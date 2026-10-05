@@ -95,7 +95,11 @@ describe("articles", () => {
         ficheMinimale(t.lieuId, { categorie: "hommes/vetements/jeans" }),
       );
       expect(intermediaire.json()).toEqual({ erreur: "Catégorie inconnue." });
-      const feuille = await requete("POST", "/api/articles", ficheMinimale(t.lieuId, { categorie: "femmes/chaussures/baskets" }));
+      const feuille = await requete(
+        "POST",
+        "/api/articles",
+        ficheMinimale(t.lieuId, { categorie: "femmes/chaussures/baskets" }),
+      );
       expect(feuille.json()).toMatchObject({ categorie: "femmes/chaussures/baskets" });
     });
 

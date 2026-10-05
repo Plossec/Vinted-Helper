@@ -15,6 +15,13 @@
       "when": 1791240741387,
       "tag": "0001_lot1_catalogue_vinted",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791241113207,
+      "tag": "0002_lot1_marques_vinted",
+      "breakpoints": true
     }
   ]
 }

@@ -14,7 +14,13 @@ const appliquer = async (client: PGlite, fichier: string) => {
 
 describe("migration 0001 — conversion des données existantes", () => {
   const client = new PGlite();
-  let articles: { nom: string; categorie: string | null; etat: string | null; gamme: string | null; notes: string | null }[];
+  let articles: {
+    nom: string;
+    categorie: string | null;
+    etat: string | null;
+    gamme: string | null;
+    notes: string | null;
+  }[];
 
   beforeAll(async () => {
     await appliquer(client, "0000_lot1_socle.sql");
@@ -36,7 +42,9 @@ describe("migration 0001 — conversion des données existantes", () => {
     `);
     await appliquer(client, "0001_lot1_catalogue_vinted.sql");
     articles = (
-      await client.query<(typeof articles)[number]>("SELECT nom, categorie, etat, gamme, notes FROM article ORDER BY reference")
+      await client.query<(typeof articles)[number]>(
+        "SELECT nom, categorie, etat, gamme, notes FROM article ORDER BY reference",
+      )
     ).rows;
   });
   afterAll(() => client.close());
@@ -68,5 +76,28 @@ describe("migration 0001 — conversion des données existantes", () => {
     expect(tables.rows.map((t) => t.table_name)).not.toEqual(expect.arrayContaining(["categorie"]));
     expect(tables.rows.map((t) => t.table_name)).not.toContain("gamme");
     expect(tables.rows.map((t) => t.table_name)).not.toContain("etat");
+  });
+});
+
+describe("migration 0002 — marques de départ ajoutées aux comptes existants", () => {
+  const client = new PGlite();
+  afterAll(() => client.close());
+
+  it("ajoute uniquement les marques manquantes, sans doublon (majuscules ignorées)", async () => {
+    await appliquer(client, "0000_lot1_socle.sql");
+    await appliquer(client, "0001_lot1_catalogue_vinted.sql");
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES ('00000000-0000-4000-8000-000000000001', 'u', 'x');
+      INSERT INTO marque (utilisateur_id, nom) VALUES
+        ('00000000-0000-4000-8000-000000000001', 'LEVI''S'),
+        ('00000000-0000-4000-8000-000000000001', 'Ma marque à moi');
+    `);
+    await appliquer(client, "0002_lot1_marques_vinted.sql");
+    const { MARQUES_INITIALES } = await import("../catalogue/marques.js");
+    const lignes = (await client.query<{ nom: string }>("SELECT nom FROM marque")).rows.map((l) => l.nom);
+    expect(lignes).toHaveLength(MARQUES_INITIALES.length + 1); // + « Ma marque à moi »
+    expect(lignes.filter((n) => n.toLowerCase() === "levi's")).toEqual(["LEVI'S"]);
+    expect(lignes).toContain("Sans marque");
+    expect(lignes).toContain("Tape à l'œil");
   });
 });
