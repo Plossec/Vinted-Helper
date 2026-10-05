@@ -7,20 +7,25 @@ import { hacherMotDePasse, LONGUEUR_MIN_MOT_DE_PASSE } from "../compte/mot-de-pa
 import { supprimerSessionsUtilisateur } from "../compte/sessions.js";
 import { eq } from "drizzle-orm";
 
+/**
+ * Sans terminal interactif (ex. « exec » sans -it, ou saisie envoyée par un tuyau), les lignes sont lues
+ * par UNE seule interface partagée : sinon la première question absorberait toutes les lignes.
+ */
+let lignesNonInteractives: AsyncIterator<string> | null = null;
+
+async function lireLigneNonInteractive(question: string): Promise<string> {
+  process.stdout.write(question);
+  lignesNonInteractives ??= createInterface({ input: process.stdin })[Symbol.asyncIterator]();
+  const suivante = await lignesNonInteractives.next();
+  process.stdout.write("\n");
+  return suivante.done ? "" : suivante.value;
+}
+
 /** Lit une saisie sans l'afficher à l'écran (les caractères sont remplacés par des étoiles). */
 function lireMasque(question: string): Promise<string> {
+  if (!process.stdin.isTTY) return lireLigneNonInteractive(question);
   return new Promise((ok, echec) => {
     const entree = process.stdin;
-    if (!entree.isTTY) {
-      // Sans terminal interactif (ex. « exec » sans -it), lecture d'une ligne simple.
-      const rl = createInterface({ input: entree });
-      process.stdout.write(question);
-      rl.once("line", (ligne) => {
-        rl.close();
-        ok(ligne);
-      });
-      return;
-    }
     process.stdout.write(question);
     entree.setRawMode(true);
     entree.resume();
@@ -90,4 +95,6 @@ try {
   process.exitCode = 1;
 } finally {
   await connexion.fermer();
+  // Quitte même si une lecture du clavier est restée ouverte.
+  process.exit(process.exitCode ?? 0);
 }
