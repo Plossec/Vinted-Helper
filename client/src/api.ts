@@ -60,15 +60,29 @@ export interface Lieu extends ValeurListe {
   estMaison: boolean;
 }
 
-export interface Referentiels {
-  lieux: Lieu[];
-  categories: ValeurListe[];
-  marques: ValeurListe[];
-  gammes: ValeurListe[];
-  etats: ValeurListe[];
+export interface Categorie {
+  /** Ex. « hommes/vetements/jeans/jeans-slim ». */
+  code: string;
+  /** Ex. ["Hommes", "Vêtements", "Jeans", "Jeans slim"]. */
+  chemin: string[];
 }
 
-export type TypeListe = keyof Referentiels;
+export interface Etat {
+  code: string;
+  libelle: string;
+}
+
+export interface Referentiels {
+  lieux: Lieu[];
+  marques: ValeurListe[];
+  /** Arbre fixe calqué sur Vinted (catégories sélectionnables uniquement). */
+  categories: Categorie[];
+  /** Liste fixe des 6 états. */
+  etats: Etat[];
+}
+
+/** Listes complétables par l'utilisateur. */
+export type TypeListe = "lieux" | "marques";
 
 export interface ResumeArticle {
   id: string;
@@ -90,10 +104,10 @@ export interface Article {
   id: string;
   reference: number;
   nom: string | null;
-  categorieId: string | null;
+  categorie: string | null;
   marqueId: string | null;
-  gammeId: string | null;
-  etatId: string | null;
+  etat: string | null;
+  gamme: string | null;
   taille: string | null;
   matiere: string | null;
   notes: string | null;
@@ -111,10 +125,10 @@ export interface DonneesArticle {
   lieuId: string;
   prixAchat: number;
   dateAchat: string;
-  categorieId: string | null;
-  marqueId: string | null;
-  gammeId: string | null;
-  etatId: string | null;
+  categorie: string;
+  marqueId: string;
+  etat: string;
+  gamme: string | null;
   taille: string | null;
   matiere: string | null;
   notes: string | null;

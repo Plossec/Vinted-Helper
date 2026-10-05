@@ -372,3 +372,82 @@ textarea:focus {
 .historique__correction input {
   flex: 1 1 12rem;
 }
+
+/* --- Liste déroulante avec recherche (aussi large que le champ, couleurs du site) --- */
+.champ > label {
+  font-size: 0.9rem;
+  color: var(--texte-secondaire);
+}
+
+.liste-deroulante {
+  position: relative;
+}
+
+.liste-deroulante input {
+  padding-right: 3rem;
+}
+
+.liste-deroulante__fleche {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3rem;
+  height: 100%;
+  border: none;
+  background: none;
+  color: var(--texte-secondaire);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.liste-deroulante__options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: min(18rem, 50vh);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.liste-deroulante__option {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 3rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+}
+
+.liste-deroulante__option.est-actif {
+  background: var(--carte);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.liste-deroulante__libelle {
+  font-weight: 600;
+}
+
+.liste-deroulante__secondaire {
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+}
+
+.liste-deroulante__ajout {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.liste-deroulante__vide {
+  padding: 0.75rem;
+  color: var(--texte-secondaire);
+}

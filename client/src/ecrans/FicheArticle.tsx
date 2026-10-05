@@ -1,62 +1,70 @@
 // Fiche article (création et modification) — cahier des charges §5.2, lot 1 (sans photo).
-import { type FormEvent, useEffect, useState } from "react";
+// Catégorie (arbre Vinted), marque et état obligatoires ; gamme en texte libre (décisions du 05/10/2026).
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type Article, type DonneesArticle, type Referentiels, type TypeListe } from "../api.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
-import { ChampListe } from "../composants/ChampListe.js";
+import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
 import { aujourdhui } from "../outils/dates.js";
 import { centimesVersSaisie, lireMontant } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
 
 interface Formulaire {
   nom: string;
-  lieu: string;
+  /** Code de la catégorie choisie (vide tant qu'aucune n'est choisie dans la liste). */
   categorie: string;
+  categorieTexte: string;
   marque: string;
-  gamme: string;
+  /** Code de l'état choisi. */
   etat: string;
+  etatTexte: string;
+  gamme: string;
   taille: string;
   matiere: string;
-  notes: string;
+  lieu: string;
   prixAchat: string;
   dateAchat: string;
   prixAffiche: string;
+  notes: string;
 }
 
 const formulaireVide = (): Formulaire => ({
   nom: "",
-  lieu: "",
   categorie: "",
+  categorieTexte: "",
   marque: "",
-  gamme: "",
   etat: "",
+  etatTexte: "",
+  gamme: "",
   taille: "",
   matiere: "",
-  notes: "",
+  lieu: "",
   prixAchat: "",
   dateAchat: aujourdhui(),
   prixAffiche: "",
+  notes: "",
 });
 
-const nomDe = (liste: readonly { id: string; nom: string }[], id: string | null) =>
-  liste.find((v) => v.id === id)?.nom ?? "";
-
-const memeNom = (a: string, b: string) => a.trim().toLocaleLowerCase("fr") === b.trim().toLocaleLowerCase("fr");
+const SEPARATEUR = " › ";
+const memeNom = (a: string, b: string) => normaliser(a) === normaliser(b);
 
 function versFormulaire(a: Article, refs: Referentiels): Formulaire {
+  const categorie = refs.categories.find((c) => c.code === a.categorie);
   return {
     nom: a.nom ?? "",
-    lieu: nomDe(refs.lieux, a.lieuId),
-    categorie: nomDe(refs.categories, a.categorieId),
-    marque: nomDe(refs.marques, a.marqueId),
-    gamme: nomDe(refs.gammes, a.gammeId),
-    etat: nomDe(refs.etats, a.etatId),
+    categorie: categorie?.code ?? "",
+    categorieTexte: categorie?.chemin.join(SEPARATEUR) ?? "",
+    marque: refs.marques.find((m) => m.id === a.marqueId)?.nom ?? "",
+    etat: a.etat ?? "",
+    etatTexte: refs.etats.find((e) => e.code === a.etat)?.libelle ?? "",
+    gamme: a.gamme ?? "",
     taille: a.taille ?? "",
     matiere: a.matiere ?? "",
-    notes: a.notes ?? "",
+    lieu: refs.lieux.find((l) => l.id === a.lieuId)?.nom ?? "",
     prixAchat: centimesVersSaisie(a.prixAchat),
     dateAchat: a.dateAchat ?? "",
     prixAffiche: centimesVersSaisie(a.prixAffiche),
+    notes: a.notes ?? "",
   };
 }
 
@@ -87,6 +95,21 @@ export function FicheArticle() {
     };
   }, [id]);
 
+  const options = useMemo(() => {
+    if (refs === null) return null;
+    return {
+      categories: refs.categories.map((c): OptionListe => ({
+        cle: c.code,
+        libelle: c.chemin[c.chemin.length - 1] ?? c.code,
+        secondaire: c.chemin.slice(0, -1).join(SEPARATEUR),
+        recherche: c.chemin.join(" "),
+      })),
+      marques: refs.marques.map((m): OptionListe => ({ cle: m.id, libelle: m.nom })),
+      etats: refs.etats.map((e): OptionListe => ({ cle: e.code, libelle: e.libelle })),
+      lieux: refs.lieux.map((l): OptionListe => ({ cle: l.id, libelle: l.nom })),
+    };
+  }, [refs]);
+
   const modifier = (champ: keyof Formulaire) => (valeur: string) => setForm((f) => ({ ...f, [champ]: valeur }));
 
   function changerLieu(valeur: string) {
@@ -95,17 +118,20 @@ export function FicheArticle() {
     setForm((f) => ({ ...f, lieu: valeur, prixAchat: estMaison && f.prixAchat === "" ? "0,00" : f.prixAchat }));
   }
 
-  /** Renvoie l'identifiant de la valeur saisie ; la crée dans la liste si elle n'existe pas. */
-  async function resoudre(type: TypeListe, texte: string): Promise<string | null> {
-    if (refs === null || texte.trim() === "") return null;
+  /** Renvoie l'identifiant du lieu ou de la marque saisi ; l'ajoute à la liste s'il n'existe pas. */
+  async function resoudre(type: TypeListe, texte: string): Promise<string> {
+    if (refs === null) throw new Error("Listes non chargées.");
     const existante = refs[type].find((v) => memeNom(v.nom, texte));
     if (existante) return existante.id;
     const creee = await api.post<{ id: string; nom: string; estMaison?: boolean }>(`/api/referentiels/${type}`, {
       nom: texte.trim(),
     });
-    setRefs((r) =>
-      r === null ? r : { ...r, [type]: [...r[type], type === "lieux" ? { estMaison: false, ...creee } : creee] },
-    );
+    setRefs((r) => {
+      if (r === null) return r;
+      return type === "lieux"
+        ? { ...r, lieux: [...r.lieux, { estMaison: false, ...creee }] }
+        : { ...r, marques: [...r.marques, { id: creee.id, nom: creee.nom }] };
+    });
     return creee.id;
   }
 
@@ -117,6 +143,9 @@ export function FicheArticle() {
     const prixAchat = lireMontant(form.prixAchat);
     const prixAffiche = lireMontant(form.prixAffiche);
     if (form.nom.trim() === "") return erreur("Le nom est obligatoire.");
+    if (form.categorie === "") return erreur("Choisissez une catégorie dans la liste.");
+    if (form.marque.trim() === "") return erreur("La marque est obligatoire (« Sans marque » si besoin).");
+    if (form.etat === "") return erreur("Choisissez un état dans la liste.");
     if (form.lieu.trim() === "") return erreur("Le lieu d'achat est obligatoire.");
     if (prixAchat === null) return erreur("Le prix d'achat est obligatoire (0 pour un article de la maison).");
     if (prixAchat === "invalide") return erreur("Prix d'achat invalide (ex. 3,50).");
@@ -125,21 +154,19 @@ export function FicheArticle() {
 
     setEnvoi(true);
     try {
-      const lieuId = await resoudre("lieux", form.lieu);
-      if (lieuId === null) return erreur("Le lieu d'achat est obligatoire.");
       const donnees: DonneesArticle = {
         nom: form.nom.trim(),
-        lieuId,
-        prixAchat,
-        dateAchat: form.dateAchat,
-        categorieId: await resoudre("categories", form.categorie),
+        categorie: form.categorie,
         marqueId: await resoudre("marques", form.marque),
-        gammeId: await resoudre("gammes", form.gamme),
-        etatId: await resoudre("etats", form.etat),
+        etat: form.etat,
+        gamme: form.gamme.trim() || null,
         taille: form.taille.trim() || null,
         matiere: form.matiere.trim() || null,
-        notes: form.notes.trim() || null,
+        lieuId: await resoudre("lieux", form.lieu),
+        prixAchat,
+        dateAchat: form.dateAchat,
         prixAffiche,
+        notes: form.notes.trim() || null,
       };
       if (article === null) {
         const cree = await api.post<Article>("/api/articles", donnees);
@@ -160,7 +187,7 @@ export function FicheArticle() {
     setForm((f) => ({ ...f, prixAffiche: centimesVersSaisie(a.prixAffiche) }));
   }
 
-  if (refs === null) {
+  if (refs === null || options === null) {
     return (
       <main className="page">
         {message ? <p className="message message--erreur">{message.texte}</p> : <p className="statut">Chargement…</p>}
@@ -175,20 +202,51 @@ export function FicheArticle() {
       </Link>
       <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
 
-      <form className="formulaire" onSubmit={(e) => void enregistrer(e)}>
+      <form className="formulaire" onSubmit={(e) => void enregistrer(e)} noValidate>
         <label className="champ">
           <span>Nom *</span>
-          <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} required />
+          <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
         </label>
-        <ChampListe
+        <ListeDeroulante
           libelle="Catégorie"
-          valeur={form.categorie}
-          valeurs={refs.categories}
-          onChange={modifier("categorie")}
+          obligatoire
+          placeholder="Tapez pour chercher (ex. jean slim)"
+          texte={form.categorieTexte}
+          onTexte={(texte) => setForm((f) => ({ ...f, categorieTexte: texte, categorie: "" }))}
+          options={options.categories}
+          onChoix={(o) =>
+            setForm((f) => ({
+              ...f,
+              categorie: o.cle,
+              categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
+            }))
+          }
         />
-        <ChampListe libelle="Marque" valeur={form.marque} valeurs={refs.marques} onChange={modifier("marque")} />
-        <ChampListe libelle="Gamme" valeur={form.gamme} valeurs={refs.gammes} onChange={modifier("gamme")} />
-        <ChampListe libelle="État" valeur={form.etat} valeurs={refs.etats} onChange={modifier("etat")} />
+        <ListeDeroulante
+          libelle="Marque"
+          obligatoire
+          ajout
+          texte={form.marque}
+          onTexte={modifier("marque")}
+          options={options.marques}
+          onChoix={(o) => modifier("marque")(o.libelle)}
+        />
+        <ListeDeroulante
+          libelle="État"
+          obligatoire
+          texte={form.etatTexte}
+          onTexte={(texte) => setForm((f) => ({ ...f, etatTexte: texte, etat: "" }))}
+          options={options.etats}
+          onChoix={(o) => setForm((f) => ({ ...f, etat: o.cle, etatTexte: o.libelle }))}
+        />
+        <label className="champ">
+          <span>Gamme</span>
+          <input
+            value={form.gamme}
+            onChange={(e) => modifier("gamme")(e.target.value)}
+            placeholder="Ex. Foot, Vintage…"
+          />
+        </label>
         <div className="champs-ligne">
           <label className="champ">
             <span>Taille</span>
@@ -199,7 +257,15 @@ export function FicheArticle() {
             <input value={form.matiere} onChange={(e) => modifier("matiere")(e.target.value)} />
           </label>
         </div>
-        <ChampListe libelle="Lieu d'achat" valeur={form.lieu} valeurs={refs.lieux} onChange={changerLieu} obligatoire />
+        <ListeDeroulante
+          libelle="Lieu d'achat"
+          obligatoire
+          ajout
+          texte={form.lieu}
+          onTexte={changerLieu}
+          options={options.lieux}
+          onChoix={(o) => changerLieu(o.libelle)}
+        />
         <div className="champs-ligne">
           <label className="champ">
             <span>Prix d'achat (€) *</span>
@@ -208,17 +274,11 @@ export function FicheArticle() {
               value={form.prixAchat}
               onChange={(e) => modifier("prixAchat")(e.target.value)}
               placeholder="2,00"
-              required
             />
           </label>
           <label className="champ">
             <span>Date d'achat *</span>
-            <input
-              type="date"
-              value={form.dateAchat}
-              onChange={(e) => modifier("dateAchat")(e.target.value)}
-              required
-            />
+            <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
           </label>
         </div>
         <label className="champ">
