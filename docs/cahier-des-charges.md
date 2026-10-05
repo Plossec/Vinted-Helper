@@ -144,7 +144,12 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 
 ### 5.2 Fiche article
 - **Référence** automatique (`#0001`, `#0002`…), **numérotée par utilisateur**, attribuée par le serveur, **jamais réutilisée** (même après corbeille ou suppression définitive), recherche directe par numéro.
-- Nom, **catégorie**, **marque**, **gamme**, **état**, taille, matière, notes.
+- Nom, **catégorie** \*, **marque** \*, **état** \*, gamme, taille, matière, notes (\* obligatoires à chaque enregistrement de la fiche ; seule la saisie terrain du lot 2 peut créer un brouillon sans) :
+  - **Catégorie** : choix dans l'**arbre des catégories calqué sur Vinted** (`docs/categories-vinted.md`, 440 catégories), fixe ; seules les catégories du dernier niveau sont sélectionnables ; recherche par mots (« jean slim »).
+  - **Marque** : liste de départ des marques courantes sur Vinted (≈ 360, dont « Sans marque »), complétée à la volée.
+  - **État** : liste fixe — Neuf avec étiquette · Neuf sans étiquette · Très bon état · Bon état · Satisfaisant · Abîmé.
+  - **Gamme** : texte libre, facultatif ([issue #6](https://github.com/Plossec/Vinted-Helper/issues/6)).
+  - Listes déroulantes avec recherche, aussi larges que le champ, aux couleurs de l'application.
 - Lieu, sortie, lot éventuel, prix d'achat, date d'achat.
 - **Photos** : photo terrain + photos annonce, ajoutées **depuis la galerie (sélection multiple) ou l'appareil photo**, réordonnables, une photo **principale**.
 - **Prix affiché** + **historique complet** des changements de prix.
@@ -160,9 +165,11 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - **Tri** : date d'achat, date de mise en ligne, prix, ancienneté dans le statut.
 
 ### 5.4 Listes de référence (Réglages)
-- Catégories, marques, gammes, états, lieux : listes réutilisables avec **autocomplétion** à la saisie.
-- **Renommer** une valeur → tous les articles concernés sont mis à jour.
-- **Fusionner** deux valeurs (ex. « Levis » + « Levi's ») → une seule valeur, articles mis à jour.
+- **Marques et lieux** : listes de l'utilisateur, pré-remplies, avec recherche à la saisie et ajout à la volée.
+  - **Renommer** une valeur → tous les articles concernés sont mis à jour.
+  - **Fusionner** deux valeurs (ex. « Levis » + « Levi's ») → une seule valeur, articles mis à jour.
+  - Lieux : écran de gestion et création automatique depuis la saisie terrain à étudier ([issue #7](https://github.com/Plossec/Vinted-Helper/issues/7)).
+- **Catégories et états** : listes fixes calquées sur Vinted, non modifiables dans l'application (correction dans le code).
 
 ### 5.5 IA (Gemini)
 - **« Générer l'annonce »** : envoie 3 à 4 photos + les champs de la fiche ; produit :
@@ -270,10 +277,11 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 |---|---|
 | **Utilisateur** | identifiant, mot de passe (haché), dernier_numero_reference |
 | **Lieu** | nom, est_maison |
-| **Categorie / Marque / Gamme / Etat** | nom (unique par utilisateur) |
+| **Marque** | nom (unique par utilisateur, sans tenir compte des majuscules) |
+| *Catégories, états* | *listes fixes dans le code (`server/src/catalogue/`), pas de table* |
 | **Sortie** | id (UUID généré sur le téléphone), date, lieu, montant_essence, notes |
 | **LotAchat** | sortie, prix_total *(le nombre d'articles est déduit, jamais stocké)* |
-| **Article** | id (UUID généré sur le téléphone), reference (séquence **par utilisateur**, attribuée par le serveur, jamais réutilisée), nom, categorie, marque, gamme, etat, taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, titre_annonce, description_annonce, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
+| **Article** | id (UUID généré sur le téléphone), reference (séquence **par utilisateur**, attribuée par le serveur, jamais réutilisée), nom, categorie (code de l'arbre), marque, etat (code fixe), gamme (texte libre), taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, titre_annonce, description_annonce, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
 | **Photo** | type (terrain / annonce), fichier, est_reduite ; liée à un ou plusieurs articles (photo terrain partagée d'un lot) ; ordre et est_principale par article |
 | **HistoriqueStatut** | article, de, vers, date |
 | **HistoriquePrix** | article, prix, date |

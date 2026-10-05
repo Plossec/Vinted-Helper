@@ -17,6 +17,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   Toutes les règles du §4.2 sont en place et testées ; les autres passages arriveront au lot 3.
 - Historique du prix affiché enregistré (affichage au lot 3).
 - Liste simple des articles, la plus récente en premier ; navigation Articles / Réglages en bas de l'écran.
+- Catégories calquées sur Vinted (arbre de 440 catégories, recherche par mots), marques courantes sur Vinted
+  (≈ 360, dont « Sans marque », complétables) et 6 états Vinted + « Abîmé » ; catégorie, marque et état obligatoires.
+- Listes déroulantes avec recherche, aussi larges que le champ, aux couleurs du site (clair / sombre), au doigt et au
+  clavier ; option « Ajouter » pour une marque ou un lieu absent.
+
+### Modifié
+- Gamme : texte libre facultatif (au lieu d'une liste).
+- Articles déjà saisis (migration) : gamme conservée en texte, états convertis (Bon → Bon état ; Abîmé, Taché, Cassé →
+  Abîmé avec mention dans les notes), catégorie à rechoisir.
 
 ## [0.0.1] — 05/10/2026
 

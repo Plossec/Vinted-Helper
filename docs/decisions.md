@@ -159,3 +159,19 @@ peut pas pousser de tags (refus réseau 403) ; les tags de version sont alors po
   (`npm run db:generate -- --name …` perd l'option à travers les sous-projets).
 - **Correction** : la commande `reset-password` lisait mal deux réponses envoyées d'un coup sans terminal interactif ;
   corrigé et testé (mode interactif avec saisie masquée, et mode non interactif).
+
+---
+
+## 05/10/2026 — Lot 1 : catégories, marques, états et listes déroulantes (retours de l'utilisateur)
+
+| Sujet | Décision |
+|---|---|
+| Listes déroulantes | Composant maison avec recherche : aussi large que le champ, couleurs du site, clair / sombre, doigt et clavier (aucune option présélectionnée : la 1re flèche ↓ sélectionne la 1re). |
+| Catégories | Arbre calqué sur Vinted, **rédigé de mémoire** (aucune requête vers Vinted), relu et validé par l'utilisateur : `docs/categories-vinted.md`, code `server/src/catalogue/categories.ts`. Fixe, seules les feuilles sont sélectionnables, stocké sur l'article sous forme de code (ex. `hommes/vetements/jeans/jeans-slim`). Obligatoire. |
+| Marques | Liste de départ des marques courantes sur Vinted (358 dont « Sans marque ») + ajout à la volée. Obligatoire. Les comptes existants reçoivent les marques manquantes par la migration 0002 (sans doublon). |
+| États | Liste fixe : Neuf avec étiquette, Neuf sans étiquette, Très bon état, Bon état, Satisfaisant, Abîmé. Obligatoire. |
+| Obligatoire quand | À chaque enregistrement de la fiche ; seule la future saisie terrain (lot 2) pourra créer un brouillon sans. |
+| Gamme | Texte libre facultatif ; sujet à approfondir : [issue #6](https://github.com/Plossec/Vinted-Helper/issues/6). |
+| Lieu d'achat | Inchangé (liste + ajout) ; écran de gestion et création automatique : [issue #7](https://github.com/Plossec/Vinted-Helper/issues/7). |
+| Migration 0001 | Écrite à la main dans un ordre sûr (copie des données avant suppression des anciennes tables) ; conversion testée. |
+| Résultats de recherche | Les options qui commencent par le texte tapé s'affichent en premier. |
