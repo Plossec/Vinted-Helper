@@ -1,4 +1,4 @@
-# Vinted Helper — Cahier des charges (V3)
+# Vinted Helper — Cahier des charges (V4)
 
 > Statut : **en attente de validation**. Aucun développement avant le feu vert.
 
@@ -15,6 +15,7 @@
 9. Découpage en lots livrables
 10. Hors périmètre
 11. Annexe — Cas chiffrés (tests automatiques)
+12. Organisation du projet, outillage IA et versions
 
 ---
 
@@ -40,7 +41,10 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
 ### 2.2 Appareils et usage
 - **Android** (terrain, photos) et **PC Windows** (compléter les fiches, statistiques).
 - Application web installable (**PWA**) : un seul code, icône sur l'écran d'accueil Android, pas de Play Store.
-- Réseau 4G généralement disponible en vide-grenier, mais **aucune saisie terrain ne doit être perdue** : chaque **achat complet** (photo + prix + nombre d'articles + sortie) est d'abord **enregistré sur le téléphone**, puis envoyé au serveur dès que possible, avec renvoi automatique en cas d'échec. Un compteur indique « N achats en attente d'envoi ».
+- Réseau 4G généralement disponible en vide-grenier, mais **aucune saisie terrain ne doit être perdue**. Les actions terrain — **démarrer une sortie**, **saisir l'essence**, **enregistrer un achat complet** (photo + prix + nombre d'articles + sortie) — sont d'abord **enregistrées sur le téléphone**, puis envoyées au serveur dès que possible, avec renvoi automatique en cas d'échec. Un compteur indique « N éléments en attente d'envoi ».
+  - Les **identifiants** (sortie, achat, article) sont **générés sur le téléphone** (UUID), pour éviter tout doublon au renvoi.
+  - La **référence** `#0127` est attribuée **par le serveur** à la réception ; d'ici là, l'article affiche « Réf. en attente ».
+  - Si la **session expire** alors que des éléments sont en attente, ils sont **conservés** sur le téléphone et envoyés après reconnexion.
 - Interface **claire / sombre automatique**, sobre, gros boutons utilisables à une main.
 
 ### 2.3 Format français (obligatoire partout)
@@ -58,6 +62,7 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
 | Photos | Fichiers dans un dossier du serveur |
 | Lancement | **Docker Compose** : identique sur PC Windows (Docker Desktop) et VPS |
 | IA | **Google Gemini, offre gratuite**, appelé **uniquement depuis le serveur** (la clé API n'est jamais dans l'appli téléphone) |
+| Montants | **Tous les montants sont stockés et calculés en centimes (entiers)** et convertis en euros uniquement à l'affichage |
 | Tests | Tests automatiques obligatoires sur le module de calcul (annexe §11) |
 | Hébergement cible | **VPS OVH** (offre précise : [issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)) |
 
@@ -86,7 +91,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **Coût total** | Prix d'achat + part d'essence + part d'emballage + boosts d'un article. |
 | **Frais généraux** | Dépense non rattachée à un article (ex. essence d'une sortie sans achat). |
 | **Boost** | Option payante Vinted pour mettre un article en avant ; coût rattaché à l'article. |
-| **Référence** | Numéro court unique et automatique de l'article (`#0127`), jamais réutilisé. |
+| **Référence** | Numéro court unique et automatique de l'article (`#0127`), **numéroté par utilisateur** (chacun commence à `#0001`), attribué par le serveur, jamais réutilisé. |
 | **Article dormant** | Article En ligne depuis N jours ou plus sans vente ni baisse de prix. |
 
 ## 4. Statuts et transitions
@@ -138,7 +143,7 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - Achats **mis en attente sur le téléphone** si le réseau manque (§2.2).
 
 ### 5.2 Fiche article
-- **Référence** automatique (`#0001`, `#0002`…), **jamais réutilisée** (même après corbeille ou suppression définitive), recherche directe par numéro.
+- **Référence** automatique (`#0001`, `#0002`…), **numérotée par utilisateur**, attribuée par le serveur, **jamais réutilisée** (même après corbeille ou suppression définitive), recherche directe par numéro.
 - Nom, **catégorie**, **marque**, **gamme**, **état**, taille, matière, notes.
 - Lieu, sortie, lot éventuel, prix d'achat, date d'achat.
 - **Photos** : photo terrain + photos annonce, ajoutées **depuis la galerie (sélection multiple) ou l'appareil photo**, réordonnables, une photo **principale**.
@@ -248,7 +253,7 @@ Bénéfice   = Prix vendu − Coût total                       (Finalisé)
 | **Bénéfice réalisé** (mois) | Σ bénéfices des articles **finalisés** ou **sortis du stock** dans le mois + (− frais généraux du mois) |
 | **Trésorerie** (mois) | + montants crédités (date de finalisation) + reventes hors Vinted (date de sortie du stock) − achats (date d'achat) − essence (date de sortie) − emballages (date d'envoi) − boosts (date du boost) − frais généraux |
 | **Valeur du stock** | Σ coûts totaux des articles ni Finalisés ni Sortis du stock (et Σ de leurs prix affichés) |
-| **Marge moyenne** | Moyenne des bénéfices des articles Finalisés, en **€** ; et en **%** = Σ bénéfices / Σ coûts totaux |
+| **Marge moyenne** | Moyenne des bénéfices des articles Finalisés, en **€** ; et en **%** = Σ bénéfices / Σ coûts totaux. Si Σ coûts totaux = 0 € (ex. uniquement des articles Maison sans emballage), le taux affiche **« — »** |
 | **Délai de vente** | Moyenne en jours de (date de vente − date de mise en ligne) **et** de (date de vente − date d'achat), articles Finalisés |
 | **Rentabilité d'une sortie / d'un lieu** | **Réalisé** = Σ bénéfices des articles Finalisés ou Sortis du stock ; **Provisoire** = Réalisé − Σ coûts totaux des articles encore en stock |
 
@@ -258,12 +263,12 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 
 | Entité | Champs principaux |
 |---|---|
-| **Utilisateur** | identifiant, mot de passe (haché) |
+| **Utilisateur** | identifiant, mot de passe (haché), dernier_numero_reference |
 | **Lieu** | nom, est_maison |
 | **Categorie / Marque / Gamme / Etat** | nom (unique par utilisateur) |
-| **Sortie** | date, lieu, montant_essence, notes |
+| **Sortie** | id (UUID généré sur le téléphone), date, lieu, montant_essence, notes |
 | **LotAchat** | sortie, prix_total *(le nombre d'articles est déduit, jamais stocké)* |
-| **Article** | reference (séquence, jamais réutilisée), nom, categorie, marque, gamme, etat, taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, titre_annonce, description_annonce, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
+| **Article** | id (UUID généré sur le téléphone), reference (séquence **par utilisateur**, attribuée par le serveur, jamais réutilisée), nom, categorie, marque, gamme, etat, taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, titre_annonce, description_annonce, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
 | **Photo** | type (terrain / annonce), fichier, est_reduite ; liée à un ou plusieurs articles (photo terrain partagée d'un lot) ; ordre et est_principale par article |
 | **HistoriqueStatut** | article, de, vers, date |
 | **HistoriquePrix** | article, prix, date |
@@ -316,6 +321,7 @@ Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne 
 
 Chaque lot est testable avant de passer au suivant.
 
+0. **Mise en place** : dépôt, Docker Compose (application + PostgreSQL), premier test du module de calcul, CLAUDE.md, `.claude/`, README, CHANGELOG (§12.1).
 1. **Socle** *(testé sur PC)* : compte créé à l'installation, connexion, fiche article, référentiels, statuts et transitions, liste simple.
    → **Avant le lot 2** : HTTPS local pour le téléphone (issue #3).
 2. **Saisie terrain** : sorties, « + Achat », lots, photos terrain, essence, mise en attente des achats hors réseau.
@@ -381,3 +387,72 @@ Chaque cas devient un test automatique.
 | 29 | Jeans finalisés : J1 coût total 4 € vendu 12 € ; J2 coût total 6 € vendu 9 € | Marge moyenne = (8 + 3) / 2 = **5,50 €** ; en % = 11 / 10 = **110 %** |
 | 30 | Article acheté le 01/09, en ligne le 10/09, vendu le 15/09, finalisé le 19/09 | Délai mise en ligne → vente = **5 j** ; achat → vente = **14 j** |
 | 31 | Sortie : 3 articles achetés 2 € chacun + 0,90 € essence ; A finalisé 9 € (emballage 0,08 €) ; B et C En ligne | Réalisé = 9 − 2 − 0,30 − 0,08 = **6,62 €** ; provisoire = 6,62 − 2,30 − 2,30 = **2,02 €** ; 2 articles restants |
+| 32 | Articles Maison finalisés : 0 € d'achat, sans essence, emballage 0 €, vendus 5 € et 3 € | Marge moyenne = **4,00 €** ; taux de marge = **« — »** (aucun coût) |
+
+## 12. Organisation du projet, outillage IA et versions
+
+### 12.1 Lot 0 — Mise en place (avant le lot 1)
+À la fin du lot 0 :
+- dépôt Git sur GitHub avec l'arborescence ci-dessous ;
+- Docker Compose (application + PostgreSQL) qui démarre ;
+- un premier test du module de calcul qui passe (règle d'arrondi) ;
+- `CLAUDE.md`, `.claude/`, `README.md` et `CHANGELOG.md` présents.
+
+Version : **0.0.1**.
+
+### 12.2 Arborescence
+```
+vinted-helper/
+├─ CLAUDE.md                 instructions permanentes pour Claude
+├─ README.md                 guide utilisateur (installation, usage, dépannage)
+├─ CHANGELOG.md              historique des versions
+├─ docs/
+│  ├─ cahier-des-charges.md  ce document = source de vérité
+│  └─ decisions.md           décisions prises en cours de développement
+├─ .claude/
+│  ├─ settings.json          permissions + formatage automatique
+│  ├─ hooks/formater.mjs     formatage Prettier après chaque modification (compatible Windows)
+│  ├─ rules/                 consignes chargées selon le dossier modifié
+│  ├─ skills/                commandes /lot, /verifier, /version
+│  └─ agents/relecteur.md    sous-agent de relecture
+├─ client/                   interface React (PWA)
+├─ server/                   API, base de données, module de calcul
+├─ docker-compose.yml
+└─ .env.example              modèle de configuration (sans secrets)
+```
+
+### 12.3 CLAUDE.md
+Moins de 200 lignes, en français : le projet en 5 lignes avec renvoi vers ce document (qui fait foi ; en cas d'ambiguïté, Claude pose la question) ; les commandes ; les conventions (TypeScript strict, termes métier du glossaire, centimes, dates UTC affichées en Europe/Paris, interface en français) ; les règles non négociables (une seule fonction de répartition, parts calculées jamais stockées, clé Gemini côté serveur, aucune automatisation de Vinted, rien du §10 sans demande explicite) ; la méthode (un lot à la fois, plan validé avant de coder, tests avant le code pour les calculs, migrations appliquées jamais modifiées, README / CHANGELOG / decisions.md mis à jour à chaque fin de lot) ; le profil de l'utilisateur (intermédiaire, commandes expliquées pas à pas).
+
+### 12.4 Architecture Claude (projet solo de 8 lots)
+| Élément | Contenu |
+|---|---|
+| `settings.json` | Autorisé : tests, scripts npm, `docker compose`, `git status/diff/log/add/commit/branch/switch`. Interdit : lire `.env`, `git push --force`, `git reset --hard`, `rm -rf`. Formatage Prettier automatique après chaque modification de fichier. |
+| `rules/calculs.md` | Chargée uniquement pour `server/src/calculs/` : règle d'arrondi, centimes, renvoi à l'annexe §11. |
+| `rules/interface.md` | Chargée uniquement pour `client/` : format français, mobile d'abord, gros boutons, clair / sombre, hors réseau. |
+| `/lot N` | Relit le lot N et ses critères, propose un plan, attend la validation, crée la branche `lot-N`. |
+| `/verifier` | Types, lint, tests, build Docker ; résumé en français. |
+| `/version` | Propose le numéro, met à jour CHANGELOG et version, crée le tag Git. |
+| `agents/relecteur.md` | Sous-agent en lecture seule, lancé en fin de lot ; compare le code au cahier des charges et aux critères §8. |
+
+Les trois skills ne se déclenchent que sur demande de l'utilisateur (`disable-model-invocation: true`).
+Volontairement exclus (surdimensionnés) : serveurs MCP, équipes d'agents, workflows, plusieurs sous-agents.
+
+### 12.5 README.md
+En français, mis à jour à chaque lot : présentation et prérequis (Docker Desktop, Git) ; installation pas à pas et configuration du `.env` (identifiant, mot de passe initial, clé Gemini, **nom du modèle Gemini**, modifiable sans toucher au code car Google retire régulièrement ses anciens modèles) ; démarrage et arrêt ; accès depuis le téléphone (après l'issue #3) ; réinitialisation du mot de passe ; sauvegarde et restauration ; mise à jour ; lancement des tests ; dépannage courant.
+
+### 12.6 Versionnage
+- **Git** : `main` toujours fonctionnelle ; chaque lot a sa branche `lot-N`, fusionnée après validation.
+- **SemVer** :
+
+| Étape | Version |
+|---|---|
+| Lot 0 | 0.0.1 |
+| Lot N validé | 0.N.0 |
+| Correctifs | 0.N.1, 0.N.2… |
+| Mise en ligne OVH validée | 1.0.0 |
+
+- Source unique : `version` du `package.json` racine, affichée dans les Réglages (« Version 0.3.0 »).
+- À chaque version : tag Git `vX.Y.Z` + entrée dans le CHANGELOG, en français (Ajouté / Modifié / Corrigé).
+- **Base de données** : migrations Drizzle versionnées, appliquées automatiquement au démarrage ; une mise à jour ne perd jamais de données.
+- **PWA** : à chaque nouvelle version, le téléphone affiche « Nouvelle version disponible — Mettre à jour ».
