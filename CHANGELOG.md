@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.1.0] — 05/10/2026
+
+Lot 1 — socle, validé sur le PC de l'utilisateur.
+
 ### Ajouté
 - Lot 1 — socle : connexion avec le compte créé au premier démarrage (pas d'inscription), session de 30 jours
   prolongée à chaque usage, blocage 15 minutes après 5 mots de passe erronés, déconnexion.
