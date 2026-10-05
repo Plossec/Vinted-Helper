@@ -45,6 +45,8 @@ export const config = {
   port: lireEntier("PORT", 3000),
   /** Dossier des fichiers de l'interface compilée (client/dist). */
   dossierClient: resolve(import.meta.dirname, "..", "..", "client", "dist"),
+  /** Dossier des photos (data/photos à la racine du projet, /app/data/photos dans Docker). */
+  dossierPhotos: resolve(import.meta.dirname, "..", "..", "data", "photos"),
   /** Dossier des migrations Drizzle (server/drizzle). */
   dossierMigrations: resolve(import.meta.dirname, "..", "drizzle"),
 };

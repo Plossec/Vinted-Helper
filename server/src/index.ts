@@ -25,6 +25,7 @@ const app = await creerApp({
   version: config.version,
   base: connexion.db,
   verifierBase: connexion.verifier,
+  dossierPhotos: config.dossierPhotos,
   dossierClient: config.dossierClient,
   journaliser: true,
 });

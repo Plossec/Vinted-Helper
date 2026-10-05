@@ -181,7 +181,8 @@ peut pas pousser de tags (refus réseau 403) ; les tags de version sont alors po
 ## 05/10/2026 — Travail autonome sur les lots 2 à 7
 
 **Décision (utilisateur)** : Claude enchaîne les lots 2 à 7 sans validation intermédiaire (« d'ici demain »), en mode
-Auto. Les points flous sont **tranchés par Claude et notés ici** (marqués « *à relire* ») ; chaque lot est livré par
+Auto, y compris pour npm, Docker et les commandes Windows (hors interdictions de `.claude/settings.json`).
+Les points flous sont **tranchés par Claude et notés ici** (marqués « *à relire* ») ; chaque lot est livré par
 une pull request fusionnée dans `main` dès que les vérifications sont vertes. Remplace, pour cette nuit, la règle « un
 lot validé sur le téléphone avant le suivant ». Les tags de version restent à pousser depuis le PC.
 

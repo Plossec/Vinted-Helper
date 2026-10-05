@@ -30,3 +30,6 @@ export function creerConnexion() {
 }
 
 export type Connexion = ReturnType<typeof creerConnexion>;
+
+/** Transaction en cours (même interface que la base). */
+export type Transaction = Parameters<Parameters<Base["transaction"]>[0]>[0];
