@@ -114,3 +114,27 @@ telle qu'écrite ; décision à prendre par l'utilisateur.
 - Les cas 1, 3, 4, 6, 8, 9, 10, 11, 23 et 31 sont inchangés (vérifié).
 - Tests de l'annexe modifiés **sur décision explicite de l'utilisateur** (seule raison admise de modifier un résultat
   attendu). Ajout de tests garantissant qu'aucune part n'est négative.
+
+---
+
+## 05/10/2026 — Git : manipulations faites par Claude
+
+**Décision (utilisateur)** : Claude effectue lui-même les manipulations Git (branches, commits, push, fusions, pull
+requests) sans demander à l'utilisateur de lancer les commandes. Restent soumises aux interdictions de
+`.claude/settings.json` (pas de réécriture d'historique, pas de `--force`, etc.). Limite technique : la session cloud ne
+peut pas pousser de tags (refus réseau 403) ; les tags de version sont alors poussés depuis le PC.
+
+---
+
+## 05/10/2026 — Lot 1 : décisions de cadrage
+
+| Sujet | Décision |
+|---|---|
+| Statuts | Le tableau complet des transitions (§4.2) est codé et testé côté serveur dès le lot 1 ; l'interface et l'API ne proposent que Brouillon ↔ À publier ↔ En ligne. Les autres passages (vente, colis, sortie du stock) arrivent au lot 3. |
+| Photos d'annonce | Au lot 2, avec les photos terrain. La fiche du lot 1 est sans photo. |
+| Listes de référence | Pré-remplies au premier démarrage avec les valeurs du tableur de l'utilisateur ; modifiables ; nouvelles valeurs créées à la volée. Unicité sans tenir compte des majuscules. |
+| Session | 30 jours sans utilisation, prolongée à chaque usage ; déconnexion dans les Réglages. |
+| Prix affiché | Historique enregistré dès le lot 1 (chaque saisie ou modification datée) ; affichage de l'historique sur la fiche au lot 3. |
+| Champs obligatoires (création manuelle) | Nom, lieu, prix d'achat, date d'achat (aujourd'hui par défaut). Lieu « Maison » : prix d'achat proposé à 0 €. |
+| À publier | Aucun contrôle de complétude (non défini au cahier des charges). Seul « En ligne » exige un prix affiché. |
+| Dépendances ajoutées | `@fastify/cookie` (cookie de session), `react-router` (navigation), `@electric-sql/pglite` en dév. (PostgreSQL en mémoire pour les tests, sans Docker). |
