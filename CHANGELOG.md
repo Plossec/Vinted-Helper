@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Lot 1 — socle : connexion avec le compte créé au premier démarrage (pas d'inscription), session de 30 jours
+  prolongée à chaque usage, blocage 15 minutes après 5 mots de passe erronés, déconnexion.
+- Réglages : version de l'application, changement du mot de passe (les autres appareils sont déconnectés).
+- Commande de secours `reset-password` (saisie masquée) pour réinitialiser le mot de passe.
+- Fiche article (sans photo) : nom, catégorie, marque, gamme, état, taille, matière, notes, lieu, prix d'achat, date
+  d'achat, prix affiché ; référence automatique `#0001` jamais réutilisée ; lieu « Maison » → prix d'achat 0 € proposé.
+- Listes de référence pré-remplies (lieux, catégories, marques, gammes, états), complétion automatique et ajout à la volée.
+- Statuts : Brouillon ↔ À publier ↔ En ligne (prix affiché demandé), date modifiable, historique avec dates corrigeables.
+  Toutes les règles du §4.2 sont en place et testées ; les autres passages arriveront au lot 3.
+- Historique du prix affiché enregistré (affichage au lot 3).
+- Liste simple des articles, la plus récente en premier ; navigation Articles / Réglages en bas de l'écran.
+
 ## [0.0.1] — 05/10/2026
 
 Lot 0 — mise en place, validé sur le PC de l'utilisateur.

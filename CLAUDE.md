@@ -26,12 +26,13 @@ l'utilisateur plutôt que de supposer**. Toute décision prise en cours de route
 | Lint | `npm run lint` |
 | Formatage | `npm run format` (vérifier sans modifier : `npm run format:check`) |
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` |
-| Générer une migration | `npm run db:generate` |
+| Générer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` (`npm run db:generate` ne transmet pas `--name`) |
 | Appliquer les migrations | `npm run db:migrate` (aussi automatique au démarrage) |
-| Réinitialiser le mot de passe | *(lot 1)* `docker compose exec app npm run reset-password -w server` |
+| Réinitialiser le mot de passe | `docker compose exec -it app npm run reset-password -w server` |
 
-Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (API, base, `src/calculs/`),
-`client/` (interface React), `scripts/`, `docs/`. Migrations Drizzle dans `server/drizzle/`.
+Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (API, base, `src/calculs/`,
+`src/metier/` règles de statut, `src/test/` base PGlite en mémoire pour les tests), `client/` (interface React),
+`scripts/`, `docs/`. Migrations Drizzle dans `server/drizzle/`. Les tests n'utilisent jamais Docker ni la vraie base.
 
 ## Conventions
 
