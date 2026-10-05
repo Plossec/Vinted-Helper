@@ -103,6 +103,9 @@ Les consignes ci-dessous complètent ces interdictions : respecte-les même quan
   3. mettre à jour `README.md`, `CHANGELOG.md` et `docs/decisions.md` ;
   4. `/version` pour numéroter la version.
 - Messages de commit en français, à l'impératif (« Ajoute la saisie terrain »).
+- Sous-agent `relecteur` (lecture seule) : **uniquement à la demande de l'utilisateur**, en fin de lot ; lui transmettre le numéro du lot et `git diff --name-only main...HEAD`.
+- Hook `formater.mjs` (après Edit/Write) : Prettier sur les `.ts/.tsx/.js/.json/.css` du projet, non bloquant.
+- Hook `tests-calculs.mjs` (fin de tour) : si `server/src/calculs/` a changé, lance ses tests et **bloque la fin du tour en cas d'échec** : corrige le code, jamais l'annexe §11.
 
 ## Versions
 
