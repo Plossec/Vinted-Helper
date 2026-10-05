@@ -18,17 +18,20 @@ l'utilisateur plutôt que de supposer**. Toute décision prise en cours de route
 | Arrêter (sans effacer les données) | `docker compose stop` |
 | Journaux | `docker compose logs -f app` |
 | Installer les dépendances (lockfile) | `npm ci` |
+| Développement (hors Docker, base Docker démarrée) | `npm run dev:server` + `npm run dev:client` (http://localhost:5173) |
+| Construire client + serveur | `npm run build` |
 | Tests | `npm test` |
 | Tests du module de calcul seuls | `npm test -w server -- calculs` |
 | Vérification des types | `npm run typecheck` |
 | Lint | `npm run lint` |
-| Formatage | `npm run format` |
+| Formatage | `npm run format` (vérifier sans modifier : `npm run format:check`) |
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` |
 | Générer une migration | `npm run db:generate` |
 | Appliquer les migrations | `npm run db:migrate` (aussi automatique au démarrage) |
-| Réinitialiser le mot de passe | `docker compose exec app npm run reset-password -w server` |
+| Réinitialiser le mot de passe | *(lot 1)* `docker compose exec app npm run reset-password -w server` |
 
-Les commandes sont créées au lot 0 ; garde ce tableau à jour si elles changent.
+Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (API, base, `src/calculs/`),
+`client/` (interface React), `scripts/`, `docs/`. Migrations Drizzle dans `server/drizzle/`.
 
 ## Conventions
 
