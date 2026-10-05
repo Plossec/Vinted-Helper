@@ -151,7 +151,7 @@ Autres vérifications : `npm run typecheck` (types), `npm run lint` (qualité du
 | `error during connect` / `cannot find the file specified` | Docker Desktop n'est pas lancé : ouvrez-le et attendez « Engine running » |
 | `env file … .env not found` | Le fichier `.env` manque : `Copy-Item .env.example .env` (§2) |
 | `port is already allocated` (3000 ou 5432) | Un autre programme utilise ce port : changez `PORT` ou `POSTGRES_PORT` dans `.env`, puis relancez |
-| `ports are not available … 5432 … forbidden by its access permissions` | Windows réserve ce port. Dans `.env`, mettez `POSTGRES_PORT=15432`, puis `docker compose up -d --build`. Ports réservés : `netsh interface ipv4 show excludedportrange protocol=tcp` |
+| `ports are not available … 5432 … forbidden by its access permissions` | Le port 5432 est déjà pris, le plus souvent par un **PostgreSQL déjà installé sur le PC** (ou réservé par Windows). Dans `.env`, mettez `POSTGRES_PORT=15432`, puis `docker compose up -d --build`. Les deux bases cohabitent sans problème |
 | La page affiche « Base de données indisponible » | `docker compose ps` : `db` doit être `healthy`. Sinon `docker compose logs db` |
 | La page affiche « Serveur injoignable » | `docker compose logs app` et copiez le message à Claude |
 | `npm : terme non reconnu` | Node.js n'est pas installé (voir §1) |
