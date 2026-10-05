@@ -4,24 +4,36 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { article, historiquePrix } from "../base/schema.js";
 import { creerAppDeTest, seConnecter } from "../test/outils.js";
 
-type Contexte = Awaited<ReturnType<typeof creerAppDeTest>> & { cookie: string; lieuId: string; maisonId: string };
+type Contexte = Awaited<ReturnType<typeof creerAppDeTest>> & {
+  cookie: string;
+  lieuId: string;
+  maisonId: string;
+  marqueId: string;
+};
 
 async function preparer(): Promise<Contexte> {
   const t = await creerAppDeTest();
   const cookie = await seConnecter(t.app);
   const refs = (await t.app.inject({ method: "GET", url: "/api/referentiels", headers: { cookie } })).json<{
     lieux: { id: string; nom: string; estMaison: boolean }[];
+    marques: { id: string; nom: string }[];
   }>();
+  marqueParDefaut = refs.marques.find((m) => m.nom === "Levi's")?.id ?? "";
   const lieuId = refs.lieux.find((l) => l.nom === "Vide grenier")?.id ?? "";
   const maisonId = refs.lieux.find((l) => l.estMaison)?.id ?? "";
-  return { ...t, cookie, lieuId, maisonId };
+  return { ...t, cookie, lieuId, maisonId, marqueId: marqueParDefaut };
 }
+
+let marqueParDefaut = "";
 
 const ficheMinimale = (lieuId: string, ajouts: Record<string, unknown> = {}) => ({
   nom: "Jean Levi's 501",
   lieuId,
   prixAchat: 300,
   dateAchat: "2026-10-04",
+  categorie: "hommes/vetements/jeans/jeans-droits",
+  marqueId: marqueParDefaut,
+  etat: "bon_etat",
   ...ajouts,
 });
 
@@ -55,8 +67,8 @@ describe("articles", () => {
   });
 
   describe("fiche", () => {
-    it("création : nom, lieu, prix d'achat et date d'achat sont obligatoires", async () => {
-      for (const champ of ["nom", "lieuId", "prixAchat", "dateAchat"]) {
+    it("création : nom, lieu, prix d'achat, date d'achat, catégorie, marque et état sont obligatoires", async () => {
+      for (const champ of ["nom", "lieuId", "prixAchat", "dateAchat", "categorie", "marqueId", "etat"]) {
         const fiche = Object.fromEntries(Object.entries(ficheMinimale(t.lieuId)).filter(([cle]) => cle !== champ));
         const reponse = await requete("POST", "/api/articles", fiche);
         expect(reponse.statusCode, champ).toBe(400);
@@ -74,6 +86,25 @@ describe("articles", () => {
       expect(fiche.historiqueStatuts).toEqual([
         expect.objectContaining({ de: null, vers: "brouillon", date: "2026-10-05T10:00:00.000Z" }),
       ]);
+    });
+
+    it("catégorie : seules les catégories du dernier niveau de l'arbre sont acceptées", async () => {
+      const intermediaire = await requete(
+        "POST",
+        "/api/articles",
+        ficheMinimale(t.lieuId, { categorie: "hommes/vetements/jeans" }),
+      );
+      expect(intermediaire.json()).toEqual({ erreur: "Catégorie inconnue." });
+      const feuille = await requete("POST", "/api/articles", ficheMinimale(t.lieuId, { categorie: "femmes/chaussures/baskets" }));
+      expect(feuille.json()).toMatchObject({ categorie: "femmes/chaussures/baskets" });
+    });
+
+    it("état : uniquement les 6 états de la liste ; gamme : texte libre facultatif", async () => {
+      expect((await requete("POST", "/api/articles", ficheMinimale(t.lieuId, { etat: "bon" }))).json()).toEqual({
+        erreur: "État inconnu.",
+      });
+      const cree = await requete("POST", "/api/articles", ficheMinimale(t.lieuId, { etat: "abime", gamme: " Foot " }));
+      expect(cree.json()).toMatchObject({ etat: "abime", gamme: "Foot" });
     });
 
     it("les montants sont en centimes entiers (un montant à virgule est refusé)", async () => {
@@ -210,9 +241,37 @@ describe("listes de référence", () => {
         headers: { cookie: t.cookie },
         payload: { nom },
       });
-    const creee = (await ajouter("Kiabi")).json<{ id: string }>();
-    expect((await ajouter("  kiabi ")).json<{ id: string }>().id).toBe(creee.id);
+    const creee = (await ajouter("Ma Marque Inventée")).json<{ id: string }>();
+    expect((await ajouter("  ma marque inventée ")).json<{ id: string }>().id).toBe(creee.id);
     const levis = (await ajouter("LEVI'S")).json<{ nom: string }>();
     expect(levis.nom).toBe("Levi's");
+  });
+
+  it("catégories et états : listes fixes ; ni catégorie ni état ne peuvent être ajoutés", async () => {
+    const refs = (await t.app.inject({ method: "GET", url: "/api/referentiels", headers: { cookie: t.cookie } })).json<{
+      categories: { code: string; chemin: string[] }[];
+      etats: { code: string; libelle: string }[];
+    }>();
+    expect(refs.etats.map((e) => e.libelle)).toEqual([
+      "Neuf avec étiquette",
+      "Neuf sans étiquette",
+      "Très bon état",
+      "Bon état",
+      "Satisfaisant",
+      "Abîmé",
+    ]);
+    expect(refs.categories).toContainEqual({
+      code: "hommes/vetements/jeans/jeans-slim",
+      chemin: ["Hommes", "Vêtements", "Jeans", "Jeans slim"],
+    });
+    for (const type of ["categories", "etats", "gammes"]) {
+      const reponse = await t.app.inject({
+        method: "POST",
+        url: `/api/referentiels/${type}`,
+        headers: { cookie: t.cookie },
+        payload: { nom: "Nouvelle valeur" },
+      });
+      expect(reponse.statusCode, type).toBe(404);
+    }
   });
 });

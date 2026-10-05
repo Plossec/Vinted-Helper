@@ -2,17 +2,8 @@
 // Cahier des charges §4, §5.2, §7. Aucun calcul d'argent ici (lot 1).
 import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
-import {
-  article,
-  categorie,
-  etat,
-  gamme,
-  historiquePrix,
-  historiqueStatut,
-  lieu,
-  marque,
-  utilisateur,
-} from "../base/schema.js";
+import { article, historiquePrix, historiqueStatut, lieu, marque, utilisateur } from "../base/schema.js";
+import type { CodeEtat } from "../catalogue/etats.js";
 import { STATUTS_DISPONIBLES, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 
@@ -22,10 +13,11 @@ export interface DonneesArticle {
   lieuId: string;
   prixAchat: number;
   dateAchat: string;
-  categorieId: string | null;
-  marqueId: string | null;
-  gammeId: string | null;
-  etatId: string | null;
+  /** Code de l'arbre des catégories (obligatoire, sauf futur brouillon de la saisie terrain). */
+  categorie: string;
+  marqueId: string;
+  etat: CodeEtat;
+  gamme: string | null;
   taille: string | null;
   matiere: string | null;
   notes: string | null;
@@ -41,13 +33,9 @@ type Transaction = Parameters<Parameters<Base["transaction"]>[0]>[0];
 async function verifierReferentiels(tx: Transaction, utilisateurId: string, d: DonneesArticle) {
   const controles = [
     { id: d.lieuId, table: lieu, nom: "Lieu" },
-    { id: d.categorieId, table: categorie, nom: "Catégorie" },
     { id: d.marqueId, table: marque, nom: "Marque" },
-    { id: d.gammeId, table: gamme, nom: "Gamme" },
-    { id: d.etatId, table: etat, nom: "État" },
   ] as const;
   for (const { id, table, nom } of controles) {
-    if (id === null) continue;
     const [trouve] = await tx
       .select({ id: table.id })
       .from(table)
@@ -233,10 +221,10 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     id: a.id,
     reference: a.reference,
     nom: a.nom,
-    categorieId: a.categorieId,
+    categorie: a.categorie,
     marqueId: a.marqueId,
-    gammeId: a.gammeId,
-    etatId: a.etatId,
+    etat: a.etat,
+    gamme: a.gamme,
     taille: a.taille,
     matiere: a.matiere,
     notes: a.notes,

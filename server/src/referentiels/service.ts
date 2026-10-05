@@ -1,38 +1,34 @@
-// Listes de référence (lieux, catégories, marques, gammes, états) — cahier des charges §5.4.
-// Lot 1 : lecture et ajout à la volée. Renommage et fusion : lot 4.
+// Listes de référence — cahier des charges §5.4 (décisions du 05/10/2026) :
+// - lieux et marques : listes de l'utilisateur, pré-remplies, complétées à la volée (renommage et fusion : lot 4) ;
+// - catégories et états : listes fixes calquées sur Vinted (server/src/catalogue), non modifiables.
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
-import { categorie, etat, gamme, lieu, marque } from "../base/schema.js";
+import { lieu, marque } from "../base/schema.js";
+import { CATEGORIES } from "../catalogue/categories.js";
+import { ETATS } from "../catalogue/etats.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 
-export const TABLES_REFERENTIEL = { categories: categorie, marques: marque, gammes: gamme, etats: etat } as const;
-export type TypeReferentiel = keyof typeof TABLES_REFERENTIEL | "lieux";
-export const TYPES_REFERENTIEL: readonly TypeReferentiel[] = ["lieux", "categories", "marques", "gammes", "etats"];
+export type TypeReferentiel = "lieux" | "marques";
+export const TYPES_REFERENTIEL: readonly TypeReferentiel[] = ["lieux", "marques"];
 
 export function estTypeReferentiel(valeur: string): valeur is TypeReferentiel {
   return (TYPES_REFERENTIEL as readonly string[]).includes(valeur);
 }
 
 export async function lireReferentiels(base: Base, utilisateurId: string) {
-  const lister = (table: (typeof TABLES_REFERENTIEL)[keyof typeof TABLES_REFERENTIEL]) =>
-    base
-      .select({ id: table.id, nom: table.nom })
-      .from(table)
-      .where(eq(table.utilisateurId, utilisateurId))
-      .orderBy(asc(sql`lower(${table.nom})`));
-
-  const [lieux, categories, marques, gammes, etats] = await Promise.all([
+  const [lieux, marques] = await Promise.all([
     base
       .select({ id: lieu.id, nom: lieu.nom, estMaison: lieu.estMaison })
       .from(lieu)
       .where(eq(lieu.utilisateurId, utilisateurId))
       .orderBy(asc(sql`lower(${lieu.nom})`)),
-    lister(categorie),
-    lister(marque),
-    lister(gamme),
-    lister(etat),
+    base
+      .select({ id: marque.id, nom: marque.nom })
+      .from(marque)
+      .where(eq(marque.utilisateurId, utilisateurId))
+      .orderBy(asc(sql`lower(${marque.nom})`)),
   ]);
-  return { lieux, categories, marques, gammes, etats };
+  return { lieux, marques, categories: CATEGORIES, etats: ETATS };
 }
 
 /** Ajoute une valeur ; si elle existe déjà (sans tenir compte des majuscules), renvoie l'existante. */
@@ -54,12 +50,11 @@ export async function ajouterValeur(base: Base, utilisateurId: string, type: Typ
     return cree;
   }
 
-  const table = TABLES_REFERENTIEL[type];
   const [existant] = await base
-    .select({ id: table.id, nom: table.nom })
-    .from(table)
-    .where(and(eq(table.utilisateurId, utilisateurId), sql`lower(${table.nom}) = lower(${nom})`));
+    .select({ id: marque.id, nom: marque.nom })
+    .from(marque)
+    .where(and(eq(marque.utilisateurId, utilisateurId), sql`lower(${marque.nom}) = lower(${nom})`));
   if (existant) return existant;
-  const [cree] = await base.insert(table).values({ utilisateurId, nom }).returning({ id: table.id, nom: table.nom });
+  const [cree] = await base.insert(marque).values({ utilisateurId, nom }).returning({ id: marque.id, nom: marque.nom });
   return cree;
 }

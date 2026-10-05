@@ -1,9 +1,10 @@
 // Premier démarrage : création du compte unique (identifiant et mot de passe du .env)
-// et pré-remplissage des listes de référence à partir du tableur de l'utilisateur (décision du 05/10/2026).
+// et pré-remplissage des lieux (tableur de l'utilisateur) et des marques courantes sur Vinted (décisions du 05/10/2026).
 import { count } from "drizzle-orm";
 import { hacherMotDePasse, LONGUEUR_MIN_MOT_DE_PASSE } from "../compte/mot-de-passe.js";
 import type { Base } from "./connexion.js";
-import { categorie, etat, gamme, lieu, marque, utilisateur } from "./schema.js";
+import { MARQUES_INITIALES } from "../catalogue/marques.js";
+import { lieu, marque, utilisateur } from "./schema.js";
 
 export const VALEURS_INITIALES = {
   lieux: [
@@ -13,69 +14,8 @@ export const VALEURS_INITIALES = {
     { nom: "Bourse vêtement", estMaison: false },
     { nom: "LBC", estMaison: false },
   ],
-  etats: ["Bon", "Abîmé", "Taché", "Cassé"],
-  gammes: ["Marque+", "Marque", "Fast fashion", "Foot", "Rugby", "Vintage", "Luxe"],
-  categories: [
-    "Jean",
-    "Chino",
-    "Pantalon",
-    "Cargo",
-    "Jogging",
-    "Short",
-    "Ensemble",
-    "T-shirt",
-    "Polo",
-    "Chemise",
-    "Pull",
-    "Pull zippé",
-    "Veste",
-    "Blouson",
-    "Doudoune",
-    "Manteau",
-    "Maillot",
-    "Casquette",
-    "Bonnet",
-    "Écharpe",
-    "Lunettes",
-    "Lunettes de soleil",
-    "Boîte à lunettes",
-    "Sac",
-    "Pins",
-    "Appareil photo",
-    "Console",
-    "Jeu de société",
-    "Autre",
-  ],
-  marques: [
-    "Levi's",
-    "Nike",
-    "Adidas",
-    "Puma",
-    "Lacoste",
-    "Ralph Lauren",
-    "Tommy Hilfiger",
-    "Hugo Boss",
-    "Fred Perry",
-    "Carhartt",
-    "Dickies",
-    "Champion",
-    "Dockers",
-    "Columbia",
-    "Lafuma",
-    "Aigle",
-    "Guess",
-    "Eastpak",
-    "Under Armour",
-    "Vans",
-    "Zara",
-    "Pull&Bear",
-    "Vuarnet",
-    "Ray-Ban",
-    "Gucci",
-    "Dolce & Gabbana",
-    "Pentax",
-    "Olympus",
-  ],
+  /** Catégories et états : listes fixes du catalogue (server/src/catalogue), pas de table à remplir. */
+  marques: MARQUES_INITIALES,
 };
 
 export interface IdentifiantsInitiaux {
@@ -105,13 +45,8 @@ export async function amorcerCompte(base: Base, lireIdentifiants: () => Identifi
       .returning({ id: utilisateur.id });
     if (!cree) throw new Error("Création du compte impossible.");
     const utilisateurId = cree.id;
-    const avecUtilisateur = (noms: string[]) => noms.map((nom) => ({ utilisateurId, nom }));
-
     await tx.insert(lieu).values(VALEURS_INITIALES.lieux.map((l) => ({ utilisateurId, ...l })));
-    await tx.insert(etat).values(avecUtilisateur(VALEURS_INITIALES.etats));
-    await tx.insert(gamme).values(avecUtilisateur(VALEURS_INITIALES.gammes));
-    await tx.insert(categorie).values(avecUtilisateur(VALEURS_INITIALES.categories));
-    await tx.insert(marque).values(avecUtilisateur(VALEURS_INITIALES.marques));
+    await tx.insert(marque).values(VALEURS_INITIALES.marques.map((nom) => ({ utilisateurId, nom })));
   });
   return true;
 }

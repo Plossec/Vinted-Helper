@@ -1,5 +1,7 @@
 // Routes de l'API des articles.
 import type { FastifyInstance } from "fastify";
+import { estCategorie } from "../catalogue/categories.js";
+import { type CodeEtat, estEtat } from "../catalogue/etats.js";
 import { estStatut } from "../metier/statuts.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import {
@@ -24,6 +26,18 @@ import {
   modifierArticle,
 } from "./service.js";
 
+function categorieObligatoire(valeur: unknown): string {
+  if (valeur === undefined || valeur === null || valeur === "") throw erreurSaisie("Catégorie : obligatoire.");
+  if (typeof valeur !== "string" || !estCategorie(valeur)) throw erreurSaisie("Catégorie inconnue.");
+  return valeur;
+}
+
+function etatObligatoire(valeur: unknown): CodeEtat {
+  if (valeur === undefined || valeur === null || valeur === "") throw erreurSaisie("État : obligatoire.");
+  if (!estEtat(valeur)) throw erreurSaisie("État inconnu.");
+  return valeur;
+}
+
 function lireDonneesArticle(corps: unknown): DonneesArticle {
   const c = objet(corps);
   return {
@@ -31,10 +45,10 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
     lieuId: uuidObligatoire(c.lieuId, "Lieu"),
     prixAchat: centimesObligatoire(c.prixAchat, "Prix d'achat"),
     dateAchat: dateObligatoire(c.dateAchat, "Date d'achat"),
-    categorieId: uuidFacultatif(c.categorieId, "Catégorie"),
-    marqueId: uuidFacultatif(c.marqueId, "Marque"),
-    gammeId: uuidFacultatif(c.gammeId, "Gamme"),
-    etatId: uuidFacultatif(c.etatId, "État"),
+    categorie: categorieObligatoire(c.categorie),
+    marqueId: uuidObligatoire(c.marqueId, "Marque"),
+    etat: etatObligatoire(c.etat),
+    gamme: texteFacultatif(c.gamme, "Gamme", 100),
     taille: texteFacultatif(c.taille, "Taille", 50),
     matiere: texteFacultatif(c.matiere, "Matière", 100),
     notes: texteFacultatif(c.notes, "Notes", 2000),

@@ -2,7 +2,7 @@
 import { count } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { amorcerCompte, VALEURS_INITIALES } from "../base/amorcage.js";
-import { categorie, lieu, utilisateur } from "../base/schema.js";
+import { lieu, marque, utilisateur } from "../base/schema.js";
 import { creerAppDeTest, IDENTIFIANT_TEST, MOT_DE_PASSE_TEST, seConnecter } from "../test/outils.js";
 import { hacherMotDePasse, verifierMotDePasse } from "./mot-de-passe.js";
 import { DUREE_SESSION_MS } from "./sessions.js";
@@ -32,8 +32,9 @@ describe("compte et connexion", () => {
     expect(comptes?.n).toBe(1);
     const [lieux] = await t.base.select({ n: count() }).from(lieu);
     expect(lieux?.n).toBe(VALEURS_INITIALES.lieux.length);
-    const [categories] = await t.base.select({ n: count() }).from(categorie);
-    expect(categories?.n).toBe(VALEURS_INITIALES.categories.length);
+    const [marques] = await t.base.select({ n: count() }).from(marque);
+    expect(marques?.n).toBe(VALEURS_INITIALES.marques.length);
+    expect(VALEURS_INITIALES.marques[0]).toBe("Sans marque");
     // Second démarrage : rien n'est recréé.
     expect(await amorcerCompte(t.base, () => ({ identifiant: "autre", motDePasse: "autre-mdp" }))).toBe(false);
   });

@@ -16,11 +16,13 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { CODES_ETAT } from "../catalogue/etats.js";
 import { STATUTS } from "../metier/statuts.js";
 
 const horodatage = (nom: string) => timestamp(nom, { withTimezone: true, mode: "date" });
 
 export const statutArticle = pgEnum("statut_article", STATUTS);
+export const etatArticle = pgEnum("etat_article", CODES_ETAT);
 
 export const utilisateur = pgTable("utilisateur", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -44,21 +46,6 @@ export const session = pgTable(
   (t) => [index("session_utilisateur_idx").on(t.utilisateurId)],
 );
 
-/** Liste de référence : nom unique par utilisateur, sans tenir compte des majuscules. */
-function tableReferentiel(nomTable: string) {
-  return pgTable(
-    nomTable,
-    {
-      id: uuid("id").primaryKey().defaultRandom(),
-      utilisateurId: uuid("utilisateur_id")
-        .notNull()
-        .references(() => utilisateur.id, { onDelete: "cascade" }),
-      nom: text("nom").notNull(),
-    },
-    (t) => [uniqueIndex(`${nomTable}_nom_unique`).on(t.utilisateurId, sql`lower(${t.nom})`)],
-  );
-}
-
 export const lieu = pgTable(
   "lieu",
   {
@@ -72,10 +59,18 @@ export const lieu = pgTable(
   (t) => [uniqueIndex("lieu_nom_unique").on(t.utilisateurId, sql`lower(${t.nom})`)],
 );
 
-export const categorie = tableReferentiel("categorie");
-export const marque = tableReferentiel("marque");
-export const gamme = tableReferentiel("gamme");
-export const etat = tableReferentiel("etat");
+/** Marques : liste de départ pré-remplie, complétée à la volée ; nom unique par utilisateur (sans tenir compte des majuscules). */
+export const marque = pgTable(
+  "marque",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    nom: text("nom").notNull(),
+  },
+  (t) => [uniqueIndex("marque_nom_unique").on(t.utilisateurId, sql`lower(${t.nom})`)],
+);
 
 export const article = pgTable(
   "article",
@@ -87,10 +82,12 @@ export const article = pgTable(
     /** Numéro court (#0127), par utilisateur, attribué par le serveur, jamais réutilisé. */
     reference: integer("reference").notNull(),
     nom: text("nom"),
-    categorieId: uuid("categorie_id").references(() => categorie.id),
+    /** Code de catégorie de l'arbre fixe (server/src/catalogue/categories.ts), ex. « hommes/vetements/jeans/jeans-slim ». */
+    categorie: text("categorie"),
     marqueId: uuid("marque_id").references(() => marque.id),
-    gammeId: uuid("gamme_id").references(() => gamme.id),
-    etatId: uuid("etat_id").references(() => etat.id),
+    /** Saisie libre (issue #6). */
+    gamme: text("gamme"),
+    etat: etatArticle("etat"),
     taille: text("taille"),
     matiere: text("matiere"),
     notes: text("notes"),
