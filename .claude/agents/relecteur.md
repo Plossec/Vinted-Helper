@@ -26,9 +26,13 @@ Le numéro du lot à relire (si absent, déduis-le de `CHANGELOG.md` et du §9 d
 3. **Statuts** : seules les transitions du §4.2 sont possibles ; les règles de colis du §4.3 sont respectées.
 4. **Règles non négociables** de `CLAUDE.md` : clé Gemini absente de `client/`, aucune automatisation de Vinted,
    pas de `.env` versionné, migrations existantes non modifiées (`git log` sur le dossier des migrations).
-5. **Hors périmètre** : rien du §10 n'a été développé.
-6. **Interface** : textes en français, format `3,33 €` et `JJ/MM/AAAA`, utilisable à une main.
-7. **Documentation** : `README.md`, `CHANGELOG.md` et `docs/decisions.md` sont à jour pour ce lot.
+5. **Garde-fous** de `CLAUDE.md` : aucun test sauté ou désactivé (`.skip`, `.only`), aucun `any`, `@ts-ignore`,
+   `@ts-expect-error` ou `eslint-disable` de contournement, aucun appel réel à Gemini dans les tests, aucun calcul
+   d'argent hors de `server/src/calculs/`, aucune dépendance ajoutée sans trace dans `docs/decisions.md`,
+   aucun script destructeur dans `package.json`.
+6. **Hors périmètre** : rien du §10 n'a été développé.
+7. **Interface** : textes en français, format `3,33 €` et `JJ/MM/AAAA`, utilisable à une main.
+8. **Documentation** : `README.md`, `CHANGELOG.md` et `docs/decisions.md` sont à jour pour ce lot.
 
 ## Format du rapport
 - **Bloquant** : écarts au cahier des charges, calcul faux, règle non négociable enfreinte.

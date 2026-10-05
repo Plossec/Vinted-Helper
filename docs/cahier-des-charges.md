@@ -434,7 +434,7 @@ Moins de 200 lignes, en français : le projet en 5 lignes avec renvoi vers ce do
 ### 12.4 Architecture Claude (projet solo de 8 lots)
 | Élément | Contenu |
 |---|---|
-| `settings.json` | Autorisé : tests, scripts npm, `docker compose`, `git status/diff/log/add/commit/branch/switch`. Interdit : lire `.env`, `git push --force`, `git reset --hard`, `rm -rf`. Formatage Prettier automatique après chaque modification de fichier. |
+| `settings.json` | Trois listes appliquées par Claude Code : **autorisé** (tests, scripts npm, `docker compose up/ps/logs/build/restart/stop`, git local), **avec confirmation** (push, merge, installation de dépendances, scripts `db…`, `docker compose down/exec`, modification des migrations, du test de l'annexe, de `docker-compose.yml`, de `CLAUDE.md` et du cahier des charges), **interdit** (réécriture d'historique, `--no-verify`, `drizzle-kit push/drop`, `compose down -v` et toute suppression de volume, `DROP`/`TRUNCATE`, `rm -rf`, `curl`/`wget`, installations globales, lecture de `.env` et des clés, modification de `/data`, de `settings.json` et des hooks, requêtes vers Vinted, mode « bypass »). Formatage Prettier automatique après chaque modification. |
 | `rules/calculs.md` | Chargée uniquement pour `server/src/calculs/` : règle d'arrondi, centimes, renvoi à l'annexe §11. |
 | `rules/interface.md` | Chargée uniquement pour `client/` : format français, mobile d'abord, gros boutons, clair / sombre, hors réseau. |
 | `/lot N` | Relit le lot N et ses critères, propose un plan, attend la validation, crée la branche `lot-N`. |
@@ -443,10 +443,16 @@ Moins de 200 lignes, en français : le projet en 5 lignes avec renvoi vers ce do
 | `agents/relecteur.md` | Sous-agent en lecture seule, lancé en fin de lot ; compare le code au cahier des charges et aux critères §8. |
 
 Les trois skills ne se déclenchent que sur demande de l'utilisateur (`disable-model-invocation: true`).
-Volontairement exclus (surdimensionnés) : serveurs MCP, équipes d'agents, workflows, plusieurs sous-agents.
+Volontairement exclus (surdimensionnés) : serveurs MCP, équipes d'agents, workflows, plusieurs sous-agents, sandbox.
+
+**Deux niveaux de protection** : `CLAUDE.md` contient les **consignes** (Claude les suit) ; `.claude/settings.json` contient les **interdictions** (Claude Code les applique, la commande est bloquée). Limites :
+- Les règles portent sur le **texte** de la commande : une commande écrite autrement ou un script peut passer à côté. D'où le blocage de `git -C` / `git -c`, la confirmation pour `bash -c` et `npm run db…`, et l'interdiction de scripts destructeurs dans `package.json`.
+- Les interdictions gagnent toujours. Répondre « Oui, ne plus demander » enregistre une règle dans `.claude/settings.local.json` qui peut élargir ce qui passe sans confirmation (jamais lever une interdiction) : vérifier `/permissions` de temps en temps.
+- Sous Windows, **Git pour Windows** est requis : Claude utilise son terminal Bash et les règles `Bash(...)` s'appliquent ; les règles `PowerShell(...)` couvrent les cas les plus graves.
+- Le vrai filet de sécurité reste les **commits fréquents**, la **sauvegarde quotidienne** et le **pg_dump avant chaque migration**.
 
 ### 12.5 README.md
-En français, mis à jour à chaque lot : présentation et prérequis (Docker Desktop, Git) ; installation pas à pas et configuration du `.env` (identifiant, mot de passe initial, clé Gemini, **nom du modèle Gemini**, modifiable sans toucher au code car Google retire régulièrement ses anciens modèles) ; démarrage et arrêt ; accès depuis le téléphone (après l'issue #3) ; réinitialisation du mot de passe ; sauvegarde et restauration ; mise à jour ; lancement des tests ; dépannage courant.
+En français, mis à jour à chaque lot : présentation et prérequis (Docker Desktop, **Git pour Windows**) ; installation pas à pas et configuration du `.env` (identifiant, mot de passe initial, clé Gemini, **nom du modèle Gemini**, modifiable sans toucher au code car Google retire régulièrement ses anciens modèles) ; démarrage et arrêt ; accès depuis le téléphone (après l'issue #3) ; réinitialisation du mot de passe ; sauvegarde et restauration ; mise à jour ; lancement des tests ; dépannage courant.
 
 ### 12.6 Versionnage
 - **Git** : `main` toujours fonctionnelle ; chaque lot a sa branche `lot-N`, fusionnée après validation.
