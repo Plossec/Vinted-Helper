@@ -26,6 +26,29 @@ describe("repartir — cas limites", () => {
   });
 });
 
+describe("repartir — arrondi vers le bas, le reste sur le dernier (jamais de part négative)", () => {
+  it("5 centimes sur 8 articles → 0 × 7 puis 5", () => {
+    expect(repartir(5, Array<number>(8).fill(1))).toEqual([0, 0, 0, 0, 0, 0, 0, 5]);
+  });
+
+  it("65 centimes sur 10 articles → 6 × 9 puis 11", () => {
+    expect(repartir(65, Array<number>(10).fill(1))).toEqual([6, 6, 6, 6, 6, 6, 6, 6, 6, 11]);
+  });
+
+  it("au prorata : 10 centimes selon des poids 1 / 1 / 1 → 3 / 3 / 4", () => {
+    expect(repartir(10, [100, 100, 100])).toEqual([3, 3, 4]);
+  });
+
+  it("aucune part n'est jamais négative", () => {
+    for (let total = 0; total <= 300; total++) {
+      for (let nombre = 1; nombre <= 12; nombre++) {
+        const parts = repartir(total, Array<number>(nombre).fill(1));
+        expect(Math.min(...parts)).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+});
+
 describe("repartir — invariant : la somme des parts vaut toujours exactement le total", () => {
   const cas: [number, number[]][] = [
     [1000, [1, 1, 1]],

@@ -16,8 +16,8 @@ describe("Annexe §11 — règle d'arrondi", () => {
     expect(egal(1000, 3)).toEqual([333, 333, 334]);
   });
 
-  it("cas 02 — lot de 3 articles pour 5 € → 1,67 / 1,67 / 1,66", () => {
-    expect(egal(500, 3)).toEqual([167, 167, 166]);
+  it("cas 02 — lot de 3 articles pour 5 € → 1,66 / 1,66 / 1,68", () => {
+    expect(egal(500, 3)).toEqual([166, 166, 168]);
   });
 
   it("cas 03 — total du lot n°1 corrigé à 12 € → 4,00 / 4,00 / 4,00", () => {
@@ -28,8 +28,8 @@ describe("Annexe §11 — règle d'arrondi", () => {
     expect(egal(200, 5)).toEqual([40, 40, 40, 40, 40]);
   });
 
-  it("cas 05 — essence 2 € sur 3 articles → 0,67 / 0,67 / 0,66", () => {
-    expect(egal(200, 3)).toEqual([67, 67, 66]);
+  it("cas 05 — essence 2 € sur 3 articles → 0,66 / 0,66 / 0,68", () => {
+    expect(egal(200, 3)).toEqual([66, 66, 68]);
   });
 
   it("cas 06 — essence 2 € sur 4 articles, puis ajout d'un 5e → 0,50 € puis 0,40 € chacun", () => {
@@ -46,8 +46,8 @@ describe("Annexe §11 — règle d'arrondi", () => {
     expect(repartir(1000, [500, 500, 500])).toEqual([333, 333, 334]);
   });
 
-  it("cas 12 — colis de 3 articles, emballage 0,08 € → 0,03 / 0,03 / 0,02", () => {
-    expect(egal(8, 3)).toEqual([3, 3, 2]);
+  it("cas 12 — colis de 3 articles, emballage 0,08 € → 0,02 / 0,02 / 0,04", () => {
+    expect(egal(8, 3)).toEqual([2, 2, 4]);
   });
 
   it("cas 23 — lot de 3 articles pour 10 €, un article supprimé → total conservé : 5,00 / 5,00", () => {

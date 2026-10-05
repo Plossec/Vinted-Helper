@@ -3,8 +3,9 @@
 // C'est la SEULE fonction de répartition de l'application : prix d'un lot, essence d'une sortie,
 // emballage d'un colis et prix vendu d'une vente groupée passent tous par elle.
 //
-// Règle : chaque part est arrondie au centime le plus proche ; le dernier élément reçoit
-// « total − somme des autres parts », pour que la somme soit toujours exactement égale au total.
+// Règle : chaque part est arrondie au centime INFÉRIEUR ; le dernier élément reçoit tout le reste
+// (« total − somme des autres parts »). La somme est donc toujours exactement égale au total,
+// et aucune part n'est jamais négative (décision du 05/10/2026, docs/decisions.md).
 // L'ordre des éléments doit être stable et déterministe (c'est à l'appelant de le garantir),
 // pour que « le dernier » soit toujours le même.
 
@@ -41,7 +42,7 @@ export function repartir(total: number, poids: readonly number[]): number[] {
   const parts: number[] = [];
   let dejaReparti = 0;
   for (let i = 0; i < nombre - 1; i++) {
-    const part = Math.round((total * (poidsEffectifs[i] ?? 0)) / sommeEffective);
+    const part = Math.floor((total * (poidsEffectifs[i] ?? 0)) / sommeEffective);
     parts.push(part);
     dejaReparti += part;
   }
