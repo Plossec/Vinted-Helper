@@ -89,7 +89,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **Finalisé** | Vente validée par Vinted, argent crédité. C'est la **date de finalisation** qui compte pour le chiffre d'affaires. |
 | **Sortie du stock** | Article qui quitte le stock sans vente Vinted (Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu). |
 | **Coût total** | Prix d'achat + part d'essence + part d'emballage + boosts d'un article. |
-| **Frais généraux** | Dépense non rattachée à un article (ex. essence d'une sortie sans achat). |
+| **Frais généraux** | Dépense non rattachée à un article : essence d'une sortie sans achat (calculée) et **frais divers** saisis à la main (ex. vitrine Vinted, rouleau d'étiquettes). |
 | **Boost** | Option payante Vinted pour mettre un article en avant ; coût rattaché à l'article. |
 | **Référence** | Numéro court unique et automatique de l'article (`#0127`), **numéroté par utilisateur** (chacun commence à `#0001`), attribué par le serveur, jamais réutilisé. |
 | **Article dormant** | Article En ligne depuis N jours ou plus sans vente ni baisse de prix. |
@@ -206,7 +206,12 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - Supprimer un article (erreur, doublon) → **corbeille 30 jours**, restaurable ; ensuite suppression définitive avec ses photos propres (la photo terrain partagée suit la règle §5.10).
 - Un article supprimé n'apparaît dans aucun calcul ; les répartitions de son lot et de sa sortie sont recalculées (§6.1, §6.2).
 
-### 5.12 Sauvegarde
+### 5.12 Frais divers
+- Écran **« Frais divers »** (accessible depuis le menu) : liste des frais saisis à la main, ajout / modification / suppression.
+- Champs : **date**, **montant**, **libellé** (ex. « Vitrine Vinted », « Rouleau d'étiquettes »).
+- Comptés comme **frais généraux** du mois de leur date (bénéfice réalisé et trésorerie, §6.6).
+
+### 5.13 Sauvegarde
 - Sauvegarde automatique **quotidienne** (base + photos).
 - **Copie hors serveur**, conservation **30 jours**, **restauration testée une fois** et documentée. Destination à choisir dans l'issue #2.
 
@@ -275,7 +280,7 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 | **Boost** | article, montant, date |
 | **Vente** (= colis) | montant_credite, emballage, date_vente, date_envoi, date_finalisation, annulee |
 | **VenteArticle** | vente, article, prix_affiche_au_moment, retourne (oui/non) |
-| **FraisGeneral** | date, montant, libellé *(frais saisis à la main ; l'essence des sorties vides est calculée, pas stockée ici)* |
+| **FraisGeneral** | date, montant, libellé *(frais divers saisis à la main via l'écran §5.12 ; l'essence des sorties vides est calculée, pas stockée ici)* |
 | **Reglages** | emballage_defaut, delai_brouillon, delai_dormant, prompt_annonce, prompt_etiquette |
 
 Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne sont **pas stockées** : elles sont recalculées à partir de ces données (ou mises en cache de façon transparente).
@@ -299,6 +304,7 @@ Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne 
 **Ventes et calculs**
 - Étant donné deux articles affichés 9 € et 6 € vendus ensemble pour 12 €, alors leurs prix vendus sont 7,20 € et 4,80 € et l'emballage 0,04 € chacun.
 - Étant donné un article finalisé le 04/10 et vendu le 30/09, alors il compte dans le CA d'octobre.
+- Étant donné un frais divers de 3 € saisi le 10/10, alors le bénéfice réalisé et la trésorerie d'octobre diminuent de 3 €.
 - Tous les cas de l'annexe §11 donnent le résultat attendu (tests automatiques).
 
 **Liste, référence, IA**
@@ -325,7 +331,7 @@ Chaque lot est testable avant de passer au suivant.
 1. **Socle** *(testé sur PC)* : compte créé à l'installation, connexion, fiche article, référentiels, statuts et transitions, liste simple.
    → **Avant le lot 2** : HTTPS local pour le téléphone (issue #3).
 2. **Saisie terrain** : sorties, « + Achat », lots, photos terrain, essence, mise en attente des achats hors réseau.
-3. **Ventes et calculs** : ventes simples et groupées, retours (partiels), emballage, boosts, sorties du stock, bénéfice, historique des prix, tests de l'annexe.
+3. **Ventes et calculs** : ventes simples et groupées, retours (partiels), emballage, boosts, sorties du stock, frais divers, bénéfice, historique des prix, tests de l'annexe.
 4. **Liste et recherche** : filtres, recherche, tri, référence, fusion/renommage des référentiels, corbeille.
 5. **Tableau de bord** : CA, bénéfice réalisé, trésorerie, stock, rentabilité par sortie/lieu, analyse par catégorie/marque.
 6. **IA** : génération d'annonce, lecture d'étiquette, prompts modifiables, secours « Copier le prompt ».
@@ -388,6 +394,7 @@ Chaque cas devient un test automatique.
 | 30 | Article acheté le 01/09, en ligne le 10/09, vendu le 15/09, finalisé le 19/09 | Délai mise en ligne → vente = **5 j** ; achat → vente = **14 j** |
 | 31 | Sortie : 3 articles achetés 2 € chacun + 0,90 € essence ; A finalisé 9 € (emballage 0,08 €) ; B et C En ligne | Réalisé = 9 − 2 − 0,30 − 0,08 = **6,62 €** ; provisoire = 6,62 − 2,30 − 2,30 = **2,02 €** ; 2 articles restants |
 | 32 | Articles Maison finalisés : 0 € d'achat, sans essence, emballage 0 €, vendus 5 € et 3 € | Marge moyenne = **4,00 €** ; taux de marge = **« — »** (aucun coût) |
+| 33 | Frais divers « Rouleau d'étiquettes » 3 € le 10/10 ; en octobre, un article finalisé avec 6,52 € de bénéfice et 9 € crédités, aucun autre mouvement | Bénéfice réalisé oct. = 6,52 + (−3,00) = **3,52 €** ; trésorerie oct. = 9 − 3 = **6,00 €** |
 
 ## 12. Organisation du projet, outillage IA et versions
 
