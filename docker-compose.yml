@@ -34,12 +34,30 @@ services:
       POSTGRES_PORT: "5432"
       PORT: "3000"
     ports:
-      # Lot 0 : accessible uniquement depuis ce PC (http://localhost:3000).
-      # L'accès depuis le téléphone sera ouvert avant le lot 2 (issue #3, HTTPS).
+      # En HTTP, accessible uniquement depuis ce PC (http://localhost:3000).
+      # Le téléphone passe par le service « https » ci-dessous.
       - "127.0.0.1:${PORT:-3000}:3000"
     volumes:
       # Photos des articles : dossier « data/photos » du projet, visible depuis Windows.
       - ./data/photos:/app/data/photos
 
+  # Accès HTTPS depuis le téléphone sur le Wi-Fi de la maison (issue #3, README §4).
+  https:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      IP_PC: ${IP_PC:-127.0.0.1}
+    ports:
+      # Ouverts au réseau local (Wi-Fi de la maison) : HTTPS de l'application + téléchargement du certificat.
+      - "8443:8443"
+      - "8080:8080"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Autorité de certification locale : conservée pour que le téléphone reste reconnu.
+      - certificats:/data
+
 volumes:
   base-donnees:
+  certificats:

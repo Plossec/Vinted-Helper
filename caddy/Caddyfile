@@ -1,0 +1,32 @@
+# Accès HTTPS depuis le téléphone (issue #3) — certificat local généré par Caddy.
+# Le téléphone doit faire confiance au certificat racine une seule fois (voir README §4).
+{
+	# Certificats signés par l'autorité locale de Caddy (pas d'internet, pas de Let's Encrypt).
+	local_certs
+	skip_install_trust
+	# Le téléphone se connecte par l'adresse IP du PC : pas de nom de domaine à présenter.
+	default_sni {$IP_PC}
+	admin off
+	# Pas de redirection automatique sur le port 80 (inutile ici).
+	auto_https disable_redirects
+}
+
+# Application en HTTPS : https://<IP du PC>:8443 (et https://localhost:8443 sur le PC).
+https://{$IP_PC}:8443, https://localhost:8443 {
+	tls internal
+	reverse_proxy app:3000
+}
+
+# Téléchargement du certificat racine à installer sur le téléphone : http://<IP du PC>:8080/certificat.crt
+# Seul ce fichier est servi (jamais la clé privée).
+http://:8080 {
+	handle /certificat.crt {
+		root * /data/caddy/pki/authorities/local
+		rewrite * /root.crt
+		header Content-Type application/x-x509-ca-cert
+		file_server
+	}
+	handle {
+		respond "Vinted Helper : ouvrez https://{$IP_PC}:8443 (certificat : /certificat.crt)" 404
+	}
+}

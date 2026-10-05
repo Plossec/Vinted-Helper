@@ -175,3 +175,28 @@ peut pas pousser de tags (refus réseau 403) ; les tags de version sont alors po
 | Lieu d'achat | Inchangé (liste + ajout) ; écran de gestion et création automatique : [issue #7](https://github.com/Plossec/Vinted-Helper/issues/7). |
 | Migration 0001 | Écrite à la main dans un ordre sûr (copie des données avant suppression des anciennes tables) ; conversion testée. |
 | Résultats de recherche | Les options qui commencent par le texte tapé s'affichent en premier. |
+
+---
+
+## 05/10/2026 — Travail autonome sur les lots 2 à 7
+
+**Décision (utilisateur)** : Claude enchaîne les lots 2 à 7 sans validation intermédiaire (« d'ici demain »), en mode
+Auto. Les points flous sont **tranchés par Claude et notés ici** (marqués « *à relire* ») ; chaque lot est livré par
+une pull request fusionnée dans `main` dès que les vérifications sont vertes. Remplace, pour cette nuit, la règle « un
+lot validé sur le téléphone avant le suivant ». Les tags de version restent à pousser depuis le PC.
+
+---
+
+## 05/10/2026 — HTTPS local pour le téléphone (issue #3) *à relire*
+
+**Décision** : relais **Caddy** (image Docker officielle `caddy:2-alpine`, service `https` du `docker-compose.yml`)
+avec son **autorité de certification locale** (équivalent de mkcert, sans rien installer sous Windows).
+- Application : `https://<IP du PC>:8443` ; certificat racine téléchargeable sur `http://<IP du PC>:8080/certificat.crt`
+  (seul ce fichier est servi, jamais la clé). L'adresse IP est indiquée dans `.env` (`IP_PC`).
+- Le certificat racine est conservé dans un volume Docker (`certificats`) : installé une seule fois sur le téléphone.
+- Le serveur fait confiance au relais (`trustProxy`) pour poser le cookie de session en mode sécurisé.
+
+**Raison** : gratuit, tout reste à la maison, adresse stable (indispensable : la file d'attente hors réseau et
+l'installation PWA sont liées à l'adresse). Le tunnel Cloudflare gratuit change d'adresse à chaque démarrage (file
+d'attente perdue) et exposerait le PC sur internet. Limite : hors Wi-Fi de la maison, les achats restent en attente
+sur le téléphone jusqu'au retour (accès depuis partout : OVH, issue #2).

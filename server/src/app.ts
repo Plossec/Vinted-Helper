@@ -47,7 +47,8 @@ export async function creerApp({
   dossierClient,
   journaliser = false,
 }: DependancesApp) {
-  const app = Fastify({ logger: journaliser });
+  // trustProxy : derrière le relais HTTPS (Caddy), le protocole d'origine sert au cookie « secure ».
+  const app = Fastify({ logger: journaliser, trustProxy: true });
   await app.register(fastifyCookie);
 
   const utilisateurs = new WeakMap<FastifyRequest, UtilisateurConnecte>();
