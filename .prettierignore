@@ -1,0 +1,14 @@
+# Générés ou hors code
+node_modules/
+dist/
+data/
+sauvegardes/
+server/drizzle/
+package-lock.json
+
+# Documents rédigés à la main : jamais reformatés automatiquement
+*.md
+
+# Fichiers protégés, maintenus à la main par l'utilisateur (Claude ne peut pas les modifier)
+.claude/settings.json
+.claude/hooks/
