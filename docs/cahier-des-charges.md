@@ -6,6 +6,7 @@
 
 Revente amateur sur Vinted d'articles achetés à bas prix (vide-greniers, ressourceries, bourses aux vêtements, lots Leboncoin) ou issus de la maison.
 Rythme constaté : ~125 articles achetés en 2,5 mois, ~60 vendus, sorties le week-end.
+*Ce rythme est donné à titre d'exemple : il est évolutif et variable, l'application ne doit pas en dépendre.*
 
 Objectif : remplacer le tableur par une application web/mobile simple pour gérer **stock, mises en vente, ventes et rentabilité**, avec une saisie très rapide sur le terrain.
 
@@ -78,10 +79,14 @@ Chaque changement de statut est daté.
 
 ## 5. Hors périmètre V1
 
-- Import de l'historique CSV (départ de zéro).
-- Suggestion de prix basée sur l'historique.
-- Mode d'envoi, pseudo acheteur.
-- Alerte seuil fiscal DAC7.
+### Exclus (non prévus)
+- Aucune possibilité d'**import** de données (départ de zéro).
+- Pas de **mode d'envoi**.
+- Pas de **pseudo acheteur**.
+- Pas d'**alerte seuil fiscal** (DAC7).
+- Pas de **suggestion de prix** basée sur l'historique.
+
+### Reportés à plus tard
 - Emplacement de rangement / QR codes → [issue #1](https://github.com/Plossec/Vinted-Helper/issues/1).
 - Déploiement OVH → [issue #2](https://github.com/Plossec/Vinted-Helper/issues/2) (développement et tests en local d'abord).
 
