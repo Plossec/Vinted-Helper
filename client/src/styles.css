@@ -3,9 +3,17 @@
   --fond: #ffffff;
   --texte: #1b1f23;
   --texte-secondaire: #57606a;
+  --bordure: #d0d7de;
+  --carte: #f6f8fa;
+  --accent: #0b7a75;
+  --accent-texte: #ffffff;
   --ok: #1a7f37;
   --erreur: #cf222e;
-  --carte: #f6f8fa;
+  --badge-brouillon: #6e7781;
+  --badge-a-publier: #9a6700;
+  --badge-en-ligne: #0b7a75;
+  --badge-vente: #8250df;
+  --badge-fin: #1a7f37;
   color-scheme: light dark;
   font-family:
     system-ui,
@@ -13,6 +21,7 @@
     "Segoe UI",
     Roboto,
     sans-serif;
+  font-size: 17px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,9 +29,17 @@
     --fond: #0d1117;
     --texte: #e6edf3;
     --texte-secondaire: #9198a1;
+    --bordure: #30363d;
+    --carte: #161b22;
+    --accent: #2bb3ab;
+    --accent-texte: #0d1117;
     --ok: #3fb950;
     --erreur: #f85149;
-    --carte: #161b22;
+    --badge-brouillon: #8b949e;
+    --badge-a-publier: #d29922;
+    --badge-en-ligne: #2bb3ab;
+    --badge-vente: #a371f7;
+    --badge-fin: #3fb950;
   }
 }
 
@@ -40,31 +57,397 @@ body {
 .page {
   max-width: 40rem;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
+}
+
+.page--connexion {
+  padding-top: 3rem;
 }
 
 h1 {
-  font-size: 1.75rem;
+  font-size: 1.6rem;
   margin: 0 0 1rem;
+  overflow-wrap: anywhere;
 }
 
-.version {
-  color: var(--texte-secondaire);
+h2 {
+  font-size: 1.2rem;
   margin: 0 0 0.75rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.secondaire {
+  color: var(--texte-secondaire);
+}
+
+/* --- Disposition et navigation (barre en bas, accessible au pouce) --- */
+.disposition__contenu {
+  padding-bottom: 5rem;
+}
+
+.navigation {
+  position: fixed;
+  inset: auto 0 0 0;
+  display: flex;
+  background: var(--carte);
+  border-top: 1px solid var(--bordure);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.navigation__lien {
+  flex: 1;
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texte-secondaire);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.navigation__lien.active {
+  color: var(--accent);
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+
+/* --- Formulaires --- */
+.formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.champ > span {
+  font-size: 0.9rem;
+  color: var(--texte-secondaire);
+}
+
+.champs-ligne {
+  display: flex;
+  gap: 0.75rem;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  min-height: 3rem;
+  width: 100%;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* --- Boutons (zone tactile ≥ 48 px) --- */
+.bouton {
+  font: inherit;
+  font-weight: 600;
+  min-height: 3rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--bordure);
+  background: var(--carte);
+  color: var(--texte);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.bouton--principal {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-texte);
+  width: 100%;
+}
+
+.bouton:disabled {
+  opacity: 0.6;
+}
+
+.lien {
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0.5rem 0;
+  min-height: 2.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.lien-retour {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--accent);
+  text-decoration: none;
+  margin-bottom: 0.25rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.actions .bouton {
+  flex: 1 1 auto;
+}
+
+/* --- Messages --- */
+.message {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.6rem;
+  background: var(--carte);
+}
+
+.message--erreur {
+  color: var(--erreur);
+}
+
+.message--ok {
+  color: var(--ok);
 }
 
 .statut {
   background: var(--carte);
   border-radius: 0.75rem;
   padding: 1rem;
-  font-size: 1.1rem;
   margin: 0;
-}
-
-.statut--ok {
-  color: var(--ok);
 }
 
 .statut--erreur {
   color: var(--erreur);
+}
+
+.vide {
+  color: var(--texte-secondaire);
+  text-align: center;
+  padding: 2rem 0;
+}
+
+/* --- Liste des articles --- */
+.liste {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.carte-article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  color: inherit;
+  text-decoration: none;
+}
+
+.carte-article__ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carte-article__nom {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.carte-article__prix {
+  color: var(--texte-secondaire);
+  font-size: 0.95rem;
+}
+
+.reference {
+  font-variant-numeric: tabular-nums;
+  color: var(--texte-secondaire);
+}
+
+/* --- Badges de statut --- */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fond);
+  background: var(--badge-brouillon);
+  white-space: nowrap;
+}
+
+.badge--a_publier {
+  background: var(--badge-a-publier);
+}
+
+.badge--en_ligne {
+  background: var(--badge-en-ligne);
+}
+
+.badge--a_expedier,
+.badge--envoye {
+  background: var(--badge-vente);
+}
+
+.badge--finalise {
+  background: var(--badge-fin);
+}
+
+/* --- Sections, encadrés, historique --- */
+.section {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--bordure);
+}
+
+.section p {
+  margin: 0 0 0.5rem;
+}
+
+.encadre {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+}
+
+.encadre p {
+  margin: 0;
+}
+
+.historique {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.historique li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.historique__correction {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.historique__correction input {
+  flex: 1 1 12rem;
+}
+
+/* --- Liste déroulante avec recherche (aussi large que le champ, couleurs du site) --- */
+.champ > label {
+  font-size: 0.9rem;
+  color: var(--texte-secondaire);
+}
+
+.liste-deroulante {
+  position: relative;
+}
+
+.liste-deroulante input {
+  padding-right: 3rem;
+}
+
+.liste-deroulante__fleche {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3rem;
+  height: 100%;
+  border: none;
+  background: none;
+  color: var(--texte-secondaire);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.liste-deroulante__options {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: min(18rem, 50vh);
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 0.6rem;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.liste-deroulante__option {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  min-height: 3rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+}
+
+.liste-deroulante__option.est-actif {
+  background: var(--carte);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.liste-deroulante__libelle {
+  font-weight: 600;
+}
+
+.liste-deroulante__secondaire {
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+}
+
+.liste-deroulante__ajout {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.liste-deroulante__vide {
+  padding: 0.75rem;
+  color: var(--texte-secondaire);
 }

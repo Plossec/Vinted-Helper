@@ -1,8 +1,12 @@
 // Connexion à PostgreSQL (pool de connexions + Drizzle).
+import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { adresseBase } from "../config.js";
 import * as schema from "./schema.js";
+
+/** Base de données de l'application (PostgreSQL réel, ou PGlite en mémoire pour les tests). */
+export type Base = PgDatabase<PgQueryResultHKT, typeof schema>;
 
 export function creerConnexion() {
   const pool = new pg.Pool({ connectionString: adresseBase(), max: 10 });

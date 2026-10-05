@@ -1,0 +1,534 @@
+# Catégories (arbre calqué sur Vinted) — à relire
+
+> Rédigé **de mémoire** le 05/10/2026 : des écarts avec le Vinted actuel sont possibles.
+> Indiquez ce qu'il faut ajouter, renommer, déplacer ou supprimer. Seules les catégories du dernier niveau
+> (en **gras**) peuvent être choisies pour un article.
+
+**440 catégories sélectionnables.**
+
+## Femmes
+
+- Vêtements
+  - Manteaux et vestes
+    - Manteaux
+      - **Cabans**
+      - **Duffle-coats**
+      - **Manteaux en fausse fourrure**
+      - **Pardessus et manteaux longs**
+      - **Parkas**
+      - **Trench-coats**
+      - **Imperméables**
+    - Vestes
+      - **Blousons aviateur**
+      - **Vestes en jean**
+      - **Vestes en cuir**
+      - **Vestes militaires et utilitaires**
+      - **Vestes polaires**
+      - **Vestes de ski et de snowboard**
+      - **Vestes légères**
+    - **Doudounes et vestes matelassées**
+    - **Vestes sans manches**
+    - **Capes et ponchos**
+  - Sweats et sweats à capuche
+    - **Sweats**
+    - **Sweats à capuche**
+    - **Sweats zippés**
+    - **Autres sweats**
+  - Blazers et tailleurs
+    - **Blazers**
+    - **Tailleurs jupe**
+    - **Tailleurs pantalon**
+    - **Autres tailleurs**
+  - Robes
+    - **Mini-robes**
+    - **Robes midi**
+    - **Robes longues**
+    - **Robes d'été**
+    - **Robes de soirée**
+    - **Robes en jean**
+    - **Robes pull**
+    - **Autres robes**
+  - Jupes
+    - **Minijupes**
+    - **Jupes mi-longues**
+    - **Jupes longues**
+    - **Jupes en jean**
+    - **Jupes-shorts**
+  - Hauts et t-shirts
+    - **T-shirts**
+    - **Chemises**
+    - **Blouses**
+    - **Débardeurs**
+    - **Tops courts**
+    - **Bodies**
+    - **Polos**
+    - **Tuniques**
+    - **T-shirts à manches longues**
+    - **Autres hauts**
+  - Pulls et gilets
+    - **Pulls**
+    - **Pulls col roulé**
+    - **Pulls col V**
+    - **Gilets**
+    - **Pulls longs**
+    - **Autres pulls**
+  - Jeans
+    - **Jeans skinny**
+    - **Jeans slim**
+    - **Jeans droits**
+    - **Jeans flare**
+    - **Jeans boyfriend**
+    - **Jeans mom**
+    - **Jeans taille haute**
+    - **Jeans larges**
+    - **Jeans troués**
+    - **Autres jeans**
+  - Pantalons et leggings
+    - **Pantalons droits**
+    - **Pantalons larges**
+    - **Pantalons cigarette**
+    - **Pantalons cargo**
+    - **Chinos**
+    - **Pantalons en cuir**
+    - **Joggings**
+    - **Leggings**
+    - **Autres pantalons**
+  - Shorts et pantacourts
+    - **Shorts en jean**
+    - **Shorts taille haute**
+    - **Shorts de sport**
+    - **Pantacourts**
+    - **Autres shorts**
+  - Combinaisons et combishorts
+    - **Combinaisons**
+    - **Combishorts**
+    - **Salopettes**
+  - Maillots de bain
+    - **Maillots une pièce**
+    - **Bikinis**
+    - **Paréos et tenues de plage**
+  - Lingerie et pyjamas
+    - **Soutiens-gorge**
+    - **Culottes**
+    - **Ensembles de lingerie**
+    - **Pyjamas**
+    - **Peignoirs**
+    - **Collants**
+    - **Chaussettes**
+    - **Autres**
+  - Maternité
+    - **Hauts de maternité**
+    - **Pantalons de maternité**
+    - **Robes de maternité**
+    - **Autres vêtements de maternité**
+  - Vêtements de sport
+    - **Hauts et t-shirts de sport**
+    - **Brassières de sport**
+    - **Leggings de sport**
+    - **Pantalons de sport**
+    - **Shorts de sport**
+    - **Survêtements**
+    - **Vestes de sport**
+    - **Sweats de sport**
+    - **Maillots de sport**
+    - **Autres vêtements de sport**
+  - Costumes et tenues particulières
+    - **Déguisements**
+    - **Tenues traditionnelles**
+    - **Autres tenues**
+  - **Autres vêtements**
+- Chaussures
+  - **Baskets**
+  - **Bottes**
+  - **Bottines**
+  - **Escarpins**
+  - **Sandales**
+  - **Ballerines**
+  - **Mocassins et chaussures bateau**
+  - **Mules et sabots**
+  - **Espadrilles**
+  - **Chaussures de sport**
+  - **Chaussons**
+  - **Tongs**
+  - **Autres chaussures**
+- Sacs
+  - **Sacs à main**
+  - **Sacs à dos**
+  - **Sacs bandoulière**
+  - **Pochettes**
+  - **Cabas et tote bags**
+  - **Bananes**
+  - **Sacs de voyage**
+  - **Portefeuilles et porte-monnaie**
+  - **Trousses**
+  - **Autres sacs**
+- Accessoires
+  - Bijoux
+    - **Colliers**
+    - **Bagues**
+    - **Boucles d'oreilles**
+    - **Bracelets**
+    - **Broches**
+    - **Autres bijoux**
+  - **Montres**
+  - **Lunettes de soleil**
+  - **Lunettes de vue et étuis**
+  - **Chapeaux et casquettes**
+  - **Bonnets**
+  - **Écharpes et foulards**
+  - **Ceintures**
+  - **Gants**
+  - **Accessoires pour cheveux**
+  - **Porte-clés**
+  - **Parapluies**
+  - **Autres accessoires**
+- Beauté
+  - **Maquillage**
+  - **Parfums**
+  - **Soins du visage**
+  - **Soins du corps**
+  - **Soins des cheveux**
+  - **Ongles**
+  - **Accessoires de beauté**
+  - **Autres**
+
+## Hommes
+
+- Vêtements
+  - Jeans
+    - **Jeans skinny**
+    - **Jeans slim**
+    - **Jeans droits**
+    - **Jeans coupe large**
+    - **Jeans troués**
+    - **Autres jeans**
+  - Manteaux et vestes
+    - Manteaux
+      - **Cabans**
+      - **Duffle-coats**
+      - **Pardessus et manteaux longs**
+      - **Parkas**
+      - **Trench-coats**
+      - **Imperméables**
+    - Vestes
+      - **Blousons aviateur**
+      - **Vestes en jean**
+      - **Vestes en cuir**
+      - **Vestes militaires et utilitaires**
+      - **Vestes polaires**
+      - **Vestes de ski et de snowboard**
+      - **Vestes légères**
+      - **Vestes Harrington**
+    - **Doudounes et vestes matelassées**
+    - **Vestes sans manches**
+  - Hauts et t-shirts
+    - **T-shirts**
+    - **T-shirts à manches longues**
+    - **Chemises**
+    - **Polos**
+    - **Débardeurs**
+    - **Autres hauts**
+  - Costumes et blazers
+    - **Blazers**
+    - **Costumes**
+    - **Pantalons de costume**
+    - **Gilets de costume**
+    - **Autres**
+  - Sweats et pulls
+    - **Sweats**
+    - **Sweats à capuche**
+    - **Sweats zippés**
+    - **Pulls**
+    - **Pulls col roulé**
+    - **Pulls col V**
+    - **Gilets**
+    - **Autres**
+  - Pantalons
+    - **Chinos**
+    - **Pantalons cargo**
+    - **Joggings**
+    - **Pantalons habillés**
+    - **Pantalons larges**
+    - **Autres pantalons**
+  - Shorts
+    - **Shorts cargo**
+    - **Shorts chino**
+    - **Shorts en jean**
+    - **Shorts de sport**
+    - **Autres shorts**
+  - Sous-vêtements et chaussettes
+    - **Boxers**
+    - **Slips**
+    - **Chaussettes**
+    - **Pyjamas**
+    - **Peignoirs**
+    - **Autres**
+  - **Maillots de bain**
+  - Vêtements de sport
+    - **Hauts et t-shirts de sport**
+    - **Maillots de sport**
+    - **Pantalons de sport**
+    - **Shorts de sport**
+    - **Survêtements**
+    - **Vestes de sport**
+    - **Sweats de sport**
+    - **Autres vêtements de sport**
+  - Costumes et tenues particulières
+    - **Déguisements**
+    - **Tenues traditionnelles**
+    - **Autres tenues**
+  - **Autres vêtements**
+- Chaussures
+  - **Baskets**
+  - **Bottes**
+  - **Chaussures habillées**
+  - **Mocassins et chaussures bateau**
+  - **Sandales**
+  - **Espadrilles**
+  - **Chaussures de sport**
+  - **Chaussons**
+  - **Tongs**
+  - **Autres chaussures**
+- Accessoires
+  - Sacs et sacoches
+    - **Sacs à dos**
+    - **Sacoches et sacs bandoulière**
+    - **Sacs de voyage**
+    - **Bananes**
+    - **Mallettes et porte-documents**
+    - **Autres sacs**
+  - **Portefeuilles**
+  - **Ceintures**
+  - **Chapeaux et casquettes**
+  - **Bonnets**
+  - **Écharpes et foulards**
+  - **Gants**
+  - **Lunettes de soleil**
+  - **Lunettes de vue et étuis**
+  - **Montres**
+  - Bijoux
+    - **Bagues**
+    - **Bracelets**
+    - **Colliers**
+    - **Boucles d'oreilles**
+    - **Boutons de manchette**
+    - **Autres bijoux**
+  - **Cravates et nœuds papillon**
+  - **Porte-clés**
+  - **Autres accessoires**
+- Soins
+  - **Parfums**
+  - **Soins du visage**
+  - **Rasage**
+  - **Soins du corps**
+  - **Soins des cheveux**
+  - **Autres**
+
+## Enfants
+
+- Filles
+  - Vêtements bébé
+    - **Bodies**
+    - **Pyjamas et grenouillères**
+    - **Ensembles**
+    - **Robes**
+    - **Hauts**
+    - **Bas**
+    - **Manteaux et combinaisons**
+    - **Autres**
+  - **Manteaux et vestes**
+  - **Sweats et pulls**
+  - **Hauts et t-shirts**
+  - **Robes**
+  - **Jupes**
+  - **Pantalons et jeans**
+  - **Shorts**
+  - **Combinaisons et salopettes**
+  - **Pyjamas**
+  - **Maillots de bain**
+  - **Vêtements de sport**
+  - **Chaussures**
+  - **Accessoires**
+  - **Déguisements**
+  - **Autres**
+- Garçons
+  - Vêtements bébé
+    - **Bodies**
+    - **Pyjamas et grenouillères**
+    - **Ensembles**
+    - **Hauts**
+    - **Bas**
+    - **Manteaux et combinaisons**
+    - **Autres**
+  - **Manteaux et vestes**
+  - **Sweats et pulls**
+  - **Hauts et t-shirts**
+  - **Chemises**
+  - **Pantalons et jeans**
+  - **Shorts**
+  - **Combinaisons et salopettes**
+  - **Pyjamas**
+  - **Maillots de bain**
+  - **Vêtements de sport**
+  - **Chaussures**
+  - **Accessoires**
+  - **Déguisements**
+  - **Autres**
+- Jouets
+  - **Peluches**
+  - **Poupées et accessoires**
+  - **Figurines**
+  - **Jeux de construction**
+  - **Voitures et véhicules**
+  - **Jeux éducatifs**
+  - **Jouets en bois**
+  - **Jeux d'extérieur**
+  - **Instruments de musique pour enfants**
+  - **Autres jouets**
+- Puériculture
+  - **Poussettes**
+  - **Sièges auto**
+  - **Porte-bébés**
+  - **Chaises hautes**
+  - **Lits et berceaux**
+  - **Allaitement et repas**
+  - **Bain et change**
+  - **Sécurité bébé**
+  - **Autres**
+- **Mobilier et décoration enfant**
+- Fournitures scolaires
+  - **Cartables et sacs**
+  - **Trousses**
+  - **Autres fournitures**
+
+## Maison
+
+- Textiles
+  - **Linge de lit**
+  - **Linge de bain**
+  - **Linge de table**
+  - **Rideaux**
+  - **Coussins**
+  - **Plaids et couvertures**
+  - **Tapis**
+  - **Autres textiles**
+- Décoration
+  - **Cadres**
+  - **Bougies et bougeoirs**
+  - **Vases**
+  - **Miroirs**
+  - **Horloges**
+  - **Affiches et tableaux**
+  - **Plantes artificielles**
+  - **Boîtes et rangements**
+  - **Objets décoratifs**
+  - **Autres**
+- Arts de la table
+  - **Assiettes**
+  - **Verres**
+  - **Tasses et mugs**
+  - **Couverts**
+  - **Plats et saladiers**
+  - **Carafes et théières**
+  - **Autres**
+- Cuisine
+  - **Ustensiles**
+  - **Casseroles et poêles**
+  - **Pâtisserie**
+  - **Rangement**
+  - **Autres**
+- **Petit mobilier**
+- **Jardin et extérieur**
+- **Fêtes et célébrations**
+
+## Électronique
+
+- Jeux vidéo et consoles
+  - **Consoles**
+  - **Jeux vidéo**
+  - **Manettes et accessoires**
+- Téléphones et accessoires
+  - **Smartphones**
+  - **Coques et protections**
+  - **Chargeurs et câbles**
+  - **Autres**
+- Ordinateurs et tablettes
+  - **Ordinateurs portables**
+  - **Ordinateurs de bureau**
+  - **Tablettes**
+  - **Claviers, souris et accessoires**
+  - **Autres**
+- Audio
+  - **Casques et écouteurs**
+  - **Enceintes**
+  - **Platines vinyle**
+  - **Chaînes hi-fi**
+  - **Autres**
+- Photo et vidéo
+  - **Appareils photo**
+  - **Objectifs**
+  - **Caméras**
+  - **Accessoires photo**
+- **TV et vidéo**
+- **Montres connectées et objets connectés**
+- **Autres appareils électroniques**
+
+## Divertissement
+
+- Livres
+  - **Romans**
+  - **Bandes dessinées**
+  - **Mangas**
+  - **Livres jeunesse**
+  - **Livres pratiques**
+  - **Beaux livres**
+  - **Autres livres**
+- Musique
+  - **Vinyles**
+  - **CD**
+  - **Cassettes**
+  - **Instruments de musique**
+- Films et séries
+  - **DVD**
+  - **Blu-ray**
+  - **VHS**
+- Jeux de société et puzzles
+  - **Jeux de société**
+  - **Puzzles**
+  - **Jeux de cartes**
+- Collections
+  - **Pin's**
+  - **Cartes à collectionner**
+  - **Figurines de collection**
+  - **Pièces et billets**
+  - **Timbres**
+  - **Autres objets de collection**
+- **Loisirs créatifs**
+
+## Sport
+
+- **Football**
+- **Rugby**
+- **Basketball**
+- **Sports de raquette**
+- **Vélos et accessoires**
+- **Fitness et musculation**
+- **Running**
+- **Randonnée et camping**
+- **Sports d'hiver**
+- **Sports nautiques**
+- **Pêche et chasse**
+- **Sports de combat**
+- **Équitation**
+- **Golf**
+- **Équipement moto**
+- **Autres sports**
+
+## Animaux
+
+- **Chiens**
+- **Chats**
+- **Petits animaux**
+- **Oiseaux**
+- **Poissons et aquariums**
+- **Autres animaux**

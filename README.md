@@ -3,8 +3,8 @@
 Application web (installable sur téléphone) pour gérer les achats en vide-grenier, le stock, les ventes Vinted et la
 rentabilité. Usage personnel, en local sur votre PC, puis plus tard sur un serveur OVH.
 
-> **Version actuelle : 0.0.1 (lot 0 — mise en place).** L'application affiche pour l'instant uniquement son état
-> (version et connexion à la base). Les fonctionnalités arrivent lot par lot (voir `docs/cahier-des-charges.md`, §9).
+> **En cours : lot 1 — socle** (connexion, fiches article sans photo, statuts Brouillon / À publier / En ligne,
+> listes de référence). Les fonctionnalités arrivent lot par lot (voir `docs/cahier-des-charges.md`, §9).
 
 ---
 
@@ -53,7 +53,10 @@ notepad .env
 
 Dans le Bloc-notes, remplacez au minimum :
 - `POSTGRES_PASSWORD` : un mot de passe long de votre choix (il protège la base) ;
-- les autres valeurs peuvent rester telles quelles pour le lot 0.
+- `COMPTE_IDENTIFIANT` et `COMPTE_MOT_DE_PASSE_INITIAL` : votre identifiant et votre mot de passe de connexion
+  (8 caractères minimum). **Ils ne servent qu'au tout premier démarrage**, pour créer votre compte : ensuite, changez
+  le mot de passe dans l'application (Réglages) ; modifier le `.env` n'aura plus d'effet ;
+- si un PostgreSQL est déjà installé sur votre PC : `POSTGRES_PORT=15432` (voir Dépannage).
 
 Enregistrez et fermez. **Ne partagez jamais ce fichier** : il n'est pas envoyé sur GitHub (c'est voulu).
 
@@ -72,7 +75,7 @@ Résultat attendu : `added … packages` et `found 0 vulnerabilities` (cela pren
 | Action | Commande | Remarque |
 |---|---|---|
 | **Démarrer** | `docker compose up -d --build` | La première fois : quelques minutes (téléchargements) |
-| **Ouvrir l'application** | http://localhost:3000 dans votre navigateur | Doit afficher « Version 0.0.1 » et « Base de données connectée » |
+| **Ouvrir l'application** | http://localhost:3000 dans votre navigateur | Écran de connexion : identifiant et mot de passe du compte |
 | **Voir l'état** | `docker compose ps` | `app` et `db` doivent être `running` |
 | **Voir les messages** | `docker compose logs -f app` | `Ctrl + C` pour quitter l'affichage |
 | **Arrêter** | `docker compose stop` | Les données sont conservées |
@@ -91,7 +94,16 @@ depuis votre PC.
 
 ## 5. Réinitialiser le mot de passe
 
-Disponible à partir du lot 1 (création du compte).
+En temps normal, changez le mot de passe dans l'application : **Réglages → Changer le mot de passe**.
+
+En cas d'oubli, l'application doit être démarrée, puis dans PowerShell (dossier du projet) :
+
+```powershell
+docker compose exec -it app npm run reset-password -w server
+```
+
+Tapez deux fois le nouveau mot de passe (8 caractères minimum ; il s'affiche sous forme d'étoiles), puis Entrée.
+Résultat attendu : `Mot de passe modifié. Toutes les sessions ont été fermées : reconnectez-vous.`
 
 ---
 

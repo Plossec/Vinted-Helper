@@ -1,6 +1,6 @@
 {
   "name": "@vinted-helper/server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,15 +10,18 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts"
+    "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts",
+    "reset-password": "node dist/outils/reinitialiser-mot-de-passe.js"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@fastify/static": "^10.1.5",
     "drizzle-orm": "^0.45.3",
     "fastify": "^5.12.5",
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
