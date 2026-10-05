@@ -1,0 +1,45 @@
+# Vinted Helper : application + base PostgreSQL.
+# Démarrer : docker compose up -d --build      Arrêter (sans rien effacer) : docker compose stop
+# ⚠️ Ne jamais lancer « docker compose down -v » : cela efface la base de données.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      # La base est conservée dans un volume Docker (survit aux redémarrages et mises à jour).
+      - base-donnees:/var/lib/postgresql/data
+    ports:
+      # Accessible uniquement depuis ce PC (scripts npm run db:…), jamais depuis le réseau.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      POSTGRES_HOTE: db
+      POSTGRES_PORT: "5432"
+      PORT: "3000"
+    ports:
+      # Lot 0 : accessible uniquement depuis ce PC (http://localhost:3000).
+      # L'accès depuis le téléphone sera ouvert avant le lot 2 (issue #3, HTTPS).
+      - "127.0.0.1:${PORT:-3000}:3000"
+    volumes:
+      # Photos des articles : dossier « data/photos » du projet, visible depuis Windows.
+      - ./data/photos:/app/data/photos
+
+volumes:
+  base-donnees:
