@@ -27,7 +27,7 @@ Objectif : remplacer le tableur par une application web/mobile simple pour gére
 | **En vente** | Acheté par un client Vinted, pas encore envoyé |
 | **Envoyé** | Colis expédié |
 | **Vendu** | Vente validée (fonds reçus) |
-| **Sortie du stock** | Invendu, donné, jeté… (perte comptabilisée) |
+| **Sortie du stock** | Motif : Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu (perte comptabilisée) |
 
 Chaque changement de statut est daté.
 
@@ -56,7 +56,8 @@ Chaque changement de statut est daté.
 
 ### 4.4 Ventes
 - Prix vendu, date de vente, date d'envoi, date de validation.
-- **Ventes groupées** : plusieurs articles vendus ensemble, emballage partagé.
+- **Ventes groupées** : plusieurs articles vendus ensemble pour un prix global, réparti **au prorata des prix affichés** ; emballage partagé.
+- **Sortie du stock** : motif au choix (Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu). Pour *Revendu hors Vinted* : **prix de vente** + **canal** (liste : Vide-grenier, Leboncoin, Main propre, Autre), pris en compte dans le bénéfice.
 - **Emballage + étiquette** : 0,08 € par défaut, modifiable.
 - **Bénéfice** = Prix vendu − Prix d'achat − Emballage − Essence (négatif tant que l'article n'est pas vendu).
 
