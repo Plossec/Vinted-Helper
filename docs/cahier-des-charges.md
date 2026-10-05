@@ -217,7 +217,7 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 
 ## 6. Règles de calcul
 
-**Règle d'arrondi commune** : toute répartition d'un montant total entre N éléments donne des parts **arrondies au centime le plus proche** ; le **dernier** élément reçoit `total − somme des autres parts`, pour que la somme soit toujours exactement égale au total.
+**Règle d'arrondi commune** : toute répartition d'un montant total entre N éléments donne des parts **arrondies au centime inférieur** ; le **dernier** élément reçoit **tout le reste** (`total − somme des autres parts`). La somme est toujours exactement égale au total et **aucune part n'est jamais négative** (ex. 5 centimes sur 8 articles → 0 × 7 puis 5). *(Décision du 05/10/2026 : remplace l'arrondi au plus proche, qui pouvait donner une part négative.)*
 
 **Recalcul** : toutes les répartitions (lot, essence, emballage, prix vendu) sont **calculées à partir des données**, jamais figées. Ajouter un article à une ancienne sortie peut donc modifier le bénéfice des mois passés : c'est accepté.
 
@@ -363,17 +363,17 @@ Chaque cas devient un test automatique.
 | # | Situation | Résultat attendu |
 |---|---|---|
 | 1 | Lot de 3 articles pour 10 € | Prix d'achat : 3,33 / 3,33 / 3,34 |
-| 2 | Lot de 3 articles pour 5 € | 1,67 / 1,67 / 1,66 |
+| 2 | Lot de 3 articles pour 5 € | 1,66 / 1,66 / 1,68 |
 | 3 | Total du lot n°1 corrigé à 12 € | 4,00 / 4,00 / 4,00 |
 | 4 | Sortie : essence 2 €, 5 articles | 0,40 € d'essence par article |
-| 5 | Sortie : essence 2 €, 3 articles | 0,67 / 0,67 / 0,66 |
+| 5 | Sortie : essence 2 €, 3 articles | 0,66 / 0,66 / 0,68 |
 | 6 | Sortie : essence 2 €, 4 articles, puis ajout d'un 5e | 0,50 € chacun, puis 0,40 € chacun |
 | 7 | Sortie : essence 1,30 €, aucun achat | Frais général calculé de 1,30 € dans le mois ; bénéfice réalisé et trésorerie du mois diminués de 1,30 € |
 | 8 | Article du lot n°1 (3,33 €), essence 0,40 €, vendu seul 9 €, emballage 0,08 € | Bénéfice = 9 − 3,33 − 0,40 − 0,08 = **5,19 €** |
 | 9 | Vente groupée : A affiché 9 €, B affiché 6 €, crédité 12 €, colis 0,08 € | A : 7,20 € vendu, 0,04 € emballage ; B : 4,80 €, 0,04 € |
 | 10 | Suite du cas 9 : A acheté 2 € + 0,40 € essence ; B acheté 1 € + 0,40 € essence | Bénéfice A = **4,76 €** ; B = **3,36 €** |
 | 11 | Vente groupée : 3 articles affichés 5 € chacun, crédité 10 € | 3,33 / 3,33 / 3,34 |
-| 12 | Colis de 3 articles, emballage 0,08 € | 0,03 / 0,03 / 0,02 |
+| 12 | Colis de 3 articles, emballage 0,08 € | 0,02 / 0,02 / 0,04 |
 | 13 | Article acheté 4 €, sans essence, boost 1,50 €, vendu 10 €, emballage 0,08 € | Bénéfice = **4,42 €** |
 | 14 | Article Maison (0 €, sans sortie), vendu 5 €, emballage 0,08 € | Bénéfice = **4,92 €** ; affiché à part dans la rentabilité par lieu |
 | 15 | Article acheté 3,75 € + 0,65 € essence, sorti du stock « Donné » | Bénéfice = **−4,40 €** (perte) |

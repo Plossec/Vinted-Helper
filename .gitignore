@@ -1,0 +1,19 @@
+# Dépendances et compilations
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Configuration locale et secrets (seul .env.example est versionné)
+.env
+.env.*
+!.env.example
+
+# Données de l'application (photos) et sauvegardes : jamais dans Git
+data/
+sauvegardes/
+
+# Divers
+.DS_Store
+Thumbs.db
+*.log
+.claude/settings.local.json

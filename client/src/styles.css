@@ -1,0 +1,70 @@
+/* Couleurs définies une seule fois ; clair / sombre automatique selon le réglage du téléphone. */
+:root {
+  --fond: #ffffff;
+  --texte: #1b1f23;
+  --texte-secondaire: #57606a;
+  --ok: #1a7f37;
+  --erreur: #cf222e;
+  --carte: #f6f8fa;
+  color-scheme: light dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #0d1117;
+    --texte: #e6edf3;
+    --texte-secondaire: #9198a1;
+    --ok: #3fb950;
+    --erreur: #f85149;
+    --carte: #161b22;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--texte);
+}
+
+/* Mobile d'abord : une colonne, marges confortables, aucun défilement horizontal. */
+.page {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 1rem;
+}
+
+.version {
+  color: var(--texte-secondaire);
+  margin: 0 0 0.75rem;
+}
+
+.statut {
+  background: var(--carte);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.statut--ok {
+  color: var(--ok);
+}
+
+.statut--erreur {
+  color: var(--erreur);
+}

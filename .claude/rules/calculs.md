@@ -19,10 +19,11 @@ Référence : `docs/cahier-des-charges.md`, §6 (règles) et §11 (cas chiffrés
 Une **seule fonction** répartit un total entre N éléments. Toutes les répartitions l'utilisent :
 prix d'un lot, essence d'une sortie, emballage d'un colis, prix vendu d'une vente groupée.
 
-- Parts égales : chaque part = `Math.round(total / N)` ; la **dernière** part = `total − somme des autres`.
-- Au prorata (poids = prix affichés) : chaque part = `Math.round(total × poids / somme des poids)` ;
+- Parts égales : chaque part = `Math.floor(total / N)` (arrondi **vers le bas**) ; la **dernière** part = `total − somme des autres` (tout le reste).
+- Au prorata (poids = prix affichés) : chaque part = `Math.floor(total × poids / somme des poids)` ;
   la **dernière** part = `total − somme des autres`.
-- La somme des parts est **toujours exactement** égale au total. Teste-le.
+- La somme des parts est **toujours exactement** égale au total, et **aucune part n'est négative**. Teste-le.
+- Ne jamais revenir à `Math.round` : il peut rendre la dernière part négative (5 centimes sur 8 → −2).
 - N = 0 : renvoie une liste vide (l'appelant gère le cas, ex. essence d'une sortie vide → frais général).
 - Somme des poids = 0 au prorata : bascule en parts égales.
 - L'ordre des éléments doit être **stable et déterministe** (ex. tri par identifiant ou ordre de création),
