@@ -31,8 +31,9 @@ Format : date, sujet, décision, raison.
 un module de calcul cassé.
 
 **Installation** : `.claude/settings.json` et `.claude/hooks/` sont protégés en écriture contre Claude. Les scripts ont
-été déposés dans `.claude/a-installer/` ; l'utilisateur les déplace dans `.claude/hooks/` et ajoute lui-même la section
-`hooks` dans `settings.json`.
+d'abord été déposés dans `.claude/a-installer/`. Sur **autorisation explicite et ponctuelle de l'utilisateur**, Claude
+les a déplacés dans `.claude/hooks/` et a remplacé la section `hooks` de `settings.json` (permissions inchangées).
+Cette autorisation ne vaut que pour cette fois : toute modification future de ces fichiers est faite par l'utilisateur.
 
 **Vérification** : les deux scripts ont été testés à la main sur un projet factice hors du dépôt (formatage d'un `.ts`,
 `.md` et fichier hors projet ignorés, entrée invalide sans effet ; tests lancés uniquement quand le calcul est touché,
