@@ -21,8 +21,8 @@ interface Suivi {
   jetonCree: boolean;
 }
 
-/** Le programme interroge l'application toutes les 10 s : au-delà d'une minute, il est considéré arrêté. */
-const programmeActif = (vuLe: string | null) => vuLe !== null && Date.now() - new Date(vuLe).getTime() < 60_000;
+/** Le programme interroge l'application toutes les 5 minutes : au-delà de 11 minutes, il est considéré arrêté. */
+const programmeActif = (vuLe: string | null) => vuLe !== null && Date.now() - new Date(vuLe).getTime() < 11 * 60_000;
 
 export function PublicationVinted() {
   const [suivi, setSuivi] = useState<Suivi | null>(null);

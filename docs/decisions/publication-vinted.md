@@ -29,9 +29,14 @@ changement du site Vinted.
   (Claude ne consulte jamais Vinted).
 
 **Précisions de réalisation (06/10/2026, tranchées par Claude)**
-- Le programme interroge l'application toutes les 10 s avec un **jeton personnel** (`vh_…`, créé dans les Réglages,
-  affiché une fois, seule son empreinte SHA-256 est stockée). Ce jeton n'ouvre que l'API du programme et la lecture
-  des photos.
+- **Fréquence** : le programme demande à l'application **toutes les 5 minutes** s'il y a des articles à publier
+  (changé le 06/10/2026 à la demande de l'utilisateur, au lieu de 10 s). Une sélection de plusieurs articles est
+  ensuite traitée d'affilée. L'écran Publication Vinted affiche le programme « arrêté » après 11 minutes sans nouvelles.
+- **Jeton** : un code d'accès réservé au programme (il commence par `vh_`), qui remplace le mot de passe puisque le
+  programme tourne sans l'utilisateur. Il est créé dans Réglages → Publication Vinted et affiché une seule fois ; en
+  créer un nouveau annule l'ancien. L'application n'en garde qu'une version brouillée (empreinte), qui permet de le
+  reconnaître sans pouvoir le retrouver. Il ne permet que de lire les articles à publier et leurs photos, et de
+  signaler « publié » ou « erreur ».
 - Une seule publication à la fois. Une publication « en cours » depuis plus de 15 minutes passe en erreur et **n'est
   jamais relancée automatiquement** (risque d'annonce en double).
 - La connexion à Vinted est vérifiée **avant** de prendre un article : un article ne reste jamais bloqué par une

@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Publication Vinted : le programme du PC vérifie la file **toutes les 5 minutes** (au lieu de 10 s) ; une
+  sélection de plusieurs articles est toujours traitée d'affilée.
+
 ## [0.8.0] — 06/10/2026
 
 Publication sur Vinted depuis le PC (évolution demandée après le lot 7, à valider).
