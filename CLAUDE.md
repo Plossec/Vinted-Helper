@@ -7,35 +7,33 @@ gestion du stock et des statuts, ventes (simples, groupées, retours), calcul du
 d'annonces par IA (Gemini). Un seul utilisateur en V1, données préparées pour plusieurs utilisateurs.
 Développement local (PC Windows + Docker Desktop), puis hébergement sur un VPS OVH.
 
-**`docs/cahier-des-charges.md` fait foi.** En cas d'ambiguïté ou de contradiction, **pose la question à
-l'utilisateur plutôt que de supposer**. Toute décision prise en cours de route est consignée dans `docs/decisions.md`.
+## Documentation (à lire quand le sujet l'exige, pas en entier à chaque fois)
+
+- **`docs/cahier-des-charges.md` fait foi.** En cas d'ambiguïté ou de contradiction, **pose la question à
+  l'utilisateur plutôt que de supposer**.
+- `docs/decisions/` : décisions prises depuis, **un fichier par lot** (`lot-N.md`) ; elles priment sur le cahier des
+  charges quand elles le précisent. Toute nouvelle décision y est consignée, datée.
+- `docs/guides/` : modes d'emploi de l'utilisateur ; `docs/README.md` : sommaire et « où écrire quoi ».
+- Consignes ciblées, chargées automatiquement selon les fichiers touchés : `.claude/rules/` (calculs, interface,
+  migrations, déploiement).
 
 ## Commandes
 
 | Action | Commande |
 |---|---|
-| Démarrer (application + PostgreSQL) | `docker compose up -d --build` |
-| Arrêter (sans effacer les données) | `docker compose stop` |
+| Démarrer / arrêter (sans effacer les données) | `docker compose up -d --build` / `docker compose stop` |
 | Journaux | `docker compose logs -f app` |
 | Installer les dépendances (lockfile) | `npm ci` |
 | Développement (hors Docker, base Docker démarrée) | `npm run dev:server` + `npm run dev:client` (http://localhost:5173) |
 | Construire client + serveur | `npm run build` |
-| Tests | `npm test` |
-| Tests du module de calcul seuls | `npm test -w server -- calculs` |
-| Vérification des types | `npm run typecheck` |
-| Lint | `npm run lint` |
-| Formatage | `npm run format` (vérifier sans modifier : `npm run format:check`) |
+| Tests / calculs seuls | `npm test` / `npm test -w server -- calculs` |
+| Types / lint / formatage | `npm run typecheck` / `npm run lint` / `npm run format` (`format:check` pour vérifier) |
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` (automatique chaque jour : service `sauvegarde`, `sauvegardes/auto/`) |
-| Restaurer une sauvegarde automatique | `docker compose stop app` puis `docker compose exec sauvegarde sh /scripts/restaurer.sh AAAA-MM-JJ` (README §6) |
-| Générer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` (`npm run db:generate` ne transmet pas `--name`) |
-| Appliquer les migrations | `npm run db:migrate` (aussi automatique au démarrage) |
-| Serveur OVH : installer / mettre à jour | `sudo bash scripts/ovh/installer.sh` / `sudo bash scripts/ovh/mettre-a-jour.sh` (sur le serveur, guide `docs/mise-en-ligne-ovh.md`) |
-| Rapatrier les sauvegardes du serveur sur le PC | `powershell -ExecutionPolicy Bypass -File scripts\rapatrier-sauvegardes.ps1` |
+| Générer / appliquer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` / `npm run db:migrate` (aussi au démarrage) |
 | Réinitialiser le mot de passe | `docker compose exec -it app npm run reset-password -w server` |
 
-Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (API, base, `src/calculs/`,
-`src/metier/` règles de statut, `src/test/` base PGlite en mémoire pour les tests), `client/` (interface React),
-`scripts/`, `docs/`. Migrations Drizzle dans `server/drizzle/`. Les tests n'utilisent jamais Docker ni la vraie base.
+Restauration, serveur OVH et rapatriement des sauvegardes : voir `docs/guides/`. Garde ce tableau à jour si les
+commandes changent. Les tests n'utilisent jamais Docker ni la vraie base (PGlite en mémoire, `server/src/test/`).
 
 ## Conventions
 
@@ -63,21 +61,16 @@ Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (AP
 Les interdictions techniques sont dans `.claude/settings.json` (appliquées par Claude Code, quoi que tu décides).
 Les consignes ci-dessous complètent ces interdictions : respecte-les même quand rien ne t'en empêche techniquement.
 
-**Données**
-- Ne jamais supprimer les volumes Docker, le dossier des photos ou la base de données.
-- `npm run db:sauvegarde` (pg_dump) **avant toute migration**.
-- La base n'évolue que par migrations : `drizzle-kit generate` puis `migrate`. **Jamais `drizzle-kit push`.**
-- Ne jamais modifier une migration déjà appliquée : en créer une nouvelle.
-- Travailler uniquement sur la base locale de développement. **Aucune commande vers le VPS** sans demande explicite.
+**Données** — Ne jamais supprimer les volumes Docker, le dossier des photos, les sauvegardes ou la base. Travailler
+uniquement sur la base locale de développement ; **aucune commande vers le VPS** sans demande explicite. Règles des
+migrations : `.claude/rules/migrations.md`.
 
-**Secrets**
-- Ne jamais lire, afficher ni commiter `.env`. `.env.example` ne contient que des valeurs fictives.
-- Aucun secret dans le code, les logs, les tests ou les messages de commit.
+**Secrets** — Ne jamais lire, afficher ni commiter `.env` (`.env.example` : valeurs fictives uniquement). Aucun
+secret dans le code, les logs, les tests ou les messages de commit.
 
-**Git**
-- Travailler sur la branche `lot-N`, **jamais directement sur `main`**.
-- **Aucun push sans demande.** Ne jamais réécrire l'historique ni contourner les vérifications (`--no-verify`).
-- Commits **petits et fréquents** : c'est le filet de sécurité.
+**Git** — Travailler sur une branche (`lot-N` ou nommée d'après le sujet), **jamais directement sur `main`**. Aucun
+push sans demande. Ne jamais réécrire l'historique ni contourner les vérifications (`--no-verify`). Commits **petits
+et fréquents**.
 
 **Code et tests**
 - Ne jamais modifier un test de l'annexe §11 pour le faire passer : corriger le code, ou **signaler le désaccord**.
@@ -85,16 +78,14 @@ Les consignes ci-dessous complètent ces interdictions : respecte-les même quan
 - Pas de `any`, `@ts-ignore`, `@ts-expect-error` ou `eslint-disable` pour contourner une erreur.
 - Les tests **n'appellent jamais réellement Gemini** : réponse simulée, pour préserver le quota gratuit.
 
-**Dépendances**
-- Toute nouvelle dépendance est **proposée avec sa justification** avant d'être installée.
-- **npm uniquement**, aucune installation globale, `package-lock.json` toujours commité.
-- Aucun script destructeur (reset de base, suppression de données) dans `package.json`.
+**Dépendances** — Toute nouvelle dépendance est **proposée avec sa justification** avant d'être installée. **npm
+uniquement**, aucune installation globale, `package-lock.json` toujours commité. Aucun script destructeur (reset de
+base, suppression de données) dans `package.json`.
 
-**Périmètre et système**
-- Un lot à la fois, rien du §10, **aucune refonte non demandée**.
-- Ne rien modifier en dehors du dossier du projet : ni Windows, ni Docker Desktop, ni la configuration Git globale.
-- Aucun droit administrateur, aucun script téléchargé puis exécuté.
-- Ne pas modifier `.claude/settings.json` ni `.claude/hooks/` : seul l'utilisateur le fait.
+**Périmètre et système** — Un lot à la fois, rien du §10, **aucune refonte non demandée**. Ne rien modifier en dehors
+du dossier du projet (ni Windows, ni Docker Desktop, ni la configuration Git globale). Aucun droit administrateur,
+aucun script téléchargé puis exécuté. Ne pas modifier `.claude/settings.json` ni `.claude/hooks/` : seul
+l'utilisateur le fait.
 
 ## Méthode de travail
 
@@ -104,15 +95,13 @@ Les consignes ci-dessous complètent ces interdictions : respecte-les même quan
   validation** avant de coder. La commande `/lot N` fait cela.
 - **Tests avant le code** pour le module de calcul : chaque cas de l'annexe §11 devient un test, écrit avant
   l'implémentation.
-- **Fin de lot** :
-  1. `/verifier` doit être entièrement vert ;
-  2. lancer le sous-agent `relecteur` et traiter ses remarques ;
-  3. mettre à jour `README.md`, `CHANGELOG.md` et `docs/decisions.md` ;
-  4. `/version` pour numéroter la version.
+- **Fin de lot** : `/verifier` entièrement vert ; sous-agent `relecteur` **uniquement à la demande de
+  l'utilisateur** (lui transmettre le numéro du lot et `git diff --name-only main...HEAD`) ; mise à jour de
+  `README.md` ou du guide concerné, de `CHANGELOG.md` et de `docs/decisions/lot-N.md` ; `/version`.
 - Messages de commit en français, à l'impératif (« Ajoute la saisie terrain »).
-- Sous-agent `relecteur` (lecture seule) : **uniquement à la demande de l'utilisateur**, en fin de lot ; lui transmettre le numéro du lot et `git diff --name-only main...HEAD`.
 - Hook `formater.mjs` (après Edit/Write) : Prettier sur les `.ts/.tsx/.js/.json/.css` du projet, non bloquant.
-- Hook `tests-calculs.mjs` (fin de tour) : si `server/src/calculs/` a changé, lance ses tests et **bloque la fin du tour en cas d'échec** : corrige le code, jamais l'annexe §11.
+- Hook `tests-calculs.mjs` (fin de tour) : si `server/src/calculs/` a changé, lance ses tests et **bloque la fin du
+  tour en cas d'échec** : corrige le code, jamais l'annexe §11.
 
 ## Versions
 
@@ -124,5 +113,6 @@ Les consignes ci-dessous complètent ces interdictions : respecte-les même quan
 ## Profil de l'utilisateur
 
 Niveau **intermédiaire** : à l'aise avec un terminal, pas développeur. Toute commande à lancer par l'utilisateur
-est **expliquée pas à pas** (où la taper, ce qu'elle fait, le résultat attendu). Réponds en **français**.
-L'utilisateur est sous **Windows** (Git pour Windows installé) : donne les commandes PowerShell quand elles diffèrent.
+est **expliquée pas à pas** (où la taper, ce qu'elle fait, le résultat attendu). Réponds en **français**, de façon
+**courte** (l'utilisateur l'a demandé). L'utilisateur est sous **Windows** (Git pour Windows installé) : donne les
+commandes PowerShell quand elles diffèrent.

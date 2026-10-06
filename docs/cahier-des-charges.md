@@ -423,11 +423,14 @@ vinted-helper/
 ├─ CHANGELOG.md              historique des versions
 ├─ docs/
 │  ├─ cahier-des-charges.md  ce document = source de vérité
-│  └─ decisions.md           décisions prises en cours de développement
+│  ├─ README.md              sommaire de la documentation
+│  ├─ categories-vinted.md   annexe : arbre des catégories
+│  ├─ decisions/             décisions prises en cours de développement (un fichier par lot)
+│  └─ guides/                modes d'emploi de l'utilisateur (téléphone, sauvegardes, IA, OVH…)
 ├─ .claude/
 │  ├─ settings.json          permissions + formatage automatique
 │  ├─ hooks/formater.mjs     formatage Prettier après chaque modification (compatible Windows)
-│  ├─ rules/                 consignes chargées selon le dossier modifié
+│  ├─ rules/                 consignes chargées selon les fichiers modifiés (calculs, interface, migrations, déploiement)
 │  ├─ skills/                commandes /lot, /verifier, /version
 │  └─ agents/relecteur.md    sous-agent de relecture
 ├─ client/                   interface React (PWA)

@@ -21,7 +21,7 @@ Concentre-toi sur les fichiers de la liste ; ouvre les autres fichiers seulement
 ## Sources de vérité
 
 1. `docs/cahier-des-charges.md` — fait foi.
-2. `docs/decisions.md` — décisions prises depuis (elles priment sur le cahier des charges quand elles le précisent).
+2. `docs/decisions/` (index `README.md`, un fichier par lot) — décisions prises depuis (elles priment sur le cahier des charges quand elles le précisent).
 3. `CLAUDE.md` et `.claude/rules/` — conventions, règles non négociables et garde-fous.
 
 ## Mission : comparer le code du lot au cahier des charges
@@ -37,14 +37,14 @@ Concentre-toi sur les fichiers de la liste ; ouvre les autres fichiers seulement
    automatisation vers Vinted, pas de `.env` versionné, migrations existantes non modifiées, aucun test sauté
    (`.skip`, `.only`), aucun `any` / `@ts-ignore` / `@ts-expect-error` / `eslint-disable` de contournement, aucun
    appel réel à Gemini dans les tests, aucun calcul d'argent hors de `server/src/calculs/`, aucune dépendance
-   ajoutée sans trace dans `docs/decisions.md`, aucun script destructeur dans `package.json`.
+   ajoutée sans trace dans `docs/decisions/`, aucun script destructeur dans `package.json`.
 5. **Hors périmètre (§10)** : rien n'a été développé par erreur (import, export, mode d'envoi, pseudo acheteur,
    alerte fiscale, suggestion de prix, notifications téléphone, page d'inscription…).
 
 Contrôles complémentaires, quand le lot est concerné :
 - **Statuts** : seules les transitions du §4.2 sont possibles ; règles de colis du §4.3 respectées.
 - **Interface** : textes en français, format `3,33 €` et `JJ/MM/AAAA`, utilisable à une main.
-- **Documentation** : `README.md`, `CHANGELOG.md` et `docs/decisions.md` à jour pour ce lot.
+- **Documentation** : `README.md`, `CHANGELOG.md` et `docs/decisions/lot-N.md` à jour pour ce lot.
 
 ## Format du rapport
 

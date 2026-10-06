@@ -1,5 +1,5 @@
 # Accès HTTPS depuis le téléphone (issue #3) — certificat local généré par Caddy.
-# Le téléphone doit faire confiance au certificat racine une seule fois (voir README §4).
+# Le téléphone doit faire confiance au certificat racine une seule fois (voir docs/guides/telephone-https.md).
 {
 	# Certificats signés par l'autorité locale de Caddy (pas d'internet, pas de Let's Encrypt).
 	local_certs

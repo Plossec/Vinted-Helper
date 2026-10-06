@@ -1,5 +1,5 @@
 #!/bin/sh
-# Restauration d'une sauvegarde automatique (README §6). À lancer application ARRÊTÉE :
+# Restauration d'une sauvegarde automatique (docs/guides/sauvegarde-restauration.md). À lancer application ARRÊTÉE :
 #   docker compose stop app
 #   docker compose exec sauvegarde sh /scripts/restaurer.sh AAAA-MM-JJ
 #   docker compose start app

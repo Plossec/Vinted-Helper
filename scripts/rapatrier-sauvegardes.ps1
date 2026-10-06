@@ -2,7 +2,7 @@
 # Utilisation (PowerShell, dans le dossier du projet) :
 #   powershell -ExecutionPolicy Bypass -File scripts\rapatrier-sauvegardes.ps1
 # Le mot de passe SSH du serveur est demandé une fois. Seuls les fichiers absents (ou incomplets) sont téléchargés.
-# Guide : docs/mise-en-ligne-ovh.md, étape « Sauvegardes ».
+# Guide : docs/guides/mise-en-ligne-ovh.md, étape « Sauvegardes ».
 param(
   [string]$Serveur = "",
   [string]$Utilisateur = "ubuntu",

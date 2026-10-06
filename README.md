@@ -3,8 +3,9 @@
 Application web (installable sur téléphone) pour gérer les achats en vide-grenier, le stock, les ventes Vinted et la
 rentabilité. Usage personnel, en local sur votre PC, puis plus tard sur un serveur OVH.
 
-> **En cours : lot 1 — socle** (connexion, fiches article sans photo, statuts Brouillon / À publier / En ligne,
-> listes de référence). Les fonctionnalités arrivent lot par lot (voir `docs/cahier-des-charges.md`, §9).
+> Toutes les fonctionnalités du cahier des charges sont livrées (version 0.7.0). Prochaine étape : la mise en ligne
+> sur OVH ([guide](docs/guides/mise-en-ligne-ovh.md)). Ce README couvre l'installation sur le PC ; les autres guides
+> sont listés à la fin (« Documentation »).
 
 ---
 
@@ -84,69 +85,7 @@ Résultat attendu : `added … packages` et `found 0 vulnerabilities` (cela pren
 
 ---
 
-## 4. Accès depuis le téléphone
-
-Le téléphone utilise une connexion sécurisée (HTTPS), indispensable pour installer l'application et utiliser
-l'appareil photo. Elle fonctionne **sur le Wi-Fi de la maison**, PC allumé et application démarrée.
-Réglage à faire **une seule fois**.
-
-### Étape 1 — Trouver l'adresse IP du PC
-
-Dans PowerShell :
-
-```powershell
-ipconfig
-```
-
-Repérez le bloc **« Carte réseau sans fil Wi-Fi »** (ou « Ethernet » si le PC est branché par câble) et notez
-l'**Adresse IPv4**, par exemple `192.168.1.20`.
-
-> Conseil : pour que cette adresse ne change pas, réservez-la dans l'interface de votre box (« bail DHCP statique »).
-> Si elle change un jour, refaites les étapes 2 et 3 (le certificat, lui, reste valable).
-
-### Étape 2 — Indiquer l'adresse dans `.env`
-
-```powershell
-notepad .env
-```
-
-Ajoutez (ou modifiez) la ligne `IP_PC=192.168.1.20` avec **votre** adresse, enregistrez, puis :
-
-```powershell
-docker compose up -d --build
-```
-
-Résultat attendu : `docker compose ps` affiche quatre services : `app`, `db`, `https` et `sauvegarde`.
-Si Windows demande d'autoriser Docker sur le réseau : acceptez pour les **réseaux privés**.
-
-### Étape 3 — Installer le certificat sur le téléphone (une seule fois)
-
-1. Sur le téléphone (connecté au Wi-Fi de la maison), ouvrez Chrome à l'adresse `http://192.168.1.20:8080/certificat.crt`
-   (avec votre adresse). Le fichier est téléchargé.
-2. Ouvrez **Paramètres** → cherchez **« certificat »** → **Installer un certificat** → **Certificat CA**
-   (selon la marque : Sécurité → Plus de paramètres de sécurité → Chiffrement et identifiants).
-3. Confirmez « Installer quand même », puis choisissez le fichier `certificat.crt` téléchargé.
-
-Ce certificat est créé sur **votre** PC : il ne sert qu'à reconnaître votre application.
-
-### Étape 4 — Ouvrir et installer l'application
-
-1. Dans Chrome : `https://192.168.1.20:8443` (avec votre adresse). Pas d'avertissement de sécurité : c'est bon.
-2. Connectez-vous, puis menu **⋮** → **Ajouter à l'écran d'accueil** → **Installer**.
-
-| Problème | Solution |
-|---|---|
-| La page ne s'ouvre pas | Même Wi-Fi que le PC ? Application démarrée ? `docker compose ps` doit montrer `https` |
-| « Votre connexion n'est pas privée » | Le certificat n'est pas installé (étape 3), ou `IP_PC` ne correspond pas à l'adresse tapée |
-| L'adresse IP du PC a changé | Mettez à jour `IP_PC` dans `.env`, `docker compose up -d`, et utilisez la nouvelle adresse |
-
-En vide-grenier (hors Wi-Fi de la maison), les achats saisis sont **gardés sur le téléphone** et envoyés
-automatiquement au retour sur le Wi-Fi de la maison. L'accès depuis partout viendra avec l'hébergement OVH
-([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)).
-
----
-
-## 5. Réinitialiser le mot de passe
+## 4. Réinitialiser le mot de passe
 
 En temps normal, changez le mot de passe dans l'application : **Réglages → Changer le mot de passe**.
 
@@ -161,52 +100,7 @@ Résultat attendu : `Mot de passe modifié. Toutes les sessions ont été fermé
 
 ---
 
-## 6. Sauvegarde et restauration
-
-### Sauvegarde automatique (tous les jours)
-
-Le service `sauvegarde` (démarré avec l'application) sauvegarde chaque jour, à partir de 3 h du matin ou dès que le PC
-est allumé ensuite :
-- la base : `sauvegardes\auto\AAAA-MM-JJ-base.sql.gz` ;
-- les photos : `sauvegardes\auto\AAAA-MM-JJ-photos.tar.gz`.
-
-Les sauvegardes de plus de 30 jours sont effacées automatiquement. Vérifier : `docker compose logs sauvegarde`
-(dernière ligne « Sauvegarde terminée »).
-
-> **Copie hors du PC** : en attendant l'hébergement OVH ([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)),
-> copiez régulièrement le dossier `sauvegardes\auto` sur une clé USB ou un cloud (OneDrive, Google Drive…).
-> Une sauvegarde qui reste sur le même PC ne protège pas d'une panne de disque.
-
-### Sauvegarde manuelle (avant une mise à jour)
-
-```powershell
-npm run db:sauvegarde
-```
-
-Résultat attendu : `Sauvegarde créée : sauvegardes/AAAA-MM-JJ_HH-MM-SS.sql` (base uniquement).
-
-### Restaurer une sauvegarde automatique
-
-⚠️ La base actuelle est **remplacée** par celle de la sauvegarde choisie (les données saisies depuis sont perdues).
-
-```powershell
-docker compose stop app
-docker compose exec sauvegarde sh /scripts/restaurer.sh
-```
-
-La deuxième commande affiche les dates disponibles. Relancez-la avec la date choisie, puis redémarrez l'application :
-
-```powershell
-docker compose exec sauvegarde sh /scripts/restaurer.sh 2026-10-06
-docker compose start app
-```
-
-Résultat attendu : `Restauration terminée.` Les photos de la sauvegarde sont remises en place (les photos plus
-récentes déjà présentes sont gardées). Procédure testée le 06/10/2026.
-
----
-
-## 7. Mettre à jour l'application
+## 5. Mettre à jour l'application
 
 ```powershell
 git switch main
@@ -219,7 +113,7 @@ Les évolutions de la base (migrations) s'appliquent automatiquement au démarra
 
 ---
 
-## 8. Lancer les tests
+## 6. Lancer les tests
 
 ```powershell
 npm test                          # tous les tests
@@ -232,7 +126,7 @@ Autres vérifications : `npm run typecheck` (types), `npm run lint` (qualité du
 
 ---
 
-## 9. Dépannage
+## 7. Dépannage
 
 | Problème | Solution |
 |---|---|
@@ -251,72 +145,16 @@ Autres vérifications : `npm run typecheck` (types), `npm run lint` (qualité du
 
 ---
 
-## 10. Utilisation au quotidien
+## Documentation
 
-### En vide-grenier (onglet **Terrain**)
+Tout est rangé dans [`docs/`](docs/README.md) :
 
-1. **Démarrer une sortie** : choisissez le lieu, la date (aujourd'hui par défaut), puis « Démarrer la sortie ».
-2. **+ Achat** : l'appareil photo s'ouvre → photo → tapez le **prix** → **Valider**. Pour un **lot** (ex. 4 maillots
-   pour 15 €), indiquez le prix total et le nombre d'articles : 4 brouillons sont créés, à 3,75 € chacun, avec la même
-   photo. « Achat sans photo » si besoin.
-3. **Essence** : à saisir quand vous voulez (pendant ou après) ; elle est répartie automatiquement sur les articles.
-4. **Terminer la sortie** quand vous rentrez. La sortie reste modifiable dans **Terrain → Toutes les sorties**.
-
-Sans réseau, tout est **gardé sur le téléphone** : le bandeau affiche « N éléments en attente d'envoi » et l'envoi se
-fait tout seul au retour sur le Wi-Fi de la maison (les références `#0127` sont attribuées à ce moment-là).
-
-Article de la maison : **Terrain → Article de la maison** (0 €, sans sortie, lieu « Maison »).
-
-### À la maison (onglet **Articles**)
-
-Ouvrez un brouillon pour compléter sa fiche (nom, catégorie, marque, état…), ajouter les **photos de l'annonce**
-(galerie : plusieurs à la fois, ou appareil photo), les réordonner (← →) et choisir la **photo principale** (★).
-Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est réparti à nouveau sur les articles.
-
-### Nouvelle version
-
-Après une mise à jour (§7), le téléphone affiche « Nouvelle version disponible — Mettre à jour » : touchez
-« Mettre à jour ».
-
----
-
-## 11. IA Gemini (annonces et étiquettes)
-
-L'application utilise l'offre **gratuite** de Google Gemini, appelée uniquement par le serveur (la clé ne va jamais
-sur le téléphone). Réglage à faire une seule fois :
-
-1. Ouvrez https://aistudio.google.com/apikey avec votre compte Google, puis **Create API key** (Créer une clé).
-   Copiez la clé.
-2. Dans PowerShell : `notepad .env`, puis renseignez :
-   - `GEMINI_API_KEY=` la clé copiée ;
-   - `GEMINI_MODELE=` le nom d'un modèle « Flash » disponible dans AI Studio (ex. `gemini-2.5-flash`).
-     Google retire régulièrement ses anciens modèles : si un jour l'application affiche « Modèle Gemini introuvable »,
-     changez simplement ce nom.
-3. Enregistrez, puis `docker compose up -d` pour relancer l'application.
-
-Utilisation, sur la fiche d'un article :
-- **🏷 Lire l'étiquette** (en haut) : photo de l'étiquette → marque, taille, catégorie et matière sont proposées dans
-  le formulaire. Rien n'est enregistré tant que vous n'avez pas cliqué « Enregistrer la fiche ».
-- **✨ Générer l'annonce** (section Annonce) : titre et description générés à partir de la fiche et des photos, avec
-  « Réf. 127 » en dernière ligne ; enregistrés et modifiables. **Copier** met le titre et la description dans le
-  presse-papiers.
-- Si Gemini est indisponible (quota gratuit atteint, pas de clé…) : un message l'explique ; **Copier le prompt**
-  permet de coller la demande dans Claude.ai, ChatGPT ou Gemini (ajoutez-y les photos), puis de recopier le résultat.
-- Les prompts sont modifiables dans **Réglages → IA (Gemini)**.
-
----
-
-## 12. Mise en ligne sur OVH
-
-Pour utiliser l'application partout (vide-grenier en 4G) : guide pas à pas dans
-[`docs/mise-en-ligne-ovh.md`](docs/mise-en-ligne-ovh.md) (commande du serveur, installation en une commande,
-sauvegardes rapatriées sur le PC, mises à jour).
-
----
-
-## Pour aller plus loin
-
-- `docs/cahier-des-charges.md` : le besoin complet (fait foi).
-- `docs/decisions.md` : les décisions prises en cours de route.
-- `CHANGELOG.md` : l'historique des versions.
-- `CLAUDE.md` : les consignes de développement pour Claude.
+| Je veux… | Guide |
+|---|---|
+| Utiliser l'application au quotidien (terrain, fiches, ventes) | [docs/guides/utilisation.md](docs/guides/utilisation.md) |
+| Ouvrir l'application sur le téléphone (Wi-Fi de la maison) | [docs/guides/telephone-https.md](docs/guides/telephone-https.md) |
+| Sauvegarder ou restaurer mes données | [docs/guides/sauvegarde-restauration.md](docs/guides/sauvegarde-restauration.md) |
+| Configurer l'IA Gemini | [docs/guides/ia-gemini.md](docs/guides/ia-gemini.md) |
+| Mettre l'application en ligne (OVH) | [docs/guides/mise-en-ligne-ovh.md](docs/guides/mise-en-ligne-ovh.md) |
+| Comprendre le besoin complet ou une décision | [docs/README.md](docs/README.md) |
+| Voir les nouveautés de chaque version | [CHANGELOG.md](CHANGELOG.md) |

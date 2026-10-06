@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installation de Vinted Helper sur un VPS OVH (Ubuntu 24.04), à lancer UNE fois :
 #   sudo bash /opt/vinted-helper/scripts/ovh/installer.sh
-# Guide complet : docs/mise-en-ligne-ovh.md
+# Guide complet : docs/guides/mise-en-ligne-ovh.md
 # - installe Docker (paquets Ubuntu), le pare-feu (SSH, HTTP, HTTPS), fail2ban, les mises à jour de sécurité ;
 # - crée le fichier .env (questions posées une par une) ;
 # - démarre l'application.
