@@ -1,12 +1,14 @@
-// Fiche article (création et modification) — cahier des charges §5.2, lot 1 (sans photo).
+// Fiche article (création et modification) — cahier des charges §5.2 : champs, photos, sortie, lot, coûts.
 // Catégorie (arbre Vinted), marque et état obligatoires ; gamme en texte libre (décisions du 05/10/2026).
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type Article, type DonneesArticle, type Referentiels, type TypeListe } from "../api.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
+import { PhotosArticle } from "../composants/PhotosArticle.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
 import { aujourdhui } from "../outils/dates.js";
-import { centimesVersSaisie, lireMontant } from "../outils/montants.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { formatDate } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
 
 interface Formulaire {
@@ -23,6 +25,8 @@ interface Formulaire {
   matiere: string;
   lieu: string;
   prixAchat: string;
+  /** Prix total du lot (articles de lot uniquement). */
+  prixLot: string;
   dateAchat: string;
   prixAffiche: string;
   notes: string;
@@ -40,6 +44,7 @@ const formulaireVide = (): Formulaire => ({
   matiere: "",
   lieu: "",
   prixAchat: "",
+  prixLot: "",
   dateAchat: aujourdhui(),
   prixAffiche: "",
   notes: "",
@@ -62,6 +67,7 @@ function versFormulaire(a: Article, refs: Referentiels): Formulaire {
     matiere: a.matiere ?? "",
     lieu: refs.lieux.find((l) => l.id === a.lieuId)?.nom ?? "",
     prixAchat: centimesVersSaisie(a.prixAchat),
+    prixLot: centimesVersSaisie(a.lot?.prixTotal ?? null),
     dateAchat: a.dateAchat ?? "",
     prixAffiche: centimesVersSaisie(a.prixAffiche),
     notes: a.notes ?? "",
@@ -140,15 +146,19 @@ export function FicheArticle() {
     setMessage(null);
     const erreur = (texte: string) => setMessage({ type: "erreur", texte });
 
-    const prixAchat = lireMontant(form.prixAchat);
+    const enLot = article?.lot != null;
+    const prixAchat = enLot ? null : lireMontant(form.prixAchat);
+    const prixLot = enLot ? lireMontant(form.prixLot) : null;
     const prixAffiche = lireMontant(form.prixAffiche);
     if (form.nom.trim() === "") return erreur("Le nom est obligatoire.");
     if (form.categorie === "") return erreur("Choisissez une catégorie dans la liste.");
     if (form.marque.trim() === "") return erreur("La marque est obligatoire (« Sans marque » si besoin).");
     if (form.etat === "") return erreur("Choisissez un état dans la liste.");
     if (form.lieu.trim() === "") return erreur("Le lieu d'achat est obligatoire.");
-    if (prixAchat === null) return erreur("Le prix d'achat est obligatoire (0 pour un article de la maison).");
+    if (!enLot && prixAchat === null)
+      return erreur("Le prix d'achat est obligatoire (0 pour un article de la maison).");
     if (prixAchat === "invalide") return erreur("Prix d'achat invalide (ex. 3,50).");
+    if (enLot && (prixLot === null || prixLot === "invalide")) return erreur("Prix total du lot invalide (ex. 15).");
     if (form.dateAchat === "") return erreur("La date d'achat est obligatoire.");
     if (prixAffiche === "invalide") return erreur("Prix affiché invalide (ex. 12,00).");
 
@@ -168,6 +178,9 @@ export function FicheArticle() {
         prixAffiche,
         notes: form.notes.trim() || null,
       };
+      if (article?.lot && typeof prixLot === "number" && prixLot !== article.lot.prixTotal) {
+        await api.put(`/api/lots/${article.lot.id}`, { prixTotal: prixLot });
+      }
       if (article === null) {
         const cree = await api.post<Article>("/api/articles", donnees);
         void naviguer(`/articles/${cree.id}`, { replace: true });
@@ -267,15 +280,22 @@ export function FicheArticle() {
           onChoix={(o) => changerLieu(o.libelle)}
         />
         <div className="champs-ligne">
-          <label className="champ">
-            <span>Prix d'achat (€) *</span>
-            <input
-              inputMode="decimal"
-              value={form.prixAchat}
-              onChange={(e) => modifier("prixAchat")(e.target.value)}
-              placeholder="2,00"
-            />
-          </label>
+          {article?.lot ? (
+            <label className="champ">
+              <span>Prix total du lot (€) *</span>
+              <input inputMode="decimal" value={form.prixLot} onChange={(e) => modifier("prixLot")(e.target.value)} />
+            </label>
+          ) : (
+            <label className="champ">
+              <span>Prix d'achat (€) *</span>
+              <input
+                inputMode="decimal"
+                value={form.prixAchat}
+                onChange={(e) => modifier("prixAchat")(e.target.value)}
+                placeholder="2,00"
+              />
+            </label>
+          )}
           <label className="champ">
             <span>Date d'achat *</span>
             <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
@@ -305,7 +325,47 @@ export function FicheArticle() {
         </button>
       </form>
 
+      {article && <InfosAchat article={article} />}
+      {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
     </main>
+  );
+}
+
+/** Sortie, lot et coûts d'achat calculés par le serveur (§6.1, §6.2). */
+function InfosAchat({ article }: { article: Article }) {
+  return (
+    <section className="section">
+      <h2>Achat</h2>
+      {article.sortie ? (
+        <p>
+          Sortie :{" "}
+          <Link to={`/sorties/${article.sortie.id}`}>
+            {article.sortie.lieu} du {formatDate(article.sortie.date)}
+          </Link>
+        </p>
+      ) : (
+        <p className="secondaire">Sans sortie.</p>
+      )}
+      {article.lot && (
+        <p>
+          Lot de {article.lot.articles.length} articles pour {formatEuros(article.lot.prixTotal)} :{" "}
+          {article.lot.articles.map((a, i) => (
+            <span key={a.id}>
+              {i > 0 && ", "}
+              {a.id === article.id ? (
+                <strong>{formatReference(a.reference)}</strong>
+              ) : (
+                <Link to={`/articles/${a.id}`}>{formatReference(a.reference)}</Link>
+              )}
+            </span>
+          ))}
+        </p>
+      )}
+      <p>
+        Prix d'achat : <strong>{formatEuros(article.couts.prixAchat)}</strong>
+        {article.lot ? " (part du lot)" : ""} — essence : <strong>{formatEuros(article.couts.essence)}</strong>
+      </p>
+    </section>
   );
 }

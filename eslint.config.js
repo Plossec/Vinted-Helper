@@ -30,6 +30,10 @@ export default tseslint.config(
     rules: { "no-console": "off" },
   },
   {
+    files: ["client/sw-modele.js"],
+    languageOptions: { globals: { ...globals.serviceworker, __FICHIERS__: "readonly" } },
+  },
+  {
     files: ["client/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
     plugins: { "react-hooks": reactHooks },

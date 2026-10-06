@@ -1,7 +1,7 @@
 // Liste simple des articles (lot 1) : la plus récente en premier. Filtres, recherche et tri : lot 4.
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api, type ResumeArticle } from "../api.js";
+import { api, type ResumeArticle, urlVignette } from "../api.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 
@@ -32,14 +32,21 @@ export function ListeArticles() {
       <ul className="liste">
         {articles?.map((a) => (
           <li key={a.id}>
-            <Link to={`/articles/${a.id}`} className="carte-article">
-              <span className="carte-article__ligne">
-                <span className="reference">{formatReference(a.reference)}</span>
-                <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
-              </span>
-              <span className="carte-article__nom">{a.nom ?? "(sans nom)"}</span>
-              <span className="carte-article__prix">
-                {a.prixAffiche === null ? "Prix affiché : —" : `Prix affiché : ${formatEuros(a.prixAffiche)}`}
+            <Link to={`/articles/${a.id}`} className="carte-article carte-article--photo">
+              {a.vignette ? (
+                <img className="vignette" src={urlVignette(a.vignette)} alt="" loading="lazy" />
+              ) : (
+                <span className="vignette" />
+              )}
+              <span className="carte-article__texte">
+                <span className="carte-article__ligne">
+                  <span className="reference">{formatReference(a.reference)}</span>
+                  <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
+                </span>
+                <span className="carte-article__nom">{a.nom ?? "(sans nom)"}</span>
+                <span className="carte-article__prix">
+                  {a.prixAffiche === null ? "Prix affiché : —" : `Prix affiché : ${formatEuros(a.prixAffiche)}`}
+                </span>
               </span>
             </Link>
           </li>

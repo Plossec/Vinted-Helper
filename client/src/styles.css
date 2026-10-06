@@ -451,3 +451,130 @@ textarea:focus {
   padding: 0.75rem;
   color: var(--texte-secondaire);
 }
+
+/* --- Lot 2 : saisie terrain, vignettes, bandeaux --- */
+.carte-article--photo {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.carte-article__texte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.vignette {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: var(--bordure);
+}
+
+.bouton--achat {
+  min-height: 5rem;
+  font-size: 1.5rem;
+  width: 100%;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-texte);
+}
+
+.champ-grand {
+  font-size: 1.6rem;
+  min-height: 3.75rem;
+}
+
+.champs-ligne--bas {
+  align-items: flex-end;
+}
+
+.apercu-photo {
+  width: 100%;
+  max-height: 40vh;
+  object-fit: contain;
+  border-radius: 0.75rem;
+  background: var(--carte);
+}
+
+.bandeau {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  background: var(--carte);
+  border-bottom: 1px solid var(--bordure);
+  font-size: 0.95rem;
+}
+
+.bandeau p {
+  margin: 0;
+}
+
+.bandeau .lien {
+  min-height: 0;
+  padding: 0 0.25rem;
+}
+
+.bandeau--hors-ligne,
+.bandeau__erreur {
+  color: var(--erreur);
+}
+
+.navigation__lien--terrain {
+  font-size: 1.1rem;
+}
+
+/* Photos d'une fiche article */
+.photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.6rem;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.photos li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.photos img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: var(--carte);
+}
+
+.photos .est-principale img {
+  outline: 3px solid var(--accent);
+}
+
+.photos__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.photos__actions button {
+  flex: 1;
+  min-height: 2.75rem;
+  font: inherit;
+  background: var(--carte);
+  color: var(--texte);
+  border: 1px solid var(--bordure);
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.photos__legende {
+  font-size: 0.8rem;
+  color: var(--texte-secondaire);
+  text-align: center;
+}
