@@ -4,7 +4,8 @@
 
 ## En vide-grenier (onglet **Terrain**)
 
-1. **Démarrer une sortie** : choisissez le lieu, la date (aujourd'hui par défaut), puis « Démarrer la sortie ».
+1. **Démarrer une sortie** : tapez le lieu (librement : un lieu nouveau est ajouté à la liste), la date (aujourd'hui
+   par défaut), puis « Démarrer la sortie ».
 2. **+ Achat** : l'appareil photo s'ouvre → photo → tapez le **prix** → **Valider**. Pour un **lot** (ex. 4 maillots
    pour 15 €), indiquez le prix total et le nombre d'articles : 4 brouillons sont créés, à 3,75 € chacun, avec la même
    photo. « Achat sans photo » si besoin.

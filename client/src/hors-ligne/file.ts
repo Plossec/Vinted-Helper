@@ -6,7 +6,9 @@
 export interface CorpsSortie {
   id: string;
   date: string;
-  lieuId: string;
+  /** Lieu choisi dans la liste, ou nom saisi librement (le serveur le retrouve ou le crée). */
+  lieuId?: string;
+  lieuNom?: string;
   notes: string | null;
 }
 

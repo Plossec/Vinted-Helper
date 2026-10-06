@@ -7,7 +7,8 @@ const CLE_SORTIE = "vh-sortie-en-cours";
 export interface SortieEnCours {
   id: string;
   date: string;
-  lieuId: string;
+  /** Absent pour un lieu saisi librement et pas encore connu (créé à l'envoi de la sortie). */
+  lieuId: string | null;
   lieu: string;
 }
 

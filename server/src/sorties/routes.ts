@@ -3,12 +3,14 @@ import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { creerAchat, modifierPrixLot, NOMBRE_MAX_ARTICLES } from "../achats/service.js";
 import { erreurSaisie } from "../outils/erreurs.js";
+import { ajouterValeur } from "../referentiels/service.js";
 import {
   centimesFacultatif,
   centimesObligatoire,
   dateObligatoire,
   objet,
   texteFacultatif,
+  texteObligatoire,
   uuidFacultatif,
   uuidObligatoire,
 } from "../outils/validation.js";
@@ -40,7 +42,12 @@ export function routesSorties(app: FastifyInstance, { base, maintenant, utilisat
     const c = objet(requete.body);
     const id = uuidObligatoire(c.id, "Identifiant");
     const essence = centimesFacultatif(c.montantEssence, "Essence") ?? 0;
-    await creerSortie(base, utilisateurId, id, lireDonneesSortie(c), essence, maintenant());
+    // Saisie terrain : le lieu est un texte libre ; un lieu encore inconnu est ajouté à la liste.
+    const lieuId =
+      c.lieuId === undefined || c.lieuId === null
+        ? (await ajouterValeur(base, utilisateurId, "lieux", texteObligatoire(c.lieuNom, "Lieu", 100)))?.id
+        : c.lieuId;
+    await creerSortie(base, utilisateurId, id, lireDonneesSortie({ ...c, lieuId }), essence, maintenant());
     return reponse.code(201).send(await lireSortie(base, utilisateurId, id));
   });
 

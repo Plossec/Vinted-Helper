@@ -186,6 +186,32 @@ describe("saisie terrain", () => {
     expect(a).toMatchObject({ sortieId: null, lieuId: t.maisonId, prixAchat: 0, couts: { prixAchat: 0, essence: 0 } });
   });
 
+  it("lieu saisi librement : réutilise un lieu existant (sans tenir compte des majuscules) ou en crée un", async () => {
+    const existant = randomUUID();
+    expect(
+      (await requete("POST", "/api/sorties", { id: existant, date: "2026-10-04", lieuNom: " vide GRENIER " }))
+        .statusCode,
+    ).toBe(201);
+    expect(await lireSortie(existant)).toMatchObject({ lieuId: t.lieuId, lieu: "Vide grenier" });
+
+    const nouveau = randomUUID();
+    const r = await requete("POST", "/api/sorties", { id: nouveau, date: "2026-10-04", lieuNom: "Braderie de Lille" });
+    expect(r.statusCode).toBe(201);
+    const refs = (await requete("GET", "/api/referentiels")).json<{ lieux: { id: string; nom: string }[] }>();
+    const cree = refs.lieux.find((l) => l.nom === "Braderie de Lille");
+    expect(cree).toBeDefined();
+    expect(await lireSortie(nouveau)).toMatchObject({ lieuId: cree?.id, lieu: "Braderie de Lille" });
+
+    // Renvoi par la file du téléphone : ni doublon de sortie, ni doublon de lieu.
+    await requete("POST", "/api/sorties", { id: nouveau, date: "2026-10-04", lieuNom: "Braderie de Lille" });
+    const apres = (await requete("GET", "/api/referentiels")).json<{ lieux: { nom: string }[] }>();
+    expect(apres.lieux.filter((l) => l.nom === "Braderie de Lille")).toHaveLength(1);
+
+    expect(
+      (await requete("POST", "/api/sorties", { id: randomUUID(), date: "2026-10-04", lieuNom: "  " })).statusCode,
+    ).toBe(400);
+  });
+
   it("modifier la date ou le lieu de la sortie met à jour ses articles", async () => {
     const sortieId = await demarrerSortie();
     const { articleIds } = await acheter(sortieId, 200, 1);
