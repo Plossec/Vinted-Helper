@@ -1,4 +1,4 @@
-# Réglages propres au serveur OVH, ajoutés à docker-compose.yml (guide : docs/mise-en-ligne-ovh.md).
+# Réglages propres au serveur OVH, ajoutés à docker-compose.yml (guide : docs/guides/mise-en-ligne-ovh.md).
 # Sur le serveur, le fichier .env contient COMPOSE_FILE=docker-compose.yml:docker-compose.ovh.yml :
 # les commandes habituelles (docker compose up -d, logs, stop…) utilisent donc automatiquement ces réglages.
 

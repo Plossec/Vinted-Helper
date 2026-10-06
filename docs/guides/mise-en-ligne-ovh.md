@@ -1,5 +1,7 @@
 # Mise en ligne sur OVH — guide pas à pas
 
+[← Sommaire de la documentation](../README.md)
+
 But : l'application tourne sur un serveur OVH, joignable **partout** (vide-grenier en 4G compris) à une adresse
 `https://…`, avec une sauvegarde chaque nuit. Durée : environ 1 heure la première fois.
 
@@ -63,7 +65,7 @@ Le script fait tout le reste (environ 10 minutes) :
 | Adresse de l'application | Entrée pour accepter celle proposée si c'est bien le nom du VPS de l'e-mail ; sinon tapez-le |
 | Identifiant | Votre identifiant de connexion à l'application |
 | Mot de passe (×2) | Votre mot de passe de l'application (8 caractères minimum, rien ne s'affiche) |
-| Clé Gemini | Collez votre clé (voir README §11), ou Entrée pour plus tard |
+| Clé Gemini | Collez votre clé (voir [ia-gemini.md](ia-gemini.md)), ou Entrée pour plus tard |
 | Modèle Gemini | Entrée pour `gemini-2.5-flash`, ou le nom d'un modèle disponible dans Google AI Studio |
 
 3. construit et démarre l'application.

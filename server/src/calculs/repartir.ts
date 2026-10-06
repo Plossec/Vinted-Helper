@@ -5,7 +5,7 @@
 //
 // Règle : chaque part est arrondie au centime INFÉRIEUR ; le dernier élément reçoit tout le reste
 // (« total − somme des autres parts »). La somme est donc toujours exactement égale au total,
-// et aucune part n'est jamais négative (décision du 05/10/2026, docs/decisions.md).
+// et aucune part n'est jamais négative (décision du 05/10/2026, docs/decisions/lot-0.md).
 // L'ordre des éléments doit être stable et déterministe (c'est à l'appelant de le garantir),
 // pour que « le dernier » soit toujours le même.
 

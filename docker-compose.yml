@@ -41,7 +41,7 @@ services:
       # Photos des articles : dossier « data/photos » du projet, visible depuis Windows.
       - ./data/photos:/app/data/photos
 
-  # Accès HTTPS depuis le téléphone sur le Wi-Fi de la maison (issue #3, README §4).
+  # Accès HTTPS depuis le téléphone sur le Wi-Fi de la maison (issue #3, docs/guides/telephone-https.md).
   https:
     image: caddy:2-alpine
     restart: unless-stopped
