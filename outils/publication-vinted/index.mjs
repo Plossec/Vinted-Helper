@@ -1,5 +1,5 @@
 // Programme de publication Vinted (décision du 06/10/2026, docs/guides/publication-vinted.md).
-// Tourne en tâche de fond sur le PC : toutes les 10 s, demande à l'application s'il y a des articles à publier ;
+// Tourne en tâche de fond sur le PC : toutes les 5 minutes, demande à l'application s'il y a des articles à publier ;
 // si oui, ouvre Chrome (profil dédié), vérifie la connexion à Vinted, remplit le formulaire, contrôle, publie.
 // Aucun contournement de détection : vérification Vinted, déconnexion ou champ inconnu → arrêt, sans publier.
 //   node index.mjs               fonctionnement normal
@@ -20,7 +20,7 @@ import {
 
 const args = new Set(process.argv.slice(2));
 const UNE_FOIS = args.has("--une-fois"); // tests : s'arrête quand la file est vide
-const ATTENTE_MS = Number(process.env.VH_ATTENTE_MS ?? 10_000);
+const ATTENTE_MS = Number(process.env.VH_ATTENTE_MS ?? 5 * 60_000);
 const PAUSE_ESSAI_MS = Number(process.env.VH_PAUSE_ESSAI_MS ?? 20_000);
 const PAUSE_ENTRE_ARTICLES_MS = Number(process.env.VH_PAUSE_MS ?? 5_000);
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
