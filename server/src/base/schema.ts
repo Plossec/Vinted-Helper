@@ -3,6 +3,7 @@
 // toute évolution passe par une migration (npm run db:generate), jamais par drizzle-kit push.
 // Lot 1 : compte, session, listes de référence, article, historiques.
 // Lot 2 : sortie, lot d'achat, photo (terrain / annonce) et lien article ↔ photo.
+// Lot 3 : vente (= colis), boost, frais divers, réglages, sortie du stock.
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -24,6 +25,8 @@ const horodatage = (nom: string) => timestamp(nom, { withTimezone: true, mode: "
 
 export const statutArticle = pgEnum("statut_article", STATUTS);
 export const typePhoto = pgEnum("type_photo", ["terrain", "annonce"]);
+export const motifSortie = pgEnum("motif_sortie", ["donne", "jete", "revendu", "garde", "perdu"]);
+export const canalRevente = pgEnum("canal_revente", ["vide_grenier", "leboncoin", "main_propre", "autre"]);
 export const etatArticle = pgEnum("etat_article", CODES_ETAT);
 
 export const utilisateur = pgTable("utilisateur", {
@@ -137,6 +140,14 @@ export const article = pgTable(
     prixAffiche: integer("prix_affiche"),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
     modifieLe: horodatage("modifie_le").notNull().defaultNow(),
+    /** Sortie du stock (§5.7) : motif, canal et prix de revente (centimes) si « revendu », date. */
+    motifSortie: motifSortie("motif_sortie"),
+    canalRevente: canalRevente("canal_revente"),
+    prixRevente: integer("prix_revente"),
+    dateSortieStock: horodatage("date_sortie_stock"),
+    /** Annonce (§5.2) : titre et description, générés par IA (lot 6) ou saisis. */
+    titreAnnonce: text("titre_annonce"),
+    descriptionAnnonce: text("description_annonce"),
     /** Corbeille (lot 4) : date de mise à la corbeille, sinon null. */
     supprimeLe: horodatage("supprime_le"),
   },
@@ -211,3 +222,84 @@ export const historiquePrix = pgTable(
   },
   (t) => [index("historique_prix_article_idx").on(t.articleId)],
 );
+
+/** Boost Vinted (§5.2) : coût rattaché à l'article. */
+export const boost = pgTable(
+  "boost",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    /** Centimes. */
+    montant: integer("montant").notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+  },
+  (t) => [index("boost_article_idx").on(t.articleId)],
+);
+
+/** Vente (= un colis, §3) : 1 article (vente simple) ou plusieurs (vente groupée). */
+export const vente = pgTable("vente", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  utilisateurId: uuid("utilisateur_id")
+    .notNull()
+    .references(() => utilisateur.id, { onDelete: "cascade" }),
+  /** Centimes : montant réellement crédité (nouveau montant après un retour partiel). */
+  montantCredite: integer("montant_credite").notNull(),
+  /** Centimes : emballage du colis (§6.3). */
+  emballage: integer("emballage").notNull(),
+  dateVente: horodatage("date_vente").notNull(),
+  dateEnvoi: horodatage("date_envoi"),
+  dateFinalisation: horodatage("date_finalisation"),
+  /** Annulation par l'acheteur ou retour du colis entier : exclue de tous les calculs (§4.4). */
+  annulee: boolean("annulee").notNull().default(false),
+  creeLe: horodatage("cree_le").notNull().defaultNow(),
+});
+
+export const venteArticle = pgTable(
+  "vente_article",
+  {
+    venteId: uuid("vente_id")
+      .notNull()
+      .references(() => vente.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    /** Centimes : prix affiché au moment de la vente (prorata, §6.4). */
+    prixAfficheAuMoment: integer("prix_affiche_au_moment").notNull(),
+    /** Renvoyé par l'acheteur (retour partiel). */
+    retourne: boolean("retourne").notNull().default(false),
+  },
+  (t) => [primaryKey({ columns: [t.venteId, t.articleId] }), index("vente_article_article_idx").on(t.articleId)],
+);
+
+/** Frais divers saisis à la main (§5.12) : frais généraux du mois de leur date. */
+export const fraisGeneral = pgTable("frais_general", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  utilisateurId: uuid("utilisateur_id")
+    .notNull()
+    .references(() => utilisateur.id, { onDelete: "cascade" }),
+  date: date("date", { mode: "string" }).notNull(),
+  /** Centimes. */
+  montant: integer("montant").notNull(),
+  libelle: text("libelle").notNull(),
+});
+
+/** Réglages de l'utilisateur (§7) ; une ligne par utilisateur, créée à la première modification. */
+export const reglages = pgTable("reglages", {
+  utilisateurId: uuid("utilisateur_id")
+    .primaryKey()
+    .references(() => utilisateur.id, { onDelete: "cascade" }),
+  /** Centimes : emballage par défaut d'un colis (0,08 €). */
+  emballageDefaut: integer("emballage_defaut").notNull().default(8),
+  /** Jours : alerte « brouillon trop ancien » (§5.8). */
+  delaiBrouillon: integer("delai_brouillon").notNull().default(3),
+  /** Jours : alerte « article dormant » (§5.8). */
+  delaiDormant: integer("delai_dormant").notNull().default(7),
+  /** Prompts IA modifiables (lot 6) ; null = prompt par défaut. */
+  promptAnnonce: text("prompt_annonce"),
+  promptEtiquette: text("prompt_etiquette"),
+});

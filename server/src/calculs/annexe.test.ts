@@ -6,6 +6,7 @@
 // Les autres cas (bénéfice, indicateurs, statuts…) sont ajoutés avec le lot qui les implémente.
 // Tous les montants sont en centimes.
 import { describe, expect, it } from "vitest";
+import { type ArticlePourBenefice, calculerDetails, type DonneesCalcul } from "./benefice.js";
 import { type ArticlePourCout, essenceParArticle, essenceSortiesVides, prixAchatParArticle } from "./couts.js";
 import { repartir } from "./repartir.js";
 
@@ -119,5 +120,222 @@ describe("Annexe §11 — lots et essence à partir des données", () => {
     const un = articles(1, { sortieId: "S" });
     expect(essenceSortiesVides(un, sorties).size).toBe(0);
     expect(essenceParArticle(un, sorties).get("a1")).toBe(130);
+  });
+});
+
+// Lot 3 : bénéfice d'un article (§6.5) à partir des données (lots, sorties, ventes, boosts).
+const article = (id: string, reference: number, extra: Partial<ArticlePourBenefice> = {}): ArticlePourBenefice => ({
+  id,
+  reference,
+  sortieId: null,
+  lotId: null,
+  prixAchat: null,
+  statut: "en_ligne",
+  motifSortie: null,
+  prixRevente: null,
+  ...extra,
+});
+const donnees = (extra: Partial<DonneesCalcul>): DonneesCalcul => ({
+  articles: [],
+  lots: [],
+  sorties: [],
+  ventes: [],
+  boosts: [],
+  ...extra,
+});
+const vente = (montantCredite: number, lignes: [string, number, boolean?][], extra = {}) => ({
+  id: "V",
+  montantCredite,
+  emballage: 8,
+  annulee: false,
+  lignes: lignes.map(([articleId, prixAffiche, retourne]) => ({ articleId, prixAffiche, retourne: retourne ?? false })),
+  ...extra,
+});
+
+describe("Annexe §11 — bénéfice d'un article", () => {
+  it("cas 08 — article du lot n°1 (3,33 €), essence 0,40 €, vendu seul 9 €, emballage 0,08 € → 5,19 €", () => {
+    // Lot n°1 : 3 articles pour 10 € (le premier reçoit 3,33 €) ; sortie : 5 articles et 2 € d'essence.
+    const articles = [
+      article("A", 1, { lotId: "L", sortieId: "S", statut: "finalise" }),
+      article("B", 2, { lotId: "L", sortieId: "S" }),
+      article("C", 3, { lotId: "L", sortieId: "S" }),
+      article("D", 4, { sortieId: "S", prixAchat: 100 }),
+      article("E", 5, { sortieId: "S", prixAchat: 100 }),
+    ];
+    const d = calculerDetails(
+      donnees({
+        articles,
+        lots: [{ id: "L", prixTotal: 1000 }],
+        sorties: [{ id: "S", montantEssence: 200 }],
+        ventes: [vente(900, [["A", 900]])],
+      }),
+    ).get("A");
+    expect(d).toMatchObject({
+      prixAchat: 333,
+      essence: 40,
+      emballage: 8,
+      prixVendu: 900,
+      benefice: 519,
+      realise: true,
+    });
+  });
+
+  it("cas 09 — A affiché 9 €, B affiché 6 €, crédité 12 €, colis 0,08 € → A 7,20 / 0,04 ; B 4,80 / 0,04", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { statut: "finalise" }), article("B", 2, { statut: "finalise" })],
+        ventes: [
+          vente(1200, [
+            ["A", 900],
+            ["B", 600],
+          ]),
+        ],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ prixVendu: 720, emballage: 4 });
+    expect(d.get("B")).toMatchObject({ prixVendu: 480, emballage: 4 });
+  });
+
+  it("cas 10 — suite du cas 9 : A acheté 2 € + 0,40 € ; B acheté 1 € + 0,40 € → bénéfice A 4,76 € ; B 3,36 €", () => {
+    const sortie = { id: "S", montantEssence: 80 };
+    const d = calculerDetails(
+      donnees({
+        articles: [
+          article("A", 1, { statut: "finalise", prixAchat: 200, sortieId: "S" }),
+          article("B", 2, { statut: "finalise", prixAchat: 100, sortieId: "S" }),
+        ],
+        sorties: [sortie],
+        ventes: [
+          vente(1200, [
+            ["A", 900],
+            ["B", 600],
+          ]),
+        ],
+      }),
+    );
+    expect(d.get("A")?.benefice).toBe(476);
+    expect(d.get("B")?.benefice).toBe(336);
+  });
+
+  it("cas 13 — acheté 4 €, sans essence, boost 1,50 €, vendu 10 €, emballage 0,08 € → 4,42 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { statut: "finalise", prixAchat: 400 })],
+        ventes: [vente(1000, [["A", 1000]])],
+        boosts: [{ articleId: "A", montant: 150 }],
+      }),
+    );
+    expect(d.get("A")?.benefice).toBe(442);
+  });
+
+  it("cas 14 — article Maison (0 €, sans sortie), vendu 5 €, emballage 0,08 € → 4,92 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { statut: "finalise", prixAchat: 0 })],
+        ventes: [vente(500, [["A", 500]])],
+      }),
+    );
+    expect(d.get("A")?.benefice).toBe(492);
+  });
+
+  it.each([
+    ["15", "donne"],
+    ["16", "garde"],
+  ] as const)("cas %s — acheté 3,75 € + 0,65 € d'essence, sorti du stock (%s) → −4,40 € (perte)", (_cas, motif) => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { statut: "sortie_stock", motifSortie: motif, prixAchat: 375, sortieId: "S" })],
+        sorties: [{ id: "S", montantEssence: 65 }],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ benefice: -440, realise: true, emballage: 0 });
+  });
+
+  it("cas 17 — acheté 2 € + 0,40 €, revendu hors Vinted 5 € → 2,60 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [
+          article("A", 1, {
+            statut: "sortie_stock",
+            motifSortie: "revendu",
+            prixRevente: 500,
+            prixAchat: 200,
+            sortieId: "S",
+          }),
+        ],
+        sorties: [{ id: "S", montantEssence: 40 }],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ benefice: 260, realise: true });
+  });
+
+  it("cas 18 — acheté 5 € + 0,65 €, toujours En ligne → bénéfice provisoire −5,65 € ; coût total 5,65 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { prixAchat: 500, sortieId: "S" })],
+        sorties: [{ id: "S", montantEssence: 65 }],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ benefice: -565, realise: false, coutTotal: 565 });
+  });
+
+  it("cas 22 — article À expédier dont l'acheteur annule → la vente annulée est exclue de tous les calculs", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { prixAchat: 200 })],
+        ventes: [vente(900, [["A", 900]], { annulee: true })],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ prixVendu: null, emballage: 0, venteId: null, coutTotal: 200 });
+  });
+
+  it("cas 25 — acheté 5 € + 0,65 € + boost 1,50 €, En ligne → coût total 7,15 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { prixAchat: 500, sortieId: "S" })],
+        sorties: [{ id: "S", montantEssence: 65 }],
+        boosts: [{ articleId: "A", montant: 150 }],
+      }),
+    );
+    expect(d.get("A")?.coutTotal).toBe(715);
+  });
+
+  it("cas 26 — suite des cas 9-10, retour de B, nouveau montant 7,20 € → A : 7,20 €, emballage 0,08 €, bénéfice 4,72 €", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [
+          article("A", 1, { statut: "finalise", prixAchat: 200, sortieId: "S" }),
+          article("B", 2, { statut: "a_publier", prixAchat: 100, sortieId: "S" }),
+        ],
+        sorties: [{ id: "S", montantEssence: 80 }],
+        ventes: [
+          vente(720, [
+            ["A", 900],
+            ["B", 600, true],
+          ]),
+        ],
+      }),
+    );
+    expect(d.get("A")).toMatchObject({ prixVendu: 720, emballage: 8, benefice: 472 });
+    expect(d.get("B")).toMatchObject({ prixVendu: null, emballage: 0, venteId: null });
+  });
+
+  it("cas 27 — colis de 2 articles Envoyé, retour du colis entier → vente annulée, plus aucun montant de vente", () => {
+    const d = calculerDetails(
+      donnees({
+        articles: [article("A", 1, { statut: "a_publier" }), article("B", 2, { statut: "a_publier" })],
+        ventes: [
+          vente(
+            1200,
+            [
+              ["A", 900],
+              ["B", 600],
+            ],
+            { annulee: true },
+          ),
+        ],
+      }),
+    );
+    for (const id of ["A", "B"]) expect(d.get(id)).toMatchObject({ prixVendu: null, emballage: 0 });
   });
 });

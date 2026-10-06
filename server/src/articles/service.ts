@@ -1,9 +1,10 @@
 // Articles : création (référence automatique), lecture, modification, statuts et historiques.
 // Cahier des charges §4, §5.2, §7. Aucun calcul d'argent ici : les coûts viennent du module de calcul.
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import {
   article,
+  boost,
   historiquePrix,
   historiqueStatut,
   lieu,
@@ -11,10 +12,12 @@ import {
   marque,
   sortie,
   utilisateur,
+  vente,
+  venteArticle,
 } from "../base/schema.js";
 import type { CodeEtat } from "../catalogue/etats.js";
-import { STATUTS_DISPONIBLES, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
-import { calculerCoutsAchat } from "../couts/service.js";
+import { estTransitionSimple, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
+import { calculer } from "../couts/service.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 
@@ -112,7 +115,7 @@ export async function creerArticle(
   });
 }
 
-async function chargerArticle(tx: Transaction | Base, utilisateurId: string, id: string) {
+export async function chargerArticle(tx: Transaction | Base, utilisateurId: string, id: string) {
   const [ligne] = await tx
     .select()
     .from(article)
@@ -149,7 +152,7 @@ export async function modifierArticle(
   });
 }
 
-function verifierDate(date: Date, maintenant: Date) {
+export function verifierDate(date: Date, maintenant: Date) {
   if (date.getTime() > maintenant.getTime() + TOLERANCE_FUTUR_MS) {
     throw erreurSaisie("La date ne peut pas être dans le futur.");
   }
@@ -174,8 +177,10 @@ export async function changerStatut(
     }
     const verification = verifierTransition(actuel.statut, demande.vers, { prixAffiche });
     if (!verification.ok) throw conflit(verification.raison);
-    if (!STATUTS_DISPONIBLES.has(demande.vers)) {
-      throw conflit("Ce changement de statut sera disponible dans une prochaine version (lot 3).");
+    if (!estTransitionSimple(actuel.statut, demande.vers)) {
+      throw conflit(
+        "Ce passage se fait par son action dédiée : « Vendu », envoi, finalisation, annulation, retour ou sortie du stock.",
+      );
     }
     await tx
       .update(article)
@@ -196,12 +201,47 @@ export async function corrigerDateHistorique(
   maintenant: Date,
 ): Promise<void> {
   verifierDate(date, maintenant);
-  const resultat = await base
-    .update(historiqueStatut)
-    .set({ date })
-    .where(and(eq(historiqueStatut.id, historiqueId), eq(historiqueStatut.utilisateurId, utilisateurId)))
-    .returning({ id: historiqueStatut.id });
-  if (resultat.length === 0) throw introuvable("Changement de statut");
+  await base.transaction(async (tx) => {
+    const [ligne] = await tx
+      .select()
+      .from(historiqueStatut)
+      .where(and(eq(historiqueStatut.id, historiqueId), eq(historiqueStatut.utilisateurId, utilisateurId)));
+    if (!ligne) throw introuvable("Changement de statut");
+    await tx.update(historiqueStatut).set({ date }).where(eq(historiqueStatut.id, historiqueId));
+
+    // Vente, envoi, finalisation : la date vaut pour tout le colis (§4.3) et pour la vente (CA du mois, §6.6).
+    const champ = { a_expedier: "dateVente", envoye: "dateEnvoi", finalise: "dateFinalisation" } as const;
+    if (ligne.vers !== "a_expedier" && ligne.vers !== "envoye" && ligne.vers !== "finalise") return;
+    const [active] = await tx
+      .select({ id: vente.id })
+      .from(venteArticle)
+      .innerJoin(vente, eq(vente.id, venteArticle.venteId))
+      .where(
+        and(eq(venteArticle.articleId, ligne.articleId), eq(vente.annulee, false), eq(venteArticle.retourne, false)),
+      );
+    if (!active) return;
+    await tx
+      .update(vente)
+      .set({ [champ[ligne.vers]]: date })
+      .where(eq(vente.id, active.id));
+    const membres = await tx
+      .select({ id: venteArticle.articleId })
+      .from(venteArticle)
+      .where(eq(venteArticle.venteId, active.id));
+    await tx
+      .update(historiqueStatut)
+      .set({ date })
+      .where(
+        and(
+          inArray(
+            historiqueStatut.articleId,
+            membres.map((m) => m.id),
+          ),
+          eq(historiqueStatut.vers, ligne.vers),
+          eq(historiqueStatut.date, ligne.date),
+        ),
+      );
+  });
 }
 
 export async function listerArticles(base: Base, utilisateurId: string) {
@@ -236,7 +276,7 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     .from(historiqueStatut)
     .where(eq(historiqueStatut.articleId, id))
     .orderBy(asc(historiqueStatut.date), asc(historiqueStatut.id));
-  const couts = await calculerCoutsAchat(base, utilisateurId);
+  const calculs = await calculer(base, utilisateurId);
   const photos = (await photosDesArticles(base, [id])).get(id) ?? [];
   const [s] = a.sortieId
     ? await base
@@ -245,6 +285,40 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
         .innerJoin(lieu, eq(lieu.id, sortie.lieuId))
         .where(eq(sortie.id, a.sortieId))
     : [];
+  const detail = calculs.details.get(id) ?? null;
+  const venteActive = detail?.venteId
+    ? ((
+        await base
+          .select({
+            id: vente.id,
+            montantCredite: vente.montantCredite,
+            emballage: vente.emballage,
+            dateVente: vente.dateVente,
+            dateEnvoi: vente.dateEnvoi,
+            dateFinalisation: vente.dateFinalisation,
+          })
+          .from(vente)
+          .where(eq(vente.id, detail.venteId))
+      )[0] ?? null)
+    : null;
+  const nombreArticlesVente = venteActive
+    ? (
+        await base
+          .select({ id: venteArticle.articleId })
+          .from(venteArticle)
+          .where(and(eq(venteArticle.venteId, venteActive.id), eq(venteArticle.retourne, false)))
+      ).length
+    : 0;
+  const boosts = await base
+    .select({ id: boost.id, montant: boost.montant, date: boost.date })
+    .from(boost)
+    .where(eq(boost.articleId, id))
+    .orderBy(asc(boost.date));
+  const historiquePrixAffiche = await base
+    .select({ prix: historiquePrix.prix, date: historiquePrix.date })
+    .from(historiquePrix)
+    .where(eq(historiquePrix.articleId, id))
+    .orderBy(asc(historiquePrix.date), asc(historiquePrix.id));
   let lot = null;
   if (a.lotId) {
     const [l] = await base.select({ prixTotal: lotAchat.prixTotal }).from(lotAchat).where(eq(lotAchat.id, a.lotId));
@@ -272,8 +346,17 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     lot,
     /** Prix saisi (article hors lot) ; vide pour un article de lot. */
     prixAchat: a.prixAchat,
-    /** Coûts calculés (centimes) : prix d'achat effectif (part de lot comprise) et part d'essence. */
-    couts: { prixAchat: couts.prixAchat.get(id) ?? 0, essence: couts.essence.get(id) ?? 0 },
+    /** Montants calculés (centimes) : prix d'achat (part de lot), essence, emballage, boosts, prix vendu, bénéfice. */
+    couts: detail,
+    vente: venteActive ? { ...venteActive, nombreArticles: nombreArticlesVente } : null,
+    boosts,
+    historiquePrix: historiquePrixAffiche,
+    sortieStock:
+      a.motifSortie === null
+        ? null
+        : { motif: a.motifSortie, canal: a.canalRevente, prixRevente: a.prixRevente, date: a.dateSortieStock },
+    titreAnnonce: a.titreAnnonce,
+    descriptionAnnonce: a.descriptionAnnonce,
     photos,
     dateAchat: a.dateAchat,
     statut: a.statut,

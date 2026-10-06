@@ -1,7 +1,7 @@
 // Règles de statut — cahier des charges §4.2. Le tableau attendu est recopié du cahier,
 // indépendamment du code, pour vérifier les 49 combinaisons (7 statuts × 7 statuts).
 import { describe, expect, it } from "vitest";
-import { STATUTS, STATUTS_DISPONIBLES, type Statut, transitionAutorisee, verifierTransition } from "./statuts.js";
+import { estTransitionSimple, STATUTS, type Statut, transitionAutorisee, verifierTransition } from "./statuts.js";
 
 const ATTENDU: Record<Statut, Statut[]> = {
   brouillon: ["a_publier", "en_ligne", "sortie_stock"],
@@ -64,8 +64,13 @@ describe("verifierTransition — messages en français", () => {
   });
 });
 
-describe("Lot 1 — statuts disponibles dans l'application", () => {
-  it("seuls Brouillon, À publier et En ligne sont proposés (les autres arrivent au lot 3)", () => {
-    expect([...STATUTS_DISPONIBLES].sort()).toEqual(["a_publier", "brouillon", "en_ligne"]);
+describe("Lot 3 — passages simples et passages avec leur propre action", () => {
+  it("le changement simple ne concerne que Brouillon, À publier et En ligne", () => {
+    expect(estTransitionSimple("brouillon", "en_ligne")).toBe(true);
+    expect(estTransitionSimple("en_ligne", "a_publier")).toBe(true);
+    expect(estTransitionSimple("en_ligne", "a_expedier")).toBe(false); // vente
+    expect(estTransitionSimple("envoye", "a_publier")).toBe(false); // retour du colis
+    expect(estTransitionSimple("brouillon", "sortie_stock")).toBe(false); // sortie du stock
+    expect(estTransitionSimple("sortie_stock", "a_publier")).toBe(false); // annulation de la sortie
   });
 });
