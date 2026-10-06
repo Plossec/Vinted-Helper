@@ -69,6 +69,9 @@ export function Disposition() {
         <NavLink to="/terrain" className="navigation__lien navigation__lien--terrain">
           Terrain
         </NavLink>
+        <NavLink to="/tableau" className="navigation__lien">
+          Tableau
+        </NavLink>
         <NavLink to="/reglages" className="navigation__lien">
           Réglages
         </NavLink>

@@ -658,3 +658,160 @@ select {
 .bouton--danger {
   color: var(--erreur);
 }
+
+/* --- Lot 5 : tableau de bord --- */
+:root {
+  --graphique: #00897b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --graphique: #2bb3ab;
+  }
+}
+
+.tuiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.6rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.tuile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  border-radius: 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+}
+
+.tuile__titre,
+.tuile__detail {
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+}
+
+.tuile__valeur {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.graphique {
+  margin: 1rem 0 0;
+}
+
+.graphique__titre {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.graphique__zone {
+  position: relative;
+}
+
+.graphique svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.graphique g:focus {
+  outline: none;
+}
+
+.graphique__barre {
+  fill: var(--graphique);
+}
+
+.graphique__barre.est-actif {
+  opacity: 0.8;
+  stroke: var(--texte);
+  stroke-width: 1;
+}
+
+.graphique__zero {
+  stroke: var(--bordure);
+  stroke-width: 1;
+}
+
+.graphique__axe {
+  font-size: 10px;
+  fill: var(--texte-secondaire);
+}
+
+.graphique__bulle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  font-size: 0.9rem;
+}
+
+.graphique__bulle span {
+  color: var(--texte-secondaire);
+}
+
+.defilement {
+  overflow-x: auto;
+}
+
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tableau th,
+.tableau td {
+  padding: 0.45rem 0.4rem;
+  border-bottom: 1px solid var(--bordure);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.tableau th:first-child,
+.tableau td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+.tableau th {
+  color: var(--texte-secondaire);
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent);
+}
+
+/* Choix exclusif compact (une seule ligne). */
+.segments {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  margin-bottom: 0.75rem;
+}
+
+.segments .bouton {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.segments .bouton--principal {
+  background: var(--accent);
+  color: var(--accent-texte);
+}
