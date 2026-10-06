@@ -31,3 +31,13 @@ sur le téléphone jusqu'au retour (accès depuis partout : OVH, issue #2).
 | File d'attente | Ordre d'envoi = ordre de saisie ; arrêt au premier problème de réseau ; session expirée → tout est gardé jusqu'à la reconnexion ; un élément refusé par le serveur est mis de côté avec son message (Réessayer / Abandonner). |
 | Photos d'annonce | Envoyées directement depuis la fiche (réseau nécessaire) : elles se font à la maison. |
 | PWA | Service worker écrit à la main (pas de nouvelle dépendance) : l'application est gardée sur le téléphone, l'API n'est jamais mise en cache. Ouverture sur l'écran Terrain. |
+
+---
+
+## 06/10/2026 — Lieu de la sortie en saisie libre (demande de l'utilisateur)
+
+Remplace la ligne « Sortie » ci-dessus pour le choix du lieu. Écran Terrain → Démarrer une sortie : le **lieu est un
+texte libre**, avec les lieux connus proposés pendant la frappe. Un nom déjà connu (sans tenir compte des majuscules
+ni des accents) réutilise ce lieu ; un nom nouveau est **ajouté à la liste des lieux** à l'envoi de la sortie, y
+compris saisi sans réseau (le téléphone envoie le nom, le serveur retrouve ou crée le lieu). Couvre la « création
+automatique depuis la saisie terrain » de l'issue #7.

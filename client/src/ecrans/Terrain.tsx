@@ -180,11 +180,19 @@ function DemarrerSortie({
 
   async function demarrer(evenement: FormEvent) {
     evenement.preventDefault();
-    const choisi = refs?.lieux.find((l) => normaliser(l.nom) === normaliser(lieu));
-    if (!choisi) return setMessage({ type: "erreur", texte: "Choisissez un lieu dans la liste." });
+    const nom = lieu.trim().replace(/\s+/g, " ");
+    if (nom === "") return setMessage({ type: "erreur", texte: "Indiquez le lieu." });
+    if (nom.length > 100) return setMessage({ type: "erreur", texte: "Lieu : 100 caractères au maximum." });
     if (date === "") return setMessage({ type: "erreur", texte: "Indiquez la date." });
-    const s: SortieEnCours = { id: crypto.randomUUID(), date, lieuId: choisi.id, lieu: choisi.nom };
-    await ajouterALaFile({ type: "sortie", corps: { id: s.id, date, lieuId: choisi.id, notes: null } });
+    // Lieu libre : un lieu déjà connu est réutilisé, sinon le serveur l'ajoute à la liste à l'envoi.
+    const choisi = refs?.lieux.find((l) => normaliser(l.nom) === normaliser(nom));
+    const s: SortieEnCours = { id: crypto.randomUUID(), date, lieuId: choisi?.id ?? null, lieu: choisi?.nom ?? nom };
+    await ajouterALaFile({
+      type: "sortie",
+      corps: choisi
+        ? { id: s.id, date, lieuId: choisi.id, notes: null }
+        : { id: s.id, date, lieuNom: nom, notes: null },
+    });
     onDemarree(s);
   }
 
@@ -192,24 +200,20 @@ function DemarrerSortie({
     <>
       <form className="formulaire encadre" onSubmit={(e) => void demarrer(e)} noValidate>
         <h2>Démarrer une sortie</h2>
-        {refs === null ? (
-          <p className="secondaire">Listes indisponibles : connectez-vous une première fois avec du réseau.</p>
-        ) : (
-          <ListeDeroulante
-            libelle="Lieu"
-            obligatoire
-            texte={lieu}
-            onTexte={setLieu}
-            options={options}
-            onChoix={(o) => setLieu(o.libelle)}
-          />
-        )}
+        <ListeDeroulante
+          libelle="Lieu"
+          obligatoire
+          texte={lieu}
+          onTexte={setLieu}
+          options={options}
+          onChoix={(o) => setLieu(o.libelle)}
+        />
         <label className="champ">
           <span>Date *</span>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <Message message={message} />
-        <button className="bouton bouton--principal" type="submit" disabled={refs === null}>
+        <button className="bouton bouton--principal" type="submit">
           Démarrer la sortie
         </button>
       </form>

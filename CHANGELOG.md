@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Modifié
+- Terrain → Démarrer une sortie : le **lieu se saisit librement** (lieux connus proposés) ; un lieu nouveau est
+  ajouté à la liste, même saisi sans réseau.
 - Publication Vinted : le programme du PC vérifie la file **toutes les 5 minutes** (au lieu de 10 s) et publie
   **un seul article toutes les 10 minutes** (les essais s'enchaînent).
 
