@@ -1,6 +1,7 @@
 // Routes de l'API des articles.
 import type { FastifyInstance } from "fastify";
 import { estCategorie } from "../catalogue/categories.js";
+import { COULEURS_MAX, estCouleur, estFormatColis, type FormatColis } from "../catalogue/couleurs.js";
 import { type CodeEtat, estEtat } from "../catalogue/etats.js";
 import { estStatut } from "../metier/statuts.js";
 import { erreurSaisie } from "../outils/erreurs.js";
@@ -37,6 +38,19 @@ function etatObligatoire(valeur: unknown): CodeEtat {
   return valeur;
 }
 
+function couleursFacultatives(valeur: unknown): string[] {
+  if (valeur === undefined || valeur === null) return [];
+  if (!Array.isArray(valeur) || !valeur.every(estCouleur)) throw erreurSaisie("Couleur inconnue.");
+  if (valeur.length > COULEURS_MAX) throw erreurSaisie(`${COULEURS_MAX} couleurs au plus.`);
+  return [...new Set(valeur)];
+}
+
+function formatColisFacultatif(valeur: unknown): FormatColis | null {
+  if (valeur === undefined || valeur === null || valeur === "") return null;
+  if (!estFormatColis(valeur)) throw erreurSaisie("Format de colis inconnu.");
+  return valeur;
+}
+
 function lireDonneesArticle(corps: unknown): DonneesArticle {
   const c = objet(corps);
   return {
@@ -52,6 +66,8 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
     matiere: texteFacultatif(c.matiere, "Matière", 100),
     notes: texteFacultatif(c.notes, "Notes", 2000),
     prixAffiche: centimesFacultatif(c.prixAffiche, "Prix affiché"),
+    couleurs: couleursFacultatives(c.couleurs),
+    formatColis: formatColisFacultatif(c.formatColis),
   };
 }
 

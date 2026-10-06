@@ -13,6 +13,8 @@ import { type ClientIA, creerClientGemini } from "./ia/gemini.js";
 import { routesIA } from "./ia/routes.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
+import { routesPublication } from "./publication/routes.js";
+import { utilisateurParJeton } from "./publication/service.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 import { routesReferentiels } from "./referentiels/routes.js";
 import { routesSorties } from "./sorties/routes.js";
@@ -77,6 +79,17 @@ export async function creerApp({
   app.addHook("onRequest", async (requete, reponse) => {
     const chemin = requete.url.split("?")[0] ?? "";
     if (!chemin.startsWith("/api/")) return;
+    // Programme de publication du PC : jeton personnel, limité à ses routes et à la lecture des photos.
+    const autorisation = requete.headers.authorization;
+    if (autorisation?.startsWith("Bearer ")) {
+      const permis =
+        chemin.startsWith("/api/programme/") || (requete.method === "GET" && chemin.startsWith("/api/photos/"));
+      const programme = permis ? await utilisateurParJeton(base, autorisation.slice(7).trim()) : null;
+      if (!programme) throw nonConnecte();
+      utilisateurs.set(requete, programme);
+      return;
+    }
+    if (chemin.startsWith("/api/programme/")) throw nonConnecte();
     const jeton = requete.cookies[NOM_COOKIE];
     const utilisateur = jeton ? await lireSession(base, jeton, maintenant()) : null;
     if (utilisateur && jeton) {
@@ -113,6 +126,7 @@ export async function creerApp({
   routesArticles(app, contexte);
   routesSorties(app, contexte);
   routesTableau(app, contexte);
+  routesPublication(app, contexte);
   routesAlertes(app, contexte);
   const stockage = creerStockagePhotos(dossierPhotos);
   routesVentes(app, contexte, stockage);

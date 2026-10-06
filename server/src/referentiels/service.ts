@@ -5,6 +5,7 @@ import { and, asc, eq, ne, sql } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { article, lieu, marque, sortie } from "../base/schema.js";
 import { CATEGORIES } from "../catalogue/categories.js";
+import { COULEURS, FORMATS_COLIS } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 
@@ -28,7 +29,7 @@ export async function lireReferentiels(base: Base, utilisateurId: string) {
       .where(eq(marque.utilisateurId, utilisateurId))
       .orderBy(asc(sql`lower(${marque.nom})`)),
   ]);
-  return { lieux, marques, categories: CATEGORIES, etats: ETATS };
+  return { lieux, marques, categories: CATEGORIES, etats: ETATS, couleurs: COULEURS, formatsColis: FORMATS_COLIS };
 }
 
 /** Ajoute une valeur ; si elle existe déjà (sans tenir compte des majuscules), renvoie l'existante. */

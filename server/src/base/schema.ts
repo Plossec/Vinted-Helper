@@ -4,6 +4,7 @@
 // Lot 1 : compte, session, listes de référence, article, historiques.
 // Lot 2 : sortie, lot d'achat, photo (terrain / annonce) et lien article ↔ photo.
 // Lot 3 : vente (= colis), boost, frais divers, réglages, sortie du stock.
+// Publication Vinted (06/10/2026) : couleurs, format du colis, lien de l'annonce, file de publication.
 import { sql } from "drizzle-orm";
 import {
   bigserial,
@@ -19,6 +20,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { CODES_FORMAT_COLIS } from "../catalogue/couleurs.js";
 import { CODES_ETAT } from "../catalogue/etats.js";
 import { STATUTS } from "../metier/statuts.js";
 
@@ -26,6 +28,15 @@ const horodatage = (nom: string) => timestamp(nom, { withTimezone: true, mode: "
 
 export const statutArticle = pgEnum("statut_article", STATUTS);
 export const typePhoto = pgEnum("type_photo", ["terrain", "annonce"]);
+export const formatColis = pgEnum("format_colis", CODES_FORMAT_COLIS);
+export const etatPublication = pgEnum("etat_publication", [
+  "en_attente",
+  "en_cours",
+  "publie",
+  "essai",
+  "erreur",
+  "annule",
+]);
 export const motifSortie = pgEnum("motif_sortie", ["donne", "jete", "revendu", "garde", "perdu"]);
 export const canalRevente = pgEnum("canal_revente", ["vide_grenier", "leboncoin", "main_propre", "autre"]);
 export const etatArticle = pgEnum("etat_article", CODES_ETAT);
@@ -148,6 +159,14 @@ export const article = pgTable(
     dateSortieStock: horodatage("date_sortie_stock"),
     /** Annonce (§5.2) : titre et description, générés par IA (lot 6) ou saisis. */
     titreAnnonce: text("titre_annonce"),
+    /** Codes de couleur (server/src/catalogue/couleurs.ts), 2 au plus. */
+    couleurs: text("couleurs")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    formatColis: formatColis("format_colis"),
+    /** Lien de l'annonce publiée sur Vinted. */
+    urlVinted: text("url_vinted"),
     descriptionAnnonce: text("description_annonce"),
     /** Corbeille (lot 4) : date de mise à la corbeille, sinon null. */
     supprimeLe: horodatage("supprime_le"),
@@ -305,4 +324,32 @@ export const reglages = pgTable("reglages", {
   /** Prompts IA modifiables (lot 6) ; null = prompt par défaut. */
   promptAnnonce: text("prompt_annonce"),
   promptEtiquette: text("prompt_etiquette"),
+  /** Publication Vinted : format de colis proposé par défaut. */
+  formatColisDefaut: formatColis("format_colis_defaut").notNull().default("petit"),
+  /** Empreinte SHA-256 du jeton du programme de publication (le jeton lui-même n'est jamais stocké). */
+  jetonPublication: text("jeton_publication"),
+  /** Dernier contact du programme de publication. */
+  programmeVuLe: horodatage("programme_vu_le"),
 });
+
+/** File de publication sur Vinted : une demande par article, traitée par le programme du PC. */
+export const publicationVinted = pgTable(
+  "publication_vinted",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    etat: etatPublication("etat").notNull().default("en_attente"),
+    /** Mode essai : le formulaire est rempli mais rien n'est publié. */
+    essai: boolean("essai").notNull().default(true),
+    message: text("message"),
+    demandeLe: horodatage("demande_le").notNull(),
+    debutLe: horodatage("debut_le"),
+    finLe: horodatage("fin_le"),
+  },
+  (t) => [index("publication_vinted_utilisateur_idx").on(t.utilisateurId, t.etat)],
+);

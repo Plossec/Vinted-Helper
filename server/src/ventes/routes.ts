@@ -14,6 +14,7 @@ import {
   supprimerFrais,
 } from "../frais/service.js";
 import { lireArticle } from "../articles/service.js";
+import { estFormatColis } from "../catalogue/couleurs.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import { reduirePhotos } from "../photos/reduction.js";
 import type { StockagePhotos } from "../photos/stockage.js";
@@ -215,6 +216,10 @@ export function routesVentes(
     if (delaiDormant !== undefined) modif.delaiDormant = delaiDormant;
     if ("promptAnnonce" in c) modif.promptAnnonce = texteFacultatif(c.promptAnnonce, "Prompt annonce", 5000);
     if ("promptEtiquette" in c) modif.promptEtiquette = texteFacultatif(c.promptEtiquette, "Prompt étiquette", 5000);
+    if (c.formatColisDefaut !== undefined) {
+      if (!estFormatColis(c.formatColisDefaut)) throw erreurSaisie("Format de colis inconnu.");
+      modif.formatColisDefaut = c.formatColisDefaut;
+    }
     return modifierReglages(base, utilisateurDe(requete).id, modif);
   });
 }
