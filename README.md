@@ -306,6 +306,14 @@ Utilisation, sur la fiche d'un article :
 
 ---
 
+## 12. Mise en ligne sur OVH
+
+Pour utiliser l'application partout (vide-grenier en 4G) : guide pas à pas dans
+[`docs/mise-en-ligne-ovh.md`](docs/mise-en-ligne-ovh.md) (commande du serveur, installation en une commande,
+sauvegardes rapatriées sur le PC, mises à jour).
+
+---
+
 ## Pour aller plus loin
 
 - `docs/cahier-des-charges.md` : le besoin complet (fait foi).
