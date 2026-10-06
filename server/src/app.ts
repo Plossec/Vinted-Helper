@@ -4,6 +4,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
 import Fastify, { type FastifyRequest } from "fastify";
 import { routesArticles } from "./articles/routes.js";
+import { routesCorbeille } from "./corbeille/routes.js";
 import type { Base } from "./base/connexion.js";
 import { poserCookie, routesCompte } from "./compte/routes.js";
 import { lireSession, NOM_COOKIE, type UtilisateurConnecte } from "./compte/sessions.js";
@@ -105,7 +106,9 @@ export async function creerApp({
   routesArticles(app, contexte);
   routesSorties(app, contexte);
   routesVentes(app, contexte);
-  routesPhotos(app, contexte, creerStockagePhotos(dossierPhotos));
+  const stockage = creerStockagePhotos(dossierPhotos);
+  routesPhotos(app, contexte, stockage);
+  routesCorbeille(app, contexte, stockage);
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {
     await app.register(fastifyStatic, { root: dossierClient });
