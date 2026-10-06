@@ -15,6 +15,8 @@ import {
 } from "../frais/service.js";
 import { lireArticle } from "../articles/service.js";
 import { erreurSaisie } from "../outils/erreurs.js";
+import { reduirePhotos } from "../photos/reduction.js";
+import type { StockagePhotos } from "../photos/stockage.js";
 import {
   centimesFacultatif,
   centimesObligatoire,
@@ -64,7 +66,11 @@ function entierFacultatif(valeur: unknown, champ: string, min: number, max: numb
   return valeur;
 }
 
-export function routesVentes(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
+export function routesVentes(
+  app: FastifyInstance,
+  { base, maintenant, utilisateurDe }: ContexteRoutes,
+  stockage: StockagePhotos,
+) {
   const date = (valeur: unknown) => horodatageFacultatif(valeur, "Date") ?? maintenant();
 
   app.post("/api/ventes", async (requete, reponse) => {
@@ -104,7 +110,13 @@ export function routesVentes(app: FastifyInstance, { base, maintenant, utilisate
       const utilisateurId = utilisateurDe(requete).id;
       const id = idDe(requete.params);
       await avancerVente(base, utilisateurId, id, vers, date(objet(requete.body).date), maintenant());
-      return lireVente(base, utilisateurId, id);
+      const vente = await lireVente(base, utilisateurId, id);
+      if (vers === "finalise") {
+        // §5.10 : on ne garde que la photo principale et la photo terrain, réduites.
+        const ids = vente.articles.filter((a) => !a.retourne).map((a) => a.id);
+        await reduirePhotos(base, stockage, utilisateurId, ids, (m) => requete.log.error(m));
+      }
+      return vente;
     });
   }
 
@@ -146,6 +158,7 @@ export function routesVentes(app: FastifyInstance, { base, maintenant, utilisate
       date: date(c.date),
     };
     await sortirDuStock(base, utilisateurId, id, demande, maintenant());
+    await reduirePhotos(base, stockage, utilisateurId, [id], (m) => requete.log.error(m));
     return lireArticle(base, utilisateurId, id);
   });
 

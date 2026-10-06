@@ -58,6 +58,26 @@ services:
       # Autorité de certification locale : conservée pour que le téléphone reste reconnu.
       - certificats:/data
 
+  # Sauvegarde automatique quotidienne de la base et des photos (§5.13), conservée 30 jours dans sauvegardes/auto.
+  sauvegarde:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["sh", "/scripts/automatique.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      TZ: Europe/Paris
+      SAUVEGARDE_HEURE: ${SAUVEGARDE_HEURE:-3}
+    volumes:
+      - ./scripts/sauvegarde:/scripts:ro
+      - ./sauvegardes:/sauvegardes
+      - ./data/photos:/photos
+
 volumes:
   base-donnees:
   certificats:

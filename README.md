@@ -116,7 +116,7 @@ Ajoutez (ou modifiez) la ligne `IP_PC=192.168.1.20` avec **votre** adresse, enre
 docker compose up -d --build
 ```
 
-Résultat attendu : `docker compose ps` affiche trois services, `app`, `db` et `https`.
+Résultat attendu : `docker compose ps` affiche quatre services : `app`, `db`, `https` et `sauvegarde`.
 Si Windows demande d'autoriser Docker sur le réseau : acceptez pour les **réseaux privés**.
 
 ### Étape 3 — Installer le certificat sur le téléphone (une seule fois)
@@ -163,23 +163,46 @@ Résultat attendu : `Mot de passe modifié. Toutes les sessions ont été fermé
 
 ## 6. Sauvegarde et restauration
 
-### Sauvegarder la base
+### Sauvegarde automatique (tous les jours)
 
-L'application doit être démarrée. Puis :
+Le service `sauvegarde` (démarré avec l'application) sauvegarde chaque jour, à partir de 3 h du matin ou dès que le PC
+est allumé ensuite :
+- la base : `sauvegardes\auto\AAAA-MM-JJ-base.sql.gz` ;
+- les photos : `sauvegardes\auto\AAAA-MM-JJ-photos.tar.gz`.
+
+Les sauvegardes de plus de 30 jours sont effacées automatiquement. Vérifier : `docker compose logs sauvegarde`
+(dernière ligne « Sauvegarde terminée »).
+
+> **Copie hors du PC** : en attendant l'hébergement OVH ([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)),
+> copiez régulièrement le dossier `sauvegardes\auto` sur une clé USB ou un cloud (OneDrive, Google Drive…).
+> Une sauvegarde qui reste sur le même PC ne protège pas d'une panne de disque.
+
+### Sauvegarde manuelle (avant une mise à jour)
 
 ```powershell
 npm run db:sauvegarde
 ```
 
-Résultat attendu : `Sauvegarde créée : sauvegardes/AAAA-MM-JJ_HH-MM-SS.sql`. Le dossier `sauvegardes` n'est pas envoyé
-sur GitHub. Copiez de temps en temps ces fichiers ailleurs (clé USB, cloud).
+Résultat attendu : `Sauvegarde créée : sauvegardes/AAAA-MM-JJ_HH-MM-SS.sql` (base uniquement).
 
-> Une sauvegarde est faite **avant chaque migration** de la base. La sauvegarde automatique quotidienne et la
-> procédure de restauration complète (testée) arrivent au lot 7.
+### Restaurer une sauvegarde automatique
 
-### Photos
+⚠️ La base actuelle est **remplacée** par celle de la sauvegarde choisie (les données saisies depuis sont perdues).
 
-Les photos des articles seront dans le dossier `data\photos` du projet (à partir du lot 2). Pensez à le copier aussi.
+```powershell
+docker compose stop app
+docker compose exec sauvegarde sh /scripts/restaurer.sh
+```
+
+La deuxième commande affiche les dates disponibles. Relancez-la avec la date choisie, puis redémarrez l'application :
+
+```powershell
+docker compose exec sauvegarde sh /scripts/restaurer.sh 2026-10-06
+docker compose start app
+```
+
+Résultat attendu : `Restauration terminée.` Les photos de la sauvegarde sont remises en place (les photos plus
+récentes déjà présentes sont gardées). Procédure testée le 06/10/2026.
 
 ---
 
@@ -223,6 +246,7 @@ Autres vérifications : `npm run typecheck` (types), `npm run lint` (qualité du
 | `npm : terme non reconnu` | Node.js n'est pas installé (voir §1) |
 | `port is already allocated` (8443 ou 8080) | Un autre programme utilise ce port : fermez-le, ou demandez à Claude de changer le port du service `https` |
 | Des achats restent « en attente d'envoi » | Le téléphone doit être sur le Wi-Fi de la maison, PC et application démarrés ; si le bandeau dit « session expirée », reconnectez-vous : rien n'est perdu |
+| `docker compose logs sauvegarde` affiche « ÉCHEC de la sauvegarde » | Vérifiez que `db` est `healthy` (`docker compose ps`) ; un nouvel essai a lieu toutes les 10 minutes |
 | Tout autre message d'erreur | Copiez-le tel quel à Claude |
 
 ---
