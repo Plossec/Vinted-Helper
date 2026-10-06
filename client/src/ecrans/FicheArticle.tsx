@@ -4,6 +4,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState 
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type Article, type DonneesArticle, envoyerImage, type Referentiels, type TypeListe } from "../api.js";
 import { BlocAnnonce } from "../composants/BlocAnnonce.js";
+import { BlocVinted } from "../composants/BlocVinted.js";
 import { BlocMontants } from "../composants/BlocMontants.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
@@ -32,6 +33,9 @@ interface Formulaire {
   dateAchat: string;
   prixAffiche: string;
   notes: string;
+  couleur1: string;
+  couleur2: string;
+  formatColis: string;
 }
 
 const formulaireVide = (): Formulaire => ({
@@ -50,6 +54,9 @@ const formulaireVide = (): Formulaire => ({
   dateAchat: aujourdhui(),
   prixAffiche: "",
   notes: "",
+  couleur1: "",
+  couleur2: "",
+  formatColis: "",
 });
 
 const SEPARATEUR = " › ";
@@ -73,6 +80,9 @@ function versFormulaire(a: Article, refs: Referentiels): Formulaire {
     dateAchat: a.dateAchat ?? "",
     prixAffiche: centimesVersSaisie(a.prixAffiche),
     notes: a.notes ?? "",
+    couleur1: a.couleurs[0] ?? "",
+    couleur2: a.couleurs[1] ?? "",
+    formatColis: a.formatColis ?? "",
   };
 }
 
@@ -181,6 +191,8 @@ export function FicheArticle() {
         dateAchat: form.dateAchat,
         prixAffiche,
         notes: form.notes.trim() || null,
+        couleurs: [form.couleur1, form.couleur2].filter((c, i, t) => c !== "" && t.indexOf(c) === i),
+        formatColis: form.formatColis || null,
       };
       if (article?.lot && typeof prixLot === "number" && prixLot !== article.lot.prixTotal) {
         await api.put(`/api/lots/${article.lot.id}`, { prixTotal: prixLot });
@@ -360,6 +372,41 @@ export function FicheArticle() {
             placeholder="12,00"
           />
         </label>
+        <div className="champs-ligne">
+          <label className="champ">
+            <span>Couleur</span>
+            <select value={form.couleur1} onChange={(e) => modifier("couleur1")(e.target.value)}>
+              <option value="">—</option>
+              {refs.couleurs.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.libelle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="champ">
+            <span>2e couleur</span>
+            <select value={form.couleur2} onChange={(e) => modifier("couleur2")(e.target.value)}>
+              <option value="">—</option>
+              {refs.couleurs.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.libelle}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="champ">
+          <span>Format du colis (Vinted)</span>
+          <select value={form.formatColis} onChange={(e) => modifier("formatColis")(e.target.value)}>
+            <option value="">Par défaut (Réglages)</option>
+            {refs.formatsColis.map((f) => (
+              <option key={f.code} value={f.code}>
+                {f.libelle}
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="champ">
           <span>Notes</span>
           <textarea value={form.notes} onChange={(e) => modifier("notes")(e.target.value)} rows={3} />
@@ -377,6 +424,7 @@ export function FicheArticle() {
 
       {article && <InfosAchat article={article} />}
       {article && <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />}
+      {article && <BlocVinted article={article} />}
       {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
       {article && <BlocMontants article={article} onMiseAJour={setArticle} />}

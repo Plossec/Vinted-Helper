@@ -6,6 +6,7 @@ import { api, type Referentiels, type ResumeArticle, type ResumeSortie, urlVigne
 import { Alertes } from "../composants/Alertes.js";
 import { ListeDeroulante, type OptionListe } from "../composants/ListeDeroulante.js";
 import { chargerReferentiels } from "../hors-ligne/cache.js";
+import { demanderPublication } from "../publication.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { FILTRES_VIDES, type Filtres, filtrerEtTrier, type Tri } from "../outils/recherche.js";
@@ -72,6 +73,10 @@ export function ListeArticles() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [etat, setEtat] = useState<Etat>(lireEtat);
   const [filtresOuverts, setFiltresOuverts] = useState(false);
+  /** Mode sélection (filtre « À publier ») : articles cochés pour la publication sur Vinted. */
+  const [selection, setSelection] = useState<Set<string> | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
 
   useEffect(() => {
     let actif = true;
@@ -118,6 +123,31 @@ export function ListeArticles() {
 
   const filtrer = (modif: Partial<Filtres>) => setEtat((e) => ({ ...e, filtres: { ...e.filtres, ...modif } }));
   const nombreFiltres = Object.entries(etat.filtres).filter(([cle, v]) => cle !== "texte" && v !== "").length;
+  const selectionPossible = etat.filtres.statut === "a_publier";
+  const selectionActive = selectionPossible && selection !== null;
+
+  const basculer = (id: string) =>
+    setSelection((s) => {
+      const suivante = new Set(s);
+      if (suivante.has(id)) suivante.delete(id);
+      else suivante.add(id);
+      return suivante;
+    });
+
+  const publier = async () => {
+    if (!selection || selection.size === 0) return;
+    setEnvoi(true);
+    setRetour(null);
+    try {
+      const r = await demanderPublication([...selection]);
+      setRetour(r);
+      if (r.ok) setSelection(null);
+    } catch (e: unknown) {
+      setRetour({ ok: false, texte: e instanceof Error ? e.message : "Envoi impossible." });
+    } finally {
+      setEnvoi(false);
+    }
+  };
 
   return (
     <main className="page">
@@ -251,6 +281,33 @@ export function ListeArticles() {
 
       {erreur && <p className="message message--erreur">{erreur}</p>}
       {resultats === null && !erreur && <p className="statut">Chargement…</p>}
+      {selectionPossible && resultats && resultats.length > 0 && (
+        <p className="section">
+          <button
+            type="button"
+            className="bouton"
+            onClick={() => {
+              setRetour(null);
+              setSelection((s) => (s ? null : new Set()));
+            }}
+          >
+            {selectionActive ? "Terminer la sélection" : "Sélectionner pour Vinted"}
+          </button>
+          {selectionActive && (
+            <button type="button" className="bouton" onClick={() => setSelection(new Set(resultats.map((a) => a.id)))}>
+              Tout cocher
+            </button>
+          )}
+        </p>
+      )}
+      {retour && (
+        <p className={`message message--lignes ${retour.ok ? "message--ok" : "message--erreur"}`}>
+          {retour.texte}{" "}
+          <Link to="/publication" className="lien">
+            Suivre la publication
+          </Link>
+        </p>
+      )}
       {resultats && (
         <p className="secondaire">
           {resultats.length} article{resultats.length > 1 ? "s" : ""}
@@ -259,7 +316,15 @@ export function ListeArticles() {
       )}
       <ul className="liste">
         {resultats?.map((a) => (
-          <li key={a.id}>
+          <li key={a.id} className={selectionActive ? "carte-selection" : undefined}>
+            {selectionActive && (
+              <input
+                type="checkbox"
+                aria-label={`Sélectionner ${formatReference(a.reference)}`}
+                checked={selection.has(a.id)}
+                onChange={() => basculer(a.id)}
+              />
+            )}
             <Link to={`/articles/${a.id}`} className="carte-article carte-article--photo">
               {a.vignette ? (
                 <img className="vignette" src={urlVignette(a.vignette)} alt="" loading="lazy" />
@@ -281,6 +346,21 @@ export function ListeArticles() {
           </li>
         ))}
       </ul>
+      {selectionActive && (
+        <div className="selection-barre">
+          <button
+            type="button"
+            className="bouton bouton--principal"
+            disabled={envoi || selection.size === 0}
+            onClick={() => void publier()}
+          >
+            {envoi ? "Envoi…" : `Publier sur Vinted (${selection.size})`}
+          </button>
+          <button type="button" className="bouton" onClick={() => setSelection(null)}>
+            Annuler
+          </button>
+        </div>
+      )}
       <p className="section">
         <Link to="/corbeille" className="lien">
           Corbeille

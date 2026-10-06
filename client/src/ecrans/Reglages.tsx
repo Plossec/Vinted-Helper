@@ -77,6 +77,9 @@ export function Reglages() {
           <Link to="/corbeille" className="bouton">
             Corbeille
           </Link>
+          <Link to="/publication" className="bouton">
+            Publication Vinted
+          </Link>
         </div>
       </section>
 

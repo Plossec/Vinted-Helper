@@ -8,6 +8,7 @@ import { ListeArticles } from "./ecrans/ListeArticles.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
 import { FicheVente } from "./ecrans/FicheVente.js";
 import { Listes } from "./ecrans/Listes.js";
+import { PublicationVinted } from "./ecrans/PublicationVinted.js";
 import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
@@ -32,6 +33,7 @@ const routeur = createBrowserRouter([
       { path: "frais", element: <FraisDivers /> },
       { path: "corbeille", element: <Corbeille /> },
       { path: "listes", element: <Listes /> },
+      { path: "publication", element: <PublicationVinted /> },
       { path: "reglages", element: <Reglages /> },
     ],
   },

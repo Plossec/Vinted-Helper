@@ -132,6 +132,9 @@ export interface Referentiels {
   categories: Categorie[];
   /** Liste fixe des 6 états. */
   etats: Etat[];
+  /** Couleurs Vinted et formats de colis (publication sur Vinted). */
+  couleurs: Etat[];
+  formatsColis: Etat[];
 }
 
 /** Listes complétables par l'utilisateur. */
@@ -233,6 +236,10 @@ export interface Article {
   sortieStock: { motif: MotifSortie; canal: CanalRevente | null; prixRevente: number | null; date: string } | null;
   titreAnnonce: string | null;
   descriptionAnnonce: string | null;
+  couleurs: string[];
+  formatColis: string | null;
+  /** Lien de l'annonce publiée sur Vinted. */
+  urlVinted: string | null;
   photos: PhotoArticle[];
   dateAchat: string | null;
   statut: Statut;
@@ -255,6 +262,8 @@ export interface DonneesArticle {
   matiere: string | null;
   notes: string | null;
   prixAffiche: number | null;
+  couleurs: string[];
+  formatColis: string | null;
 }
 
 export interface Couts {
@@ -314,6 +323,27 @@ export interface ReglagesUtilisateur {
   delaiDormant: number;
   promptAnnonce: string | null;
   promptEtiquette: string | null;
+  formatColisDefaut: string;
+}
+
+export type EtatPublication = "en_attente" | "en_cours" | "publie" | "essai" | "erreur" | "annule";
+
+export interface Publication {
+  id: string;
+  articleId: string;
+  reference: number;
+  nom: string | null;
+  etat: EtatPublication;
+  essai: boolean;
+  message: string | null;
+  demandeLe: string;
+  finLe: string | null;
+  urlVinted: string | null;
+}
+
+export interface ReponsePublication {
+  acceptes: number[];
+  refuses: { reference: number; nom: string | null; manques: string[] }[];
 }
 
 export interface FraisDivers {
