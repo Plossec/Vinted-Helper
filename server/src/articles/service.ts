@@ -244,7 +244,11 @@ export async function corrigerDateHistorique(
   });
 }
 
+/** Liste des articles (hors corbeille) avec les champs utiles aux filtres, à la recherche et aux tris (§5.3). */
 export async function listerArticles(base: Base, utilisateurId: string) {
+  const dateStatut = sql<Date>`(select max(h.date) from historique_statut h where h.article_id = ${article.id})`;
+  const dateMiseEnLigne = sql<Date | null>`(select max(h.date) from historique_statut h
+    where h.article_id = ${article.id} and h.vers = 'en_ligne')`;
   const lignes = await base
     .select({
       id: article.id,
@@ -252,16 +256,34 @@ export async function listerArticles(base: Base, utilisateurId: string) {
       nom: article.nom,
       statut: article.statut,
       prixAffiche: article.prixAffiche,
+      categorie: article.categorie,
+      marqueId: article.marqueId,
+      marque: marque.nom,
+      gamme: article.gamme,
+      taille: article.taille,
+      lieuId: article.lieuId,
+      sortieId: article.sortieId,
+      dateAchat: article.dateAchat,
       creeLe: article.creeLe,
+      dateStatut,
+      dateMiseEnLigne,
     })
     .from(article)
+    .leftJoin(marque, eq(marque.id, article.marqueId))
     .where(and(eq(article.utilisateurId, utilisateurId), isNull(article.supprimeLe)))
     .orderBy(desc(article.creeLe), desc(article.reference));
   const photos = await photosDesArticles(
     base,
     lignes.map((a) => a.id),
   );
-  return lignes.map((a) => ({ ...a, vignette: choisirVignette(photos.get(a.id) ?? []) }));
+  // Les sous-requêtes SQL renvoient du texte : on rétablit des dates ISO.
+  const iso = (d: Date | string | null) => (d === null ? null : new Date(d).toISOString());
+  return lignes.map((a) => ({
+    ...a,
+    dateStatut: iso(a.dateStatut),
+    dateMiseEnLigne: iso(a.dateMiseEnLigne),
+    vignette: choisirVignette(photos.get(a.id) ?? []),
+  }));
 }
 
 export async function lireArticle(base: Base, utilisateurId: string, id: string) {
