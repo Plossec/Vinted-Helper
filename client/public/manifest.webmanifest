@@ -1,0 +1,17 @@
+{
+  "name": "Vinted Helper",
+  "short_name": "Vinted Helper",
+  "description": "Achats, stock et ventes Vinted",
+  "lang": "fr",
+  "start_url": "/terrain",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b7a75",
+  "theme_color": "#0b7a75",
+  "icons": [
+    { "src": "/icone-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icone-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icone-masquable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

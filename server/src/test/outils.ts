@@ -1,6 +1,8 @@
 // Outils de test : vraie base PostgreSQL en mémoire (PGlite), migrations du projet, compte de test.
 // Aucun accès à Docker ni à la base de l'utilisateur.
-import { resolve } from "node:path";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
@@ -36,14 +38,24 @@ export async function creerAppDeTest() {
   const { base, fermer } = await creerBaseDeTest();
   await amorcerCompte(base, () => ({ identifiant: IDENTIFIANT_TEST, motDePasse: MOT_DE_PASSE_TEST }));
   const horloge = creerHorloge();
-  const app = await creerApp({ version: "test", base, verifierBase: async () => true, maintenant: horloge.maintenant });
+  // Photos dans un dossier temporaire, effacé à la fin du test (jamais data/photos).
+  const dossierPhotos = mkdtempSync(join(tmpdir(), "vh-photos-"));
+  const app = await creerApp({
+    version: "test",
+    base,
+    verifierBase: async () => true,
+    maintenant: horloge.maintenant,
+    dossierPhotos,
+  });
   return {
     app,
     base,
     horloge,
+    dossierPhotos,
     fermer: async () => {
       await app.close();
       await fermer();
+      rmSync(dossierPhotos, { recursive: true, force: true });
     },
   };
 }

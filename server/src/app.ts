@@ -8,7 +8,10 @@ import type { Base } from "./base/connexion.js";
 import { poserCookie, routesCompte } from "./compte/routes.js";
 import { lireSession, NOM_COOKIE, type UtilisateurConnecte } from "./compte/sessions.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
+import { routesPhotos } from "./photos/routes.js";
+import { creerStockagePhotos } from "./photos/stockage.js";
 import { routesReferentiels } from "./referentiels/routes.js";
+import { routesSorties } from "./sorties/routes.js";
 
 export interface DependancesApp {
   version: string;
@@ -17,6 +20,8 @@ export interface DependancesApp {
   verifierBase: () => Promise<boolean>;
   /** Horloge (remplaçable dans les tests). */
   maintenant?: () => Date;
+  /** Dossier des photos (data/photos). */
+  dossierPhotos: string;
   /** Dossier de l'interface compilée ; absent en développement (Vite sert l'interface). */
   dossierClient?: string;
   journaliser?: boolean;
@@ -44,10 +49,12 @@ export async function creerApp({
   base,
   verifierBase,
   maintenant = () => new Date(),
+  dossierPhotos,
   dossierClient,
   journaliser = false,
 }: DependancesApp) {
-  const app = Fastify({ logger: journaliser });
+  // trustProxy : derrière le relais HTTPS (Caddy), le protocole d'origine sert au cookie « secure ».
+  const app = Fastify({ logger: journaliser, trustProxy: true });
   await app.register(fastifyCookie);
 
   const utilisateurs = new WeakMap<FastifyRequest, UtilisateurConnecte>();
@@ -95,6 +102,8 @@ export async function creerApp({
   routesCompte(app, contexte);
   routesReferentiels(app, contexte);
   routesArticles(app, contexte);
+  routesSorties(app, contexte);
+  routesPhotos(app, contexte, creerStockagePhotos(dossierPhotos));
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {
     await app.register(fastifyStatic, { root: dossierClient });

@@ -5,6 +5,28 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.2.0] — 06/10/2026
+
+Lot 2 — saisie terrain (développé en autonomie, à valider sur le téléphone).
+
+### Ajouté
+- Accès depuis le téléphone en **HTTPS** sur le Wi-Fi de la maison (relais Caddy, certificat local à installer une
+  fois) — issue #3 ; guide pas à pas dans le README (§4).
+- Application **installable** sur Android (PWA) et utilisable **sans réseau** ; bandeau « Nouvelle version disponible
+  — Mettre à jour ».
+- Onglet **Terrain** : démarrer une sortie (mémorisée sur le téléphone), gros bouton « + Achat » (photo → prix →
+  Valider), achat sans photo, lots (prix total réparti, même photo terrain), essence de la sortie, article Maison.
+- **File d'attente** sur le téléphone : sorties, achats, photos et essence sont gardés puis envoyés automatiquement
+  (au retour du réseau, toutes les 30 secondes, après reconnexion) ; compteur « N éléments en attente d'envoi » ;
+  « Réf. en attente » tant que le serveur n'a pas reçu l'achat ; éléments refusés à réessayer ou abandonner.
+- **Sorties** : liste et fiche (date, lieu, essence, notes, articles) ; l'essence d'une sortie sans article compte en
+  frais général.
+- Fiche article : sortie, lot (articles du lot, prix total modifiable), prix d'achat et part d'essence calculés,
+  **photos** (photo terrain + photos d'annonce depuis la galerie ou l'appareil photo, ordre, photo principale).
+- Vignettes des photos dans les listes.
+- Calculs : part de lot (§6.1), part d'essence et essence des sorties vides (§6.2) ; cas 1 à 7, 23 et 24 de l'annexe
+  vérifiés à partir des données.
+
 ## [0.1.0] — 05/10/2026
 
 Lot 1 — socle, validé sur le PC de l'utilisateur.

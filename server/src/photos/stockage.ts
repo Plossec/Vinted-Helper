@@ -1,0 +1,49 @@
+// Fichiers des photos : data/photos/<utilisateur>/<photo>.<ext> + une vignette légère pour les listes.
+// L'original est conservé en pleine qualité (§5.10) ; la réduction à ~1600 px arrive au lot 7.
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import sharp from "sharp";
+import { erreurSaisie } from "../outils/erreurs.js";
+
+const EXTENSIONS: Record<string, string> = { jpeg: "jpg", png: "png", webp: "webp", heif: "heic" };
+const COTE_VIGNETTE = 400;
+
+export const nomVignette = (photoId: string) => `${photoId}-vignette.webp`;
+
+export function creerStockagePhotos(dossier: string) {
+  const chemin = (utilisateurId: string, fichier: string) => resolve(dossier, utilisateurId, fichier);
+
+  return {
+    chemin,
+
+    /** Vérifie que le contenu est une image, l'enregistre et crée sa vignette. Renvoie le nom du fichier. */
+    async enregistrer(utilisateurId: string, photoId: string, contenu: Buffer): Promise<string> {
+      let format: string | undefined;
+      try {
+        format = (await sharp(contenu).metadata()).format;
+      } catch {
+        throw erreurSaisie("Le fichier envoyé n'est pas une image lisible.");
+      }
+      const extension = format ? EXTENSIONS[format] : undefined;
+      if (!extension) throw erreurSaisie("Format de photo non pris en charge (JPEG, PNG, WebP ou HEIC).");
+      const fichier = `${photoId}.${extension}`;
+      await mkdir(resolve(dossier, utilisateurId), { recursive: true });
+      await writeFile(chemin(utilisateurId, fichier), contenu);
+      const vignette = await sharp(contenu)
+        .rotate() // respecte l'orientation de l'appareil photo
+        .resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" })
+        .webp({ quality: 75 })
+        .toBuffer();
+      await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
+      return fichier;
+    },
+
+    /** Supprime le fichier et sa vignette (photo qui n'est plus utilisée par aucun article). */
+    async supprimer(utilisateurId: string, photoId: string, fichier: string): Promise<void> {
+      await rm(chemin(utilisateurId, fichier), { force: true });
+      await rm(chemin(utilisateurId, nomVignette(photoId)), { force: true });
+    },
+  };
+}
+
+export type StockagePhotos = ReturnType<typeof creerStockagePhotos>;

@@ -6,7 +6,6 @@ import { estStatut } from "../metier/statuts.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import {
   centimesFacultatif,
-  centimesObligatoire,
   dateObligatoire,
   horodatageFacultatif,
   objet,
@@ -43,7 +42,7 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
   return {
     nom: texteObligatoire(c.nom, "Nom", 200),
     lieuId: uuidObligatoire(c.lieuId, "Lieu"),
-    prixAchat: centimesObligatoire(c.prixAchat, "Prix d'achat"),
+    prixAchat: centimesFacultatif(c.prixAchat, "Prix d'achat"),
     dateAchat: dateObligatoire(c.dateAchat, "Date d'achat"),
     categorie: categorieObligatoire(c.categorie),
     marqueId: uuidObligatoire(c.marqueId, "Marque"),

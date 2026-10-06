@@ -6,6 +6,9 @@ import { Disposition } from "./ecrans/Disposition.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
 import { Reglages } from "./ecrans/Reglages.js";
+import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
+import { Terrain } from "./ecrans/Terrain.js";
+import { enregistrerServiceWorker } from "./pwa.js";
 import "./styles.css";
 
 const routeur = createBrowserRouter([
@@ -16,6 +19,9 @@ const routeur = createBrowserRouter([
       { index: true, element: <ListeArticles /> },
       { path: "articles/nouveau", element: <FicheArticle /> },
       { path: "articles/:id", element: <FicheArticle /> },
+      { path: "terrain", element: <Terrain /> },
+      { path: "sorties", element: <ListeSorties /> },
+      { path: "sorties/:id", element: <FicheSortie /> },
       { path: "reglages", element: <Reglages /> },
     ],
   },
@@ -23,6 +29,8 @@ const routeur = createBrowserRouter([
 
 const racine = document.getElementById("racine");
 if (racine === null) throw new Error("Élément #racine introuvable dans index.html");
+
+enregistrerServiceWorker();
 
 createRoot(racine).render(
   <StrictMode>
