@@ -26,8 +26,13 @@ export default tseslint.config(
     languageOptions: { globals: globals.node },
   },
   {
-    files: ["scripts/**/*.mjs", ".claude/hooks/**/*.mjs"],
+    files: ["scripts/**/*.mjs", ".claude/hooks/**/*.mjs", "outils/**/*.mjs"],
     rules: { "no-console": "off" },
+  },
+  {
+    // Programme de publication : Node, avec du code exécuté dans la page (page.evaluate).
+    files: ["outils/**/*.mjs"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {
     files: ["client/sw-modele.js"],

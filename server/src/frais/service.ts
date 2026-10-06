@@ -3,6 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { boost, fraisGeneral, reglages } from "../base/schema.js";
 import { chargerArticle } from "../articles/service.js";
+import type { FormatColis } from "../catalogue/couleurs.js";
 import { introuvable } from "../outils/erreurs.js";
 
 export async function ajouterBoost(
@@ -73,6 +74,7 @@ export const REGLAGES_DEFAUT = {
   delaiDormant: 7,
   promptAnnonce: null as string | null,
   promptEtiquette: null as string | null,
+  formatColisDefaut: "petit" as FormatColis,
 };
 
 export type Reglages = typeof REGLAGES_DEFAUT;
@@ -86,6 +88,7 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     delaiDormant: r.delaiDormant,
     promptAnnonce: r.promptAnnonce,
     promptEtiquette: r.promptEtiquette,
+    formatColisDefaut: r.formatColisDefaut,
   };
 }
 

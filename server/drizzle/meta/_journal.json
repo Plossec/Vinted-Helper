@@ -43,6 +43,13 @@
       "when": 1791246058488,
       "tag": "0005_lot3_ordre_historique",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791297481206,
+      "tag": "0006_publication_vinted",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@
 | [`guides/sauvegarde-restauration.md`](guides/sauvegarde-restauration.md) | Sauvegarder et restaurer les données sur le PC |
 | [`guides/ia-gemini.md`](guides/ia-gemini.md) | Configurer et utiliser l'IA (annonces, étiquettes) |
 | [`guides/mise-en-ligne-ovh.md`](guides/mise-en-ligne-ovh.md) | Installer, sauvegarder et mettre à jour l'application sur le serveur OVH |
+| [`guides/publication-vinted.md`](guides/publication-vinted.md) | Publier automatiquement les articles « À publier » sur Vinted depuis le PC |
 
 L'installation sur le PC, le démarrage et le dépannage sont dans le [`README.md`](../README.md) à la racine ; les
 nouveautés de chaque version dans le [`CHANGELOG.md`](../CHANGELOG.md).

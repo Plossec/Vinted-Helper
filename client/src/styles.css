@@ -880,3 +880,80 @@ a {
 .navigation__lien .pastille {
   margin-left: 0.35rem;
 }
+
+/* --- Publication Vinted --- */
+.case {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+}
+
+.case input {
+  width: 1.4rem;
+  height: 1.4rem;
+  min-height: 0;
+  flex: none;
+}
+
+.etiquette-publication {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+}
+
+.etiquette-publication--publie,
+.etiquette-publication--essai {
+  color: var(--ok);
+}
+
+.etiquette-publication--erreur {
+  color: var(--erreur);
+}
+
+.jeton {
+  word-break: break-all;
+  user-select: all;
+}
+
+.message--lignes {
+  white-space: pre-line;
+}
+
+.selection-barre {
+  position: sticky;
+  bottom: 4.5rem;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  margin-top: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--bordure);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+}
+
+.selection-barre .bouton {
+  flex: 1;
+}
+
+.carte-selection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carte-selection > input {
+  width: 1.5rem;
+  height: 1.5rem;
+  min-height: 0;
+  flex: none;
+}
+
+.carte-selection > a {
+  flex: 1;
+  min-width: 0;
+}

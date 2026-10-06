@@ -5,7 +5,18 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.8.0] — 06/10/2026
+
+Publication sur Vinted depuis le PC (évolution demandée après le lot 7, à valider).
+
 ### Ajouté
+- **Publication sur Vinted** : sélection d'articles « À publier » (liste ou fiche), file d'attente suivie dans
+  Réglages → Publication Vinted ; un programme du PC (`outils/publication-vinted`, démarré avec Windows) remplit le
+  formulaire Vinted, contrôle chaque champ puis clique « Ajouter » ; l'article passe En ligne avec le lien de
+  l'annonce. **Mode essai** par défaut (rien n'est publié), articles incomplets refusés avec ce qui manque, arrêt en
+  cas de vérification Vinted. Guide : `docs/guides/publication-vinted.md`.
+- Fiche article : **couleur(s)** (2 au maximum) et **format du colis** ; format par défaut dans les Réglages.
+- Jeton de publication personnel (seule son empreinte est gardée sur le serveur).
 - Mise en ligne sur un VPS OVH (issue #2) : guide pas à pas `docs/mise-en-ligne-ovh.md`, installation en une
   commande (Docker, pare-feu, fail2ban, mises à jour de sécurité, `.env` par questions), HTTPS Let's Encrypt
   automatique, script de mise à jour, rapatriement des sauvegardes sur le PC (`scripts/rapatrier-sauvegardes.ps1`).

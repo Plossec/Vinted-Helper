@@ -53,7 +53,10 @@ commandes changent. Les tests n'utilisent jamais Docker ni la vraie base (PGlite
    (`server/src/calculs/`). **Aucun calcul d'argent en dehors de ce module.**
 2. **Les parts calculées ne sont jamais stockées** en base : elles sont recalculées à partir des données.
 3. **La clé Gemini reste côté serveur.** Jamais dans `client/`.
-4. **Aucune automatisation de Vinted** et **aucune requête vers Vinted**.
+4. **Vinted** : la seule automatisation autorisée est la **publication d'annonces** par le programme du PC
+   (`outils/publication-vinted/`, décision du 06/10/2026, `docs/decisions/publication-vinted.md`). Aucune autre
+   requête vers Vinted (ni lecture des ventes, ni messages, ni prix), **aucun contournement de détection**
+   (camouflage du navigateur, captcha) : en cas de vérification, le programme s'arrête et attend l'utilisateur.
 5. **Rien de ce qui figure au §10 (hors périmètre) n'est développé** sans demande explicite.
 
 ## Garde-fous

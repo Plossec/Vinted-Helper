@@ -156,5 +156,6 @@ Tout est rangé dans [`docs/`](docs/README.md) :
 | Sauvegarder ou restaurer mes données | [docs/guides/sauvegarde-restauration.md](docs/guides/sauvegarde-restauration.md) |
 | Configurer l'IA Gemini | [docs/guides/ia-gemini.md](docs/guides/ia-gemini.md) |
 | Mettre l'application en ligne (OVH) | [docs/guides/mise-en-ligne-ovh.md](docs/guides/mise-en-ligne-ovh.md) |
+| Publier mes articles sur Vinted depuis le PC | [docs/guides/publication-vinted.md](docs/guides/publication-vinted.md) |
 | Comprendre le besoin complet ou une décision | [docs/README.md](docs/README.md) |
 | Voir les nouveautés de chaque version | [CHANGELOG.md](CHANGELOG.md) |
