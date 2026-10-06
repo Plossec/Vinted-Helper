@@ -180,8 +180,23 @@ export interface Article {
   lot: { id: string; prixTotal: number; articles: { id: string; reference: number }[] } | null;
   /** Prix saisi (article hors lot) ; null pour un article de lot. */
   prixAchat: number | null;
-  /** Coûts calculés par le serveur (centimes). */
-  couts: { prixAchat: number; essence: number };
+  /** Montants calculés par le serveur (centimes, §6.5). */
+  couts: Couts;
+  /** Vente (colis) en cours ou finalisée de l'article. */
+  vente: {
+    id: string;
+    montantCredite: number;
+    emballage: number;
+    dateVente: string;
+    dateEnvoi: string | null;
+    dateFinalisation: string | null;
+    nombreArticles: number;
+  } | null;
+  boosts: { id: string; montant: number; date: string }[];
+  historiquePrix: { prix: number; date: string }[];
+  sortieStock: { motif: MotifSortie; canal: CanalRevente | null; prixRevente: number | null; date: string } | null;
+  titreAnnonce: string | null;
+  descriptionAnnonce: string | null;
   photos: PhotoArticle[];
   dateAchat: string | null;
   statut: Statut;
@@ -204,4 +219,70 @@ export interface DonneesArticle {
   matiere: string | null;
   notes: string | null;
   prixAffiche: number | null;
+}
+
+export interface Couts {
+  prixAchat: number;
+  essence: number;
+  emballage: number;
+  boosts: number;
+  coutTotal: number;
+  prixVendu: number | null;
+  venteId: string | null;
+  /** Réalisé (Finalisé, Sortie du stock) ou provisoire. */
+  benefice: number;
+  realise: boolean;
+}
+
+export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu";
+export type CanalRevente = "vide_grenier" | "leboncoin" | "main_propre" | "autre";
+
+export const LIBELLES_MOTIF: Record<MotifSortie, string> = {
+  donne: "Donné",
+  jete: "Jeté",
+  revendu: "Revendu hors Vinted",
+  garde: "Gardé pour moi",
+  perdu: "Perdu",
+};
+
+export const LIBELLES_CANAL: Record<CanalRevente, string> = {
+  vide_grenier: "Vide-grenier",
+  leboncoin: "Leboncoin",
+  main_propre: "Main propre",
+  autre: "Autre",
+};
+
+export interface Vente {
+  id: string;
+  montantCredite: number;
+  emballage: number;
+  dateVente: string;
+  dateEnvoi: string | null;
+  dateFinalisation: string | null;
+  annulee: boolean;
+  articles: {
+    id: string;
+    reference: number;
+    nom: string | null;
+    statut: Statut;
+    prixAffiche: number;
+    retourne: boolean;
+    prixVendu: number | null;
+    partEmballage: number;
+  }[];
+}
+
+export interface ReglagesUtilisateur {
+  emballageDefaut: number;
+  delaiBrouillon: number;
+  delaiDormant: number;
+  promptAnnonce: string | null;
+  promptEtiquette: string | null;
+}
+
+export interface FraisDivers {
+  id: string;
+  date: string;
+  montant: number;
+  libelle: string;
 }

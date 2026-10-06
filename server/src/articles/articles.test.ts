@@ -186,21 +186,21 @@ describe("articles", () => {
       expect(reponse.json()).toEqual({ erreur: "Passage impossible de « En ligne » à « Brouillon »." });
     });
 
-    it("lot 1 : les passages des lots suivants (vente, sortie du stock) ne sont pas encore disponibles", async () => {
+    it("la vente et la sortie du stock passent par leur propre action, pas par le changement simple", async () => {
       const cree = await creer();
       await changer(cree.id, { vers: "en_ligne", prixAffiche: 900 });
       const reponse = await changer(cree.id, { vers: "a_expedier" });
       expect(reponse.statusCode).toBe(409);
-      expect(reponse.json<{ erreur: string }>().erreur).toMatch(/prochaine version/);
+      expect(reponse.json<{ erreur: string }>().erreur).toMatch(/Vendu/);
     });
 
-    it("les transitions proposées à l'interface sont celles du lot 1", async () => {
+    it("les transitions proposées à l'interface sont celles du §4.2", async () => {
       const cree = await creer();
-      expect(cree.transitionsPossibles).toEqual(["a_publier", "en_ligne"]);
+      expect(cree.transitionsPossibles).toEqual(["a_publier", "en_ligne", "sortie_stock"]);
       const enLigne = (await changer(cree.id, { vers: "en_ligne", prixAffiche: 900 })).json<{
         transitionsPossibles: string[];
       }>();
-      expect(enLigne.transitionsPossibles).toEqual(["a_publier"]);
+      expect(enLigne.transitionsPossibles).toEqual(["a_expedier", "a_publier", "sortie_stock"]);
     });
 
     it("un article En ligne doit garder un prix affiché", async () => {

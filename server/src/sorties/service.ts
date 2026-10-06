@@ -2,7 +2,7 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, lieu, sortie } from "../base/schema.js";
-import { calculerCoutsAchat } from "../couts/service.js";
+import { calculer } from "../couts/service.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 
@@ -102,7 +102,7 @@ export async function lireSortie(base: Base, utilisateurId: string, id: string) 
     .from(article)
     .where(and(eq(article.sortieId, id), isNull(article.supprimeLe)))
     .orderBy(article.reference);
-  const couts = await calculerCoutsAchat(base, utilisateurId);
+  const calculs = await calculer(base, utilisateurId);
   const photos = await photosDesArticles(
     base,
     articles.map((a) => a.id),
@@ -115,11 +115,11 @@ export async function lireSortie(base: Base, utilisateurId: string, id: string) 
     montantEssence: s.montantEssence,
     notes: s.notes,
     /** Frais général calculé si la sortie n'a aucun article (§6.2), sinon 0. */
-    essenceFraisGeneral: couts.essenceSortiesVides.get(s.id) ?? 0,
+    essenceFraisGeneral: calculs.essenceSortiesVides.get(s.id) ?? 0,
     articles: articles.map((a) => ({
       ...a,
-      prixAchat: couts.prixAchat.get(a.id) ?? 0,
-      essence: couts.essence.get(a.id) ?? 0,
+      prixAchat: calculs.details.get(a.id)?.prixAchat ?? 0,
+      essence: calculs.details.get(a.id)?.essence ?? 0,
       vignette: choisirVignette(photos.get(a.id) ?? []),
     })),
   };

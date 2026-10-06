@@ -1,7 +1,8 @@
 // Réglages : version, changement du mot de passe, déconnexion.
 import { type FormEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { api, type Sante } from "../api.js";
+import { ParametresCalcul } from "../composants/ParametresCalcul.js";
 
 export function Reglages() {
   const naviguer = useNavigate();
@@ -59,6 +60,20 @@ export function Reglages() {
         </p>
         <p className="secondaire">Vinted Helper — version {version ?? "…"}</p>
       </section>
+
+      <section className="section">
+        <h2>Menu</h2>
+        <div className="actions">
+          <Link to="/frais" className="bouton">
+            Frais divers
+          </Link>
+          <Link to="/sorties" className="bouton">
+            Sorties
+          </Link>
+        </div>
+      </section>
+
+      <ParametresCalcul />
 
       <section className="section">
         <h2>Changer le mot de passe</h2>

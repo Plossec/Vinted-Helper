@@ -1,21 +1,13 @@
-// Lecture des données nécessaires aux calculs de coûts, puis appel du module de calcul (aucun calcul ici).
+// Lecture des données nécessaires aux calculs, puis appel du module de calcul (aucun calcul d'argent ici).
 import { and, eq, isNull } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { article, lotAchat, sortie } from "../base/schema.js";
-import { essenceParArticle, essenceSortiesVides, prixAchatParArticle } from "../calculs/couts.js";
+import { article, boost, lotAchat, sortie, vente, venteArticle } from "../base/schema.js";
+import { calculerDetails, type DetailArticle, type DonneesCalcul } from "../calculs/benefice.js";
+import { essenceSortiesVides } from "../calculs/couts.js";
 
-export interface CoutsAchat {
-  /** Prix d'achat de chaque article (centimes), part de lot comprise. */
-  prixAchat: Map<string, number>;
-  /** Part d'essence de chaque article (centimes). */
-  essence: Map<string, number>;
-  /** Essence des sorties sans article (frais généraux calculés). */
-  essenceSortiesVides: Map<string, number>;
-}
-
-/** Calcule les coûts d'achat de tous les articles de l'utilisateur (hors corbeille). */
-export async function calculerCoutsAchat(base: Base | Transaction, utilisateurId: string): Promise<CoutsAchat> {
-  const [articles, lots, sorties] = await Promise.all([
+/** Données de calcul de l'utilisateur (articles hors corbeille). */
+export async function chargerDonneesCalcul(base: Base | Transaction, utilisateurId: string): Promise<DonneesCalcul> {
+  const [articles, lots, sorties, ventes, lignes, boosts] = await Promise.all([
     base
       .select({
         id: article.id,
@@ -23,6 +15,9 @@ export async function calculerCoutsAchat(base: Base | Transaction, utilisateurId
         sortieId: article.sortieId,
         lotId: article.lotId,
         prixAchat: article.prixAchat,
+        statut: article.statut,
+        motifSortie: article.motifSortie,
+        prixRevente: article.prixRevente,
       })
       .from(article)
       .where(and(eq(article.utilisateurId, utilisateurId), isNull(article.supprimeLe))),
@@ -34,10 +29,55 @@ export async function calculerCoutsAchat(base: Base | Transaction, utilisateurId
       .select({ id: sortie.id, montantEssence: sortie.montantEssence })
       .from(sortie)
       .where(eq(sortie.utilisateurId, utilisateurId)),
+    base
+      .select({
+        id: vente.id,
+        montantCredite: vente.montantCredite,
+        emballage: vente.emballage,
+        annulee: vente.annulee,
+      })
+      .from(vente)
+      .where(eq(vente.utilisateurId, utilisateurId)),
+    base
+      .select({
+        venteId: venteArticle.venteId,
+        articleId: venteArticle.articleId,
+        prixAffiche: venteArticle.prixAfficheAuMoment,
+        retourne: venteArticle.retourne,
+      })
+      .from(venteArticle)
+      .innerJoin(vente, eq(vente.id, venteArticle.venteId))
+      .where(eq(vente.utilisateurId, utilisateurId)),
+    base
+      .select({ articleId: boost.articleId, montant: boost.montant })
+      .from(boost)
+      .where(eq(boost.utilisateurId, utilisateurId)),
   ]);
+  // Un article à la corbeille ne compte plus dans la vente (ses parts vont aux articles restants).
+  const vivants = new Set(articles.map((a) => a.id));
   return {
-    prixAchat: prixAchatParArticle(articles, lots),
-    essence: essenceParArticle(articles, sorties),
-    essenceSortiesVides: essenceSortiesVides(articles, sorties),
+    articles,
+    lots,
+    sorties,
+    ventes: ventes.map((v) => ({
+      ...v,
+      lignes: lignes.filter((l) => l.venteId === v.id && vivants.has(l.articleId)),
+    })),
+    boosts: boosts.filter((b) => vivants.has(b.articleId)),
+  };
+}
+
+export interface Calculs {
+  details: Map<string, DetailArticle>;
+  /** Essence des sorties sans article (frais généraux calculés, §6.2). */
+  essenceSortiesVides: Map<string, number>;
+}
+
+/** Calcule tous les montants des articles de l'utilisateur. */
+export async function calculer(base: Base | Transaction, utilisateurId: string): Promise<Calculs> {
+  const donnees = await chargerDonneesCalcul(base, utilisateurId);
+  return {
+    details: calculerDetails(donnees),
+    essenceSortiesVides: essenceSortiesVides(donnees.articles, donnees.sorties),
   };
 }

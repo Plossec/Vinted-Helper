@@ -12,6 +12,7 @@ import { routesPhotos } from "./photos/routes.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 import { routesReferentiels } from "./referentiels/routes.js";
 import { routesSorties } from "./sorties/routes.js";
+import { routesVentes } from "./ventes/routes.js";
 
 export interface DependancesApp {
   version: string;
@@ -103,6 +104,7 @@ export async function creerApp({
   routesReferentiels(app, contexte);
   routesArticles(app, contexte);
   routesSorties(app, contexte);
+  routesVentes(app, contexte);
   routesPhotos(app, contexte, creerStockagePhotos(dossierPhotos));
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {

@@ -35,11 +35,24 @@ const TRANSITIONS: Record<Statut, readonly Statut[]> = {
 };
 
 /**
- * Statuts vers lesquels l'application sait déjà faire passer un article.
- * Lot 1 : Brouillon, À publier, En ligne. Les passages qui créent une vente, concernent un colis
- * ou sortent l'article du stock arrivent au lot 3 (décision du 05/10/2026).
+ * Passages faits par le simple changement de statut (bouton + date). Les autres passages ont leur propre action
+ * (décision du 06/10/2026) : la vente (En ligne → À expédier), le colis (envoi, finalisation, annulation, retour)
+ * et la sortie du stock (et son annulation).
  */
-export const STATUTS_DISPONIBLES: ReadonlySet<Statut> = new Set<Statut>(["brouillon", "a_publier", "en_ligne"]);
+const TRANSITIONS_SIMPLES = new Set<string>([
+  "brouillon>a_publier",
+  "brouillon>en_ligne",
+  "a_publier>en_ligne",
+  "a_publier>brouillon",
+  "en_ligne>a_publier",
+]);
+
+export function estTransitionSimple(de: Statut, vers: Statut): boolean {
+  return TRANSITIONS_SIMPLES.has(`${de}>${vers}`);
+}
+
+/** Statuts « en vente » : l'article fait partie d'un colis en cours. */
+export const STATUTS_COLIS: ReadonlySet<Statut> = new Set<Statut>(["a_expedier", "envoye"]);
 
 export function estStatut(valeur: unknown): valeur is Statut {
   return typeof valeur === "string" && (STATUTS as readonly string[]).includes(valeur);
@@ -49,9 +62,9 @@ export function transitionAutorisee(de: Statut, vers: Statut): boolean {
   return TRANSITIONS[de].includes(vers);
 }
 
-/** Transitions proposées à l'utilisateur : autorisées par le §4.2 et déjà disponibles dans l'application. */
+/** Transitions proposées à l'utilisateur : celles du §4.2 (l'interface choisit l'action adaptée à chacune). */
 export function transitionsProposees(de: Statut): Statut[] {
-  return TRANSITIONS[de].filter((vers) => STATUTS_DISPONIBLES.has(vers));
+  return [...TRANSITIONS[de]];
 }
 
 export type ResultatTransition = { ok: true } | { ok: false; raison: string };

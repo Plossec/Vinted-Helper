@@ -217,3 +217,17 @@ sur le téléphone jusqu'au retour (accès depuis partout : OVH, issue #2).
 | File d'attente | Ordre d'envoi = ordre de saisie ; arrêt au premier problème de réseau ; session expirée → tout est gardé jusqu'à la reconnexion ; un élément refusé par le serveur est mis de côté avec son message (Réessayer / Abandonner). |
 | Photos d'annonce | Envoyées directement depuis la fiche (réseau nécessaire) : elles se font à la maison. |
 | PWA | Service worker écrit à la main (pas de nouvelle dépendance) : l'application est gardée sur le téléphone, l'API n'est jamais mise en cache. Ouverture sur l'écran Terrain. |
+
+---
+
+## 06/10/2026 — Lot 3 : choix pris en autonomie *à relire*
+
+| Sujet | Décision |
+|---|---|
+| Actions dédiées | Les passages qui touchent une vente (Vendu, envoi, finalisation, annulation, retour) ou la sortie du stock ont leur propre formulaire ; le changement simple ne sert qu'entre Brouillon, À publier et En ligne. |
+| Vente groupée | Créée depuis la fiche d'un article : on coche les autres articles En ligne du même colis. |
+| Retour | « Retour de l'acheteur » depuis Envoyé : on coche les articles renvoyés. Tous cochés = retour du colis entier (vente annulée) ; sinon le nouveau montant crédité est obligatoire. Un litige perdu se saisit comme un retour. |
+| Sortie du stock d'un article dans un colis en cours | Refusée (À expédier / Envoyé) : annuler la vente ou enregistrer un retour d'abord, pour ne jamais fausser les montants du colis. |
+| Bénéfice des articles À expédier / Envoyé | Provisoire (= − coût total, §6.5) même si le prix vendu est connu ; il devient réel à la finalisation. Le prix vendu est affiché à part. |
+| Dates de vente | Vente, envoi et finalisation sont des dates-heures (comme les changements de statut). Corriger l'une d'elles dans l'historique corrige la vente et tout le colis. |
+| Article à la corbeille dans un colis | Il ne compte plus : le montant du colis est réparti sur les articles restants (lot 4). |

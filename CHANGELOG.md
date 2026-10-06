@@ -5,6 +5,32 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.3.0] — 06/10/2026
+
+Lot 3 — ventes et calculs (développé en autonomie, à valider).
+
+### Ajouté
+- **Vente** depuis un article En ligne (« Vendu : à expédier ») : montant crédité, emballage (0,08 € par défaut),
+  date ; **vente groupée** en cochant les autres articles du colis (montant réparti au prorata des prix affichés).
+- **Colis** : envoi et finalisation appliqués à tous les articles du colis avec la même date ; annulation par
+  l'acheteur (retour En ligne, vente annulée) ; **retour** de l'acheteur, entier (vente annulée) ou **partiel**
+  (articles renvoyés À publier, nouveau montant crédité pour les autres) ; écran « Colis » pour corriger les montants.
+- **Sortie du stock** avec motif (Donné, Jeté, Revendu hors Vinted avec prix et canal, Gardé pour moi, Perdu) et
+  annulation de la sortie.
+- **Boosts** (montant + date) sur la fiche.
+- Fiche article : **montants** détaillés (prix d'achat, essence, emballage, boosts, coût total, prix vendu,
+  bénéfice réel ou provisoire), **historique du prix affiché**.
+- Écran **Frais divers** (Réglages → Frais divers) : ajout, modification, suppression.
+- Réglages : emballage par défaut, délais des alertes (utilisés au lot 7).
+- Calculs : cas 8 à 18, 22, 25 à 27 de l'annexe.
+
+### Modifié
+- Toutes les transitions du §4.2 sont proposées ; les passages de vente, de colis et de sortie du stock ont leur
+  propre formulaire. Corriger la date d'une vente, d'un envoi ou d'une finalisation l'applique à tout le colis.
+
+### Corrigé
+- Historique des statuts : les changements enregistrés à la même minute s'affichent dans l'ordre.
+
 ## [0.2.0] — 06/10/2026
 
 Lot 2 — saisie terrain (développé en autonomie, à valider sur le téléphone).
