@@ -8,6 +8,8 @@ import { routesCorbeille } from "./corbeille/routes.js";
 import type { Base } from "./base/connexion.js";
 import { poserCookie, routesCompte } from "./compte/routes.js";
 import { lireSession, NOM_COOKIE, type UtilisateurConnecte } from "./compte/sessions.js";
+import { type ClientIA, creerClientGemini } from "./ia/gemini.js";
+import { routesIA } from "./ia/routes.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
@@ -23,6 +25,8 @@ export interface DependancesApp {
   verifierBase: () => Promise<boolean>;
   /** Horloge (remplaçable dans les tests). */
   maintenant?: () => Date;
+  /** Client IA (Gemini) ; par défaut, celui configuré dans .env. Les tests passent un client simulé. */
+  ia?: ClientIA;
   /** Dossier des photos (data/photos). */
   dossierPhotos: string;
   /** Dossier de l'interface compilée ; absent en développement (Vite sert l'interface). */
@@ -53,6 +57,7 @@ export async function creerApp({
   verifierBase,
   maintenant = () => new Date(),
   dossierPhotos,
+  ia = creerClientGemini(process.env.GEMINI_API_KEY, process.env.GEMINI_MODELE),
   dossierClient,
   journaliser = false,
 }: DependancesApp) {
@@ -111,6 +116,7 @@ export async function creerApp({
   const stockage = creerStockagePhotos(dossierPhotos);
   routesPhotos(app, contexte, stockage);
   routesCorbeille(app, contexte, stockage);
+  routesIA(app, contexte, stockage, ia);
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {
     await app.register(fastifyStatic, { root: dossierClient });

@@ -1,8 +1,9 @@
 // Fiche article (création et modification) — cahier des charges §5.2 : champs, photos, sortie, lot, coûts.
 // Catégorie (arbre Vinted), marque et état obligatoires ; gamme en texte libre (décisions du 05/10/2026).
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { api, type Article, type DonneesArticle, type Referentiels, type TypeListe } from "../api.js";
+import { api, type Article, type DonneesArticle, envoyerImage, type Referentiels, type TypeListe } from "../api.js";
+import { BlocAnnonce } from "../composants/BlocAnnonce.js";
 import { BlocMontants } from "../composants/BlocMontants.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
@@ -83,6 +84,8 @@ export function FicheArticle() {
   const [form, setForm] = useState<Formulaire>(formulaireVide);
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
+  const [lecture, setLecture] = useState(false);
+  const etiquette = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let actif = true;
@@ -196,6 +199,40 @@ export function FicheArticle() {
     }
   }
 
+  /** « Lire l'étiquette » (§5.5) : propositions placées dans le formulaire, rien n'est enregistré avant validation. */
+  async function lireEtiquette(evenement: ChangeEvent<HTMLInputElement>) {
+    const image = evenement.target.files?.[0];
+    evenement.target.value = "";
+    if (!image || refs === null) return;
+    setLecture(true);
+    setMessage(null);
+    try {
+      const p = await envoyerImage<{
+        marque: string | null;
+        taille: string | null;
+        categorie: string | null;
+        categorieTexte: string | null;
+        matiere: string | null;
+      }>("/api/etiquette", image);
+      const categorie = refs.categories.find((c) => c.code === p.categorie);
+      setForm((f) => ({
+        ...f,
+        marque: p.marque ?? f.marque,
+        taille: p.taille ?? f.taille,
+        matiere: p.matiere ?? f.matiere,
+        ...(categorie ? { categorie: categorie.code, categorieTexte: categorie.chemin.join(SEPARATEUR) } : {}),
+      }));
+      setMessage({
+        type: "ok",
+        texte: `Étiquette lue${p.categorieTexte && !categorie ? ` (catégorie proposée : « ${p.categorieTexte} », à choisir dans la liste)` : ""}. Vérifiez les champs puis enregistrez.`,
+      });
+    } catch (e) {
+      setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Lecture impossible." });
+    } finally {
+      setLecture(false);
+    }
+  }
+
   function apresChangementStatut(a: Article) {
     setArticle(a);
     setForm((f) => ({ ...f, prixAffiche: centimesVersSaisie(a.prixAffiche) }));
@@ -216,7 +253,19 @@ export function FicheArticle() {
       </Link>
       <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
 
-      <form className="formulaire" onSubmit={(e) => void enregistrer(e)} noValidate>
+      <input
+        ref={etiquette}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(e) => void lireEtiquette(e)}
+      />
+      <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
+        {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
+      </button>
+
+      <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
         <label className="champ">
           <span>Nom *</span>
           <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
@@ -327,6 +376,7 @@ export function FicheArticle() {
       </form>
 
       {article && <InfosAchat article={article} />}
+      {article && <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />}
       {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
       {article && <BlocMontants article={article} onMiseAJour={setArticle} />}
