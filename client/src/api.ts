@@ -69,6 +69,30 @@ export async function envoyerPhoto(image: Blob, type: "terrain" | "annonce"): Pr
   return id;
 }
 
+/** Envoie une image brute à une adresse de l'API et renvoie la réponse (ex. lecture d'étiquette). */
+export async function envoyerImage<T>(chemin: string, image: Blob): Promise<T> {
+  let reponse: Response;
+  try {
+    reponse = await fetch(chemin, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": image.type || "image/jpeg" },
+      body: image,
+    });
+  } catch {
+    throw new ErreurApi(0, "Serveur injoignable. Vérifiez votre connexion.");
+  }
+  const contenu: unknown = await reponse.json().catch(() => null);
+  if (!reponse.ok) {
+    const message =
+      typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
+        ? contenu.erreur
+        : `Erreur ${reponse.status}`;
+    throw new ErreurApi(reponse.status, message);
+  }
+  return contenu as T;
+}
+
 export const urlPhoto = (id: string) => `/api/photos/${id}`;
 export const urlVignette = (id: string) => `/api/photos/${id}/vignette`;
 

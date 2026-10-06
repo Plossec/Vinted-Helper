@@ -3,6 +3,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api, type Sante } from "../api.js";
 import { ParametresCalcul } from "../composants/ParametresCalcul.js";
+import { PromptsIA } from "../composants/PromptsIA.js";
 
 export function Reglages() {
   const naviguer = useNavigate();
@@ -80,6 +81,7 @@ export function Reglages() {
       </section>
 
       <ParametresCalcul />
+      <PromptsIA />
 
       <section className="section">
         <h2>Changer le mot de passe</h2>

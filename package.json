@@ -1,6 +1,6 @@
 {
   "name": "vinted-helper",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "Aide à la gestion des achats et ventes Vinted",
   "type": "module",

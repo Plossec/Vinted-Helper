@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.6.0] — 06/10/2026
+
+Lot 6 — IA Gemini (à valider avec votre clé Gemini).
+
+### Ajouté
+- Fiche article, section **Annonce** : titre et description enregistrés et modifiables, **✨ Générer l'annonce**
+  (Gemini, à partir de la fiche et de 3-4 photos ; titre ≤ 60 caractères ; « Réf. 127 » ajouté en dernière ligne),
+  **Copier**, **Copier le prompt** (secours vers une IA gratuite si Gemini est indisponible).
+- **🏷 Lire l'étiquette** : marque, taille, catégorie et matière proposées dans le formulaire, sans enregistrement
+  avant validation.
+- Réglages → **IA (Gemini)** : prompts modifiables, retour au prompt d'origine.
+- Guide de configuration de la clé Gemini (README §11). La clé reste côté serveur.
+
 ## [0.5.0] — 06/10/2026
 
 Lot 5 — tableau de bord (à valider).

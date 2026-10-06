@@ -55,7 +55,7 @@ describe("client Gemini (requête simulée)", () => {
 
   it("lit le texte de la réponse et envoie la clé dans l'en-tête (jamais dans l'adresse)", async () => {
     let url = "";
-    let entetes: HeadersInit | undefined;
+    let entetes: RequestInit["headers"];
     const ok = (async (u: string, init: RequestInit) => {
       url = u;
       entetes = init.headers;
