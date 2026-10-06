@@ -21,8 +21,8 @@ Il faut **Google Chrome** et **Node.js** (déjà installé pour le projet).
    Le script installe le programme, demande l'**adresse** de l'application (Entrée = `http://localhost:3000` ; sur
    OVH, l'adresse `https://…` du serveur) et le **jeton**, le fait démarrer avec Windows (fenêtre réduite) et le lance.
 3. Résultat attendu : « Installé. » en vert. Le programme vérifie **toutes les 5 minutes** s'il y a des articles à
-   publier (une sélection de plusieurs articles est ensuite traitée d'affilée) ; l'écran **Publication Vinted** de
-   l'application indique « Programme actif ».
+   publier, et publie **un seul article toutes les 10 minutes** (une sélection de 6 articles prend donc environ
+   1 heure) ; l'écran **Publication Vinted** de l'application indique « Programme actif ».
 
 La configuration est dans `%LOCALAPPDATA%\VintedHelper\publication.json`, le journal dans
 `%LOCALAPPDATA%\VintedHelper\publication.log`. Pour changer d'adresse ou de jeton, relancez le script.

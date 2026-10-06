@@ -22,7 +22,9 @@ const args = new Set(process.argv.slice(2));
 const UNE_FOIS = args.has("--une-fois"); // tests : s'arrête quand la file est vide
 const ATTENTE_MS = Number(process.env.VH_ATTENTE_MS ?? 5 * 60_000);
 const PAUSE_ESSAI_MS = Number(process.env.VH_PAUSE_ESSAI_MS ?? 20_000);
-const PAUSE_ENTRE_ARTICLES_MS = Number(process.env.VH_PAUSE_MS ?? 5_000);
+// Une seule publication toutes les 10 minutes (décision de l'utilisateur) ; les essais ne publient rien et s'enchaînent.
+const PAUSE_ENTRE_ARTICLES_MS = Number(process.env.VH_PAUSE_MS ?? 10 * 60_000);
+const PAUSE_APRES_ESSAI_MS = 5_000;
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function ouvrirNavigateur() {
@@ -158,7 +160,12 @@ async function principal() {
         resultat = { resultat: "erreur", message };
       }
       await api.resultat(demande.id, resultat);
-      await pause(PAUSE_ENTRE_ARTICLES_MS);
+      if (resultat.resultat !== "essai") journal("Prochaine publication possible dans 10 minutes.");
+      await pause(
+        resultat.resultat === "essai"
+          ? Math.min(PAUSE_APRES_ESSAI_MS, PAUSE_ENTRE_ARTICLES_MS)
+          : PAUSE_ENTRE_ARTICLES_MS,
+      );
     } catch (erreur) {
       journal(`Problème : ${erreur instanceof Error ? erreur.message : erreur}. Nouvel essai dans 30 s.`);
       if (UNE_FOIS) break;

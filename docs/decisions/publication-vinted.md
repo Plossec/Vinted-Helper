@@ -31,7 +31,9 @@ changement du site Vinted.
 **Précisions de réalisation (06/10/2026, tranchées par Claude)**
 - **Fréquence** : le programme demande à l'application **toutes les 5 minutes** s'il y a des articles à publier
   (changé le 06/10/2026 à la demande de l'utilisateur, au lieu de 10 s). Une sélection de plusieurs articles est
-  ensuite traitée d'affilée. L'écran Publication Vinted affiche le programme « arrêté » après 11 minutes sans nouvelles.
+  publiée à raison d'**un seul article toutes les 10 minutes** (précisé le 06/10/2026 par l'utilisateur) ; les essais,
+  qui ne publient rien, s'enchaînent. L'écran Publication Vinted affiche le programme « arrêté » après 16 minutes sans
+  nouvelles.
 - **Jeton** : un code d'accès réservé au programme (il commence par `vh_`), qui remplace le mot de passe puisque le
   programme tourne sans l'utilisateur. Il est créé dans Réglages → Publication Vinted et affiché une seule fois ; en
   créer un nouveau annule l'ancien. L'application n'en garde qu'une version brouillée (empreinte), qui permet de le
