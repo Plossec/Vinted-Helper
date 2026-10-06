@@ -29,6 +29,8 @@ l'utilisateur plutôt que de supposer**. Toute décision prise en cours de route
 | Restaurer une sauvegarde automatique | `docker compose stop app` puis `docker compose exec sauvegarde sh /scripts/restaurer.sh AAAA-MM-JJ` (README §6) |
 | Générer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` (`npm run db:generate` ne transmet pas `--name`) |
 | Appliquer les migrations | `npm run db:migrate` (aussi automatique au démarrage) |
+| Serveur OVH : installer / mettre à jour | `sudo bash scripts/ovh/installer.sh` / `sudo bash scripts/ovh/mettre-a-jour.sh` (sur le serveur, guide `docs/mise-en-ligne-ovh.md`) |
+| Rapatrier les sauvegardes du serveur sur le PC | `powershell -ExecutionPolicy Bypass -File scripts\rapatrier-sauvegardes.ps1` |
 | Réinitialiser le mot de passe | `docker compose exec -it app npm run reset-password -w server` |
 
 Garde ce tableau à jour si les commandes changent. Arborescence : `server/` (API, base, `src/calculs/`,

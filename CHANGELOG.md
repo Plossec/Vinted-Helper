@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Mise en ligne sur un VPS OVH (issue #2) : guide pas à pas `docs/mise-en-ligne-ovh.md`, installation en une
+  commande (Docker, pare-feu, fail2ban, mises à jour de sécurité, `.env` par questions), HTTPS Let's Encrypt
+  automatique, script de mise à jour, rapatriement des sauvegardes sur le PC (`scripts/rapatrier-sauvegardes.ps1`).
+
+### Modifié
+- Sauvegarde automatique : les archives de photos sont gardées 7 jours, sauf celles du dimanche (30 jours), pour
+  limiter la place prise sur le disque ; la base reste gardée 30 jours.
+
 ## [0.7.0] — 06/10/2026
 
 Lot 7 — alertes et sauvegarde (à valider). Tous les lots du cahier des charges sont livrés.

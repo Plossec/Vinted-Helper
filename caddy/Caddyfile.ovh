@@ -1,0 +1,15 @@
+# Serveur OVH : HTTPS avec un certificat Let's Encrypt (gratuit, renouvelé automatiquement).
+# L'adresse (DOMAINE) est indiquée dans le fichier .env du serveur.
+{
+	admin off
+}
+
+{$DOMAINE} {
+	encode zstd gzip
+	reverse_proxy app:3000
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+	}
+}

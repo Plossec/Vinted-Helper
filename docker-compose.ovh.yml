@@ -1,0 +1,24 @@
+# Réglages propres au serveur OVH, ajoutés à docker-compose.yml (guide : docs/mise-en-ligne-ovh.md).
+# Sur le serveur, le fichier .env contient COMPOSE_FILE=docker-compose.yml:docker-compose.ovh.yml :
+# les commandes habituelles (docker compose up -d, logs, stop…) utilisent donc automatiquement ces réglages.
+
+services:
+  db:
+    # La base n'est jamais accessible depuis internet (ni même depuis le serveur hors Docker).
+    ports: !reset []
+
+  app:
+    # L'application n'est joignable qu'à travers le relais HTTPS.
+    ports: !reset []
+
+  https:
+    environment:
+      DOMAINE: ${DOMAINE}
+    # Vrai certificat Let's Encrypt, obtenu et renouvelé automatiquement par Caddy.
+    ports: !override
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes: !override
+      - ./caddy/Caddyfile.ovh:/etc/caddy/Caddyfile:ro
+      - certificats:/data
