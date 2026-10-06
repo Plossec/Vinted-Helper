@@ -180,6 +180,25 @@ describe("saisie terrain", () => {
     expect((await requete("GET", "/api/sorties")).json<unknown[]>()).toHaveLength(1);
   });
 
+  it("annuler la sortie : articles à la corbeille (restaurables, sans sortie), sortie et essence supprimées", async () => {
+    const sortieId = await demarrerSortie(450);
+    const seul = await acheter(sortieId, 200, 1);
+    const lot = await acheter(sortieId, 1500, 3);
+
+    const r = await requete("DELETE", `/api/sorties/${sortieId}`);
+    expect(r.statusCode, r.body).toBe(200);
+    expect((await requete("GET", `/api/sorties/${sortieId}`)).statusCode).toBe(404);
+    const corbeille = (await requete("GET", "/api/corbeille")).json<{ id: string }[]>().map((a) => a.id);
+    expect(corbeille).toEqual(expect.arrayContaining([...seul.articleIds, ...lot.articleIds]));
+
+    const id = seul.articleIds[0] ?? "";
+    expect((await requete("POST", `/api/corbeille/${id}/restauration`)).statusCode).toBe(200);
+    expect(await lireArticle(id)).toMatchObject({ sortieId: null, prixAchat: 200, couts: { essence: 0 } });
+
+    // Renvoi par la file du téléphone : sans erreur.
+    expect((await requete("DELETE", `/api/sorties/${sortieId}`)).statusCode).toBe(200);
+  });
+
   it("article Maison : sans sortie, lieu Maison, prix 0 €, sans essence", async () => {
     const { articleIds } = await acheter(null, 999, 1);
     const a = await lireArticle(articleIds[0] ?? "");

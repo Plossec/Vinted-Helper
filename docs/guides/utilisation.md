@@ -11,6 +11,8 @@
    photo. « Achat sans photo » si besoin.
 3. **Essence** : à saisir quand vous voulez (pendant ou après) ; elle est répartie automatiquement sur les articles.
 4. **Terminer la sortie** quand vous rentrez. La sortie reste modifiable dans **Terrain → Toutes les sorties**.
+   Sortie démarrée par erreur : **Annuler la sortie** (après confirmation, ses achats vont à la corbeille,
+   restaurables 30 jours, et l'essence est effacée ; fonctionne aussi sans réseau).
 
 Sans réseau, tout est **gardé sur le téléphone** : le bandeau affiche « N éléments en attente d'envoi » et l'envoi se
 fait tout seul au retour sur le Wi-Fi de la maison (les références `#0127` sont attribuées à ce moment-là).

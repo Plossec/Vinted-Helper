@@ -5,6 +5,7 @@ import {
   type BilanEnvoi,
   type ElementFile,
   envoyerAuServeur,
+  elementsDeLaSortie,
   envoyerFile,
   listerDansLOrdre,
   type Operation,
@@ -63,6 +64,15 @@ export async function ajouterALaFile(...operations: Operation[]): Promise<void> 
   }
   await rafraichir();
   void envoyerMaintenant();
+}
+
+/**
+ * Annule une sortie : retire du téléphone tout ce qui la concerne et pas encore envoyé, puis demande au serveur
+ * de l'annuler (sans effet si elle n'y était pas encore). Fonctionne sans réseau.
+ */
+export async function annulerSortie(sortieId: string): Promise<void> {
+  for (const e of elementsDeLaSortie(await stockage.lister(), sortieId)) await stockage.supprimer(e.cle);
+  await ajouterALaFile({ type: "annulation-sortie", sortieId });
 }
 
 /** Remet un élément refusé dans la file (après correction côté serveur, par exemple). */

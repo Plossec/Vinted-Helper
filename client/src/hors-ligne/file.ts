@@ -26,7 +26,8 @@ export type Operation =
   | { type: "sortie"; corps: CorpsSortie }
   | { type: "essence"; sortieId: string; montantEssence: number }
   | { type: "photo"; photoId: string; typePhoto: "terrain" | "annonce"; image: Blob }
-  | { type: "achat"; corps: CorpsAchat };
+  | { type: "achat"; corps: CorpsAchat }
+  | { type: "annulation-sortie"; sortieId: string };
 
 export interface ElementFile {
   /** Identifiant de l'élément dans la file. */
@@ -98,6 +99,29 @@ export async function interpreterReponse(reponse: Response): Promise<ResultatEnv
   return { etat: "refuse", message };
 }
 
+/**
+ * Éléments de la file liés à une sortie (création, essence, achats et leurs photos terrain) : à retirer du
+ * téléphone quand la sortie est annulée, pour qu'ils ne soient jamais envoyés.
+ */
+export function elementsDeLaSortie(elements: ElementFile[], sortieId: string): ElementFile[] {
+  const achats = elements.filter((e) => e.operation.type === "achat" && e.operation.corps.sortieId === sortieId);
+  const photos = new Set(achats.map((e) => (e.operation.type === "achat" ? e.operation.corps.photoId : null)));
+  return elements.filter((e) => {
+    const op = e.operation;
+    switch (op.type) {
+      case "sortie":
+        return op.corps.id === sortieId;
+      case "essence":
+      case "annulation-sortie":
+        return op.sortieId === sortieId;
+      case "achat":
+        return op.corps.sortieId === sortieId;
+      case "photo":
+        return photos.has(op.photoId);
+    }
+  });
+}
+
 /** Envoi réel au serveur. */
 export const envoyerAuServeur: Envoyeur = async (operation) => {
   const json = (methode: string, chemin: string, corps: unknown) =>
@@ -127,6 +151,9 @@ export const envoyerAuServeur: Envoyeur = async (operation) => {
       break;
     case "achat":
       reponse = await json("POST", "/api/achats", operation.corps);
+      break;
+    case "annulation-sortie":
+      reponse = await fetch(`/api/sorties/${operation.sortieId}`, { method: "DELETE", credentials: "same-origin" });
       break;
   }
   return interpreterReponse(reponse);

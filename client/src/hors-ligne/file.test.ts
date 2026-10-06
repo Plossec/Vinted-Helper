@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   creerStockageMemoire,
   type ElementFile,
+  elementsDeLaSortie,
   envoyerFile,
   type Envoyeur,
   interpreterReponse,
@@ -96,5 +97,25 @@ describe("interpreterReponse", () => {
       etat: "refuse",
       message: "Prix : obligatoire.",
     });
+  });
+});
+
+describe("elementsDeLaSortie", () => {
+  it("retient la sortie, son essence, ses achats et leurs photos, et rien d'autre", () => {
+    const image = new Blob();
+    const achat = (sortieId: string | null, photoId: string | null): Operation => ({
+      type: "achat",
+      corps: { id: `a-${photoId}`, articleIds: ["x"], sortieId, prixTotal: 100, photoId, date: "2026-10-06" },
+    });
+    const elements = [
+      element("1", 1, { type: "sortie", corps: { id: "S", date: "2026-10-06", lieuNom: "Braderie", notes: null } }),
+      element("2", 2, { type: "photo", photoId: "p1", typePhoto: "terrain", image }),
+      element("3", 3, achat("S", "p1")),
+      element("4", 4, essence("S")),
+      element("5", 5, { type: "photo", photoId: "p2", typePhoto: "terrain", image }),
+      element("6", 6, achat(null, "p2")),
+      element("7", 7, essence("autre")),
+    ];
+    expect(elementsDeLaSortie(elements, "S").map((e) => e.cle)).toEqual(["1", "2", "3", "4"]);
   });
 });

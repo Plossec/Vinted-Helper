@@ -1,7 +1,7 @@
 // Sorties d'achat (§5.1) : création (identifiant généré sur le téléphone), modification, essence, lecture.
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { article, lieu, sortie } from "../base/schema.js";
+import { article, lieu, lotAchat, sortie } from "../base/schema.js";
 import { calculer } from "../couts/service.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
@@ -59,6 +59,27 @@ export async function modifierSortie(base: Base, utilisateurId: string, id: stri
       .update(article)
       .set({ dateAchat: donnees.date, lieuId: donnees.lieuId })
       .where(and(eq(article.sortieId, id), eq(article.utilisateurId, utilisateurId)));
+  });
+}
+
+/**
+ * Annule la sortie (Terrain → « Annuler la sortie ») : ses articles vont à la corbeille (restaurables, sans sortie),
+ * ses lots perdent leur sortie, la sortie et son essence sont supprimées. Une sortie déjà annulée ou inconnue
+ * ne provoque pas d'erreur (renvoi par la file d'attente du téléphone).
+ */
+export async function annulerSortie(base: Base, utilisateurId: string, id: string, maintenant: Date) {
+  await base.transaction(async (tx) => {
+    const [s] = await tx
+      .select({ id: sortie.id })
+      .from(sortie)
+      .where(and(eq(sortie.id, id), eq(sortie.utilisateurId, utilisateurId)));
+    if (!s) return;
+    await tx
+      .update(article)
+      .set({ supprimeLe: sql`coalesce(${article.supprimeLe}, ${maintenant})`, sortieId: null, modifieLe: maintenant })
+      .where(eq(article.sortieId, id));
+    await tx.update(lotAchat).set({ sortieId: null }).where(eq(lotAchat.sortieId, id));
+    await tx.delete(sortie).where(eq(sortie.id, id));
   });
 }
 
