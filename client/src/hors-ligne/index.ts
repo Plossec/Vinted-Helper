@@ -40,9 +40,12 @@ export function envoyerMaintenant(): Promise<void> {
   envoiPromis ??= (async () => {
     publier({ envoiEnCours: true });
     try {
+      const avant = (await stockage.lister()).filter((e) => e.erreur === null).length;
       const bilan = await envoyerFile(stockage, envoyerAuServeur);
       publier({ bilan });
-      if (bilan === "termine") window.dispatchEvent(new Event("file-envoyee"));
+      // Seulement si quelque chose a été envoyé : les écrans qui écoutent cet évènement relancent eux-mêmes un envoi
+      // (vérification de la connexion), ce qui tournerait sans fin sur une file vide.
+      if (bilan === "termine" && avant > 0) window.dispatchEvent(new Event("file-envoyee"));
     } finally {
       await rafraichir();
       publier({ envoiEnCours: false });
