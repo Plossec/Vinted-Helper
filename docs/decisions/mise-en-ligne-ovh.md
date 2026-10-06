@@ -17,3 +17,14 @@ plus tard) ; sauvegardes rapatriées sur le PC ; le serveur démarre vide ; conn
 | Sauvegardes | Archives de photos réduites à 7 jours + dimanches 30 jours (une archive complète par jour pendant 30 jours remplirait le disque du VPS). Rapatriement : `sftp get -a` (une seule demande de mot de passe, seuls les fichiers nouveaux sont téléchargés), testé ; automatique seulement avec une clé SSH. |
 | Mise à jour | `scripts/ovh/mettre-a-jour.sh` : sauvegarde de la base, `git pull --ff-only`, reconstruction. |
 | Version | 1.0.0 après validation de la mise en ligne par l'utilisateur. |
+
+---
+
+## 06/10/2026 — Rapatriement automatique des sauvegardes (demande de l'utilisateur)
+
+| Sujet | Décision |
+|---|---|
+| Principe | Clé SSH dédiée créée sur le PC (`%USERPROFILE%\.ssh\vinted-helper-sauvegardes`, sans phrase secrète pour tourner seule), déposée sur le serveur par `scripts/installer-sauvegarde-auto.ps1` (mot de passe SSH demandé une dernière fois). |
+| Limitation de la clé | `restrict,command="internal-sftp -R -d /opt/vinted-helper/sauvegardes/auto"` : uniquement sftp en **lecture seule** ; ni terminal, ni commande, ni modification ou suppression. La connexion par mot de passe reste inchangée. |
+| Planification | Tâche planifiée Windows « Vinted Helper - sauvegardes », chaque jour à 12 h, rattrapée au démarrage si le PC était éteint, seulement avec réseau. Journal : `rapatriement.log` dans le dossier des sauvegardes. |
+| Risque accepté | Quelqu'un qui a accès au PC peut lire les sauvegardes du serveur, qui sont de toute façon déjà copiées sur ce PC. |
