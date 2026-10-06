@@ -70,6 +70,12 @@ export function Reglages() {
           <Link to="/sorties" className="bouton">
             Sorties
           </Link>
+          <Link to="/listes" className="bouton">
+            Marques et lieux
+          </Link>
+          <Link to="/corbeille" className="bouton">
+            Corbeille
+          </Link>
         </div>
       </section>
 

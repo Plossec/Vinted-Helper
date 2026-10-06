@@ -4,6 +4,8 @@ import { amorcerCompte } from "./base/amorcage.js";
 import { creerConnexion } from "./base/connexion.js";
 import { appliquerMigrations } from "./base/migrer.js";
 import { config } from "./config.js";
+import { purgerCorbeille } from "./corbeille/service.js";
+import { creerStockagePhotos } from "./photos/stockage.js";
 
 const connexion = creerConnexion();
 
@@ -38,6 +40,19 @@ async function arreter(signal: string): Promise<void> {
 }
 process.on("SIGTERM", () => void arreter("SIGTERM"));
 process.on("SIGINT", () => void arreter("SIGINT"));
+
+// Corbeille : suppression définitive des articles supprimés depuis plus de 30 jours (au démarrage puis chaque jour).
+const stockagePhotos = creerStockagePhotos(config.dossierPhotos);
+async function purger(): Promise<void> {
+  try {
+    const nombre = await purgerCorbeille(connexion.db, stockagePhotos, new Date());
+    if (nombre > 0) console.info(`Corbeille : ${nombre} article(s) supprimé(s) définitivement.`);
+  } catch (erreur) {
+    console.error("Purge de la corbeille impossible :", erreur instanceof Error ? erreur.message : erreur);
+  }
+}
+void purger();
+setInterval(() => void purger(), 24 * 60 * 60 * 1000).unref();
 
 await app.listen({ host: "0.0.0.0", port: config.port });
 console.info(`Vinted Helper ${config.version} démarré sur le port ${config.port}.`);
