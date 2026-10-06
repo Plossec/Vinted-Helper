@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.0.0] — 06/10/2026
+
+Mise en ligne sur le serveur OVH validée : l'application est utilisable partout (`https://vps-6b2cf0b2.vps.ovh.net`),
+sauvegardée chaque nuit et rapatriée sur le PC.
+
+> Publication automatique sur Vinted **en pause** : Vinted a bloqué la session au premier essai (activité
+> automatisée détectée). Le programme du PC est arrêté ; la suite est à décider.
+
 ### Ajouté
 - Terrain : bouton **Annuler la sortie**, avec confirmation ; les achats de la sortie vont à la corbeille
   (restaurables 30 jours, sans sortie), l'essence est effacée. Fonctionne sans réseau.
