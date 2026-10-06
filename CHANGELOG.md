@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Terrain : bouton **Annuler la sortie**, avec confirmation ; les achats de la sortie vont à la corbeille
+  (restaurables 30 jours, sans sortie), l'essence est effacée. Fonctionne sans réseau.
+
+### Corrigé
+- La file d'attente du téléphone tournait en boucle quand elle était vide (requêtes continues vers le serveur).
+
 ### Modifié
 - Terrain → Démarrer une sortie : le **lieu se saisit librement** (lieux connus proposés) ; un lieu nouveau est
   ajouté à la liste, même saisi sans réseau.

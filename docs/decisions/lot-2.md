@@ -41,3 +41,14 @@ texte libre**, avec les lieux connus proposés pendant la frappe. Un nom déjà 
 ni des accents) réutilise ce lieu ; un nom nouveau est **ajouté à la liste des lieux** à l'envoi de la sortie, y
 compris saisi sans réseau (le téléphone envoie le nom, le serveur retrouve ou crée le lieu). Couvre la « création
 automatique depuis la saisie terrain » de l'issue #7.
+
+---
+
+## 06/10/2026 — Annuler la sortie (demande de l'utilisateur)
+
+- Bouton **Annuler la sortie** sur l'écran Terrain (sortie en cours), avec confirmation indiquant le nombre d'achats.
+- Choix de l'utilisateur : les articles de la sortie vont **à la corbeille** (restaurables 30 jours) ; restaurés, ils
+  n'ont plus de sortie (lieu et date d'achat conservés, plus d'essence). Les lots perdent leur sortie ; la sortie et
+  son essence sont supprimées.
+- Sans réseau : ce qui n'est pas encore envoyé (sortie, achats, photos, essence) est retiré du téléphone, puis
+  l'annulation est mise dans la file ; le serveur l'accepte même si la sortie ne lui est jamais parvenue.

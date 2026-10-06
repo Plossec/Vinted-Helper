@@ -5,6 +5,7 @@ import {
   type BilanEnvoi,
   type ElementFile,
   envoyerAuServeur,
+  elementsDeLaSortie,
   envoyerFile,
   listerDansLOrdre,
   type Operation,
@@ -40,9 +41,12 @@ export function envoyerMaintenant(): Promise<void> {
   envoiPromis ??= (async () => {
     publier({ envoiEnCours: true });
     try {
+      const avant = (await stockage.lister()).filter((e) => e.erreur === null).length;
       const bilan = await envoyerFile(stockage, envoyerAuServeur);
       publier({ bilan });
-      if (bilan === "termine") window.dispatchEvent(new Event("file-envoyee"));
+      // Seulement si quelque chose a été envoyé : les écrans qui écoutent cet évènement relancent eux-mêmes un envoi
+      // (vérification de la connexion), ce qui tournerait sans fin sur une file vide.
+      if (bilan === "termine" && avant > 0) window.dispatchEvent(new Event("file-envoyee"));
     } finally {
       await rafraichir();
       publier({ envoiEnCours: false });
@@ -60,6 +64,15 @@ export async function ajouterALaFile(...operations: Operation[]): Promise<void> 
   }
   await rafraichir();
   void envoyerMaintenant();
+}
+
+/**
+ * Annule une sortie : retire du téléphone tout ce qui la concerne et pas encore envoyé, puis demande au serveur
+ * de l'annuler (sans effet si elle n'y était pas encore). Fonctionne sans réseau.
+ */
+export async function annulerSortie(sortieId: string): Promise<void> {
+  for (const e of elementsDeLaSortie(await stockage.lister(), sortieId)) await stockage.supprimer(e.cle);
+  await ajouterALaFile({ type: "annulation-sortie", sortieId });
 }
 
 /** Remet un élément refusé dans la file (après correction côté serveur, par exemple). */

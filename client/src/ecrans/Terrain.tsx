@@ -11,7 +11,7 @@ import {
   type SortieEnCours,
 } from "../hors-ligne/cache.js";
 import type { CorpsAchat, Operation } from "../hors-ligne/file.js";
-import { ajouterALaFile, useFile } from "../hors-ligne/index.js";
+import { ajouterALaFile, annulerSortie, useFile } from "../hors-ligne/index.js";
 import { aujourdhui, formatDate } from "../outils/dates.js";
 import { formatEuros, lireMontant } from "../outils/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
@@ -127,6 +127,12 @@ export function Terrain() {
             setSortie(null);
             setMessage(null);
           }}
+          onAnnuler={async () => {
+            await annulerSortie(sortie.id);
+            memoriserSortieEnCours(null);
+            setSortie(null);
+            setMessage({ type: "ok", texte: "Sortie annulée." });
+          }}
           message={message}
           setMessage={setMessage}
         />
@@ -236,6 +242,7 @@ function SortieActive({
   onAchat,
   onAchatSansPhoto,
   onTerminer,
+  onAnnuler,
   message,
   setMessage,
 }: {
@@ -243,6 +250,7 @@ function SortieActive({
   onAchat: () => void;
   onAchatSansPhoto: () => void;
   onTerminer: () => void;
+  onAnnuler: () => Promise<void>;
   message: { type: "ok" | "erreur"; texte: string } | null;
   setMessage: SetMessage;
 }) {
@@ -378,6 +386,26 @@ function SortieActive({
           }}
         >
           Terminer la sortie
+        </button>
+        <button
+          className="bouton bouton--danger"
+          type="button"
+          onClick={() => {
+            const nombre =
+              enAttente.reduce((n, a) => n + a.corps.articleIds.length, 0) + (serveur?.articles.length ?? 0);
+            const achats =
+              nombre === 0
+                ? ""
+                : ` Ses ${nombre} article${nombre > 1 ? "s" : ""} iront à la corbeille (restaurables 30 jours).`;
+            if (
+              window.confirm(
+                `Annuler la sortie « ${sortie.lieu} » du ${formatDate(sortie.date)} ?${achats} L'essence saisie sera effacée.`,
+              )
+            )
+              void onAnnuler();
+          }}
+        >
+          Annuler la sortie
         </button>
       </div>
     </>

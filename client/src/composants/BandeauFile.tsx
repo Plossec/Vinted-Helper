@@ -2,7 +2,13 @@
 import { Link } from "react-router";
 import { abandonner, envoyerMaintenant, reessayer, useFile } from "../hors-ligne/index.js";
 
-const LIBELLES = { sortie: "Sortie", essence: "Essence", photo: "Photo", achat: "Achat" } as const;
+const LIBELLES = {
+  sortie: "Sortie",
+  essence: "Essence",
+  photo: "Photo",
+  achat: "Achat",
+  "annulation-sortie": "Annulation de sortie",
+} as const;
 
 export function BandeauFile() {
   const { elements, bilan, envoiEnCours } = useFile();

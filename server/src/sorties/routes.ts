@@ -15,6 +15,7 @@ import {
   uuidObligatoire,
 } from "../outils/validation.js";
 import {
+  annulerSortie,
   creerSortie,
   type DonneesSortie,
   listerSorties,
@@ -58,6 +59,11 @@ export function routesSorties(app: FastifyInstance, { base, maintenant, utilisat
     const id = idDe(requete.params);
     await modifierSortie(base, utilisateurId, id, lireDonneesSortie(requete.body));
     return lireSortie(base, utilisateurId, id);
+  });
+
+  app.delete("/api/sorties/:id", async (requete) => {
+    await annulerSortie(base, utilisateurDe(requete).id, idDe(requete.params), maintenant());
+    return { ok: true };
   });
 
   app.put("/api/sorties/:id/essence", async (requete) => {
