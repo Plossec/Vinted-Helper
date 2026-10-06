@@ -8,6 +8,7 @@ cd "$(dirname "$0")/../.."
 
 echo "==> Sauvegarde de la base avant mise à jour"
 mkdir -p sauvegardes/avant-mise-a-jour
+chmod 755 sauvegardes # lisible par « ubuntu » (rapatriement sur le PC), corrige les installations antérieures
 fichier="sauvegardes/avant-mise-a-jour/$(date +%Y-%m-%d_%H-%M-%S).sql.gz"
 docker compose exec -T sauvegarde sh -c 'pg_dump --clean --if-exists --no-owner' | gzip > "$fichier"
 echo "Sauvegarde : $fichier"

@@ -10,6 +10,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   (restaurables 30 jours, sans sortie), l'essence est effacée. Fonctionne sans réseau.
 
 ### Corrigé
+- Serveur OVH : le dossier des sauvegardes était illisible pour l'utilisateur `ubuntu`, ce qui empêchait le
+  rapatriement sur le PC (corrigé à l'installation et à la mise à jour).
 - La file d'attente du téléphone tournait en boucle quand elle était vide (requêtes continues vers le serveur).
 
 ### Modifié

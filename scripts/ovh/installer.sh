@@ -65,6 +65,8 @@ else
   done
   read -r -p "Clé Gemini (laisser vide pour plus tard) : " cle_gemini
   read -r -p "Modèle Gemini [gemini-2.5-flash] : " modele_gemini
+  # umask limité à la création de .env (sinon les dossiers créés ensuite deviendraient illisibles pour « ubuntu »).
+  (
   umask 077
   cat > .env <<FIN
 # Configuration du serveur OVH — créée par scripts/ovh/installer.sh. Ne jamais partager ce fichier.
@@ -79,11 +81,14 @@ GEMINI_API_KEY=${cle_gemini:-votre-cle-gemini}
 GEMINI_MODELE=${modele_gemini:-gemini-2.5-flash}
 SAUVEGARDE_HEURE=3
 FIN
+  )
   chmod 600 .env
   echo "Fichier .env créé (lisible uniquement par l'administrateur)."
 fi
 mkdir -p data/photos sauvegardes
 chown -R 1000:1000 data
+# Sauvegardes lisibles par « ubuntu » : rapatriement sur le PC (scripts/rapatrier-sauvegardes.ps1).
+chmod 755 sauvegardes
 
 etape "6/6 Construction et démarrage de l'application (5 à 10 minutes la première fois)"
 docker compose up -d --build
