@@ -25,7 +25,8 @@ l'utilisateur plutôt que de supposer**. Toute décision prise en cours de route
 | Vérification des types | `npm run typecheck` |
 | Lint | `npm run lint` |
 | Formatage | `npm run format` (vérifier sans modifier : `npm run format:check`) |
-| Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` |
+| Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` (automatique chaque jour : service `sauvegarde`, `sauvegardes/auto/`) |
+| Restaurer une sauvegarde automatique | `docker compose stop app` puis `docker compose exec sauvegarde sh /scripts/restaurer.sh AAAA-MM-JJ` (README §6) |
 | Générer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` (`npm run db:generate` ne transmet pas `--name`) |
 | Appliquer les migrations | `npm run db:migrate` (aussi automatique au démarrage) |
 | Réinitialiser le mot de passe | `docker compose exec -it app npm run reset-password -w server` |

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type Referentiels, type ResumeArticle, type ResumeSortie, urlVignette } from "../api.js";
+import { Alertes } from "../composants/Alertes.js";
 import { ListeDeroulante, type OptionListe } from "../composants/ListeDeroulante.js";
 import { chargerReferentiels } from "../hors-ligne/cache.js";
 import { formatDate } from "../outils/dates.js";
@@ -121,6 +122,7 @@ export function ListeArticles() {
   return (
     <main className="page">
       <h1>Articles</h1>
+      <Alertes />
       <Link to="/articles/nouveau" className="bouton bouton--principal">
         + Nouvel article
       </Link>

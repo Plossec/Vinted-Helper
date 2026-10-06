@@ -270,3 +270,15 @@ sur le téléphone jusqu'au retour (accès depuis partout : OVH, issue #2).
 | Génération | Le résultat est enregistré directement (il reste modifiable) ; confirmation demandée s'il remplace un texte existant. Titre coupé à 60 caractères au dernier mot ; toute ligne « Réf. … » proposée par l'IA est retirée puis « Réf. 127 » est ajouté. |
 | Lecture d'étiquette | La catégorie libre de l'IA est rapprochée de l'arbre Vinted par mots-clés ; si rien ne correspond, elle est seulement affichée. Une marque inconnue est proposée telle quelle (ajoutée à la liste à l'enregistrement de la fiche). |
 | Prompts | Un prompt identique au prompt d'origine n'est pas enregistré, pour profiter des futures améliorations. |
+
+---
+
+## 06/10/2026 — Lot 7 : choix pris en autonomie *à relire*
+
+| Sujet | Décision |
+|---|---|
+| Alertes | Calculées à chaque affichage (rien n'est stocké). Brouillon : depuis la dernière arrivée en Brouillon. Dormant : depuis la dernière baisse du prix affiché après la mise en ligne (une hausse ne relance pas le décompte). Jours comptés en dates de Paris. |
+| Réduction des photos | Faite tout de suite au passage Finalisé / Sortie du stock (colis entier à la finalisation). Irréversible : annuler une sortie du stock ne fait pas revenir les photos supprimées. JPEG qualité 85, 1600 px au plus. |
+| Sauvegarde automatique | Service Docker `sauvegarde` (image PostgreSQL déjà utilisée, rien à installer) : une fois par jour à partir de 3 h, ou au démarrage du PC si l'heure est passée ; base compressée + archive complète des photos ; 30 jours gardés. |
+| Copie hors serveur | En attente de l'issue #2 (OVH) : en local, copie manuelle du dossier `sauvegardes/auto` (clé USB, cloud), expliquée dans le README. |
+| Restauration | Script lancé dans le service `sauvegarde`, application arrêtée ; base remplacée (`pg_dump --clean`), photos remises sans effacer les plus récentes. Testée le 06/10/2026 sur la base de test. |

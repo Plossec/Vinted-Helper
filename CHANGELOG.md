@@ -5,6 +5,20 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.7.0] — 06/10/2026
+
+Lot 7 — alertes et sauvegarde (à valider). Tous les lots du cahier des charges sont livrés.
+
+### Ajouté
+- **Alertes** sur l'écran Articles et pastille sur l'onglet : articles à expédier, brouillons depuis 3 jours ou plus,
+  articles dormants (En ligne depuis 7 jours ou plus, comptés depuis la dernière baisse de prix). Délais modifiables
+  dans les Réglages.
+- **Réduction des photos** au passage en Finalisé ou en Sortie du stock : seules la photo principale et la photo
+  terrain sont gardées, réduites à ~1600 px ; la photo terrain d'un lot n'est réduite que lorsque tous ses articles
+  sont finalisés ou sortis du stock.
+- **Sauvegarde automatique quotidienne** (base + photos) dans `sauvegardes/auto`, conservée 30 jours ; procédure de
+  **restauration** testée et documentée (README §6).
+
 ## [0.6.0] — 06/10/2026
 
 Lot 6 — IA Gemini (à valider avec votre clé Gemini).
