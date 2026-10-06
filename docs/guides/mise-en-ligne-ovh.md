@@ -107,8 +107,27 @@ powershell -ExecutionPolicy Bypass -File scripts\rapatrier-sauvegardes.ps1
 
 Résultat attendu : `Sauvegardes présentes sur le PC : N fichiers…`.
 
-> Astuce : un rappel hebdomadaire dans votre agenda suffit. Pour une copie **entièrement automatique** (sans
-> mot de passe), il faudra une clé SSH : demandez-la à Claude.
+### Copie automatique sur le PC (recommandé, à faire une fois)
+
+Pour ne plus rien taper : une **clé SSH** dédiée permet au PC de récupérer les sauvegardes seul, chaque jour à 12 h
+(ou au démarrage du PC s'il était éteint). Cette clé ne sert qu'à **lire** les sauvegardes : elle ne permet ni de
+lancer une commande sur le serveur, ni de modifier ou supprimer quoi que ce soit.
+
+```powershell
+cd $HOME\Documents\Vinted-Helper
+powershell -ExecutionPolicy Bypass -File scripts\installer-sauvegarde-auto.ps1
+```
+
+- le script crée la clé, puis demande le **mot de passe SSH** du serveur **une dernière fois** ;
+- il teste le rapatriement avec la clé (aucun mot de passe demandé), puis crée la tâche planifiée
+  « Vinted Helper - sauvegardes ».
+
+Résultat attendu : `Installé.` en vert. Pour vérifier plus tard : ouvrez `rapatriement.log` dans
+`Documents\Sauvegardes Vinted Helper` (une ligne par jour). Pour lancer la tâche tout de suite :
+`Start-ScheduledTask -TaskName "Vinted Helper - sauvegardes"`. Pour l'arrêter définitivement :
+`Unregister-ScheduledTask -TaskName "Vinted Helper - sauvegardes"`.
+
+Le script manuel ci-dessus fonctionne toujours (sans mot de passe une fois la clé installée).
 
 ### Restaurer une sauvegarde sur le serveur
 
