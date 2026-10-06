@@ -275,7 +275,7 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     })
     .from(historiqueStatut)
     .where(eq(historiqueStatut.articleId, id))
-    .orderBy(asc(historiqueStatut.date), asc(historiqueStatut.id));
+    .orderBy(asc(historiqueStatut.date), asc(historiqueStatut.ordre));
   const calculs = await calculer(base, utilisateurId);
   const photos = (await photosDesArticles(base, [id])).get(id) ?? [];
   const [s] = a.sortieId

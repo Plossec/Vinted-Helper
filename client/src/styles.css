@@ -578,3 +578,67 @@ textarea:focus {
   color: var(--texte-secondaire);
   text-align: center;
 }
+
+/* --- Lot 3 : montants, cases à cocher, listes de choix --- */
+select {
+  font: inherit;
+  color: inherit;
+  background: var(--fond);
+  border: 1px solid var(--bordure);
+  border-radius: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  min-height: 3rem;
+  width: 100%;
+}
+
+.cases {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cases label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+}
+
+.cases input {
+  width: 1.4rem;
+  height: 1.4rem;
+  min-height: 0;
+  flex: none;
+}
+
+.montants {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+}
+
+.montants td {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.montants td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.montants__total td {
+  font-weight: 700;
+}
+
+.negatif {
+  color: var(--erreur);
+}
+
+.positif {
+  color: var(--ok);
+}

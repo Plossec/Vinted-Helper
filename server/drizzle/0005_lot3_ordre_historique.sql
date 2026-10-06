@@ -1,0 +1,1 @@
+ALTER TABLE "historique_statut" ADD COLUMN "ordre" bigserial NOT NULL;

@@ -6,6 +6,7 @@
 // Lot 3 : vente (= colis), boost, frais divers, réglages, sortie du stock.
 import { sql } from "drizzle-orm";
 import {
+  bigserial,
   boolean,
   date,
   index,
@@ -202,6 +203,8 @@ export const historiqueStatut = pgTable(
     de: statutArticle("de"),
     vers: statutArticle("vers").notNull(),
     date: horodatage("date").notNull(),
+    /** Ordre d'enregistrement : départage les changements de même date. */
+    ordre: bigserial("ordre", { mode: "number" }).notNull(),
   },
   (t) => [index("historique_statut_article_idx").on(t.articleId)],
 );

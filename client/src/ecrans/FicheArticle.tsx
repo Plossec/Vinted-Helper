@@ -3,6 +3,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { api, type Article, type DonneesArticle, type Referentiels, type TypeListe } from "../api.js";
+import { BlocMontants } from "../composants/BlocMontants.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
@@ -328,6 +329,7 @@ export function FicheArticle() {
       {article && <InfosAchat article={article} />}
       {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
+      {article && <BlocMontants article={article} onMiseAJour={setArticle} />}
     </main>
   );
 }
@@ -362,10 +364,6 @@ function InfosAchat({ article }: { article: Article }) {
           ))}
         </p>
       )}
-      <p>
-        Prix d'achat : <strong>{formatEuros(article.couts.prixAchat)}</strong>
-        {article.lot ? " (part du lot)" : ""} — essence : <strong>{formatEuros(article.couts.essence)}</strong>
-      </p>
     </section>
   );
 }

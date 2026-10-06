@@ -5,6 +5,8 @@ import { Connexion } from "./ecrans/Connexion.js";
 import { Disposition } from "./ecrans/Disposition.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
+import { FicheVente } from "./ecrans/FicheVente.js";
+import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
 import { Terrain } from "./ecrans/Terrain.js";
@@ -22,6 +24,8 @@ const routeur = createBrowserRouter([
       { path: "terrain", element: <Terrain /> },
       { path: "sorties", element: <ListeSorties /> },
       { path: "sorties/:id", element: <FicheSortie /> },
+      { path: "ventes/:id", element: <FicheVente /> },
+      { path: "frais", element: <FraisDivers /> },
       { path: "reglages", element: <Reglages /> },
     ],
   },
