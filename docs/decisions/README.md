@@ -18,6 +18,7 @@ façon de travailler), avec la date.
 | [lot-6.md](lot-6.md) | Lot 6 — IA Gemini |
 | [lot-7.md](lot-7.md) | Lot 7 — alertes et sauvegarde |
 | [mise-en-ligne-ovh.md](mise-en-ligne-ovh.md) | Mise en ligne OVH |
+| [publication-vinted.md](publication-vinted.md) | Publication automatique sur Vinted |
 
 ## À relire par l'utilisateur
 

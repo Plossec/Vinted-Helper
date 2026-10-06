@@ -180,7 +180,9 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - **« Lire l'étiquette »** : à partir d'une photo d'étiquette, pré-remplit marque, taille, catégorie, matière ; l'utilisateur vérifie avant d'enregistrer.
 - **Prompts modifiables** dans les Réglages.
 - **Secours** : bouton **« Copier le prompt »** (texte prêt à coller dans une IA gratuite : Claude.ai, ChatGPT, Gemini) si le quota est dépassé ou le service indisponible.
-- Aucune automatisation de Vinted (pas d'API publique ; scraping contraire aux CGU).
+- Pas d'API publique Vinted. **Exception décidée le 06/10/2026** (`docs/decisions/publication-vinted.md`) : publication
+  des annonces depuis le PC par un programme qui pilote le navigateur, risques acceptés par l'utilisateur (CGU de
+  Vinted : suspension possible du compte). Aucune autre automatisation de Vinted.
 
 ### 5.6 Ventes
 - Passage **En ligne → À expédier** : création d'une **vente** (= un colis) avec 1 ou plusieurs articles, montant crédité, date de vente.
