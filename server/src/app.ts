@@ -13,6 +13,7 @@ import { routesPhotos } from "./photos/routes.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 import { routesReferentiels } from "./referentiels/routes.js";
 import { routesSorties } from "./sorties/routes.js";
+import { routesTableau } from "./tableau/routes.js";
 import { routesVentes } from "./ventes/routes.js";
 
 export interface DependancesApp {
@@ -106,6 +107,7 @@ export async function creerApp({
   routesArticles(app, contexte);
   routesSorties(app, contexte);
   routesVentes(app, contexte);
+  routesTableau(app, contexte);
   const stockage = creerStockagePhotos(dossierPhotos);
   routesPhotos(app, contexte, stockage);
   routesCorbeille(app, contexte, stockage);

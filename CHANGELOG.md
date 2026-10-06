@@ -5,6 +5,20 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.5.0] — 06/10/2026
+
+Lot 5 — tableau de bord (à valider).
+
+### Ajouté
+- Onglet **Tableau** : chiffre d'affaires, bénéfice réalisé et trésorerie du mois et de l'année (mois au choix),
+  frais généraux du mois, **graphique mensuel** (une mesure à la fois, valeur au survol ou au doigt, tableau des
+  valeurs).
+- **Stock** : valeur au coût total et au prix affiché, nombre d'articles par statut.
+- **Rentabilité** par sortie et par lieu : réalisé, provisoire, articles restants ; articles Maison à part.
+- **Analyse** par catégorie (niveau de détail au choix), marque ou gamme : nombre de ventes, marge moyenne en € et
+  en %, délais moyens mise en ligne → vente et achat → vente.
+- Calculs : cas 7, 14, 17 à 20, 24, 25, 29 à 33 de l'annexe.
+
 ## [0.4.0] — 06/10/2026
 
 Lot 4 — liste et recherche (à valider).

@@ -11,6 +11,7 @@ import { Listes } from "./ecrans/Listes.js";
 import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
+import { TableauDeBord } from "./ecrans/TableauDeBord.js";
 import { Terrain } from "./ecrans/Terrain.js";
 import { enregistrerServiceWorker } from "./pwa.js";
 import "./styles.css";
@@ -24,6 +25,7 @@ const routeur = createBrowserRouter([
       { path: "articles/nouveau", element: <FicheArticle /> },
       { path: "articles/:id", element: <FicheArticle /> },
       { path: "terrain", element: <Terrain /> },
+      { path: "tableau", element: <TableauDeBord /> },
       { path: "sorties", element: <ListeSorties /> },
       { path: "sorties/:id", element: <FicheSortie /> },
       { path: "ventes/:id", element: <FicheVente /> },
