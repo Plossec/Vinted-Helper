@@ -161,6 +161,16 @@ export async function annulerPublication(base: Base, utilisateurId: string, id: 
   if (r.length === 0) throw conflit("Seule une demande en attente peut être annulée.");
 }
 
+/** Nombre de demandes en attente (le programme n'ouvre Vinted que s'il y a du travail). */
+export async function nombreEnAttente(base: Base, utilisateurId: string, maintenant: Date) {
+  await base.update(reglages).set({ programmeVuLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
+  const lignes = await base
+    .select({ id: publicationVinted.id })
+    .from(publicationVinted)
+    .where(and(eq(publicationVinted.utilisateurId, utilisateurId), eq(publicationVinted.etat, "en_attente")));
+  return lignes.length;
+}
+
 /**
  * Demande suivante pour le programme du PC (la plus ancienne en attente), passée « en cours ».
  * Une demande restée « en cours » trop longtemps passe en erreur : on ne la relance jamais seule, pour ne pas

@@ -10,6 +10,7 @@ import {
   demandeSuivante,
   enregistrerResultat,
   listerPublications,
+  nombreEnAttente,
   type ResultatProgramme,
 } from "./service.js";
 
@@ -34,6 +35,10 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
   app.post("/api/publication/jeton", async (requete) => ({ jeton: await creerJeton(base, utilisateurDe(requete).id) }));
 
   // --- Programme du PC ---
+  app.get("/api/programme/attente", async (requete) => ({
+    nombre: await nombreEnAttente(base, utilisateurDe(requete).id, maintenant()),
+  }));
+
   app.get("/api/programme/suivante", async (requete) => ({
     publication: await demandeSuivante(base, utilisateurDe(requete).id, maintenant()),
   }));
