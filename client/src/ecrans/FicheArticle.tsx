@@ -330,6 +330,25 @@ export function FicheArticle() {
       {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
       {article && <BlocMontants article={article} onMiseAJour={setArticle} />}
+      {article && (
+        <section className="section">
+          <button
+            type="button"
+            className="bouton bouton--danger"
+            onClick={() => {
+              if (!window.confirm("Mettre cet article à la corbeille ? Il sera restaurable pendant 30 jours.")) return;
+              void api
+                .delete(`/api/articles/${article.id}`)
+                .then(() => naviguer("/", { replace: true }))
+                .catch((e: unknown) =>
+                  setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Suppression impossible." }),
+                );
+            }}
+          >
+            Supprimer l'article
+          </button>
+        </section>
+      )}
     </main>
   );
 }

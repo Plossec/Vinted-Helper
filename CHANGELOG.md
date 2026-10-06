@@ -5,6 +5,21 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [0.4.0] — 06/10/2026
+
+Lot 4 — liste et recherche (à valider).
+
+### Ajouté
+- Écran Articles : **recherche** (nom, marque, gamme, taille, catégorie, n° de référence : « 127 » propose #0127 en
+  premier), **filtres** (statut, catégorie avec ses sous-catégories, marque, gamme, lieu, sortie) et **tris** (date
+  de saisie, d'achat, de mise en ligne, prix affiché, ancienneté dans le statut ; croissant ou décroissant). Les
+  choix restent mémorisés en revenant d'une fiche.
+- **Corbeille** : « Supprimer l'article » sur la fiche ; restauration pendant 30 jours ; suppression définitive
+  (manuelle ou automatique après 30 jours) avec les photos propres de l'article ; la photo terrain d'un lot reste
+  tant qu'un autre article l'utilise ; le numéro de référence n'est jamais réattribué.
+- Réglages → **Marques et lieux** : nombre d'articles par valeur, **renommer**, **fusionner** (ex. « Levis » dans
+  « Levi's »).
+
 ## [0.3.0] — 06/10/2026
 
 Lot 3 — ventes et calculs (développé en autonomie, à valider).

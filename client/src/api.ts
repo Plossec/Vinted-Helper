@@ -119,7 +119,19 @@ export interface ResumeArticle {
   nom: string | null;
   statut: Statut;
   prixAffiche: number | null;
+  categorie: string | null;
+  marqueId: string | null;
+  marque: string | null;
+  gamme: string | null;
+  taille: string | null;
+  lieuId: string | null;
+  sortieId: string | null;
+  dateAchat: string | null;
   creeLe: string;
+  /** Date du dernier changement de statut (ancienneté dans le statut). */
+  dateStatut: string | null;
+  /** Date de la dernière mise en ligne. */
+  dateMiseEnLigne: string | null;
   /** Photo à afficher en vignette (identifiant), ou null. */
   vignette: string | null;
 }

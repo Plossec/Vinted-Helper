@@ -642,3 +642,19 @@ select {
 .positif {
   color: var(--ok);
 }
+
+/* --- Lot 4 : recherche et filtres --- */
+.recherche {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.champs-ligne--bas .bouton {
+  flex: none;
+}
+
+.bouton--danger {
+  color: var(--erreur);
+}
