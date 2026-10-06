@@ -34,13 +34,34 @@ export function creerHorloge(depart = "2026-10-05T10:00:00.000Z") {
 }
 
 /** Application complète sur une base en mémoire, avec le compte de test déjà créé. */
+/** Client IA simulé : les tests n'appellent jamais réellement Gemini (quota gratuit). */
+export function creerIASimulee() {
+  const appels: { prompt: string; images: number }[] = [];
+  let reponse: string | Error = '{"titre": "Titre simulé", "description": "Description simulée."}';
+  return {
+    appels,
+    repondre: (r: string | Error) => {
+      reponse = r;
+    },
+    client: {
+      generer: async (prompt: string, images: readonly unknown[]) => {
+        appels.push({ prompt, images: images.length });
+        if (reponse instanceof Error) throw reponse;
+        return reponse;
+      },
+    },
+  };
+}
+
 export async function creerAppDeTest() {
   const { base, fermer } = await creerBaseDeTest();
   await amorcerCompte(base, () => ({ identifiant: IDENTIFIANT_TEST, motDePasse: MOT_DE_PASSE_TEST }));
   const horloge = creerHorloge();
   // Photos dans un dossier temporaire, effacé à la fin du test (jamais data/photos).
   const dossierPhotos = mkdtempSync(join(tmpdir(), "vh-photos-"));
+  const ia = creerIASimulee();
   const app = await creerApp({
+    ia: ia.client,
     version: "test",
     base,
     verifierBase: async () => true,
@@ -52,6 +73,7 @@ export async function creerAppDeTest() {
     base,
     horloge,
     dossierPhotos,
+    ia,
     fermer: async () => {
       await app.close();
       await fermer();
