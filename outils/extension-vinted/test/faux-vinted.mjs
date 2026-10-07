@@ -2,16 +2,24 @@
 import { createServer } from "node:http";
 
 /** Page du faux formulaire. Options : sans un champ, déconnecté, captcha, titre tronqué. */
-function pageFormulaire({ sansChamp = null, deconnecte = false, titreCourt = false, captcha = false } = {}) {
+function pageFormulaire({
+  sansChamp = null,
+  deconnecte = false,
+  titreCourt = false,
+  captcha = false,
+  categoriePreremplie = "",
+} = {}) {
   const liste = (id, options) =>
     sansChamp === id
       ? ""
       : `<div><input data-testid="${id}-select-dropdown-input" readonly value="">
          <ul class="options" data-pour="${id}" hidden>${options.map((o) => `<li role="option">${o}</li>`).join("")}</ul></div>`;
   // Liste des catégories comme sur Vinted (relevé du 07/10/2026) : cases « role=button » dans « …-dropdown-content ».
+  // Une catégorie peut être déjà remplie par Vinted (suggestion automatique). Recherche « Trouver une catégorie ».
   const categories = (options) =>
-    `<div><input data-testid="catalog-select-dropdown-input" readonly value="">
-       <div class="options" data-testid="catalog-select-dropdown-content" hidden><ul data-testid="category-list">${options
+    `<div><input data-testid="catalog-select-dropdown-input" readonly value="${categoriePreremplie}">
+       <div class="options" data-testid="catalog-select-dropdown-content" hidden>
+       <input id="catalog-search-input" placeholder="Trouver une catégorie"><ul data-testid="category-list">${options
          .map((o, i) => `<li class="web_ui__Item__item"><div role="button" id="catalog-${i}">${o}</div></li>`)
          .join("")}</ul></div></div>`;
   return `<!doctype html><html><body>
@@ -29,7 +37,13 @@ function pageFormulaire({ sansChamp = null, deconnecte = false, titreCourt = fal
     ${liste("condition", ["Neuf avec étiquette", "Bon état"])}
     ${liste("color", ["Bleu", "Noir"])}
     <input data-testid="price-input--input">
-    ${liste("package-size", ["Petit", "Moyen", "Grand"])}
+    ${["Petit", "Moyen", "Grand"]
+      .map(
+        (o, i) => `<div data-testid="${i + 1}-package-size--cell" role="button">
+          <div data-testid="${i + 1}-package-size--cell--title">${o === "Moyen" ? "<span>Recommandé</span>" : ""}${o}</div>
+          <input type="radio" name="package_type_selector_${i + 1}"></div>`,
+      )
+      .join("")}
     <button data-testid="upload-form-save-button" type="button">Ajouter</button>
   </form>
   <script>
@@ -47,6 +61,16 @@ function pageFormulaire({ sansChamp = null, deconnecte = false, titreCourt = fal
         if (!champ.dataset.testid.startsWith("catalog")) ul.hidden = true;
       }));
     });
+    // Recherche de catégorie : filtre la liste. Clics sur une catégorie : comptés par le serveur factice.
+    const rechercheCat = document.getElementById("catalog-search-input");
+    rechercheCat?.addEventListener("input", () => document.querySelectorAll('[data-testid="category-list"] li').forEach(
+      (li) => (li.hidden = !li.textContent.toLowerCase().includes(rechercheCat.value.toLowerCase()))));
+    document.querySelectorAll('[data-testid="category-list"] li').forEach((li) =>
+      li.addEventListener("click", () => fetch("/clic-categorie", { method: "POST" })));
+    document.querySelectorAll('[data-testid$="-package-size--cell"]').forEach((c) => c.addEventListener("click", () => {
+      document.querySelectorAll('[data-testid$="-package-size--cell"] input').forEach((r) => (r.checked = false));
+      c.querySelector("input").checked = true;
+    }));
     document.querySelector('[data-testid="upload-form-save-button"]').addEventListener("click", () => {
       fetch("/clic", { method: "POST" }).then(() => location.assign("/items/987654-jean-levis"));
     });
@@ -58,8 +82,13 @@ const PAGE_BLOCAGE = `<!doctype html><html><body><h1>Ta session a été bloquée
   <p>Nous avons détecté une activité inhabituelle ou automatisée.</p></body></html>`;
 
 export function demarrerFauxVinted(options = {}) {
-  const etat = { clics: 0, chargements: 0 };
+  const etat = { clics: 0, chargements: 0, clicsCategorie: 0 };
   const serveur = createServer((req, res) => {
+    if (req.url === "/clic-categorie") {
+      etat.clicsCategorie++;
+      res.end("ok");
+      return;
+    }
     if (req.url === "/clic") {
       etat.clics++;
       res.end("ok");

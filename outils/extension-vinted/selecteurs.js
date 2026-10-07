@@ -15,8 +15,15 @@ const SELECTEURS = {
     taille: ['[data-testid="size-select-dropdown-input"]', 'input[name="size"]', "#size"],
     etat: ['[data-testid="condition-select-dropdown-input"]', 'input[name="condition"]', "#condition"],
     couleur: ['[data-testid="color-select-dropdown-input"]', 'input[name="color"]', "#color"],
-    colis: ['[data-testid="package-size-select-dropdown-input"]', 'input[name="package_size"]', "#package_size"],
+    // Format du colis : cases à cocher, pas une liste (relevé du 07/10/2026).
+    colis: ['[data-testid$="-package-size--cell"]'],
   },
+
+  /** Titre d'une case « format du colis » (« Petit », « Recommandé Moyen »…). */
+  titreColis: '[data-testid$="-package-size--cell--title"]',
+
+  /** Recherche de la liste des catégories : utilisée quand le chemin de l'application diffère de celui de Vinted. */
+  rechercheCategorie: ["#catalog-search-input", 'input[name="catalog-search-input"]'],
 
   /** Champ de recherche affiché dans une liste de choix (marque, taille…), s'il existe. */
   rechercheDansListe: ['[data-testid$="-search-input"]', 'input[type="search"]'],
