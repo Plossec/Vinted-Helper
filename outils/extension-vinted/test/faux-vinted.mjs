@@ -8,6 +8,7 @@ function pageFormulaire({
   titreCourt = false,
   captcha = false,
   categoriePreremplie = "",
+  genrePrerempli = "Hommes",
 } = {}) {
   const liste = (id, options) =>
     sansChamp === id
@@ -16,11 +17,24 @@ function pageFormulaire({
          <ul class="options" data-pour="${id}" hidden>${options.map((o) => `<li role="option">${o}</li>`).join("")}</ul></div>`;
   // Liste des catégories comme sur Vinted (relevé du 07/10/2026) : cases « role=button » dans « …-dropdown-content ».
   // Une catégorie peut être déjà remplie par Vinted (suggestion automatique). Recherche « Trouver une catégorie ».
+  // Résultats de recherche comme sur Vinted (relevé du 07/10/2026) : case « role=radio », nom puis chemin.
+  const resultats = [
+    ["Jeans droits", "Femmes > Vêtements > Jeans"],
+    ["Jeans droits", "Hommes > Vêtements > Jeans"],
+    ["Jeans slim", "Hommes > Vêtements > Jeans"],
+  ];
   const categories = (options) =>
     `<div><input data-testid="catalog-select-dropdown-input" readonly value="${categoriePreremplie}">
        <div class="options" data-testid="catalog-select-dropdown-content" hidden>
        <input id="catalog-search-input" placeholder="Trouver une catégorie"><ul data-testid="category-list">${options
          .map((o, i) => `<li class="web_ui__Item__item"><div role="button" id="catalog-${i}">${o}</div></li>`)
+         .join("")}</ul>
+       <ul data-testid="search-results" hidden>${resultats
+         .map(
+           ([nom, chemin], i) => `<li><div role="radio" id="catalog-search-${i}-result">
+             <div class="web_ui__Cell__title">${nom}</div><div class="web_ui__Cell__body">${chemin}</div>
+             <input type="radio"${nom === categoriePreremplie && chemin.startsWith(genrePrerempli) ? " checked" : ""}></div></li>`,
+         )
          .join("")}</ul></div></div>`;
   return `<!doctype html><html><body>
   ${deconnecte ? '<a data-testid="header--login-button" href="/login">Se connecter</a>' : ""}
@@ -54,6 +68,7 @@ function pageFormulaire({
     document.querySelectorAll('[data-testid$="-select-dropdown-input"]').forEach((champ) => {
       const ul = champ.nextElementSibling;
       champ.addEventListener("click", () => { document.querySelectorAll(".options").forEach((u) => (u.hidden = true)); ul.hidden = false; });
+      if (champ.dataset.testid.startsWith("catalog")) return; // liste des catégories : voir plus bas
       ul.querySelectorAll("li").forEach((li) => li.addEventListener("click", () => {
         champ.value = champ.dataset.testid.startsWith("catalog") || champ.dataset.testid.startsWith("color")
           ? (champ.dataset.testid.startsWith("color") && champ.value ? champ.value + ", " : "") + li.textContent
@@ -61,12 +76,27 @@ function pageFormulaire({
         if (!champ.dataset.testid.startsWith("catalog")) ul.hidden = true;
       }));
     });
-    // Recherche de catégorie : filtre la liste. Clics sur une catégorie : comptés par le serveur factice.
+    // Catégories : arbre (cases « button ») ou, dès qu'une recherche est tapée, résultats (cases « radio »).
+    // Chaque clic sur une catégorie est compté par le serveur factice.
+    const champCat = document.querySelector('[data-testid="catalog-select-dropdown-input"]');
+    const arbre = document.querySelector('[data-testid="category-list"]');
+    const listeResultats = document.querySelector('[data-testid="search-results"]');
     const rechercheCat = document.getElementById("catalog-search-input");
-    rechercheCat?.addEventListener("input", () => document.querySelectorAll('[data-testid="category-list"] li').forEach(
-      (li) => (li.hidden = !li.textContent.toLowerCase().includes(rechercheCat.value.toLowerCase()))));
-    document.querySelectorAll('[data-testid="category-list"] li').forEach((li) =>
-      li.addEventListener("click", () => fetch("/clic-categorie", { method: "POST" })));
+    rechercheCat?.addEventListener("input", () => {
+      arbre.hidden = rechercheCat.value !== "";
+      listeResultats.hidden = rechercheCat.value === "";
+    });
+    arbre?.querySelectorAll("li").forEach((li) => li.addEventListener("click", () => {
+      champCat.value = li.textContent;
+      fetch("/clic-categorie", { method: "POST" });
+    }));
+    listeResultats?.querySelectorAll("li").forEach((li) => li.addEventListener("click", () => {
+      listeResultats.querySelectorAll("input").forEach((r) => (r.checked = false));
+      li.querySelector("input").checked = true;
+      champCat.value = li.querySelector(".web_ui__Cell__title").textContent;
+      champCat.nextElementSibling.hidden = true;
+      fetch("/clic-categorie", { method: "POST" });
+    }));
     document.querySelectorAll('[data-testid$="-package-size--cell"]').forEach((c) => c.addEventListener("click", () => {
       document.querySelectorAll('[data-testid$="-package-size--cell"] input').forEach((r) => (r.checked = false));
       c.querySelector("input").checked = true;

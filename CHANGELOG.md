@@ -6,6 +6,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Extension Vinted : catégorie choisie par la **recherche de Vinted**, dans le bon rayon (Femmes, Hommes…), y compris
+  quand son nom diffère de celui de l'application (« Doudounes » pour « Doudounes et vestes matelassées ») ; une
+  suggestion de Vinted dans le mauvais rayon est corrigée (#56).
 - Extension Vinted : catégorie **déjà remplie par Vinted** et identique laissée telle quelle (de même pour marque,
   taille, état, couleurs) ; recherche de la catégorie finale quand le chemin diffère de celui de Vinted ; format du
   colis coché dans ses cases ; choix proposés par Vinted affichés en cas d'erreur (#56).

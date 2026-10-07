@@ -104,3 +104,9 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   la taille, l'état et aux couleurs : recliquer une couleur la décocherait). Si un niveau du chemin manque, la
   catégorie finale est cherchée avec « Trouver une catégorie » ; en dernier recours, erreur listant les choix
   proposés par Vinted. Le format du colis est une série de cases (« Petit », « Recommandé Moyen »…), pas une liste.
+- Relevé du 07/10/2026 (22:18) : Vinted avait suggéré « Doudounes » dans le rayon **Hommes** pour un article Femmes ;
+  sa recherche renvoie des cases « nom + chemin » (« Doudounes — Femmes > Vêtements > Manteaux et vestes > Vestes »).
+  La catégorie est donc désormais choisie **par la recherche**, en exigeant le même rayon que l'article, puis le nom
+  identique ou le plus proche (nom de Vinted par lequel commence celui de l'application). Si le bon résultat est déjà
+  coché, rien n'est touché (demande de l'utilisateur) ; le contrôle avant envoi relit le nom retenu. L'arbre des
+  catégories de l'application (`server/src/catalogue/`) reste à rapprocher de celui de Vinted (sujet à part).
