@@ -61,17 +61,15 @@ export function creerStockagePhotos(dossier: string) {
      */
     async pivoter(utilisateurId: string, photoId: string, fichier: string, angle: 90 | -90): Promise<string> {
       const contenu = await readFile(chemin(utilisateurId, fichier));
-      const tournee = await sharp(await sharp(contenu).rotate().toBuffer())
-        .rotate(angle)
-        .jpeg({ quality: 92 })
-        .toBuffer();
+      // Un seul décodage : orientation de l'appareil photo puis quart de tour ; photo et vignette en parallèle.
+      const tournee = sharp(contenu).autoOrient().rotate(angle);
+      const [photoTournee, vignette] = await Promise.all([
+        tournee.clone().jpeg({ quality: 90 }).toBuffer(),
+        tournee.clone().resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" }).webp({ quality: 75 }).toBuffer(),
+      ]);
       const nouveau = `${photoId}.jpg`;
-      await writeFile(chemin(utilisateurId, nouveau), tournee);
+      await writeFile(chemin(utilisateurId, nouveau), photoTournee);
       if (nouveau !== fichier) await rm(chemin(utilisateurId, fichier), { force: true });
-      const vignette = await sharp(tournee)
-        .resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" })
-        .webp({ quality: 75 })
-        .toBuffer();
       await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
       return nouveau;
     },

@@ -62,3 +62,10 @@ automatique depuis la saisie terrain » de l'issue #7.
   vignette recréée ; une photo terrain de lot tourne pour tous les articles du lot.
 - Les images ne sont plus gardées une semaine sans vérification : le navigateur les revérifie (empreinte `ETag`,
   réponse 304 si inchangée), pour afficher partout la photo tournée.
+
+## 07/10/2026 — Photo tournée pas à jour, rotation lente (issue #39)
+
+- Les adresses des images portent un numéro de version (`?c=2`) : les copies gardées une semaine par les navigateurs
+  avant #35 sont ignorées ; les images sont ensuite revérifiées à chaque affichage.
+- Rotation en un seul décodage (orientation de l'appareil photo + quart de tour), photo et vignette produites en
+  parallèle ; sur la fiche, la vignette pivote à l'écran pendant l'enregistrement.

@@ -19,6 +19,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 - Liste des articles : **filtres à choix multiples** (statuts, catégories, marques, lieux, sorties) ; par défaut, tous
   les statuts sauf Finalisé et Sortie du stock (#30).
 
+### Corrigé
+- Photo tournée : l'ancienne version restait affichée (liste, fiche, photo agrandie) ; rotation plus rapide (#39).
+
 ## [1.0.1] — 07/10/2026
 
 ### Ajouté

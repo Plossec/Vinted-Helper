@@ -10,8 +10,11 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
   const [erreur, setErreur] = useState<string | null>(null);
   /** Photos tournées dans cette page : nouvelle adresse pour forcer le rechargement de l'image. */
   const [versions, setVersions] = useState<Record<string, number>>({});
-  const [rotation, setRotation] = useState<string | null>(null);
-  const version = (id: string) => (versions[id] ? `?v=${versions[id]}` : "");
+  /** Rotation en cours d'enregistrement : la vignette pivote tout de suite à l'écran (issue #39). */
+  const [rotation, setRotation] = useState<{ id: string; sens: "gauche" | "droite" } | null>(null);
+  const style = (id: string) =>
+    rotation?.id === id ? { transform: `rotate(${rotation.sens === "droite" ? 90 : -90}deg)` } : undefined;
+  const version = (id: string) => (versions[id] ? `&r=${versions[id]}` : "");
 
   const terrain = article.photos.filter((p) => p.type === "terrain");
   const annonces = article.photos.filter((p) => p.type === "annonce");
@@ -61,7 +64,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
 
   async function pivoter(id: string, sens: "gauche" | "droite") {
     setErreur(null);
-    setRotation(id);
+    setRotation({ id, sens });
     try {
       await api.post(`/api/photos/${id}/rotation`, { sens });
       setVersions((v) => ({ ...v, [id]: (v[id] ?? 0) + 1 }));
@@ -108,7 +111,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         {terrain.map((p) => (
           <li key={p.id}>
             <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id) + version(p.id)} alt="Photo terrain" loading="lazy" />
+              <img src={urlVignette(p.id) + version(p.id)} style={style(p.id)} alt="Photo terrain" loading="lazy" />
             </a>
             <span className="photos__legende">Photo terrain</span>
             <div className="photos__actions">
@@ -122,7 +125,12 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         {annonces.map((p, i) => (
           <li key={p.id} className={p.estPrincipale ? "est-principale" : ""}>
             <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id) + version(p.id)} alt={`Photo d'annonce ${i + 1}`} loading="lazy" />
+              <img
+                src={urlVignette(p.id) + version(p.id)}
+                style={style(p.id)}
+                alt={`Photo d'annonce ${i + 1}`}
+                loading="lazy"
+              />
             </a>
             <span className="photos__legende">{p.estPrincipale ? "★ Principale" : `Photo ${i + 1}`}</span>
             <div className="photos__actions">{boutonsRotation(p.id)}</div>
