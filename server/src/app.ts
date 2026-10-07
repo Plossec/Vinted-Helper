@@ -9,7 +9,7 @@ import { routesCorbeille } from "./corbeille/routes.js";
 import type { Base } from "./base/connexion.js";
 import { poserCookie, routesCompte } from "./compte/routes.js";
 import { lireSession, NOM_COOKIE, type UtilisateurConnecte } from "./compte/sessions.js";
-import { type ClientIA, creerClientGemini } from "./ia/gemini.js";
+import { type ClientIA, creerClientGemini, MODELE_SECOURS_DEFAUT } from "./ia/gemini.js";
 import { routesIA } from "./ia/routes.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
@@ -60,7 +60,13 @@ export async function creerApp({
   verifierBase,
   maintenant = () => new Date(),
   dossierPhotos,
-  ia = creerClientGemini(process.env.GEMINI_API_KEY, process.env.GEMINI_MODELE),
+  ia = creerClientGemini(
+    process.env.GEMINI_API_KEY,
+    process.env.GEMINI_MODELE,
+    fetch,
+    undefined,
+    process.env.GEMINI_MODELE_SECOURS ?? MODELE_SECOURS_DEFAUT,
+  ),
   dossierClient,
   journaliser = false,
 }: DependancesApp) {
