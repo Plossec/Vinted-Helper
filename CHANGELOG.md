@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.1.0] — 07/10/2026
+
 ### Ajouté
 - **Rotation des photos** d'un article (↺ ↻, d'un quart de tour, définitive) (#35).
 - **Modes d'affichage** de la liste des articles : vignettes, liste compacte, mosaïque, détaillé (tableau triable
