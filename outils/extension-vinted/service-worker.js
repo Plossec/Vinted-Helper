@@ -224,9 +224,16 @@ async function publier(onglet, api, demande) {
   throw new Error("Après « Ajouter » : pas de page d'annonce. Vérifiez sur Vinted si l'annonce existe.");
 }
 
-async function cycleSansVerrou() {
+/**
+ * Un passage. « manuel » (bouton « Vérifier maintenant ») : le journal dit toujours pourquoi rien ne se passe
+ * (issue #61) ; les passages automatiques, toutes les 5 minutes, restent silencieux quand il n'y a rien à faire.
+ */
+async function cycleSansVerrou(manuel) {
   const { config, etat, vinted } = await lire();
-  if (!config) return;
+  const signaler = async (texte) => {
+    if (manuel) await journal(texte);
+  };
+  if (!config) return signaler("Non configurée : ouvrez les Réglages de l'extension.");
   const api = creerApi(config);
 
   // Une publication interrompue (Chrome fermé, extension rechargée) n'est jamais reprise automatiquement.
@@ -238,10 +245,19 @@ async function cycleSansVerrou() {
     });
     await ecrireEtat({ enCours: null });
   }
-  if (etat.pause) return;
+  if (etat.pause) return signaler("En pause : cliquez « Reprendre » pour relancer.");
 
   const nombre = await api.enAttente(); // signale aussi à l'application que l'extension est active
-  if (nombre === 0 || Date.now() < etat.prochain) return;
+  if (nombre === 0)
+    return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
+  if (Date.now() < etat.prochain) {
+    const heure = new Date(etat.prochain).toLocaleTimeString("fr-FR", {
+      timeZone: "Europe/Paris",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return signaler(`${nombre} annonce(s) en attente : prochaine publication possible après ${heure}.`);
+  }
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).
   const onglet = await ouvrirOnglet(`${vinted}/items/new`);
@@ -249,7 +265,7 @@ async function cycleSansVerrou() {
   if (etatPage !== "pret") throw new Arret(RAISONS[etatPage] ?? RAISONS.inconnu);
 
   const demande = await api.suivante();
-  if (!demande) return;
+  if (!demande) return signaler("Aucune annonce en attente.");
   await ecrireEtat({ enCours: demande.id });
   const reference = `#${String(demande.article.reference).padStart(4, "0")}`;
   await journal(`${reference} « ${demande.article.titre} »${demande.essai ? " (essai)" : ""}…`);
@@ -264,12 +280,13 @@ async function cycleSansVerrou() {
     if (erreur instanceof Arret) arret = message;
   }
   await api.resultat(demande.id, resultat);
+  // L'attente de 10 minutes ne suit qu'une vraie publication : après un essai ou une erreur, rien n'a été publié.
   await ecrireEtat({
     enCours: null,
     prochain:
-      resultat.resultat === "essai"
-        ? 0
-        : Date.now() + PAUSE_ENTRE_ARTICLES_MS + Math.round(Math.random() * PAUSE_ALEATOIRE_MS),
+      resultat.resultat === "publie"
+        ? Date.now() + PAUSE_ENTRE_ARTICLES_MS + Math.round(Math.random() * PAUSE_ALEATOIRE_MS)
+        : 0,
   });
   await journal(
     resultat.resultat === "publie"
@@ -305,13 +322,16 @@ async function diagnostic() {
   }
 }
 
-/** Un passage : appelé par l'alarme, par « Vérifier maintenant » et par les tests. */
-async function cycle() {
-  if (occupe) return;
+/** Un passage : appelé par l'alarme, par « Vérifier maintenant » (manuel) et par les tests. */
+async function cycle(manuel = false) {
+  if (occupe) {
+    if (manuel) await journal("Une publication ou un diagnostic est déjà en cours : patientez.");
+    return;
+  }
   occupe = true;
   await majBadge(true);
   try {
-    await cycleSansVerrou();
+    await cycleSansVerrou(manuel);
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : String(erreur);
     if (erreur instanceof Arret) await mettreEnPause(message);
@@ -329,7 +349,11 @@ async function preparerAlarme() {
   await majBadge();
 }
 
-chrome.runtime.onInstalled.addListener(() => void preparerAlarme());
+chrome.runtime.onInstalled.addListener((details) => {
+  // Mise à jour de l'extension : l'attente héritée d'une erreur (ancienne version) est levée (#61).
+  if (details.reason === "update") void ecrireEtat({ prochain: 0 });
+  void preparerAlarme();
+});
 chrome.runtime.onStartup.addListener(() => void preparerAlarme());
 chrome.alarms.onAlarm.addListener((alarme) => {
   if (alarme.name === "cycle") void cycle();
@@ -347,7 +371,7 @@ async function action(message) {
       await mettreEnPause("Pause demandée par l'utilisateur.");
       return { ok: true };
     case "maintenant":
-      void cycle();
+      void cycle(true);
       return { ok: true };
     case "diagnostic":
       return diagnostic();

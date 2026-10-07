@@ -87,6 +87,8 @@ test("champ introuvable (marque) : erreur, relevé de la page, aucun clic, pas d
   assert.equal(app.resultats[0].resultat, "erreur");
   assert.match(app.resultats[0].message, /marque/);
   assert.equal(etat.pause, false);
+  // Rien n'a été publié : pas d'attente de 10 minutes avant la demande suivante (#61).
+  assert.equal(etat.prochain, 0);
   // Relevé automatique de la page au moment de l'erreur (#56).
   assert.equal(d.etape, "marque");
   assert.equal(d.selecteursTrouves.categorie, '[data-testid="catalog-select-dropdown-input"]');
@@ -186,4 +188,15 @@ test("catégorie inexistante sur Vinted : erreur avec les choix proposés, aucun
   const { app, vinted } = await lancer({ demande });
   assert.equal(vinted.clics, 0);
   assert.match(app.resultats[0].message, /Catégorie « Doudounes » introuvable/);
+});
+
+test("« Vérifier maintenant » sans annonce en attente : le journal le dit (#61)", async () => {
+  const { etat, app } = await lancer({ demande: null, action: () => cycle(true) });
+  assert.equal(app.prises, 0);
+  assert.match(etat.journal[0].texte, /Aucune annonce en attente/);
+});
+
+test("passage automatique sans annonce : journal silencieux", async () => {
+  const { etat } = await lancer({ demande: null });
+  assert.deepEqual(etat?.journal ?? [], []);
 });
