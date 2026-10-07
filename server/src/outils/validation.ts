@@ -76,3 +76,19 @@ export function horodatageFacultatif(valeur: unknown, champ: string): Date | nul
   if (Number.isNaN(date.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
   return date;
 }
+
+/** Lien vers Vinted (annonce, conversation) : https, site vinted.fr, vinted.be… ; vide = pas de lien. */
+export function lienVintedFacultatif(valeur: unknown, champ: string): string | null {
+  const texte = texteFacultatif(valeur, champ, 500);
+  if (texte === null) return null;
+  let url: URL;
+  try {
+    url = new URL(texte);
+  } catch {
+    throw erreurSaisie(`${champ} : adresse invalide (copiez-la depuis Vinted : Partager → Copier le lien).`);
+  }
+  if (url.protocol !== "https:" || !/(^|\.)vinted\.[a-z.]{2,10}$/.test(url.hostname)) {
+    throw erreurSaisie(`${champ} : l'adresse doit être une adresse Vinted (https://www.vinted.fr/…).`);
+  }
+  return url.toString();
+}

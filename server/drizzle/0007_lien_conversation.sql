@@ -1,0 +1,1 @@
+ALTER TABLE "article" ADD COLUMN "url_conversation" text;

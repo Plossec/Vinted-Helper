@@ -13,3 +13,13 @@
 | Bénéfice des articles À expédier / Envoyé | Provisoire (= − coût total, §6.5) même si le prix vendu est connu ; il devient réel à la finalisation. Le prix vendu est affiché à part. |
 | Dates de vente | Vente, envoi et finalisation sont des dates-heures (comme les changements de statut). Corriger l'une d'elles dans l'historique corrige la vente et tout le colis. |
 | Article à la corbeille dans un colis | Il ne compte plus : le montant du colis est réparti sur les articles restants (lot 4). |
+
+---
+
+## 07/10/2026 — Lien de la conversation Vinted à la vente (issue #48)
+
+- Champ facultatif « Lien de la conversation Vinted » dans le formulaire « Vendu : à expédier » ; enregistré sur
+  chaque article du colis (colonne `article.url_conversation`, migration 0007, ajout de colonne sans perte).
+- Modifiable ensuite dans la section Vinted de la fiche (affichée dès qu'un article est vendu) ; icône 💬 dans
+  l'alerte « À expédier » (choix de l'utilisateur). Seules les adresses `https` d'un site Vinted sont acceptées ;
+  simple lien enregistré, l'application n'interroge jamais Vinted.

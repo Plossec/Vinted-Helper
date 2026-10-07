@@ -424,7 +424,13 @@ export function FicheArticle() {
 
       {article && <InfosAchat article={article} />}
       {article && <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />}
-      {article && <BlocVinted key={article.id} article={article} onMiseAJour={apresChangementStatut} />}
+      {article && (
+        <BlocVinted
+          key={`${article.id}:${article.urlVinted}:${article.urlConversation}`}
+          article={article}
+          onMiseAJour={apresChangementStatut}
+        />
+      )}
       {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
       {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
       {article && <BlocMontants article={article} onMiseAJour={setArticle} />}

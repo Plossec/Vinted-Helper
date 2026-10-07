@@ -216,6 +216,18 @@ export async function enregistrerLienVinted(
   return { passeEnLigne: true, prixManquant: false };
 }
 
+/** Lien de la conversation Vinted avec l'acheteur (issue #48), modifiable sur la fiche ; null = retiré. */
+export async function enregistrerLienConversation(
+  base: Base,
+  utilisateurId: string,
+  id: string,
+  url: string | null,
+  maintenant: Date,
+): Promise<void> {
+  await chargerArticle(base, utilisateurId, id);
+  await base.update(article).set({ urlConversation: url, modifieLe: maintenant }).where(eq(article.id, id));
+}
+
 /** Corrige la date d'un changement de statut déjà enregistré (§4.4). */
 export async function corrigerDateHistorique(
   base: Base,
@@ -414,6 +426,7 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     couleurs: a.couleurs,
     formatColis: a.formatColis,
     urlVinted: a.urlVinted,
+    urlConversation: a.urlConversation,
     descriptionAnnonce: a.descriptionAnnonce,
     photos,
     dateAchat: a.dateAchat,

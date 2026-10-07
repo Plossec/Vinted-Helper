@@ -12,7 +12,13 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
   app.get("/api/alertes", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;
     const articles = await base
-      .select({ id: article.id, reference: article.reference, nom: article.nom, statut: article.statut })
+      .select({
+        id: article.id,
+        reference: article.reference,
+        nom: article.nom,
+        statut: article.statut,
+        urlConversation: article.urlConversation,
+      })
       .from(article)
       .where(
         and(
@@ -40,7 +46,7 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
               .where(inArray(historiquePrix.articleId, ids)),
           ]);
     const reglages = await lireReglages(base, utilisateurId);
-    return calculerAlertes(
+    const alertes = calculerAlertes(
       articles.map((a) => ({
         ...a,
         historique: historiques
@@ -53,5 +59,11 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
       reglages,
       maintenant(),
     );
+    // Articles à expédier : lien de la conversation Vinted avec l'acheteur (issue #48).
+    const conversations = new Map(articles.map((a) => [a.id, a.urlConversation]));
+    return {
+      ...alertes,
+      aExpedier: alertes.aExpedier.map((a) => ({ ...a, urlConversation: conversations.get(a.id) ?? null })),
+    };
   });
 }

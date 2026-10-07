@@ -67,6 +67,8 @@ export interface DemandeVente {
   /** null : emballage par défaut des Réglages. */
   emballage: number | null;
   dateVente: Date;
+  /** Lien de la conversation Vinted avec l'acheteur (issue #48), enregistré sur chaque article du colis. */
+  urlConversation?: string | null;
 }
 
 /** En ligne → À expédier : crée la vente (= un colis) avec 1 ou plusieurs articles (§5.6). */
@@ -97,7 +99,15 @@ export async function creerVente(base: Base, utilisateurId: string, d: DemandeVe
     await tx
       .insert(venteArticle)
       .values(articles.map((a) => ({ venteId: v.id, articleId: a.id, prixAfficheAuMoment: a.prixAffiche ?? 0 })));
-    await passer(tx, utilisateurId, articles, "a_expedier", d.dateVente, maintenant);
+    await passer(
+      tx,
+      utilisateurId,
+      articles,
+      "a_expedier",
+      d.dateVente,
+      maintenant,
+      d.urlConversation ? { urlConversation: d.urlConversation } : {},
+    );
     return v.id;
   });
 }

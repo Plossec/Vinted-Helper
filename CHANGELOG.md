@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Lien de la conversation Vinted** saisi à la vente (« Vendu : à expédier »), gardé sur les articles du colis,
+  modifiable sur la fiche, icône 💬 dans l'alerte « À expédier » (#48).
 - **Lien de l'annonce Vinted** saisi sur la fiche (l'article passe En ligne s'il a un prix affiché) ; repère « ↗ »
   dans la liste des articles (#46).
 
