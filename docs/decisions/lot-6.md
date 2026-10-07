@@ -20,3 +20,12 @@
   guides, message d'erreur) : l'alias **`gemini-flash-latest`**, qui suit le dernier modèle « Flash ».
 - Erreurs passagères de Google (500, 502, 503, 504) : **2 nouveaux essais** automatiques, après 2 s puis 5 s, avant
   le message « Gemini est surchargé pour le moment… ».
+
+## 07/10/2026 — Modèle de secours (issue #43)
+
+- Constat : `gemini-flash-latest` (alias du dernier modèle) et `gemini-3.5-flash` ne répondaient plus (attente sans
+  fin, 503) alors que `gemini-flash-lite-latest` répondait en quelques secondes.
+- Modèle de secours (`GEMINI_MODELE_SECOURS`, par défaut `gemini-flash-lite-latest`, « aucun » pour le désactiver) :
+  le principal est essayé une fois avec un délai de 30 s ; s'il est saturé, trop lent, sans quota, retiré ou renvoie
+  une réponse vide, le secours est essayé (60 s, 2 nouveaux essais sur erreur passagère). Clé refusée : pas de
+  secours (même clé).

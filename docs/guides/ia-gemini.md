@@ -13,8 +13,11 @@ sur le téléphone). Réglage à faire une seule fois :
      précis d'un modèle disponible dans AI Studio).
      Google retire régulièrement ses anciens modèles : si un jour l'application affiche « Modèle Gemini introuvable »,
      changez simplement ce nom.
-   - « Gemini est surchargé » : les serveurs de Google sont saturés (fréquent sur l'offre gratuite). L'application a
-     déjà réessayé deux fois ; réessayez quelques minutes plus tard, ou utilisez « Copier le prompt ».
+   - **Modèle de secours** : si le modèle principal est saturé ou ne répond pas en 30 secondes, l'application passe
+     toute seule sur `gemini-flash-lite-latest` (plus léger, un peu moins précis). Pour en choisir un autre :
+     `GEMINI_MODELE_SECOURS=…` dans le `.env` (« aucun » pour s'en passer).
+   - « Gemini est surchargé » : les deux modèles sont saturés (fréquent sur l'offre gratuite) ; l'application a déjà
+     réessayé ; réessayez quelques minutes plus tard, ou utilisez « Copier le prompt ».
 3. Enregistrez, puis `docker compose up -d` pour relancer l'application.
 
 Utilisation, sur la fiche d'un article :

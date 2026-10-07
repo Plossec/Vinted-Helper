@@ -76,6 +76,77 @@ describe("client Gemini (requête simulée)", () => {
     expect(attentes).toEqual([2000, 5000]);
   });
 
+  describe("modèle de secours (#43)", () => {
+    const ok = (texte: string) =>
+      new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: texte }] } }] }));
+    const sansAttente = async () => undefined;
+    /** Simule Google : réponse selon le modèle demandé ; note les modèles appelés. */
+    const google = (parModele: Record<string, () => Response>, appels: string[]) =>
+      (async (url: string) => {
+        const nom = decodeURIComponent(url.split("/models/")[1]?.split(":")[0] ?? "");
+        appels.push(nom);
+        const rep = parModele[nom];
+        if (!rep) throw new TypeError("délai dépassé");
+        return rep();
+      }) as unknown as typeof fetch;
+
+    it("principal saturé (503) ou trop lent → secours, sans attendre de nouveaux essais du principal", async () => {
+      const appels: string[] = [];
+      const appeler = google(
+        { principal: () => new Response("{}", { status: 503 }), lite: () => ok('{"s":1}') },
+        appels,
+      );
+      expect(await creerClientGemini("cle", "principal", appeler, sansAttente, "lite").generer("p", [])).toBe(
+        '{"s":1}',
+      );
+      expect(appels).toEqual(["principal", "lite"]);
+
+      const lent: string[] = [];
+      const appelerLent = google({ lite: () => ok('{"s":2}') }, lent);
+      expect(await creerClientGemini("cle", "principal", appelerLent, sansAttente, "lite").generer("p", [])).toBe(
+        '{"s":2}',
+      );
+      expect(lent).toEqual(["principal", "lite"]);
+    });
+
+    it("principal qui répond : le secours n'est pas appelé", async () => {
+      const appels: string[] = [];
+      const appeler = google({ principal: () => ok('{"p":1}'), lite: () => ok('{"s":1}') }, appels);
+      expect(await creerClientGemini("cle", "principal", appeler, sansAttente, "lite").generer("p", [])).toBe(
+        '{"p":1}',
+      );
+      expect(appels).toEqual(["principal"]);
+    });
+
+    it("clé refusée : pas de secours ; « aucun » ou secours identique : pas de secours", async () => {
+      const appels: string[] = [];
+      const refus = google({ principal: () => new Response("{}", { status: 403 }), lite: () => ok("{}") }, appels);
+      await expect(creerClientGemini("cle", "principal", refus, sansAttente, "lite").generer("p", [])).rejects.toThrow(
+        /vérifiez la clé/,
+      );
+      expect(appels).toEqual(["principal"]);
+
+      for (const secours of ["aucun", "principal"]) {
+        const vus: string[] = [];
+        const sature = google({ principal: () => new Response("{}", { status: 503 }) }, vus);
+        await expect(
+          creerClientGemini("cle", "principal", sature, sansAttente, secours).generer("p", []),
+        ).rejects.toThrow(/surchargé/);
+        expect(vus).toEqual(["principal", "principal", "principal"]);
+      }
+    });
+
+    it("secours saturé lui aussi : nouveaux essais puis message clair", async () => {
+      const appels: string[] = [];
+      const sature = () => new Response("{}", { status: 503 });
+      const appeler = google({ principal: sature, lite: sature }, appels);
+      await expect(
+        creerClientGemini("cle", "principal", appeler, sansAttente, "lite").generer("p", []),
+      ).rejects.toThrow(/surchargé/);
+      expect(appels).toEqual(["principal", "lite", "lite", "lite"]);
+    });
+  });
+
   it("modèle introuvable : le message conseille gemini-flash-latest", async () => {
     await expect(creerClientGemini("cle", "ancien", reponse(404)).generer("p", [])).rejects.toThrow(
       /« ancien » introuvable.*GEMINI_MODELE=gemini-flash-latest/,
