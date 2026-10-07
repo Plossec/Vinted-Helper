@@ -5,6 +5,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Ancien programme de publication du PC (bloqué par Vinted) **retiré** : seule l'extension Chrome publie (#68).
+
 ### Ajouté
 - Extension Vinted : catégorie choisie par la **recherche de Vinted**, dans le bon rayon (Femmes, Hommes…), y compris
   quand son nom diffère de celui de l'application (« Doudounes » pour « Doudounes et vestes matelassées ») ; une

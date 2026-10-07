@@ -126,3 +126,11 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
 - Première vraie publication (08/10/2026, 01:03) : arrêtée par le contrôle avant envoi, rien de publié. Vinted
   affiche le prix saisi « 9,00 » sous la forme « 9.00 » (comparaison désormais en nombre) ; les photos déposées sont
   des `[data-testid="image-wrapper-N"]` (le repère supposé `image-grid` ne trouvait rien, d'où « 0 sur 5 »).
+
+---
+
+## 08/10/2026 — Extension validée, ancien programme retiré (#68)
+
+Première annonce publiée par l'extension (doudoune #0006). Décision (utilisateur) : retirer l'ancien programme
+Playwright (`outils/publication-vinted/`) et son installeur (`scripts/installer-publication.ps1`). Seule l'extension
+Chrome publie désormais.
