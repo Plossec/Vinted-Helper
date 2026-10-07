@@ -58,8 +58,8 @@ calcul) est utilisé.
 
 Chrome doit rester ouvert. L'extension vérifie **toutes les 5 minutes** s'il y a des articles à publier, et publie
 **un seul article toutes les 10 minutes au moins** (plus un délai variable de 0 à 3 minutes). Pendant le remplissage,
-un onglet Vinted s'ouvre au premier plan : laissez-le faire, sans le fermer. L'extension marque une pause de **15 à
-20 secondes** entre chaque étape (photos, titre, description, catégorie…) : une annonce prend environ **3 minutes**.
+un onglet Vinted s'ouvre au premier plan : laissez-le faire, sans le fermer. L'extension marque une pause de **5 secondes**
+entre chaque étape (photos, titre, description, catégorie…) : une annonce prend environ **1 minute**.
 
 Une publication interrompue (Chrome fermé, PC éteint…) passe en **erreur** et n'est **jamais relancée
 automatiquement**, pour éviter une annonce en double : vérifiez sur Vinted avant de la redemander.

@@ -48,7 +48,21 @@ function pageFormulaire({
     ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
     ${liste("size", ["W32", "M"])}
-    ${liste("condition", ["Neuf avec étiquette", "Bon état"])}
+    ${
+      sansChamp === "condition"
+        ? ""
+        : `<div><input data-testid="condition-select-dropdown-input" readonly value="">
+           <div class="options" data-testid="category-condition-single-list-content" hidden>${[
+             ["Neuf avec étiquette", "Article neuf, jamais porté."],
+             ["Très bon état", "Article très peu porté."],
+             ["Bon état", "Article porté, quelques signes d'usure."],
+           ]
+             .map(
+               ([titre, corps], i) => `<li><div role="radio" data-testid="condition-${i}">
+                 <div class="web_ui__Cell__title">${titre}</div><div class="web_ui__Cell__body">${corps}</div></div></li>`,
+             )
+             .join("")}</div></div>`
+    }
     ${liste("color", ["Bleu", "Noir"])}
     <input data-testid="price-input--input">
     ${["Petit", "Moyen", "Grand"]
@@ -70,9 +84,10 @@ function pageFormulaire({
       champ.addEventListener("click", () => { document.querySelectorAll(".options").forEach((u) => (u.hidden = true)); ul.hidden = false; });
       if (champ.dataset.testid.startsWith("catalog")) return; // liste des catégories : voir plus bas
       ul.querySelectorAll("li").forEach((li) => li.addEventListener("click", () => {
-        champ.value = champ.dataset.testid.startsWith("catalog") || champ.dataset.testid.startsWith("color")
-          ? (champ.dataset.testid.startsWith("color") && champ.value ? champ.value + ", " : "") + li.textContent
-          : li.textContent;
+        const texte = (li.querySelector(".web_ui__Cell__title") ?? li).textContent;
+        champ.value = champ.dataset.testid.startsWith("color")
+          ? (champ.value ? champ.value + ", " : "") + texte
+          : texte;
         if (!champ.dataset.testid.startsWith("catalog")) ul.hidden = true;
       }));
     });

@@ -1,7 +1,7 @@
 // Service worker de l'extension Vinted Helper (décision du 07/10/2026, docs/guides/publication-vinted.md).
 // Toutes les 5 minutes : demande à l'application s'il y a des annonces à publier ; si oui, ouvre « Vendre un article »
 // dans le Chrome habituel de l'utilisateur (sa propre session Vinted), fait remplir le formulaire par le script de
-// contenu étape par étape (15 à 20 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes,
+// contenu étape par étape (5 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes,
 // plus un délai aléatoire.
 // Aucun contournement : vérification, page de blocage ou déconnexion → PAUSE, reprise uniquement à la main.
 
@@ -14,8 +14,8 @@ const PAUSE_ENTRE_ARTICLES_MS = 10 * 60_000;
 const PAUSE_ALEATOIRE_MS = 3 * 60_000;
 const ATTENTE_ANNONCE_MS = 60_000;
 const TAILLE_JOURNAL = 30;
-/** Pause entre deux étapes du remplissage (issue #57), tirée au hasard dans cet intervalle. */
-const DELAI_ETAPES_MS = [15_000, 20_000];
+/** Pause entre deux étapes du remplissage (issue #57 ; 5 s depuis #63), tirée dans cet intervalle. */
+const DELAI_ETAPES_MS = [5_000, 5_000];
 const ETAPES = ["photos", "titre", "description", "categorie", "marque", "taille", "etat", "couleurs", "prix", "colis"];
 
 const attendreMs = (ms) => new Promise((r) => setTimeout(r, ms));
