@@ -80,8 +80,11 @@ async function option(texte, delai = DELAI_MS) {
     // Libellé d'une option : son titre s'il y en a un (une case « état » porte aussi une description), sinon son
     // texte. Égalité d'abord : « Bon état » ne doit pas choisir « Très bon état ».
     const libelle = (el) => normaliser(el.querySelector(SELECTEURS.titreResultat)?.textContent ?? el.textContent);
+    // « Contient » seulement pour un texte d'au moins 3 lettres : une taille « S » ne doit pas choisir « XS »
+    // (ni n'importe quelle option contenant un « s »).
     const trouvee =
-      candidates.find((el) => libelle(el) === voulu) ?? candidates.find((el) => libelle(el).includes(voulu));
+      candidates.find((el) => libelle(el) === voulu) ??
+      (voulu.length >= 3 ? candidates.find((el) => libelle(el).includes(voulu)) : undefined);
     if (trouvee) return trouvee;
     await attendreMs(250);
   } while (Date.now() < fin);
@@ -305,6 +308,8 @@ async function controler(article, nombrePhotos) {
   await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
   await attendu("etat", article.etat); // égalité : « Bon état » ≠ « Très bon état »
+  // Taille : égalité (« S » ≠ « XS »). Seulement si l'article en a une et si Vinted propose le champ.
+  if (article.taille && (await champ("taille", false))) await attendu("taille", article.taille);
   for (const couleur of article.couleurs) await attendu("couleur", couleur, "contient");
   await attendre(SELECTEURS.photosDeposees, 3000);
   const nombre = document.querySelectorAll(SELECTEURS.photosDeposees.join(", ")).length;

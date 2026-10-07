@@ -47,7 +47,7 @@ function pageFormulaire({
     <input data-testid="title--input"${titreCourt ? ' oninput="this.value = this.value.slice(0, 5)"' : ""}><textarea data-testid="description--input"></textarea>
     ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
-    ${liste("size", ["W32", "M"])}
+    ${liste("size", ["W32", "M", "XS"])}
     ${
       sansChamp === "condition"
         ? ""

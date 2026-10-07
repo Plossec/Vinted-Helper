@@ -49,6 +49,8 @@ const SELECTEURS = {
     '[data-testid$="-content"] [role="option"]',
     '[data-testid$="-content"] [role="radio"]',
     '[data-testid$="-content"] [role="checkbox"]',
+    // Tailles : possiblement des « puces » (relevé du 07/10/2026 : `category-size-single-grid_chips-input`).
+    '[data-testid$="-content"] button',
     '[role="option"]',
     '[data-testid$="-option"]',
   ],

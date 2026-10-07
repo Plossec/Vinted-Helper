@@ -200,3 +200,11 @@ test("passage automatique sans annonce : journal silencieux", async () => {
   const { etat } = await lancer({ demande: null });
   assert.deepEqual(etat?.journal ?? [], []);
 });
+
+test("taille absente de la liste de Vinted : erreur, aucun clic sur « Ajouter » (une taille « S » ne prend pas « XS »)", async () => {
+  const demande = DEMANDE(false);
+  demande.article.taille = "S";
+  const { app, vinted } = await lancer({ demande });
+  assert.equal(vinted.clics, 0);
+  assert.match(app.resultats[0].message, /« S » introuvable dans la liste « taille »/);
+});
