@@ -30,6 +30,7 @@ import {
   uuidObligatoire,
 } from "../outils/validation.js";
 import {
+  annulerDernierChangement,
   annulerSortieStock,
   annulerVente,
   avancerVente,
@@ -169,6 +170,15 @@ export function routesVentes(
     const utilisateurId = utilisateurDe(requete).id;
     const id = idDe(requete.params);
     await annulerSortieStock(base, utilisateurId, id, date(objet(requete.body).date), maintenant());
+    return lireArticle(base, utilisateurId, id);
+  });
+
+  // Supprime le dernier changement de statut (issue #50).
+  app.post("/api/articles/:id/annulation-statut", async (requete) => {
+    const utilisateurId = utilisateurDe(requete).id;
+    const id = idDe(requete.params);
+    const montantCredite = centimesFacultatif(objet(requete.body ?? {}).montantCredite, "Montant crédité");
+    await annulerDernierChangement(base, utilisateurId, id, { montantCredite }, maintenant());
     return lireArticle(base, utilisateurId, id);
   });
 

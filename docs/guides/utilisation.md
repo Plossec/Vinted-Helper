@@ -34,6 +34,12 @@ lien, puis collez-le et « Enregistrer le lien ». Un article Brouillon ou À pu
 la conversation Vinted (facultatif ; dans Vinted : la conversation → copier l'adresse). Il est gardé sur chaque article
 du colis, modifiable dans la section Vinted de la fiche, et l'icône 💬 de l'alerte « À expédier » l'ouvre.
 
+**Supprimer un changement de statut fait par erreur** : sur la fiche, historique des statuts → « Supprimer » sur la
+dernière ligne (après confirmation). L'article revient au statut précédent : « Vendu » annulé → la vente est supprimée
+(colis de plusieurs articles : seul cet article en sort, nouveau montant demandé pour les autres) ; « Envoyé »,
+« Finalisé » ou « Annulation par l'acheteur » → défait pour tout le colis ; « Sortie du stock » → motif effacé. Pour
+remonter plus loin, recommencez. La création, un retour et l'annulation d'une sortie du stock ne se suppriment pas.
+
 **Filtres** (bouton « Filtres ») : touchez les statuts à afficher (par défaut tous sauf Finalisé et Sortie du stock) ;
 pour les catégories, marques, lieux et sorties, cherchez puis ajoutez une ou plusieurs valeurs (« × » pour en
 retirer une). « Effacer les filtres » revient au réglage par défaut.

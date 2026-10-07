@@ -171,6 +171,35 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
     });
   const tailleColis = article.vente?.nombreArticles ?? 1;
 
+  /** Supprime le dernier changement de statut (issue #50), après confirmation. */
+  async function supprimerDernier(de: Statut, vers: Statut) {
+    const passage = `${de}>${vers}`;
+    const colis = tailleColis > 1;
+    let texte = `Supprimer le changement « ${LIBELLES_STATUT[de]} → ${LIBELLES_STATUT[vers]} » ? L'article repasse « ${LIBELLES_STATUT[de]} ».`;
+    if (passage === "en_ligne>a_expedier") texte += colis ? " Il sort du colis." : " La vente est supprimée.";
+    if (
+      (passage === "a_expedier>envoye" || passage === "envoye>finalise" || passage === "a_expedier>en_ligne") &&
+      colis
+    ) {
+      texte += ` Tous les articles du colis (${tailleColis}) sont concernés.`;
+    }
+    if (!window.confirm(texte)) return;
+    let montantCredite: number | null = null;
+    if (passage === "en_ligne>a_expedier" && colis) {
+      const saisi = window.prompt("Nouveau montant crédité pour les autres articles du colis (€) :");
+      if (saisi === null) return;
+      const montant = lireMontant(saisi);
+      if (montant === null || montant === "invalide") return setErreur("Montant invalide (ex. 12,00).");
+      montantCredite = montant;
+    }
+    try {
+      onMiseAJour(await api.post<Article>(`/api/articles/${article.id}/annulation-statut`, { montantCredite }));
+      setErreur(null);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "Suppression impossible.");
+    }
+  }
+
   async function enregistrerCorrection() {
     if (correction === null) return;
     const dateIso = depuisChampDateHeure(correction.date);
@@ -379,7 +408,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
 
       <h3>Historique</h3>
       <ul className="historique">
-        {[...article.historiqueStatuts].reverse().map((h) => (
+        {[...article.historiqueStatuts].reverse().map((h, i) => (
           <li key={h.id}>
             {correction?.id === h.id ? (
               <span className="historique__correction">
@@ -408,6 +437,11 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                 >
                   Corriger la date
                 </button>
+                {i === 0 && h.de !== null && (
+                  <button type="button" className="lien" onClick={() => void supprimerDernier(h.de ?? h.vers, h.vers)}>
+                    Supprimer
+                  </button>
+                )}
               </>
             )}
           </li>
