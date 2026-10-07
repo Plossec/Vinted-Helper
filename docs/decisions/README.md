@@ -19,6 +19,7 @@ façon de travailler), avec la date.
 | [lot-7.md](lot-7.md) | Lot 7 — alertes et sauvegarde |
 | [mise-en-ligne-ovh.md](mise-en-ligne-ovh.md) | Mise en ligne OVH |
 | [publication-vinted.md](publication-vinted.md) | Publication automatique sur Vinted |
+| [import-tableur.md](import-tableur.md) | Import de l'ancien tableur dans la base du serveur |
 
 ## À relire par l'utilisateur
 

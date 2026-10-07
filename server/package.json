@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts",
-    "reset-password": "node dist/outils/reinitialiser-mot-de-passe.js"
+    "reset-password": "node dist/outils/reinitialiser-mot-de-passe.js",
+    "import-tableur": "node dist/outils/importer-tableur.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
