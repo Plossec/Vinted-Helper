@@ -34,6 +34,11 @@ lien, puis collez-le et « Enregistrer le lien ». Un article Brouillon ou À pu
 la conversation Vinted (facultatif ; dans Vinted : la conversation → copier l'adresse). Il est gardé sur chaque article
 du colis, modifiable dans la section Vinted de la fiche, et l'icône 💬 de l'alerte « À expédier » l'ouvre.
 
+**Retour de l'acheteur** : sur la fiche d'un article Envoyé, « Retour de l'acheteur » (colis entier, ou articles
+renvoyés + nouveau montant crédité). L'article passe **À récupérer** (alerte sur l'écran Articles, avec 💬 si la
+conversation est connue). Une fois l'article récupéré : « Récupéré : à publier », « Récupéré : remettre en ligne »
+(prix affiché demandé) ou « Sortir du stock ».
+
 **Supprimer un changement de statut fait par erreur** : sur la fiche, historique des statuts → « Supprimer » sur la
 dernière ligne (après confirmation). L'article revient au statut précédent : « Vendu » annulé → la vente est supprimée
 (colis de plusieurs articles : seul cet article en sort, nouveau montant demandé pour les autres) ; « Envoyé »,

@@ -1,5 +1,6 @@
 // Libellés des statuts (§4.1). Les transitions possibles sont fournies par le serveur (source unique).
-export type Statut = "brouillon" | "a_publier" | "en_ligne" | "a_expedier" | "envoye" | "finalise" | "sortie_stock";
+export type Statut =
+  "brouillon" | "a_publier" | "en_ligne" | "a_expedier" | "envoye" | "a_recuperer" | "finalise" | "sortie_stock";
 
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",
@@ -7,6 +8,7 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
   en_ligne: "En ligne",
   a_expedier: "À expédier",
   envoye: "Envoyé",
+  a_recuperer: "À récupérer",
   finalise: "Finalisé",
   sortie_stock: "Sortie du stock",
 };
@@ -18,6 +20,7 @@ export const ACTIONS_STATUT: Record<Statut, string> = {
   en_ligne: "Mettre en ligne",
   a_expedier: "Vendu : à expédier",
   envoye: "Marquer envoyé",
+  a_recuperer: "Retour de l'acheteur",
   finalise: "Finaliser",
   sortie_stock: "Sortir du stock",
 };

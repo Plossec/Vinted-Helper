@@ -19,13 +19,16 @@ export interface AlertesServeur {
   brouillons: Alerte[];
   dormants: Alerte[];
   aExpedier: Alerte[];
+  /** Retours à aller chercher (issue #52). */
+  aRecuperer?: Alerte[];
 }
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
-  a ? a.brouillons.length + a.dormants.length + a.aExpedier.length : 0;
+  a ? a.brouillons.length + a.dormants.length + a.aExpedier.length + (a.aRecuperer?.length ?? 0) : 0;
 
 const GROUPES = [
   { cle: "aExpedier", titre: "À expédier", detail: (a: Alerte) => `vendu le ${formatDate(a.depuis)}` },
+  { cle: "aRecuperer", titre: "À récupérer", detail: (a: Alerte) => `retour du ${formatDate(a.depuis)}` },
   {
     cle: "brouillons",
     titre: "Brouillons à compléter",
@@ -52,7 +55,7 @@ export function Alertes() {
   if (nombreAlertes(alertes) === 0 || alertes === null) return null;
   return (
     <section className="alertes" aria-label="Alertes">
-      {GROUPES.filter((g) => alertes[g.cle].length > 0).map((g) => (
+      {GROUPES.filter((g) => (alertes[g.cle] ?? []).length > 0).map((g) => (
         <div key={g.cle} className={`alerte alerte--${g.cle}`}>
           <button
             type="button"
@@ -60,12 +63,12 @@ export function Alertes() {
             aria-expanded={ouvert === g.cle}
             onClick={() => setOuvert((o) => (o === g.cle ? null : g.cle))}
           >
-            <span className="pastille">{alertes[g.cle].length}</span> {g.titre}
+            <span className="pastille">{(alertes[g.cle] ?? []).length}</span> {g.titre}
             <span aria-hidden="true">{ouvert === g.cle ? "▴" : "▾"}</span>
           </button>
           {ouvert === g.cle && (
             <ul>
-              {alertes[g.cle].map((a) => (
+              {(alertes[g.cle] ?? []).map((a) => (
                 <li key={a.id}>
                   <Link to={`/articles/${a.id}`}>
                     {formatReference(a.reference)} {a.nom ?? "(sans nom)"}

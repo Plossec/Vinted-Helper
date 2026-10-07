@@ -1,0 +1,1 @@
+ALTER TYPE "public"."statut_article" ADD VALUE 'a_recuperer' BEFORE 'finalise';

@@ -143,7 +143,7 @@ export async function annulerVente(base: Base, utilisateurId: string, venteId: s
 }
 
 /**
- * Retour (Envoyé → À publier) : les articles renvoyés repassent À publier.
+ * Retour (Envoyé → À récupérer, issue #52) : les articles renvoyés sont à aller chercher, puis « Récupéré ».
  * - Tous les articles du colis : retour du colis entier, la vente est annulée.
  * - Une partie : retour partiel, l'utilisateur saisit le nouveau montant crédité pour les articles restants (§6.4).
  */
@@ -160,7 +160,7 @@ export async function retourVente(
     const { actifs } = await chargerVente(tx, utilisateurId, venteId);
     const renvoyes = actifs.filter((a) => d.articleIds.includes(a.id));
     if (renvoyes.length !== new Set(d.articleIds).size) throw erreurSaisie("Article absent du colis.");
-    await passer(tx, utilisateurId, renvoyes, "a_publier", d.date, maintenant);
+    await passer(tx, utilisateurId, renvoyes, "a_recuperer", d.date, maintenant);
     if (renvoyes.length === actifs.length) {
       await tx.update(vente).set({ annulee: true }).where(eq(vente.id, venteId));
       return;
@@ -317,7 +317,7 @@ export async function annulerDernierChangement(
     if (passage === "sortie_stock>a_publier") {
       throw conflit("L'annulation d'une sortie du stock ne se supprime pas : refaites la sortie du stock.");
     }
-    if (passage === "envoye>a_publier") {
+    if (passage === "envoye>a_recuperer") {
       throw conflit("Un retour ne se supprime pas : refaites la vente si besoin.");
     }
     if (dernier.vers === "sortie_stock") {

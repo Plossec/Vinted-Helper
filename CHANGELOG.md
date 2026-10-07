@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Statut **« À récupérer »** après un retour de l'acheteur, puis « Récupéré » → À publier ou En ligne ; alerte sur
+  l'écran Articles (#52).
 - **Supprimer le dernier changement de statut** (erreur de saisie) depuis l'historique de la fiche, effets défaits
   (vente, colis, sortie du stock) (#50).
 - **Lien de la conversation Vinted** saisi à la vente (« Vendu : à expédier »), gardé sur les articles du colis,

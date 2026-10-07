@@ -95,7 +95,7 @@ describe("filtres", () => {
       article(10, { statut: "finalise" }),
       article(11, { statut: "sortie_stock" }),
     );
-    expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5]);
+    expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5, 6]);
     expect(nombreFiltresActifs(FILTRES_PAR_DEFAUT)).toBe(0);
     expect(nombreFiltresActifs({ ...FILTRES_PAR_DEFAUT, statuts: ["en_ligne"], marqueIds: ["A"] })).toBe(2);
   });

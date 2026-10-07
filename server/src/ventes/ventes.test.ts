@@ -148,7 +148,8 @@ describe("ventes et calculs", () => {
     expect(lu.vente?.dateFinalisation).toBe("2026-10-04T08:00:00.000Z");
   });
 
-  it("§8 / cas 26 — colis Envoyé, B renvoyé, nouveau montant 7,20 € → B À publier, A porte tout l'emballage", async () => {
+  // Cas 26 et 27 modifiés le 07/10/2026 avec l'accord de l'utilisateur (issue #52) : « À récupérer » au lieu d'« À publier ».
+  it("§8 / cas 26 — colis Envoyé, B renvoyé, nouveau montant 7,20 € → B À récupérer, A porte tout l'emballage", async () => {
     const a = await enLigne(900);
     const b = await enLigne(600);
     const v = await vendre([a, b], 1200);
@@ -157,18 +158,22 @@ describe("ventes et calculs", () => {
     expect(sansMontant.statusCode).toBe(400);
     const r = await requete("POST", `/api/ventes/${v.id}/retour`, { articleIds: [b], montantCredite: 720 });
     expect(r.statusCode, r.body).toBe(200);
-    expect(await lire(b)).toMatchObject({ statut: "a_publier", vente: null, couts: { prixVendu: null, emballage: 0 } });
+    expect(await lire(b)).toMatchObject({
+      statut: "a_recuperer",
+      vente: null,
+      couts: { prixVendu: null, emballage: 0 },
+    });
     expect(await lire(a)).toMatchObject({ statut: "envoye", couts: { prixVendu: 720, emballage: 8 } });
   });
 
-  it("cas 27 — retour du colis entier → tous À publier, vente annulée", async () => {
+  it("cas 27 — retour du colis entier → tous À récupérer, vente annulée", async () => {
     const a = await enLigne(900);
     const b = await enLigne(600);
     const v = await vendre([a, b], 1200);
     await requete("POST", `/api/ventes/${v.id}/envoi`, {});
     const r = await requete("POST", `/api/ventes/${v.id}/retour`, { articleIds: [a, b] });
     expect(r.json<VenteLue>().annulee).toBe(true);
-    for (const id of [a, b]) expect((await lire(id)).statut).toBe("a_publier");
+    for (const id of [a, b]) expect((await lire(id)).statut).toBe("a_recuperer");
   });
 
   it("refus : vendre un article qui n'est pas En ligne ; envoyer une vente annulée ; date future", async () => {
@@ -328,6 +333,21 @@ describe("ventes et calculs", () => {
       expect((await annuler(b)).statusCode).toBe(200);
       expect(await statuts(a, b)).toEqual(["a_expedier", "a_expedier"]);
       expect((await requete("GET", `/api/ventes/${v.id}`)).json<VenteLue>().annulee).toBe(false);
+    });
+
+    it("« Récupéré » : À récupérer → À publier ou En ligne ; supprimer « Récupéré » revient à À récupérer", async () => {
+      const a = await enLigne(900);
+      const v = await vendre([a], 900);
+      await requete("POST", `/api/ventes/${v.id}/envoi`, {});
+      await requete("POST", `/api/ventes/${v.id}/retour`, { articleIds: [a] });
+      expect((await lire(a)).statut).toBe("a_recuperer");
+      expect((await lire(a)).transitionsPossibles).toEqual(["a_publier", "en_ligne", "sortie_stock"]);
+      expect((await requete("POST", `/api/articles/${a}/statut`, { vers: "en_ligne" })).statusCode).toBe(200);
+      expect((await annuler(a)).statusCode).toBe(200);
+      expect((await lire(a)).statut).toBe("a_recuperer");
+      expect((await requete("POST", `/api/articles/${a}/statut`, { vers: "a_publier" })).statusCode).toBe(200);
+      const alertes = (await requete("GET", "/api/alertes")).json<{ aRecuperer: unknown[] }>();
+      expect(alertes.aRecuperer).toHaveLength(0);
     });
 
     it("sortie du stock supprimée : motif effacé ; un retour ne se supprime pas", async () => {
