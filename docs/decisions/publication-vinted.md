@@ -119,3 +119,7 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
 - 07/10/2026 (#61) : « Vérifier maintenant » semblait ne rien faire (file vide, ou attente de 10 min après une
   **erreur**). L'attente de 10 minutes ne suit plus qu'une **publication réelle** ; un passage demandé à la main écrit
   toujours son résultat dans le journal (les passages automatiques restent silencieux quand il n'y a rien à faire).
+- Essai du 07/10/2026 (22:50) : formulaire complet sauf la **taille** (« S » sur la fiche, restée vide sur Vinted,
+  sans erreur). Cause probable : la recherche « contient » acceptait n'importe quelle option contenant un « s », et la
+  taille n'était pas relue. Désormais : « contient » seulement pour un texte d'au moins 3 lettres, puces `button`
+  cherchées dans les listes ouvertes, taille relue à l'identique par le contrôle (erreur + relevé sinon).
