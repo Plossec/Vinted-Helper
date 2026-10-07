@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.0.1] — 06/10/2026
+
 ### Ajouté
 - **Rapatriement automatique des sauvegardes** sur le PC (`scripts/installer-sauvegarde-auto.ps1`) : clé SSH
   limitée à la lecture des sauvegardes, tâche planifiée Windows chaque jour, journal `rapatriement.log`.
