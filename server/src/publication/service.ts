@@ -1,5 +1,5 @@
-// Publication automatique sur Vinted (décision du 06/10/2026, docs/decisions/publication-vinted.md).
-// Le serveur tient la file d'attente ; le programme du PC (outils/publication-vinted) vient chercher la demande
+// Publication automatique sur Vinted (décisions des 06 et 07/10/2026, docs/decisions/publication-vinted.md).
+// Le serveur tient la file d'attente ; l'extension Chrome (outils/extension-vinted) vient chercher la demande
 // suivante avec un jeton personnel, publie, puis renvoie le résultat. Le serveur ne contacte jamais Vinted.
 import { createHash, randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, lt } from "drizzle-orm";

@@ -9,8 +9,8 @@ puis clique « Ajouter ». L'article passe ensuite **En ligne** et le lien de l'
 > Si Vinted affiche une vérification (captcha), une page « session bloquée », ou si vous n'êtes pas connecté,
 > l'extension **se met en pause** : rien n'est rechargé ni publié tant que vous n'avez pas cliqué « Reprendre ».
 
-> L'ancien programme du PC (`outils/publication-vinted/`, fenêtre Chrome pilotée à distance) n'est plus utilisé :
-> il a été bloqué par Vinted le 06/10/2026. Il sera retiré une fois l'extension validée.
+> L'ancien programme du PC (fenêtre Chrome pilotée à distance), bloqué par Vinted le 06/10/2026, a été retiré le
+> 08/10/2026 (#68). Son dossier de données sur le PC, `%LOCALAPPDATA%\VintedHelper`, peut être supprimé.
 
 ## 1. Installer l'extension (une seule fois)
 
