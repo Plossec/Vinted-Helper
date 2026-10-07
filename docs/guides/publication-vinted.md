@@ -58,7 +58,8 @@ calcul) est utilisé.
 
 Chrome doit rester ouvert. L'extension vérifie **toutes les 5 minutes** s'il y a des articles à publier, et publie
 **un seul article toutes les 10 minutes au moins** (plus un délai variable de 0 à 3 minutes). Pendant le remplissage,
-un onglet Vinted s'ouvre au premier plan : laissez-le faire (moins d'une minute), sans le fermer.
+un onglet Vinted s'ouvre au premier plan : laissez-le faire, sans le fermer. L'extension marque une pause de **15 à
+20 secondes** entre chaque étape (photos, titre, description, catégorie…) : une annonce prend environ **3 minutes**.
 
 Une publication interrompue (Chrome fermé, PC éteint…) passe en **erreur** et n'est **jamais relancée
 automatiquement**, pour éviter une annonce en double : vérifiez sur Vinted avant de la redemander.
@@ -74,6 +75,7 @@ Décochez la case seulement quand plusieurs essais sont parfaits.
 Cliquez l'icône de l'extension :
 - **État** : active, ou **en pause** avec la raison (badge rouge « ! » sur l'icône) ;
 - **Mettre en pause / Reprendre** ; **Vérifier maintenant** (sans attendre les 5 minutes) ;
+- **Diagnostic** (voir §8) ;
 - **Journal** des dernières actions.
 
 **En cas de pause** :
@@ -85,8 +87,15 @@ Cliquez l'icône de l'extension :
 ## 8. Si Vinted change (ou au premier réglage)
 
 Les repères du formulaire Vinted sont regroupés dans `outils/extension-vinted/selecteurs.js`. Si un champ n'est pas
-trouvé (erreur « champ introuvable » ou contrôle en échec), rien n'est publié. Faites une **capture d'écran** de
-l'onglet Vinted et du message d'erreur, et envoyez-les à Claude, qui corrigera `selecteurs.js`. Ensuite :
+trouvé (erreur « champ introuvable », « catégorie introuvable » ou contrôle en échec), rien n'est publié :
+
+1. Soyez connecté à Vinted, puis cliquez l'icône de l'extension → **Diagnostic**.
+2. L'extension ouvre « Vendre un article », relève la structure du formulaire, ouvre la liste des catégories (sans
+   rien choisir) et la referme. Rien n'est saisi ni publié.
+3. Une page « Diagnostic du formulaire Vinted » s'ouvre : cliquez **Télécharger le fichier**
+   (`diagnostic-vinted-….json`, dans votre dossier Téléchargements).
+4. Envoyez ce fichier à Claude, avec le message d'erreur, et une capture de l'onglet Vinted si possible. Claude
+   corrigera `selecteurs.js`. Ensuite :
 
 1. `git pull` à la racine du projet ;
 2. `chrome://extensions` → bouton **↻** (recharger) sur la carte de l'extension ;

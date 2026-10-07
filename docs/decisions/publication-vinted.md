@@ -84,3 +84,12 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
 - La page est vérifiée **avant** de prendre un article ; une publication interrompue n'est jamais relancée.
 - Contrôle avant envoi et mode essai inchangés.
 - CLAUDE.md, règle n° 4, mise à jour : la seule automatisation autorisée est la publication par cette extension.
+
+**Précisions du 07/10/2026 (#56, #57)**
+- Premier essai réel : photos, titre et description remplis ; arrêt sur la liste des catégories (« Femmes »
+  introuvable). Ajout d'un bouton **Diagnostic** dans l'extension : il relève la structure du formulaire (sans les
+  saisies) et ouvre la liste des catégories sans rien choisir, pour calibrer `selecteurs.js` sans que Claude consulte
+  Vinted.
+- À la demande de l'utilisateur, **pause de 15 à 20 s** (au hasard) entre chaque étape du remplissage ; le service
+  worker pilote les étapes une à une et vérifie la page (captcha, blocage) avant chacune. Ce ralentissement ne
+  masque pas l'automatisation : le risque de blocage reste le même.
