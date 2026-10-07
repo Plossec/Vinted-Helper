@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.1.1] — 07/10/2026
+
 ### Ajouté
 - IA Gemini : **modèle de secours** (`gemini-flash-lite-latest` par défaut) essayé automatiquement quand le modèle
   principal est saturé ou ne répond pas en 30 secondes (#43).
