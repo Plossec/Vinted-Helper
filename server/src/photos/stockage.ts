@@ -54,6 +54,28 @@ export function creerStockagePhotos(dossier: string) {
       return nouveau;
     },
 
+    /**
+     * Fait pivoter la photo d'un quart de tour (sens des aiguilles d'une montre si `angle` = 90), définitivement :
+     * fichier réécrit en JPEG (l'orientation de l'appareil photo est appliquée avant) et vignette recréée.
+     * Renvoie le nouveau nom de fichier.
+     */
+    async pivoter(utilisateurId: string, photoId: string, fichier: string, angle: 90 | -90): Promise<string> {
+      const contenu = await readFile(chemin(utilisateurId, fichier));
+      const tournee = await sharp(await sharp(contenu).rotate().toBuffer())
+        .rotate(angle)
+        .jpeg({ quality: 92 })
+        .toBuffer();
+      const nouveau = `${photoId}.jpg`;
+      await writeFile(chemin(utilisateurId, nouveau), tournee);
+      if (nouveau !== fichier) await rm(chemin(utilisateurId, fichier), { force: true });
+      const vignette = await sharp(tournee)
+        .resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" })
+        .webp({ quality: 75 })
+        .toBuffer();
+      await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
+      return nouveau;
+    },
+
     /** Supprime le fichier et sa vignette (photo qui n'est plus utilisée par aucun article). */
     async supprimer(utilisateurId: string, photoId: string, fichier: string): Promise<void> {
       await rm(chemin(utilisateurId, fichier), { force: true });

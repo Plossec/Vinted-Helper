@@ -8,6 +8,10 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
   const appareil = useRef<HTMLInputElement>(null);
   const [envoi, setEnvoi] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  /** Photos tournées dans cette page : nouvelle adresse pour forcer le rechargement de l'image. */
+  const [versions, setVersions] = useState<Record<string, number>>({});
+  const [rotation, setRotation] = useState<string | null>(null);
+  const version = (id: string) => (versions[id] ? `?v=${versions[id]}` : "");
 
   const terrain = article.photos.filter((p) => p.type === "terrain");
   const annonces = article.photos.filter((p) => p.type === "annonce");
@@ -55,6 +59,40 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
     void action(api.put(`/api/articles/${article.id}/photos`, { ordre: annonces.map((p) => p.id), principale: id }));
   }
 
+  async function pivoter(id: string, sens: "gauche" | "droite") {
+    setErreur(null);
+    setRotation(id);
+    try {
+      await api.post(`/api/photos/${id}/rotation`, { sens });
+      setVersions((v) => ({ ...v, [id]: (v[id] ?? 0) + 1 }));
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "Rotation impossible.");
+    } finally {
+      setRotation(null);
+    }
+  }
+
+  const boutonsRotation = (id: string) => (
+    <>
+      <button
+        type="button"
+        onClick={() => void pivoter(id, "gauche")}
+        disabled={rotation !== null}
+        aria-label="Tourner vers la gauche"
+      >
+        ↺
+      </button>
+      <button
+        type="button"
+        onClick={() => void pivoter(id, "droite")}
+        disabled={rotation !== null}
+        aria-label="Tourner vers la droite"
+      >
+        ↻
+      </button>
+    </>
+  );
+
   function retirer(id: string, type: string) {
     const texte =
       type === "terrain" && article.lot
@@ -69,11 +107,12 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
       <ul className="photos">
         {terrain.map((p) => (
           <li key={p.id}>
-            <a href={urlPhoto(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id)} alt="Photo terrain" loading="lazy" />
+            <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
+              <img src={urlVignette(p.id) + version(p.id)} alt="Photo terrain" loading="lazy" />
             </a>
             <span className="photos__legende">Photo terrain</span>
             <div className="photos__actions">
+              {boutonsRotation(p.id)}
               <button type="button" onClick={() => retirer(p.id, p.type)} aria-label="Retirer la photo terrain">
                 🗑
               </button>
@@ -82,10 +121,11 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         ))}
         {annonces.map((p, i) => (
           <li key={p.id} className={p.estPrincipale ? "est-principale" : ""}>
-            <a href={urlPhoto(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id)} alt={`Photo d'annonce ${i + 1}`} loading="lazy" />
+            <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
+              <img src={urlVignette(p.id) + version(p.id)} alt={`Photo d'annonce ${i + 1}`} loading="lazy" />
             </a>
             <span className="photos__legende">{p.estPrincipale ? "★ Principale" : `Photo ${i + 1}`}</span>
+            <div className="photos__actions">{boutonsRotation(p.id)}</div>
             <div className="photos__actions">
               <button type="button" onClick={() => deplacer(i, -1)} disabled={i === 0} aria-label="Avancer">
                 ←

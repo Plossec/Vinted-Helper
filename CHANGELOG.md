@@ -6,6 +6,7 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Rotation des photos** d'un article (↺ ↻, d'un quart de tour, définitive) (#35).
 - **Modes d'affichage** de la liste des articles : vignettes, liste compacte, mosaïque, détaillé (tableau triable
   avec prix d'achat et bénéfice) (#31).
 - **Déploiement continu** : vérification automatique (GitHub Actions) de chaque pull request, et mise à jour du

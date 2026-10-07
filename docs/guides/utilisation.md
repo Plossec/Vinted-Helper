@@ -22,7 +22,8 @@ Article de la maison : **Terrain → Article de la maison** (0 €, sans sortie,
 ## À la maison (onglet **Articles**)
 
 Ouvrez un brouillon pour compléter sa fiche (nom, catégorie, marque, état…), ajouter les **photos de l'annonce**
-(galerie : plusieurs à la fois, ou appareil photo), les réordonner (← →) et choisir la **photo principale** (★).
+(galerie : plusieurs à la fois, ou appareil photo), les réordonner (← →), les **faire pivoter** (↺ ↻, d'un quart de
+tour, définitivement) et choisir la **photo principale** (★).
 Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est réparti à nouveau sur les articles.
 
 **Filtres** (bouton « Filtres ») : touchez les statuts à afficher (par défaut tous sauf Finalisé et Sortie du stock) ;
