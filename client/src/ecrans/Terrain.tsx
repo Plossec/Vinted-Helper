@@ -223,15 +223,13 @@ function DemarrerSortie({
           Démarrer la sortie
         </button>
       </form>
-      <div className="section">
+      <div className="section actions">
         <button className="bouton" type="button" onClick={onMaison}>
           📷 Article de la maison (0 €, sans sortie)
         </button>
-        <p>
-          <Link to="/sorties" className="lien">
-            Toutes les sorties
-          </Link>
-        </p>
+        <Link to="/sorties" className="bouton">
+          Toutes les sorties
+        </Link>
       </div>
     </>
   );
