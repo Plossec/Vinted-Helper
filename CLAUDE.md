@@ -96,7 +96,7 @@ l'utilisateur le fait.
 - **Chaque nouvelle demande** (évolution, correctif, idée) : **créer d'abord une issue GitHub** (titre
   `[Évolution] …` ou `[Correctif] …`, contexte, demande de l'utilisateur, points à préciser), donner son lien, puis
   **demander à l'utilisateur s'il faut la réaliser maintenant**. Aucun plan ni code avant sa réponse. La PR qui la
-  réalise la ferme (`Closes #N`).
+  réalise porte son numéro dans le titre (`#N — Ajoute …`) et la ferme (`Closes #N`).
 - **Un lot à la fois** (§9). On ne commence pas le lot suivant tant que le lot courant n'est pas validé
   par l'utilisateur sur son téléphone (ou sur PC pour les lots 0 et 1).
 - **Plan d'abord** : pour chaque lot, propose un plan (fichiers, étapes, critères §8 couverts) et **attends la
