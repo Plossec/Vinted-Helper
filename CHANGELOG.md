@@ -6,10 +6,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Modes d'affichage** de la liste des articles : vignettes, liste compacte, mosaïque, détaillé (tableau triable
+  avec prix d'achat et bénéfice) (#31).
 - **Déploiement continu** : vérification automatique (GitHub Actions) de chaque pull request, et mise à jour du
   serveur après chaque fusion dans `main` si tout est vert (`scripts/ovh/activer-deploiement-continu.sh`).
 - **Import de l'ancien tableur** (`npm run import-tableur -w server`, mode `--essai`) : sorties, lots, mises en ligne
   et ventes recréés par les fonctions de l'application, en une seule transaction.
+
+### Modifié
+- Terrain : « Toutes les sorties » devient un bouton (#32).
 
 ## [1.0.1] — 07/10/2026
 

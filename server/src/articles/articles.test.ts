@@ -138,6 +138,12 @@ describe("articles", () => {
       const liste = (await requete("GET", "/api/articles")).json<{ nom: string; reference: number }[]>();
       expect(liste.map((a) => a.nom)).toEqual(["Second", "Premier"]);
     });
+
+    it("liste : prix d'achat et bénéfice calculés (affichage détaillé, issue #31)", async () => {
+      await creer({ nom: "Polo", prixAchat: 250 });
+      const [ligne] = (await requete("GET", "/api/articles")).json<Record<string, unknown>[]>();
+      expect(ligne).toMatchObject({ prixAchat: 250, benefice: -250, beneficeRealise: false });
+    });
   });
 
   describe("statuts (§4)", () => {

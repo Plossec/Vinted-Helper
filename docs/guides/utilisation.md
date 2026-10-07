@@ -25,6 +25,14 @@ Ouvrez un brouillon pour compléter sa fiche (nom, catégorie, marque, état…)
 (galerie : plusieurs à la fois, ou appareil photo), les réordonner (← →) et choisir la **photo principale** (★).
 Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est réparti à nouveau sur les articles.
 
+**Affichage de la liste** (boutons « Affichage », sous le tri ; choix gardé sur chaque appareil) :
+- ▤ **Vignettes** : photo, référence, statut, nom, marque et prix ;
+- ☰ **Liste compacte** : une ligne par article, sans photo ;
+- ▦ **Mosaïque** : grandes photos en grille ;
+- ▥ **Détaillé** : tableau (statut, marque, catégorie, lieu, date et prix d'achat, prix affiché, bénéfice) ; touchez
+  un en-tête de colonne pour trier (une 2e fois pour inverser). Sur téléphone, faites glisser le tableau vers la
+  gauche ; le bénéfice en *italique* est provisoire (article pas encore finalisé).
+
 ## Nouvelle version
 
 Après une mise à jour (README, « Mettre à jour l'application »), le téléphone affiche « Nouvelle version disponible — Mettre à jour » : touchez

@@ -280,14 +280,22 @@ export async function listerArticles(base: Base, utilisateurId: string) {
     base,
     lignes.map((a) => a.id),
   );
+  // Montants calculés par le module de calcul (affichage détaillé de la liste) : jamais stockés.
+  const { details } = await calculer(base, utilisateurId);
   // Les sous-requêtes SQL renvoient du texte : on rétablit des dates ISO.
   const iso = (d: Date | string | null) => (d === null ? null : new Date(d).toISOString());
-  return lignes.map((a) => ({
-    ...a,
-    dateStatut: iso(a.dateStatut),
-    dateMiseEnLigne: iso(a.dateMiseEnLigne),
-    vignette: choisirVignette(photos.get(a.id) ?? []),
-  }));
+  return lignes.map((a) => {
+    const detail = details.get(a.id);
+    return {
+      ...a,
+      dateStatut: iso(a.dateStatut),
+      dateMiseEnLigne: iso(a.dateMiseEnLigne),
+      vignette: choisirVignette(photos.get(a.id) ?? []),
+      prixAchat: detail?.prixAchat ?? null,
+      benefice: detail?.benefice ?? null,
+      beneficeRealise: detail?.realise ?? false,
+    };
+  });
 }
 
 export async function lireArticle(base: Base, utilisateurId: string, id: string) {

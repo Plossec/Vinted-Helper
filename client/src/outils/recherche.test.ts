@@ -20,6 +20,9 @@ const article = (reference: number, extra: Partial<ResumeArticle> = {}): ResumeA
   dateStatut: "2026-10-01T10:00:00.000Z",
   dateMiseEnLigne: null,
   vignette: null,
+  prixAchat: null,
+  benefice: null,
+  beneficeRealise: false,
   ...extra,
 });
 const refs = (liste: ResumeArticle[]) => liste.map((a) => a.reference);
@@ -82,5 +85,32 @@ describe("tris", () => {
     expect(t("achat", false)).toEqual([3, 1, 2]);
     expect(t("mise_en_ligne", true)).toEqual([1, 3, 2]);
     expect(t("anciennete_statut", true)).toEqual([2, 3, 1]); // égalité : la plus récente référence d'abord
+  });
+});
+
+describe("tris des colonnes du mode détaillé", () => {
+  const articles = [
+    article(1, { nom: "Écharpe", statut: "en_ligne", marque: "Zara", lieuId: "L2", prixAchat: 300, benefice: 500 }),
+    article(2, { nom: "anorak", statut: "brouillon", marque: null, lieuId: "L1", prixAchat: 100, benefice: -100 }),
+    article(3, { nom: "Blouson", statut: "finalise", marque: "Adidas", lieuId: null, prixAchat: 200, benefice: 800 }),
+  ];
+  const trier = (tri: Parameters<typeof filtrerEtTrier>[2], croissant = true) =>
+    refs(
+      filtrerEtTrier(articles, FILTRES_VIDES, tri, croissant, undefined, (id) =>
+        id === "L1" ? "Vide grenier" : "Braderie",
+      ),
+    );
+
+  it("trie le texte sans tenir compte des accents ni des majuscules, valeurs vides à la fin", () => {
+    expect(trier("nom")).toEqual([2, 3, 1]);
+    expect(trier("marque")).toEqual([3, 1, 2]);
+    expect(trier("lieu")).toEqual([1, 2, 3]);
+  });
+
+  it("trie les statuts dans l'ordre du cycle de vie et les montants", () => {
+    expect(trier("statut")).toEqual([2, 1, 3]);
+    expect(trier("prix_achat")).toEqual([2, 3, 1]);
+    expect(trier("benefice", false)).toEqual([3, 1, 2]);
+    expect(trier("reference", false)).toEqual([3, 2, 1]);
   });
 });

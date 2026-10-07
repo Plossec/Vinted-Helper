@@ -2,15 +2,21 @@
 // le temps de la session (retour depuis une fiche).
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { api, type Referentiels, type ResumeArticle, type ResumeSortie, urlVignette } from "../api.js";
+import { api, type Referentiels, type ResumeArticle, type ResumeSortie } from "../api.js";
 import { Alertes } from "../composants/Alertes.js";
 import { ListeDeroulante, type OptionListe } from "../composants/ListeDeroulante.js";
+import {
+  ecrireModeAffichage,
+  lireModeAffichage,
+  type ModeAffichage,
+  SelecteurAffichage,
+  VuesArticles,
+} from "../composants/VuesArticles.js";
 import { chargerReferentiels } from "../hors-ligne/cache.js";
 import { demanderPublication } from "../publication.js";
 import { formatDate } from "../outils/dates.js";
-import { formatEuros } from "../outils/montants.js";
 import { FILTRES_VIDES, type Filtres, filtrerEtTrier, type Tri } from "../outils/recherche.js";
-import { formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
+import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 const CLE = "vh-liste-articles";
 const TRIS: Record<Tri, string> = {
@@ -19,6 +25,14 @@ const TRIS: Record<Tri, string> = {
   mise_en_ligne: "Date de mise en ligne",
   prix: "Prix affiché",
   anciennete_statut: "Ancienneté dans le statut",
+  reference: "Référence",
+  nom: "Nom",
+  statut: "Statut",
+  marque: "Marque",
+  categorie: "Catégorie",
+  lieu: "Lieu",
+  prix_achat: "Prix d'achat",
+  benefice: "Bénéfice",
 };
 const SEPARATEUR = " › ";
 
@@ -73,6 +87,7 @@ export function ListeArticles() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [etat, setEtat] = useState<Etat>(lireEtat);
   const [filtresOuverts, setFiltresOuverts] = useState(false);
+  const [mode, setMode] = useState<ModeAffichage>(lireModeAffichage);
   /** Mode sélection (filtre « À publier ») : articles cochés pour la publication sur Vinted. */
   const [selection, setSelection] = useState<Set<string> | null>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -110,6 +125,9 @@ export function ListeArticles() {
         categories: branchesCategories(refs),
         marques: refs.marques.map((m): OptionListe => ({ cle: m.id, libelle: m.nom })),
         libelles: new Map(refs.categories.map((c) => [c.code, c.chemin.join(" ")])),
+        /** Affichage (mode détaillé) : dernier niveau de la catégorie, nom du lieu. */
+        categoriesCourtes: new Map(refs.categories.map((c) => [c.code, c.chemin[c.chemin.length - 1] ?? c.code])),
+        lieux: new Map(refs.lieux.map((l) => [l.id, l.nom])),
       },
     [refs],
   );
@@ -117,7 +135,14 @@ export function ListeArticles() {
   const resultats = useMemo(
     () =>
       articles &&
-      filtrerEtTrier(articles, etat.filtres, etat.tri, etat.croissant, (code) => options?.libelles.get(code) ?? code),
+      filtrerEtTrier(
+        articles,
+        etat.filtres,
+        etat.tri,
+        etat.croissant,
+        (code) => options?.libelles.get(code) ?? code,
+        (id) => options?.lieux.get(id) ?? "",
+      ),
     [articles, etat, options],
   );
 
@@ -150,7 +175,7 @@ export function ListeArticles() {
   };
 
   return (
-    <main className="page">
+    <main className={mode === "detaille" || mode === "mosaique" ? "page page--large" : "page"}>
       <h1>Articles</h1>
       <Alertes />
       <Link to="/articles/nouveau" className="bouton bouton--principal">
@@ -192,6 +217,16 @@ export function ListeArticles() {
           >
             Filtres{nombreFiltres > 0 ? ` (${nombreFiltres})` : ""}
           </button>
+        </div>
+        <div className="ligne-affichage">
+          <span className="secondaire">Affichage</span>
+          <SelecteurAffichage
+            mode={mode}
+            onChange={(m) => {
+              setMode(m);
+              ecrireModeAffichage(m);
+            }}
+          />
         </div>
 
         {filtresOuverts && options && refs && (
@@ -314,38 +349,19 @@ export function ListeArticles() {
           {articles && resultats.length !== articles.length ? ` sur ${articles.length}` : ""}
         </p>
       )}
-      <ul className="liste">
-        {resultats?.map((a) => (
-          <li key={a.id} className={selectionActive ? "carte-selection" : undefined}>
-            {selectionActive && (
-              <input
-                type="checkbox"
-                aria-label={`Sélectionner ${formatReference(a.reference)}`}
-                checked={selection.has(a.id)}
-                onChange={() => basculer(a.id)}
-              />
-            )}
-            <Link to={`/articles/${a.id}`} className="carte-article carte-article--photo">
-              {a.vignette ? (
-                <img className="vignette" src={urlVignette(a.vignette)} alt="" loading="lazy" />
-              ) : (
-                <span className="vignette" />
-              )}
-              <span className="carte-article__texte">
-                <span className="carte-article__ligne">
-                  <span className="reference">{formatReference(a.reference)}</span>
-                  <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
-                </span>
-                <span className="carte-article__nom">{a.nom ?? "(sans nom)"}</span>
-                <span className="carte-article__prix">
-                  {[a.marque, a.prixAffiche === null ? null : formatEuros(a.prixAffiche)].filter(Boolean).join(" · ") ||
-                    "Prix affiché : —"}
-                </span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {resultats && (
+        <VuesArticles
+          articles={resultats}
+          mode={mode}
+          selection={selectionActive ? selection : null}
+          onBasculer={basculer}
+          libelleCategorie={(code) => options?.categoriesCourtes.get(code) ?? code}
+          libelleLieu={(id) => options?.lieux.get(id) ?? "—"}
+          tri={etat.tri}
+          croissant={etat.croissant}
+          onTri={(tri) => setEtat((s) => ({ ...s, tri, croissant: s.tri === tri ? !s.croissant : true }))}
+        />
+      )}
       {selectionActive && (
         <div className="selection-barre">
           <button
