@@ -19,11 +19,19 @@ export const iaIndisponible = (message: string) => new ErreurMetier(503, message
 
 const VALEURS_FICTIVES = new Set(["", "votre-cle-gemini", "nom-du-modele-gemini"]);
 const DELAI_MS = 60_000;
+/** Modèle conseillé : l'alias de Google qui suit toujours le dernier modèle « Flash » (issue #38). */
+export const MODELE_CONSEILLE = "gemini-flash-latest";
+/** Erreurs passagères de Google (serveurs surchargés) : nouvel essai après ces délais. */
+const ERREURS_PASSAGERES = new Set([500, 502, 503, 504]);
+const DELAIS_NOUVEL_ESSAI_MS = [2_000, 5_000];
+
+const pause = (ms: number) => new Promise<void>((fin) => setTimeout(fin, ms));
 
 export function creerClientGemini(
   cle: string | undefined,
   modele: string | undefined,
   appeler: typeof fetch = fetch,
+  attendre: (ms: number) => Promise<void> = pause,
 ): ClientIA {
   return {
     async generer(prompt, images) {
@@ -34,9 +42,8 @@ export function creerClientGemini(
         throw iaIndisponible("Modèle Gemini non configuré (GEMINI_MODELE dans le fichier .env).");
       }
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`;
-      let reponse: Response;
-      try {
-        reponse = await appeler(url, {
+      const envoyer = () =>
+        appeler(url, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-goog-api-key": cle },
           body: JSON.stringify({
@@ -52,12 +59,30 @@ export function creerClientGemini(
           }),
           signal: AbortSignal.timeout(DELAI_MS),
         });
+      let reponse: Response;
+      try {
+        reponse = await envoyer();
+        // Serveurs de Google surchargés (fréquent sur l'offre gratuite) : jusqu'à 2 nouveaux essais.
+        for (const delai of DELAIS_NOUVEL_ESSAI_MS) {
+          if (!ERREURS_PASSAGERES.has(reponse.status)) break;
+          await attendre(delai);
+          reponse = await envoyer();
+        }
       } catch {
         throw iaIndisponible("Gemini est injoignable (réseau ou délai dépassé).");
       }
       if (reponse.status === 429) throw iaIndisponible("Quota gratuit de Gemini atteint : réessayez plus tard.");
-      if (reponse.status === 404)
-        throw iaIndisponible(`Modèle Gemini « ${modele} » introuvable : vérifiez GEMINI_MODELE.`);
+      if (reponse.status === 404) {
+        throw iaIndisponible(
+          `Modèle Gemini « ${modele} » introuvable : Google l'a peut-être retiré. Indiquez ` +
+            `GEMINI_MODELE=${MODELE_CONSEILLE} dans le fichier .env (guide « IA Gemini »).`,
+        );
+      }
+      if (ERREURS_PASSAGERES.has(reponse.status)) {
+        throw iaIndisponible(
+          "Gemini est surchargé pour le moment : réessayez dans quelques minutes (ou utilisez « Copier le prompt »).",
+        );
+      }
       if (reponse.status === 400 || reponse.status === 401 || reponse.status === 403) {
         throw iaIndisponible("Gemini refuse la demande : vérifiez la clé GEMINI_API_KEY.");
       }

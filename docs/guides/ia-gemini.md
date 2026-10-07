@@ -9,9 +9,12 @@ sur le téléphone). Réglage à faire une seule fois :
    Copiez la clé.
 2. Dans PowerShell : `notepad .env`, puis renseignez :
    - `GEMINI_API_KEY=` la clé copiée ;
-   - `GEMINI_MODELE=` le nom d'un modèle « Flash » disponible dans AI Studio (ex. `gemini-2.5-flash`).
+   - `GEMINI_MODELE=gemini-flash-latest` : ce nom suit toujours le dernier modèle « Flash » de Google (ou le nom
+     précis d'un modèle disponible dans AI Studio).
      Google retire régulièrement ses anciens modèles : si un jour l'application affiche « Modèle Gemini introuvable »,
      changez simplement ce nom.
+   - « Gemini est surchargé » : les serveurs de Google sont saturés (fréquent sur l'offre gratuite). L'application a
+     déjà réessayé deux fois ; réessayez quelques minutes plus tard, ou utilisez « Copier le prompt ».
 3. Enregistrez, puis `docker compose up -d` pour relancer l'application.
 
 Utilisation, sur la fiche d'un article :

@@ -20,6 +20,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   les statuts sauf Finalisé et Sortie du stock (#30).
 
 ### Corrigé
+- IA Gemini : modèle `gemini-flash-latest` conseillé (l'ancien `gemini-2.5-flash` a été retiré par Google) ;
+  2 nouveaux essais automatiques quand Google est surchargé, avec un message clair (#38).
 - Photo tournée : l'ancienne version restait affichée (liste, fiche, photo agrandie) ; rotation plus rapide (#39).
 
 ## [1.0.1] — 07/10/2026
