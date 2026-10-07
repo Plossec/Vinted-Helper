@@ -43,6 +43,7 @@ for (const id of ["reprendre", "pause", "maintenant"])
     await afficher();
   });
 $("options").addEventListener("click", () => chrome.runtime.openOptionsPage());
+$("releve").addEventListener("click", () => chrome.tabs.create({ url: chrome.runtime.getURL("diagnostic.html") }));
 $("diagnostic").addEventListener("click", async () => {
   $("etat").className = "";
   $("etat").textContent = "Diagnostic en cours (quelques secondes)…";

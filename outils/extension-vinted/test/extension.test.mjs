@@ -76,12 +76,20 @@ test("mode essai : tout est rempli mais « Ajouter » n'est jamais cliqué", asy
   assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
 });
 
-test("champ introuvable (marque) : erreur, aucun clic, pas de pause", async () => {
-  const { app, vinted, etat } = await lancer({ demande: DEMANDE(false), vinted: { sansChamp: "brand" } });
+test("champ introuvable (marque) : erreur, relevé de la page, aucun clic, pas de pause", async () => {
+  const {
+    app,
+    vinted,
+    etat,
+    diagnostic: d,
+  } = await lancer({ demande: DEMANDE(false), vinted: { sansChamp: "brand" } });
   assert.equal(vinted.clics, 0);
   assert.equal(app.resultats[0].resultat, "erreur");
   assert.match(app.resultats[0].message, /marque/);
   assert.equal(etat.pause, false);
+  // Relevé automatique de la page au moment de l'erreur (#56).
+  assert.equal(d.etape, "marque");
+  assert.equal(d.selecteursTrouves.categorie, '[data-testid="catalog-select-dropdown-input"]');
 });
 
 test("valeur absente d'une liste (couleur inconnue) : erreur, aucun clic", async () => {

@@ -7,9 +7,10 @@ void chrome.storage.local.get("diagnostic").then(({ diagnostic }) => {
     return;
   }
   const date = new Date(diagnostic.date).toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
-  $("resume").textContent =
-    `Relevé du ${date} : ${diagnostic.elements.length} éléments, ` +
-    `${diagnostic.apparusApresClicCategorie.length} apparus après le clic sur la catégorie.`;
+  $("resume").textContent = diagnostic.erreur
+    ? `Relevé automatique du ${date}, à l'étape « ${diagnostic.etape} » : ${diagnostic.erreur}`
+    : `Relevé du ${date} : ${diagnostic.elements.length} éléments, ` +
+      `${diagnostic.apparusApresClicCategorie?.length ?? 0} apparus après le clic sur la catégorie.`;
   $("champs").replaceChildren(
     ...Object.entries(diagnostic.selecteursTrouves).map(([nom, selecteur]) => {
       const li = document.createElement("li");

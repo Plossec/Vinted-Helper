@@ -188,7 +188,13 @@ async function etape(onglet, message) {
   const r = await envoyer(onglet, { type: "etape", ...message });
   if (!r) throw new Arret(RAISONS.inconnu);
   if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
-  if (!r.ok) throw new Error(r.message);
+  if (!r.ok) {
+    if (r.releve) {
+      await chrome.storage.local.set({ diagnostic: r.releve });
+      await journal("Relevé de la page enregistré : fenêtre de l'extension → « Dernier relevé ».");
+    }
+    throw new Error(r.message);
+  }
 }
 
 async function publier(onglet, api, demande) {

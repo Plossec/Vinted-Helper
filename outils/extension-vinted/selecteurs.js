@@ -21,8 +21,23 @@ const SELECTEURS = {
   /** Champ de recherche affiché dans une liste de choix (marque, taille…), s'il existe. */
   rechercheDansListe: ['[data-testid$="-search-input"]', 'input[type="search"]'],
 
-  /** Options cliquables d'une liste de choix (on retient celle dont le texte correspond). */
-  options: ['[role="option"]', '[data-testid$="-option"]'],
+  /**
+   * Options cliquables d'une liste de choix ouverte (on retient celle dont le texte correspond). Relevé du 07/10/2026 :
+   * la liste des catégories est `[data-testid="catalog-select-dropdown-content"]`, chaque catégorie une case
+   * `div[role="button"][id^="catalog-"]`. On ne cherche QUE dans les listes ouvertes : le menu du haut de Vinted
+   * contient aussi « Femmes », « Hommes »…
+   */
+  options: [
+    '[data-testid$="-dropdown-content"] [role="button"]',
+    '[data-testid$="-dropdown-content"] [role="option"]',
+    '[data-testid$="-dropdown-content"] [role="radio"]',
+    '[data-testid$="-dropdown-content"] [role="checkbox"]',
+    '[role="option"]',
+    '[data-testid$="-option"]',
+  ],
+
+  /** Zones où une option n'est jamais cherchée (menu de navigation du site). */
+  horsOptions: 'header, nav, [role="tablist"]',
 
   /** Vignettes des photos déposées dans le formulaire (leur nombre est contrôlé avant l'envoi). */
   photosDeposees: ['[data-testid="image-grid"] img', '[data-testid^="media-select-item"] img'],
