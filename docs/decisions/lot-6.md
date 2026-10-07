@@ -11,3 +11,12 @@
 | Génération | Le résultat est enregistré directement (il reste modifiable) ; confirmation demandée s'il remplace un texte existant. Titre coupé à 60 caractères au dernier mot ; toute ligne « Réf. … » proposée par l'IA est retirée puis « Réf. 127 » est ajouté. |
 | Lecture d'étiquette | La catégorie libre de l'IA est rapprochée de l'arbre Vinted par mots-clés ; si rien ne correspond, elle est seulement affichée. Une marque inconnue est proposée telle quelle (ajoutée à la liste à l'enregistrement de la fiche). |
 | Prompts | Un prompt identique au prompt d'origine n'est pas enregistré, pour profiter des futures améliorations. |
+
+---
+
+## 07/10/2026 — Modèle retiré et serveurs surchargés (issue #38)
+
+- `gemini-2.5-flash` n'est plus proposé par Google (404). Modèle conseillé partout (installation, `.env.example`,
+  guides, message d'erreur) : l'alias **`gemini-flash-latest`**, qui suit le dernier modèle « Flash ».
+- Erreurs passagères de Google (500, 502, 503, 504) : **2 nouveaux essais** automatiques, après 2 s puis 5 s, avant
+  le message « Gemini est surchargé pour le moment… ».

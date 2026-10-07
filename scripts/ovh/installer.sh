@@ -64,7 +64,7 @@ else
     echo "Les deux saisies diffèrent ou le mot de passe fait moins de 8 caractères : recommencez."
   done
   read -r -p "Clé Gemini (laisser vide pour plus tard) : " cle_gemini
-  read -r -p "Modèle Gemini [gemini-2.5-flash] : " modele_gemini
+  read -r -p "Modèle Gemini [gemini-flash-latest] : " modele_gemini
   # umask limité à la création de .env (sinon les dossiers créés ensuite deviendraient illisibles pour « ubuntu »).
   (
   umask 077
@@ -78,7 +78,7 @@ POSTGRES_DB=vinted_helper
 COMPTE_IDENTIFIANT=$identifiant
 COMPTE_MOT_DE_PASSE_INITIAL=$mot_de_passe
 GEMINI_API_KEY=${cle_gemini:-votre-cle-gemini}
-GEMINI_MODELE=${modele_gemini:-gemini-2.5-flash}
+GEMINI_MODELE=${modele_gemini:-gemini-flash-latest}
 SAUVEGARDE_HEURE=3
 FIN
   )

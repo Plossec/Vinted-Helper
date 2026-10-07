@@ -53,6 +53,35 @@ describe("client Gemini (requête simulée)", () => {
     await expect(creerClientGemini("cle", "m", panne).generer("p", [])).rejects.toMatchObject({ statut: 503 });
   });
 
+  it("Google surchargé (503) : 2 nouveaux essais (2 s puis 5 s) avant un message clair (#38)", async () => {
+    const statuts = [503, 503, 200];
+    const attentes: number[] = [];
+    const appels: number[] = [];
+    const tantot = (async () => {
+      const statut = statuts.shift() ?? 503;
+      appels.push(statut);
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }), {
+        status: statut,
+      });
+    }) as unknown as typeof fetch;
+    const attendre = async (ms: number) => {
+      attentes.push(ms);
+    };
+    expect(await creerClientGemini("cle", "m", tantot, attendre).generer("p", [])).toBe("{}");
+    expect(appels).toEqual([503, 503, 200]);
+    expect(attentes).toEqual([2000, 5000]);
+
+    attentes.length = 0;
+    await expect(creerClientGemini("cle", "m", reponse(503), attendre).generer("p", [])).rejects.toThrow(/surchargé/);
+    expect(attentes).toEqual([2000, 5000]);
+  });
+
+  it("modèle introuvable : le message conseille gemini-flash-latest", async () => {
+    await expect(creerClientGemini("cle", "ancien", reponse(404)).generer("p", [])).rejects.toThrow(
+      /« ancien » introuvable.*GEMINI_MODELE=gemini-flash-latest/,
+    );
+  });
+
   it("lit le texte de la réponse et envoie la clé dans l'en-tête (jamais dans l'adresse)", async () => {
     let url = "";
     let entetes: RequestInit["headers"];

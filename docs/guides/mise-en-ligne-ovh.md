@@ -66,7 +66,7 @@ Le script fait tout le reste (environ 10 minutes) :
 | Identifiant | Votre identifiant de connexion à l'application |
 | Mot de passe (×2) | Votre mot de passe de l'application (8 caractères minimum, rien ne s'affiche) |
 | Clé Gemini | Collez votre clé (voir [ia-gemini.md](ia-gemini.md)), ou Entrée pour plus tard |
-| Modèle Gemini | Entrée pour `gemini-2.5-flash`, ou le nom d'un modèle disponible dans Google AI Studio |
+| Modèle Gemini | Entrée pour `gemini-flash-latest`, ou le nom d'un modèle disponible dans Google AI Studio |
 
 3. construit et démarre l'application.
 
