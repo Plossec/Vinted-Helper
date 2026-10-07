@@ -6,6 +6,7 @@ interface ArticleLu {
   id: string;
   statut: string;
   transitionsPossibles: string[];
+  urlConversation: string | null;
   historiqueStatuts: { id: string; de: string | null; vers: string; date: string }[];
   couts: {
     prixAchat: number;
@@ -79,6 +80,36 @@ describe("ventes et calculs", () => {
       [480, 4, "a_expedier"],
     ]);
     expect((await lire(a)).vente).toMatchObject({ montantCredite: 1200, nombreArticles: 2 });
+  });
+
+  it("lien de la conversation Vinted (#48) : enregistré sur chaque article du colis, visible dans l'alerte", async () => {
+    const a = await enLigne(900);
+    const b = await enLigne(600);
+    const lien = "https://www.vinted.fr/inbox/123456789";
+    await vendre([a, b], 1200, { urlConversation: lien });
+    expect([(await lire(a)).urlConversation, (await lire(b)).urlConversation]).toEqual([lien, lien]);
+    const alertes = (await requete("GET", "/api/alertes")).json<{
+      aExpedier: { id: string; urlConversation: string }[];
+    }>();
+    expect(alertes.aExpedier.map((x) => x.urlConversation)).toEqual([lien, lien]);
+
+    // Modifiable ensuite sur la fiche ; vide = retiré ; adresse hors Vinted refusée.
+    const autre = "https://www.vinted.fr/inbox/987";
+    const r = await requete("PUT", `/api/articles/${a}/lien-conversation`, { url: autre });
+    expect(r.json()).toMatchObject({ urlConversation: autre });
+    expect((await requete("PUT", `/api/articles/${a}/lien-conversation`, { url: "" })).json()).toMatchObject({
+      urlConversation: null,
+    });
+    expect(
+      (await requete("PUT", `/api/articles/${a}/lien-conversation`, { url: "https://exemple.fr" })).statusCode,
+    ).toBe(400);
+    const c = await enLigne(500);
+    expect(
+      (await requete("POST", "/api/ventes", { articleIds: [c], montantCredite: 500, urlConversation: "x" })).statusCode,
+    ).toBe(400);
+    // Sans lien : la vente se fait quand même.
+    await vendre([c], 500);
+    expect((await lire(c)).urlConversation).toBeNull();
   });
 
   it("§8 — colis de 2 articles À expédier marqué Envoyé → les 2 passent Envoyé avec la même date", async () => {

@@ -23,6 +23,7 @@ import {
   centimesObligatoire,
   dateObligatoire,
   horodatageFacultatif,
+  lienVintedFacultatif,
   objet,
   texteFacultatif,
   texteObligatoire,
@@ -84,6 +85,7 @@ export function routesVentes(
         montantCredite: centimesObligatoire(c.montantCredite, "Montant crédité"),
         emballage: centimesFacultatif(c.emballage, "Emballage"),
         dateVente: date(c.date),
+        urlConversation: lienVintedFacultatif(c.urlConversation, "Lien de la conversation"),
       },
       maintenant(),
     );

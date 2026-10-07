@@ -1259,3 +1259,7 @@ a {
 .ligne-article .lien-vinted {
   min-width: 1.5rem;
 }
+
+.lien-conversation {
+  text-decoration: none;
+}

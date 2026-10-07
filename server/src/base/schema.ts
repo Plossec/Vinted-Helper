@@ -167,6 +167,8 @@ export const article = pgTable(
     formatColis: formatColis("format_colis"),
     /** Lien de l'annonce publiée sur Vinted. */
     urlVinted: text("url_vinted"),
+    /** Lien de la conversation Vinted avec l'acheteur, saisi à la vente (issue #48). */
+    urlConversation: text("url_conversation"),
     descriptionAnnonce: text("description_annonce"),
     /** Corbeille (lot 4) : date de mise à la corbeille, sinon null. */
     supprimeLe: horodatage("supprime_le"),

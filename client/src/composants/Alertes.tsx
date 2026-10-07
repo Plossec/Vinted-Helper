@@ -11,6 +11,8 @@ interface Alerte {
   nom: string | null;
   depuis: string;
   jours: number;
+  /** Articles à expédier : lien de la conversation Vinted avec l'acheteur (issue #48). */
+  urlConversation?: string | null;
 }
 
 export interface AlertesServeur {
@@ -69,6 +71,21 @@ export function Alertes() {
                     {formatReference(a.reference)} {a.nom ?? "(sans nom)"}
                   </Link>{" "}
                   <span className="secondaire">— {g.detail(a)}</span>
+                  {a.urlConversation && (
+                    <>
+                      {" "}
+                      <a
+                        href={a.urlConversation}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="lien-conversation"
+                        aria-label={`Conversation Vinted de ${formatReference(a.reference)}`}
+                        title="Ouvrir la conversation Vinted"
+                      >
+                        💬
+                      </a>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>

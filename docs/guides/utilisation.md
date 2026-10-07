@@ -30,6 +30,10 @@ Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est r
 lien, puis collez-le et « Enregistrer le lien ». Un article Brouillon ou À publier qui a un prix affiché passe alors
 **En ligne**. Dans la liste, le repère **↗** ouvre l'annonce.
 
+**Lien de la conversation avec l'acheteur** : quand vous passez un article « Vendu : à expédier », collez le lien de
+la conversation Vinted (facultatif ; dans Vinted : la conversation → copier l'adresse). Il est gardé sur chaque article
+du colis, modifiable dans la section Vinted de la fiche, et l'icône 💬 de l'alerte « À expédier » l'ouvre.
+
 **Filtres** (bouton « Filtres ») : touchez les statuts à afficher (par défaut tous sauf Finalisé et Sortie du stock) ;
 pour les catégories, marques, lieux et sorties, cherchez puis ajoutez une ou plusieurs valeurs (« × » pour en
 retirer une). « Effacer les filtres » revient au réglage par défaut.

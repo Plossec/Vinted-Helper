@@ -251,6 +251,8 @@ export interface Article {
   formatColis: string | null;
   /** Lien de l'annonce publiée sur Vinted. */
   urlVinted: string | null;
+  /** Lien de la conversation Vinted avec l'acheteur (issue #48). */
+  urlConversation: string | null;
   photos: PhotoArticle[];
   dateAchat: string | null;
   statut: Statut;

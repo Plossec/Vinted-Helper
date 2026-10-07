@@ -13,6 +13,9 @@ interface ReponseLien {
 
 export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
   const [lien, setLien] = useState(article.urlVinted ?? "");
+  const [conversation, setConversation] = useState(article.urlConversation ?? "");
+  /** Vendu (colis en cours ou fini) : le lien de la conversation avec l'acheteur est proposé (issue #48). */
+  const vendu = ["a_expedier", "envoye", "finalise"].includes(article.statut) || article.urlConversation !== null;
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
 
@@ -41,6 +44,24 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
               : r.prixManquant
                 ? "Lien enregistré. Indiquez un prix affiché pour passer l'article En ligne."
                 : "Lien enregistré.",
+      });
+    } catch (e) {
+      setMessage({ ok: false, texte: e instanceof Error ? e.message : "Enregistrement impossible." });
+    } finally {
+      setEnCours(false);
+    }
+  }
+
+  async function enregistrerConversation(url: string) {
+    setEnCours(true);
+    setMessage(null);
+    try {
+      const a = await api.put<Article>(`/api/articles/${article.id}/lien-conversation`, { url });
+      onMiseAJour(a);
+      setConversation(a.urlConversation ?? "");
+      setMessage({
+        ok: true,
+        texte: url.trim() === "" ? "Lien de la conversation retiré." : "Lien de la conversation enregistré.",
       });
     } catch (e) {
       setMessage({ ok: false, texte: e instanceof Error ? e.message : "Enregistrement impossible." });
@@ -91,6 +112,55 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
           )}
         </div>
       </form>
+      {vendu && (
+        <form
+          className="formulaire section"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void enregistrerConversation(conversation);
+          }}
+          noValidate
+        >
+          {article.urlConversation && (
+            <p>
+              <a href={article.urlConversation} target="_blank" rel="noreferrer">
+                💬 Ouvrir la conversation avec l'acheteur ↗
+              </a>
+            </p>
+          )}
+          <label className="champ">
+            <span>Lien de la conversation Vinted</span>
+            <input
+              type="url"
+              inputMode="url"
+              placeholder="https://www.vinted.fr/inbox/…"
+              value={conversation}
+              onChange={(e) => setConversation(e.target.value)}
+            />
+          </label>
+          <div className="actions">
+            <button
+              className="bouton"
+              type="submit"
+              disabled={
+                enCours || conversation.trim() === "" || conversation.trim() === (article.urlConversation ?? "")
+              }
+            >
+              Enregistrer la conversation
+            </button>
+            {article.urlConversation && (
+              <button
+                className="bouton"
+                type="button"
+                disabled={enCours}
+                onClick={() => void enregistrerConversation("")}
+              >
+                Retirer
+              </button>
+            )}
+          </div>
+        </form>
+      )}
       {article.statut === "a_publier" && (
         <>
           <button type="button" className="bouton bouton--principal" onClick={() => void publier()}>

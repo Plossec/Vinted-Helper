@@ -40,6 +40,8 @@ interface Saisie {
   motif: MotifSortie | "";
   canal: CanalRevente | "";
   prixRevente: string;
+  /** Vente : lien de la conversation Vinted avec l'acheteur (issue #48), facultatif. */
+  conversation: string;
 }
 
 export function BlocStatut({ article, onMiseAJour }: Props) {
@@ -62,6 +64,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
       motif: "",
       canal: "",
       prixRevente: "",
+      conversation: "",
     };
     try {
       if (vers === "a_expedier") {
@@ -102,6 +105,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
           montantCredite: montant,
           emballage,
           date,
+          urlConversation: saisie.conversation.trim() || null,
         });
       } else if (venteId && de === "a_expedier" && choix === "envoye") {
         await api.post(`/api/ventes/${venteId}/envoi`, { date });
@@ -244,6 +248,16 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                   />
                 </label>
               </div>
+              <label className="champ">
+                <span>Lien de la conversation Vinted (facultatif)</span>
+                <input
+                  type="url"
+                  inputMode="url"
+                  placeholder="https://www.vinted.fr/inbox/…"
+                  value={saisie.conversation}
+                  onChange={(e) => modifier({ conversation: e.target.value })}
+                />
+              </label>
               <p className="secondaire">
                 Montant réellement crédité sur le porte-monnaie Vinted. Vente groupée : cochez les autres articles du
                 colis (montant total du colis).

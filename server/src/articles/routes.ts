@@ -9,6 +9,7 @@ import {
   centimesFacultatif,
   dateObligatoire,
   horodatageFacultatif,
+  lienVintedFacultatif,
   objet,
   texteFacultatif,
   texteObligatoire,
@@ -19,6 +20,7 @@ import type { ContexteRoutes } from "../app.js";
 import {
   changerStatut,
   corrigerDateHistorique,
+  enregistrerLienConversation,
   enregistrerLienVinted,
   creerArticle,
   type DonneesArticle,
@@ -74,22 +76,6 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
 
 const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
-/** Lien d'une annonce Vinted (https, site vinted.fr, vinted.be…) ; vide = lien retiré. */
-function lienVinted(valeur: unknown): string | null {
-  const texte = texteFacultatif(valeur, "Lien Vinted", 500);
-  if (texte === null) return null;
-  let url: URL;
-  try {
-    url = new URL(texte);
-  } catch {
-    throw erreurSaisie("Lien Vinted : adresse invalide (copiez-la depuis Vinted : Partager → Copier le lien).");
-  }
-  if (url.protocol !== "https:" || !/(^|\.)vinted\.[a-z.]{2,10}$/.test(url.hostname)) {
-    throw erreurSaisie("Lien Vinted : l'adresse doit être celle d'une annonce Vinted (https://www.vinted.fr/…).");
-  }
-  return url.toString();
-}
-
 export function routesArticles(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/articles", async (requete) => listerArticles(base, utilisateurDe(requete).id));
 
@@ -112,9 +98,17 @@ export function routesArticles(app: FastifyInstance, { base, maintenant, utilisa
   app.put("/api/articles/:id/lien-vinted", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;
     const id = idDe(requete.params);
-    const url = lienVinted(objet(requete.body).url);
+    const url = lienVintedFacultatif(objet(requete.body).url, "Lien Vinted");
     const resultat = await enregistrerLienVinted(base, utilisateurId, id, url, maintenant());
     return { ...resultat, article: await lireArticle(base, utilisateurId, id) };
+  });
+
+  app.put("/api/articles/:id/lien-conversation", async (requete) => {
+    const utilisateurId = utilisateurDe(requete).id;
+    const id = idDe(requete.params);
+    const url = lienVintedFacultatif(objet(requete.body).url, "Lien de la conversation");
+    await enregistrerLienConversation(base, utilisateurId, id, url, maintenant());
+    return lireArticle(base, utilisateurId, id);
   });
 
   app.post("/api/articles/:id/statut", async (requete) => {
