@@ -5,31 +5,17 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-### Modifié
-- Ancien programme de publication du PC (bloqué par Vinted) **retiré** : seule l'extension Chrome publie (#68).
+## [1.2.0] — 08/10/2026
 
 ### Ajouté
-- Extension Vinted : catégorie choisie par la **recherche de Vinted**, dans le bon rayon (Femmes, Hommes…), y compris
-  quand son nom diffère de celui de l'application (« Doudounes » pour « Doudounes et vestes matelassées ») ; une
-  suggestion de Vinted dans le mauvais rayon est corrigée (#56).
-- Extension Vinted : catégorie **déjà remplie par Vinted** et identique laissée telle quelle (de même pour marque,
-  taille, état, couleurs) ; recherche de la catégorie finale quand le chemin diffère de celui de Vinted ; format du
-  colis coché dans ses cases ; choix proposés par Vinted affichés en cas d'erreur (#56).
-- Extension Vinted : choix de la **catégorie** calibré sur le vrai formulaire (options cherchées uniquement dans la
-  liste ouverte) et **relevé automatique** de la page en cas d'erreur, bouton « Dernier relevé » (#56).
-- Extension Vinted : contrôle avant envoi corrigé : **prix** comparé en nombre (« 9.00 » = « 9,00 ») et **photos**
-  comptées avec le vrai repère de Vinted (#56).
-- Extension Vinted : **taille** comparée à l'identique (« S » ne prend plus « XS » ni une option quelconque) et
-  relue par le contrôle avant envoi : une taille non remplie arrête la publication avec un relevé (#56).
-- Extension Vinted : **« Vérifier maintenant »** écrit toujours le résultat dans le journal (aucune annonce, attente,
-  pause) ; l'attente de 10 minutes ne suit plus qu'une vraie publication, ni un essai ni une erreur (#61).
-- Extension Vinted : **état** (« Très bon état », « Bon état »…) choisi par le titre exact de sa case (#56) ; pause
-  ramenée à **5 secondes** entre chaque étape, une annonce en 1 minute environ (#63).
-- Extension Vinted : **pause de 15 à 20 secondes** entre chaque étape du remplissage (#57) et bouton **Diagnostic**
-  qui relève la structure du formulaire Vinted pour corriger les repères (#56).
-- **Extension Chrome de publication Vinted** (`outils/extension-vinted/`), dans le Chrome habituel : même file et
-  même jeton, une annonce au plus toutes les 10 minutes, pause automatique sur vérification, page « session
-  bloquée » ou déconnexion (#54).
+- **Publication automatique sur Vinted par une extension Chrome** (`outils/extension-vinted/`), dans le Chrome
+  habituel : même file et même jeton, une annonce au plus toutes les 10 minutes, 5 secondes entre chaque étape du
+  remplissage, pause automatique sur vérification, page « session bloquée » ou déconnexion (#54, #57, #63).
+  - Formulaire calibré sur le vrai site : catégorie trouvée par la recherche de Vinted dans le bon rayon, champs
+    déjà remplis par Vinted respectés, état, taille, couleurs et format du colis choisis à l'identique (#56).
+  - Contrôle avant envoi (prix, photos, taille…) ; boutons **Diagnostic** et **Dernier relevé** pour corriger les
+    repères si Vinted change (#56).
+  - « Vérifier maintenant » indique toujours le résultat dans le journal (#61).
 - Statut **« À récupérer »** après un retour de l'acheteur, puis « Récupéré » → À publier ou En ligne ; alerte sur
   l'écran Articles (#52).
 - **Supprimer le dernier changement de statut** (erreur de saisie) depuis l'historique de la fiche, effets défaits
@@ -38,6 +24,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   modifiable sur la fiche, icône 💬 dans l'alerte « À expédier » (#48).
 - **Lien de l'annonce Vinted** saisi sur la fiche (l'article passe En ligne s'il a un prix affiché) ; repère « ↗ »
   dans la liste des articles (#46).
+
+### Modifié
+- Ancien programme de publication du PC (bloqué par Vinted) **retiré** : seule l'extension Chrome publie (#68).
 
 ## [1.1.1] — 07/10/2026
 
