@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Extension Vinted : **pause de 15 à 20 secondes** entre chaque étape du remplissage (#57) et bouton **Diagnostic**
+  qui relève la structure du formulaire Vinted pour corriger les repères (#56).
 - **Extension Chrome de publication Vinted** (`outils/extension-vinted/`), dans le Chrome habituel : même file et
   même jeton, une annonce au plus toutes les 10 minutes, pause automatique sur vérification, page « session
   bloquée » ou déconnexion (#54).

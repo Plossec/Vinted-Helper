@@ -1,7 +1,8 @@
 // Service worker de l'extension Vinted Helper (décision du 07/10/2026, docs/guides/publication-vinted.md).
 // Toutes les 5 minutes : demande à l'application s'il y a des annonces à publier ; si oui, ouvre « Vendre un article »
 // dans le Chrome habituel de l'utilisateur (sa propre session Vinted), fait remplir le formulaire par le script de
-// contenu, contrôle, publie. Une annonce au plus toutes les 10 minutes, plus un délai aléatoire.
+// contenu étape par étape (15 à 20 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes,
+// plus un délai aléatoire.
 // Aucun contournement : vérification, page de blocage ou déconnexion → PAUSE, reprise uniquement à la main.
 
 /* global SELECTEURS */
@@ -13,6 +14,9 @@ const PAUSE_ENTRE_ARTICLES_MS = 10 * 60_000;
 const PAUSE_ALEATOIRE_MS = 3 * 60_000;
 const ATTENTE_ANNONCE_MS = 60_000;
 const TAILLE_JOURNAL = 30;
+/** Pause entre deux étapes du remplissage (issue #57), tirée au hasard dans cet intervalle. */
+const DELAI_ETAPES_MS = [15_000, 20_000];
+const ETAPES = ["photos", "titre", "description", "categorie", "marque", "taille", "etat", "couleurs", "prix", "colis"];
 
 const attendreMs = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -34,12 +38,14 @@ const RAISONS = {
 const ETAT_INITIAL = { pause: false, raison: null, prochain: 0, enCours: null, onglet: null, journal: [] };
 
 async function lire() {
+  // « vinted » et « delaiEtapes » ne sont changés que par les tests (page factice locale, délais courts).
   const {
     config = null,
     etat = {},
     vinted = VINTED_DEFAUT,
-  } = await chrome.storage.local.get(["config", "etat", "vinted"]);
-  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted };
+    delaiEtapes = DELAI_ETAPES_MS,
+  } = await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtapes"]);
+  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, delaiEtapes };
 }
 
 async function ecrireEtat(modifications) {
@@ -161,15 +167,42 @@ async function etatOnglet(onglet) {
 
 // --- Publication ---
 
-async function publier(onglet, api, demande) {
-  const { article } = demande;
-  const photos = await api.photos(article.photos);
-  const r = await envoyer(onglet, { type: "remplir", article, photos });
+/** Attente en gardant l'œil sur l'onglet (et le service worker éveillé) : erreur si l'utilisateur le ferme. */
+async function patienter(onglet, ms) {
+  const fin = Date.now() + ms;
+  while (Date.now() < fin) {
+    await attendreMs(Math.min(1000, fin - Date.now()));
+    if (!(await chrome.tabs.get(onglet).catch(() => null)))
+      throw new Error("Onglet Vinted fermé pendant le remplissage. Rien n'a été publié.");
+  }
+}
+
+async function pauseEntreEtapes(onglet) {
+  const { delaiEtapes } = await lire();
+  const [min, max] = delaiEtapes;
+  await patienter(onglet, min + Math.round(Math.random() * Math.max(0, max - min)));
+}
+
+/** Une étape du remplissage, demandée au script de contenu (qui vérifie d'abord la page). */
+async function etape(onglet, message) {
+  const r = await envoyer(onglet, { type: "etape", ...message });
   if (!r) throw new Arret(RAISONS.inconnu);
   if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
   if (!r.ok) throw new Error(r.message);
+}
+
+async function publier(onglet, api, demande) {
+  const { article } = demande;
+  const photos = await api.photos(article.photos);
+  for (const [i, nom] of ETAPES.entries()) {
+    if (i > 0) await pauseEntreEtapes(onglet);
+    await etape(onglet, { nom, article, photos: nom === "photos" ? photos : undefined });
+  }
+  await pauseEntreEtapes(onglet);
+  await etape(onglet, { nom: "controle", article, nombrePhotos: photos.length });
   if (demande.essai) return { resultat: "essai" };
 
+  await pauseEntreEtapes(onglet);
   const clic = await envoyer(onglet, { type: "ajouter" });
   if (!clic?.ok) throw new Error(clic?.message ?? "Clic sur « Ajouter » impossible. Rien n'a été publié.");
   const motif = new RegExp(SELECTEURS.motifAnnonceCreee);
@@ -244,6 +277,28 @@ async function cycleSansVerrou() {
 
 let occupe = false;
 
+/**
+ * Diagnostic (issue #56) : ouvre « Vendre un article », relève la structure du formulaire et l'enregistre pour la
+ * page diagnostic.html (fichier à envoyer à Claude). Aucune demande n'est prise, rien n'est saisi ni envoyé.
+ */
+async function diagnostic() {
+  if (occupe) return { ok: false, message: "Une publication est en cours : réessayez dans quelques minutes." };
+  occupe = true;
+  try {
+    const { vinted } = await lire();
+    const onglet = await ouvrirOnglet(`${vinted}/items/new`);
+    await attendreMs(3000); // laisser le formulaire s'afficher
+    const r = await envoyer(onglet, { type: "diagnostic", niveau: "Femmes" });
+    if (!r?.ok) return { ok: false, message: r?.message ?? "La page Vinted ne répond pas (êtes-vous connecté ?)." };
+    await chrome.storage.local.set({ diagnostic: r.diagnostic });
+    await journal("Diagnostic enregistré.");
+    await chrome.tabs.create({ url: chrome.runtime.getURL("diagnostic.html") });
+    return { ok: true };
+  } finally {
+    occupe = false;
+  }
+}
+
 /** Un passage : appelé par l'alarme, par « Vérifier maintenant » et par les tests. */
 async function cycle() {
   if (occupe) return;
@@ -288,6 +343,8 @@ async function action(message) {
     case "maintenant":
       void cycle();
       return { ok: true };
+    case "diagnostic":
+      return diagnostic();
     case "tester": {
       const { config } = await lire();
       if (!config) return { ok: false, message: "Adresse et jeton à saisir." };

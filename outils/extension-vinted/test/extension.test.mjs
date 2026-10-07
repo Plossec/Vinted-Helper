@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 import { DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
-/* global chrome, cycle */
+/* global chrome, cycle, diagnostic */
 
 const CHROME = process.env.VH_CHROME_TEST ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const SOURCE = join(import.meta.dirname, "..");
@@ -26,7 +26,7 @@ function copieDeTest() {
 }
 
 /** Lance Chromium avec l'extension, configure-la, et exécute un ou plusieurs passages. */
-async function lancer({ demande, vinted = {}, passages = 1 }) {
+async function lancer({ demande, vinted = {}, passages = 1, delaiEtapes = [0, 0], action = () => cycle() }) {
   const faux = await demarrerFauxVinted(vinted);
   const app = await demarrerFausseApplication(demande);
   const extension = copieDeTest();
@@ -38,13 +38,20 @@ async function lancer({ demande, vinted = {}, passages = 1 }) {
   try {
     const sw = contexte.serviceWorkers()[0] ?? (await contexte.waitForEvent("serviceworker"));
     await sw.evaluate(
-      ([adresse, vintedUrl]) =>
-        chrome.storage.local.set({ config: { adresse, jeton: "jeton-test" }, vinted: vintedUrl }),
-      [app.url, faux.url],
+      ([adresse, vintedUrl, delais]) =>
+        chrome.storage.local.set({
+          config: { adresse, jeton: "jeton-test" },
+          vinted: vintedUrl,
+          delaiEtapes: delais,
+        }),
+      [app.url, faux.url, delaiEtapes],
     );
-    for (let i = 0; i < passages; i++) await sw.evaluate(() => cycle());
-    const { etat } = await sw.evaluate(() => chrome.storage.local.get("etat"));
-    return { app: app.etat, vinted: faux.etat, etat };
+    const debut = Date.now();
+    let reponse;
+    for (let i = 0; i < passages; i++) reponse = await sw.evaluate(action);
+    const duree = Date.now() - debut;
+    const stockage = await sw.evaluate(() => chrome.storage.local.get(["etat", "diagnostic"]));
+    return { app: app.etat, vinted: faux.etat, etat: stockage.etat, diagnostic: stockage.diagnostic, duree, reponse };
   } finally {
     await contexte.close();
     faux.fermer();
@@ -107,3 +114,29 @@ for (const [nom, vinted, raison] of [
     assert.equal(r.vinted.chargements, 1);
   });
 }
+
+test("pause entre chaque étape du remplissage (#57)", async () => {
+  const { app, duree } = await lancer({ demande: DEMANDE(true), delaiEtapes: [150, 150] });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+  // 10 étapes + le contrôle : 10 pauses de 150 ms au moins.
+  assert.ok(duree >= 1500, `durée ${duree} ms`);
+});
+
+test("diagnostic (#56) : relevé du formulaire et de la liste des catégories, aucune demande prise", async () => {
+  const {
+    app,
+    vinted,
+    diagnostic: d,
+    reponse,
+  } = await lancer({
+    demande: DEMANDE(false),
+    action: () => diagnostic(),
+  });
+  assert.equal(reponse.ok, true);
+  assert.equal(app.prises, 0);
+  assert.equal(vinted.clics, 0);
+  assert.equal(d.champCategorieTrouve, true);
+  assert.equal(d.selecteursTrouves.titre, '[data-testid="title--input"]');
+  assert.ok(d.apparusApresClicCategorie.some((e) => e.texte === "hommes"));
+  assert.ok(d["options « Femmes »"].length >= 1);
+});
