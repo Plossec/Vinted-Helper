@@ -1,0 +1,109 @@
+// Tests de l'extension sur un faux formulaire local (aucune requête vers Vinted). L'extension est chargée dans
+// Chromium, avec une copie du manifeste qui l'autorise aussi sur 127.0.0.1 (faux Vinted et fausse application).
+import assert from "node:assert/strict";
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
+import { chromium } from "playwright-core";
+import { DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
+
+// Fonctions exécutées dans le service worker de l'extension.
+/* global chrome, cycle */
+
+const CHROME = process.env.VH_CHROME_TEST ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const SOURCE = join(import.meta.dirname, "..");
+const LOCAL = "http://127.0.0.1/*";
+
+function copieDeTest() {
+  const dossier = mkdtempSync(join(tmpdir(), "vh-extension-"));
+  cpSync(SOURCE, dossier, { recursive: true, filter: (f) => !f.includes("node_modules") && !f.includes("/test") });
+  const manifeste = JSON.parse(readFileSync(join(dossier, "manifest.json"), "utf8"));
+  manifeste.host_permissions.push(LOCAL);
+  manifeste.content_scripts[0].matches.push(LOCAL);
+  writeFileSync(join(dossier, "manifest.json"), JSON.stringify(manifeste));
+  return dossier;
+}
+
+/** Lance Chromium avec l'extension, configure-la, et exécute un ou plusieurs passages. */
+async function lancer({ demande, vinted = {}, passages = 1 }) {
+  const faux = await demarrerFauxVinted(vinted);
+  const app = await demarrerFausseApplication(demande);
+  const extension = copieDeTest();
+  const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
+    executablePath: CHROME,
+    headless: true,
+    args: [`--disable-extensions-except=${extension}`, `--load-extension=${extension}`],
+  });
+  try {
+    const sw = contexte.serviceWorkers()[0] ?? (await contexte.waitForEvent("serviceworker"));
+    await sw.evaluate(
+      ([adresse, vintedUrl]) =>
+        chrome.storage.local.set({ config: { adresse, jeton: "jeton-test" }, vinted: vintedUrl }),
+      [app.url, faux.url],
+    );
+    for (let i = 0; i < passages; i++) await sw.evaluate(() => cycle());
+    const { etat } = await sw.evaluate(() => chrome.storage.local.get("etat"));
+    return { app: app.etat, vinted: faux.etat, etat };
+  } finally {
+    await contexte.close();
+    faux.fermer();
+    app.fermer();
+  }
+}
+
+test("publication complète : formulaire rempli, contrôlé, « Ajouter » cliqué, lien renvoyé", async () => {
+  const { app, vinted, etat } = await lancer({ demande: DEMANDE(false) });
+  assert.equal(vinted.clics, 1);
+  assert.equal(app.resultats.length, 1);
+  assert.equal(app.resultats[0].resultat, "publie");
+  assert.match(app.resultats[0].url, /\/items\/987654/);
+  // Prochaine publication : au moins 10 minutes plus tard.
+  assert.ok(etat.prochain >= Date.now() + 9 * 60_000);
+  assert.equal(etat.pause, false);
+});
+
+test("mode essai : tout est rempli mais « Ajouter » n'est jamais cliqué", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(true) });
+  assert.equal(vinted.clics, 0);
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+});
+
+test("champ introuvable (marque) : erreur, aucun clic, pas de pause", async () => {
+  const { app, vinted, etat } = await lancer({ demande: DEMANDE(false), vinted: { sansChamp: "brand" } });
+  assert.equal(vinted.clics, 0);
+  assert.equal(app.resultats[0].resultat, "erreur");
+  assert.match(app.resultats[0].message, /marque/);
+  assert.equal(etat.pause, false);
+});
+
+test("valeur absente d'une liste (couleur inconnue) : erreur, aucun clic", async () => {
+  const demande = DEMANDE(false);
+  demande.article.couleurs = ["Fuchsia"];
+  const { app, vinted } = await lancer({ demande });
+  assert.equal(vinted.clics, 0);
+  assert.match(app.resultats[0].message, /Fuchsia/);
+});
+
+test("contrôle avant envoi : une valeur modifiée par la page (titre tronqué) bloque la publication", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(false), vinted: { titreCourt: true } });
+  assert.equal(vinted.clics, 0);
+  assert.match(app.resultats[0].message, /Contrôle avant envoi : titre/);
+});
+
+for (const [nom, vinted, raison] of [
+  ["non connecté à Vinted", { deconnecte: true }, /Non connecté/],
+  ["vérification (captcha)", { captcha: true }, /Vérification Vinted/],
+  ["page « session bloquée »", { bloque: true }, /bloqué la session/],
+]) {
+  test(`${nom} : pause, demande non prise, plus rien n'est chargé ensuite`, async () => {
+    const r = await lancer({ demande: DEMANDE(false), vinted, passages: 3 });
+    assert.equal(r.app.prises, 0);
+    assert.equal(r.app.resultats.length, 0);
+    assert.equal(r.vinted.clics, 0);
+    assert.equal(r.etat.pause, true);
+    assert.match(r.etat.raison, raison);
+    // Un seul chargement de la page Vinted : en pause, l'extension ne recharge pas Vinted.
+    assert.equal(r.vinted.chargements, 1);
+  });
+}

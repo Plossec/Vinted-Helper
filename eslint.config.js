@@ -35,6 +35,14 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {
+    // Extension Chrome de publication : scripts classiques (partage de SELECTEURS), pages, service worker.
+    files: ["outils/extension-vinted/**/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: { ...globals.browser, ...globals.serviceworker, ...globals.webextensions },
+    },
+  },
+  {
     files: ["client/sw-modele.js"],
     languageOptions: { globals: { ...globals.serviceworker, __FICHIERS__: "readonly" } },
   },

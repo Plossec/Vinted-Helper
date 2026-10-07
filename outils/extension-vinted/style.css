@@ -1,0 +1,89 @@
+/* Fenêtre et options de l'extension : mêmes couleurs que l'application, clair / sombre automatique. */
+:root {
+  color-scheme: light dark;
+  --fond: #ffffff;
+  --texte: #1b1b1b;
+  --secondaire: #5f6368;
+  --accent: #0b7a75;
+  --erreur: #c62828;
+  --bord: #d0d4d8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fond: #1b1d1f;
+    --texte: #eceff1;
+    --secondaire: #a8b0b6;
+    --accent: #4fc3bb;
+    --erreur: #ef7f7f;
+    --bord: #3a3f44;
+  }
+}
+body {
+  margin: 0;
+  padding: 16px;
+  font:
+    15px/1.4 system-ui,
+    sans-serif;
+  background: var(--fond);
+  color: var(--texte);
+}
+h1 {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+.secondaire {
+  color: var(--secondaire);
+  font-size: 0.9rem;
+}
+.erreur {
+  color: var(--erreur);
+}
+.ok {
+  color: var(--accent);
+}
+button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--bord);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+}
+button.principal {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+label {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+input {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--bord);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--texte);
+  font: inherit;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+li {
+  padding: 6px 0;
+  border-top: 1px solid var(--bord);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vinted Helper — publication</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        width: 340px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Publication Vinted</h1>
+    <p id="etat" role="status"></p>
+    <div class="actions">
+      <button id="reprendre" class="principal" type="button" hidden>Reprendre</button>
+      <button id="pause" type="button" hidden>Mettre en pause</button>
+      <button id="maintenant" type="button" hidden>Vérifier maintenant</button>
+      <button id="options" type="button">Réglages</button>
+    </div>
+    <h2 class="secondaire">Journal</h2>
+    <ul id="journal"></ul>
+    <script src="popup.js"></script>
+  </body>
+</html>

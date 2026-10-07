@@ -1,0 +1,16 @@
+{
+  "name": "vinted-helper-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tests de l'extension Chrome de publication Vinted (docs/guides/publication-vinted.md)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0"
+  }
+}
