@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Extension Vinted : choix de la **catégorie** calibré sur le vrai formulaire (options cherchées uniquement dans la
+  liste ouverte) et **relevé automatique** de la page en cas d'erreur, bouton « Dernier relevé » (#56).
 - Extension Vinted : **pause de 15 à 20 secondes** entre chaque étape du remplissage (#57) et bouton **Diagnostic**
   qui relève la structure du formulaire Vinted pour corriger les repères (#56).
 - **Extension Chrome de publication Vinted** (`outils/extension-vinted/`), dans le Chrome habituel : même file et

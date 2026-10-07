@@ -89,6 +89,9 @@ Cliquez l'icône de l'extension :
 Les repères du formulaire Vinted sont regroupés dans `outils/extension-vinted/selecteurs.js`. Si un champ n'est pas
 trouvé (erreur « champ introuvable », « catégorie introuvable » ou contrôle en échec), rien n'est publié :
 
+En cas d'erreur pendant un remplissage, l'extension relève **automatiquement** la page : cliquez l'icône de
+l'extension → **Dernier relevé** → **Télécharger le fichier**, et envoyez-le à Claude. Sinon, relevé à la demande :
+
 1. Soyez connecté à Vinted, puis cliquez l'icône de l'extension → **Diagnostic**.
 2. L'extension ouvre « Vendre un article », relève la structure du formulaire, ouvre la liste des catégories (sans
    rien choisir) et la referme. Rien n'est saisi ni publié.

@@ -93,3 +93,7 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
 - À la demande de l'utilisateur, **pause de 15 à 20 s** (au hasard) entre chaque étape du remplissage ; le service
   worker pilote les étapes une à une et vérifie la page (captcha, blocage) avant chacune. Ce ralentissement ne
   masque pas l'automatisation : le risque de blocage reste le même.
+- Diagnostic du 07/10/2026 : la liste des catégories est `[data-testid="catalog-select-dropdown-content"]`, chaque
+  catégorie une case `role="button"` ; le menu du haut du site porte les mêmes libellés (« Femmes »…). Les options ne
+  sont donc cherchées **que dans les listes ouvertes**, jamais dans l'en-tête ni la navigation. En cas d'erreur
+  d'étape, l'extension enregistre un **relevé automatique** de la page (bouton « Dernier relevé »).
