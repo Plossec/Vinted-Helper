@@ -1231,3 +1231,31 @@ a {
   display: flex;
   flex-direction: column;
 }
+
+/* Repère « ↗ » : l'article a un lien d'annonce Vinted (issue #46). */
+.lien-vinted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lien-vinted:hover,
+.lien-vinted:focus-visible {
+  background: var(--bordure);
+}
+
+.carte-article__reperes {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ligne-article .lien-vinted {
+  min-width: 1.5rem;
+}

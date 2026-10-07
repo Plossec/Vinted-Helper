@@ -146,6 +146,42 @@ describe("articles", () => {
     });
   });
 
+  describe("lien de l'annonce Vinted (#46)", () => {
+    const lien = (id: string, url: string | null) => requete("PUT", `/api/articles/${id}/lien-vinted`, { url });
+    const URL_VINTED = "https://www.vinted.fr/items/123456789-jean-levis-501";
+
+    it("enregistre le lien ; un Brouillon avec prix affiché passe En ligne", async () => {
+      const cree = await creer({ prixAffiche: 1200 });
+      const r = await lien(cree.id, URL_VINTED);
+      expect(r.statusCode).toBe(200);
+      expect(r.json()).toMatchObject({
+        passeEnLigne: true,
+        article: { urlVinted: URL_VINTED, statut: "en_ligne" },
+      });
+      const [ligne] = (await requete("GET", "/api/articles")).json<{ urlVinted: string }[]>();
+      expect(ligne?.urlVinted).toBe(URL_VINTED);
+    });
+
+    it("sans prix affiché : lien enregistré, statut inchangé, prix signalé manquant", async () => {
+      const cree = await creer();
+      expect((await lien(cree.id, URL_VINTED)).json()).toMatchObject({
+        passeEnLigne: false,
+        prixManquant: true,
+        article: { urlVinted: URL_VINTED, statut: "brouillon" },
+      });
+    });
+
+    it("lien vide : retiré ; adresse hors Vinted ou invalide : refusée", async () => {
+      const cree = await creer();
+      await lien(cree.id, URL_VINTED);
+      expect((await lien(cree.id, "")).json()).toMatchObject({ article: { urlVinted: null } });
+      expect((await lien(cree.id, "https://www.vinted.be/items/1")).statusCode).toBe(200);
+      for (const mauvais of ["https://exemple.fr/items/1", "http://www.vinted.fr/items/1", "pas une adresse"]) {
+        expect((await lien(cree.id, mauvais)).statusCode).toBe(400);
+      }
+    });
+  });
+
   describe("statuts (§4)", () => {
     const changer = (id: string, corps: object) => requete("POST", `/api/articles/${id}/statut`, corps);
 

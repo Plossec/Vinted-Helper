@@ -196,6 +196,26 @@ export async function changerStatut(
   });
 }
 
+/**
+ * Lien de l'annonce Vinted saisi à la main (issue #46) : simple lien enregistré, l'application n'interroge jamais
+ * Vinted. Un article Brouillon ou À publier qui a un prix affiché passe alors En ligne (choix de l'utilisateur).
+ */
+export async function enregistrerLienVinted(
+  base: Base,
+  utilisateurId: string,
+  id: string,
+  url: string | null,
+  maintenant: Date,
+): Promise<{ passeEnLigne: boolean; prixManquant: boolean }> {
+  const actuel = await chargerArticle(base, utilisateurId, id);
+  await base.update(article).set({ urlVinted: url, modifieLe: maintenant }).where(eq(article.id, id));
+  const avantLigne = actuel.statut === "brouillon" || actuel.statut === "a_publier";
+  if (url === null || !avantLigne) return { passeEnLigne: false, prixManquant: false };
+  if (actuel.prixAffiche === null) return { passeEnLigne: false, prixManquant: true };
+  await changerStatut(base, utilisateurId, id, { vers: "en_ligne", date: maintenant, prixAffiche: null }, maintenant);
+  return { passeEnLigne: true, prixManquant: false };
+}
+
 /** Corrige la date d'un changement de statut déjà enregistré (§4.4). */
 export async function corrigerDateHistorique(
   base: Base,
@@ -269,6 +289,7 @@ export async function listerArticles(base: Base, utilisateurId: string) {
       sortieId: article.sortieId,
       dateAchat: article.dateAchat,
       creeLe: article.creeLe,
+      urlVinted: article.urlVinted,
       dateStatut,
       dateMiseEnLigne,
     })

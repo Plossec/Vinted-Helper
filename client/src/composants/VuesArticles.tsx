@@ -75,6 +75,35 @@ interface Props {
   onTri: (tri: Tri) => void;
 }
 
+/**
+ * Repère « ↗ » qui ouvre l'annonce Vinted (issue #46). Placé dans le lien de la carte : un élément cliquable
+ * (et non un second lien imbriqué), qui empêche l'ouverture de la fiche.
+ */
+function LienVinted({ a }: { a: ResumeArticle }) {
+  const url = a.urlVinted;
+  if (!url) return null;
+  const ouvrir = (e: { preventDefault: () => void; stopPropagation: () => void }) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+  return (
+    <span
+      className="lien-vinted"
+      role="link"
+      tabIndex={0}
+      title="Voir l'annonce sur Vinted"
+      aria-label={`Voir l'annonce Vinted de ${formatReference(a.reference)}`}
+      onClick={ouvrir}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") ouvrir(e);
+      }}
+    >
+      ↗
+    </span>
+  );
+}
+
 const prixAffiche = (a: ResumeArticle) => (a.prixAffiche === null ? "—" : formatEuros(a.prixAffiche));
 
 function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
@@ -113,7 +142,9 @@ export function VuesArticles(props: Props) {
               <span className={`badge badge--${a.statut} mosaique__badge`}>{LIBELLES_STATUT[a.statut]}</span>
               <span className="mosaique__texte">
                 <span className="reference">{formatReference(a.reference)}</span>
-                <span className="mosaique__prix">{prixAffiche(a)}</span>
+                <span className="mosaique__prix">
+                  <LienVinted a={a} /> {prixAffiche(a)}
+                </span>
               </span>
               <span className="mosaique__nom">{a.nom ?? "(sans nom)"}</span>
             </Link>
@@ -132,6 +163,7 @@ export function VuesArticles(props: Props) {
             <Link to={`/articles/${a.id}`} className="ligne-article">
               <span className="reference">{formatReference(a.reference)}</span>
               <span className="ligne-article__nom">{a.nom ?? "(sans nom)"}</span>
+              <LienVinted a={a} />
               <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
               <span className="ligne-article__prix">{prixAffiche(a)}</span>
             </Link>
@@ -141,7 +173,10 @@ export function VuesArticles(props: Props) {
               <span className="carte-article__texte">
                 <span className="carte-article__ligne">
                   <span className="reference">{formatReference(a.reference)}</span>
-                  <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
+                  <span className="carte-article__reperes">
+                    <LienVinted a={a} />
+                    <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
+                  </span>
                 </span>
                 <span className="carte-article__nom">{a.nom ?? "(sans nom)"}</span>
                 <span className="carte-article__prix">
@@ -202,7 +237,7 @@ function Tableau(props: Props) {
                 </span>
               </th>
               <td>
-                <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
+                <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span> <LienVinted a={a} />
               </td>
               <td>{a.marque ?? "—"}</td>
               <td>{a.categorie ? props.libelleCategorie(a.categorie) : "—"}</td>

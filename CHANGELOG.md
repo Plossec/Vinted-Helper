@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- **Lien de l'annonce Vinted** saisi sur la fiche (l'article passe En ligne s'il a un prix affiché) ; repère « ↗ »
+  dans la liste des articles (#46).
+
 ## [1.1.1] — 07/10/2026
 
 ### Ajouté

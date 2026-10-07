@@ -26,6 +26,10 @@ Ouvrez un brouillon pour compléter sa fiche (nom, catégorie, marque, état…)
 tour, définitivement) et choisir la **photo principale** (★).
 Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est réparti à nouveau sur les articles.
 
+**Lien de l'annonce Vinted** (section Vinted de la fiche) : dans Vinted, ouvrez l'annonce → Partager → Copier le
+lien, puis collez-le et « Enregistrer le lien ». Un article Brouillon ou À publier qui a un prix affiché passe alors
+**En ligne**. Dans la liste, le repère **↗** ouvre l'annonce.
+
 **Filtres** (bouton « Filtres ») : touchez les statuts à afficher (par défaut tous sauf Finalisé et Sortie du stock) ;
 pour les catégories, marques, lieux et sorties, cherchez puis ajoutez une ou plusieurs valeurs (« × » pour en
 retirer une). « Effacer les filtres » revient au réglage par défaut.

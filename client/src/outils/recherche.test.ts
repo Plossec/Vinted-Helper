@@ -27,6 +27,7 @@ const article = (reference: number, extra: Partial<ResumeArticle> = {}): ResumeA
   dateStatut: "2026-10-01T10:00:00.000Z",
   dateMiseEnLigne: null,
   vignette: null,
+  urlVinted: null,
   prixAchat: null,
   benefice: null,
   beneficeRealise: false,

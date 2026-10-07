@@ -19,6 +19,7 @@ import type { ContexteRoutes } from "../app.js";
 import {
   changerStatut,
   corrigerDateHistorique,
+  enregistrerLienVinted,
   creerArticle,
   type DonneesArticle,
   listerArticles,
@@ -73,6 +74,22 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
 
 const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
+/** Lien d'une annonce Vinted (https, site vinted.fr, vinted.be…) ; vide = lien retiré. */
+function lienVinted(valeur: unknown): string | null {
+  const texte = texteFacultatif(valeur, "Lien Vinted", 500);
+  if (texte === null) return null;
+  let url: URL;
+  try {
+    url = new URL(texte);
+  } catch {
+    throw erreurSaisie("Lien Vinted : adresse invalide (copiez-la depuis Vinted : Partager → Copier le lien).");
+  }
+  if (url.protocol !== "https:" || !/(^|\.)vinted\.[a-z.]{2,10}$/.test(url.hostname)) {
+    throw erreurSaisie("Lien Vinted : l'adresse doit être celle d'une annonce Vinted (https://www.vinted.fr/…).");
+  }
+  return url.toString();
+}
+
 export function routesArticles(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/articles", async (requete) => listerArticles(base, utilisateurDe(requete).id));
 
@@ -90,6 +107,14 @@ export function routesArticles(app: FastifyInstance, { base, maintenant, utilisa
     const id = idDe(requete.params);
     await modifierArticle(base, utilisateurId, id, lireDonneesArticle(requete.body), maintenant());
     return lireArticle(base, utilisateurId, id);
+  });
+
+  app.put("/api/articles/:id/lien-vinted", async (requete) => {
+    const utilisateurId = utilisateurDe(requete).id;
+    const id = idDe(requete.params);
+    const url = lienVinted(objet(requete.body).url);
+    const resultat = await enregistrerLienVinted(base, utilisateurId, id, url, maintenant());
+    return { ...resultat, article: await lireArticle(base, utilisateurId, id) };
   });
 
   app.post("/api/articles/:id/statut", async (requete) => {
