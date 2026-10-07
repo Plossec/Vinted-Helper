@@ -43,5 +43,14 @@ for (const id of ["reprendre", "pause", "maintenant"])
     await afficher();
   });
 $("options").addEventListener("click", () => chrome.runtime.openOptionsPage());
+$("diagnostic").addEventListener("click", async () => {
+  $("etat").className = "";
+  $("etat").textContent = "Diagnostic en cours (quelques secondes)…";
+  const r = await chrome.runtime.sendMessage({ type: "diagnostic" });
+  if (!r.ok) {
+    $("etat").className = "erreur";
+    $("etat").textContent = r.message;
+  }
+});
 chrome.storage.onChanged.addListener(() => void afficher());
 void afficher();

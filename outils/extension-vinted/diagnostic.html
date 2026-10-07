@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vinted Helper — diagnostic</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        max-width: 640px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Diagnostic du formulaire Vinted</h1>
+    <p id="resume" role="status"></p>
+    <ul id="champs"></ul>
+    <div class="actions">
+      <button id="telecharger" class="principal" type="button" hidden>Télécharger le fichier</button>
+    </div>
+    <p class="secondaire">
+      Envoyez le fichier téléchargé à Claude : il contient la structure du formulaire (balises, repères, libellés), pas
+      vos saisies. Rien n'a été publié.
+    </p>
+    <script src="diagnostic.js"></script>
+  </body>
+</html>
