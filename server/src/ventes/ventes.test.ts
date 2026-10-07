@@ -269,4 +269,78 @@ describe("ventes et calculs", () => {
     await requete("DELETE", `/api/frais/${id}`);
     expect((await requete("GET", "/api/frais")).json()).toEqual([]);
   });
+
+  describe("supprimer le dernier changement de statut (#50)", () => {
+    const annuler = (id: string, corps: object = {}) => requete("POST", `/api/articles/${id}/annulation-statut`, corps);
+    const statuts = async (...ids: string[]) => Promise.all(ids.map(async (id) => (await lire(id)).statut));
+
+    it("passage simple : retour au statut précédent ; la création ne se supprime pas", async () => {
+      const a = await enLigne(900);
+      expect((await annuler(a)).statusCode).toBe(200);
+      const lu = await lire(a);
+      expect(lu.statut).toBe("brouillon");
+      expect(lu.historiqueStatuts.map((h) => h.vers)).toEqual(["brouillon"]);
+      expect((await annuler(a)).statusCode).toBe(409);
+    });
+
+    it("« Vendu » d'un article seul : la vente disparaît, l'article repasse En ligne", async () => {
+      const a = await enLigne(900);
+      const v = await vendre([a], 900, { urlConversation: "https://www.vinted.fr/inbox/1" });
+      expect((await annuler(a)).statusCode).toBe(200);
+      expect(await lire(a)).toMatchObject({ statut: "en_ligne", urlConversation: null });
+      expect((await requete("GET", `/api/ventes/${v.id}`)).statusCode).toBe(404);
+    });
+
+    it("« Vendu » dans un colis groupé : seul l'article sort, nouveau montant demandé pour les autres", async () => {
+      const a = await enLigne(900);
+      const b = await enLigne(600);
+      const v = await vendre([a, b], 1200);
+      expect((await annuler(a)).statusCode).toBe(400);
+      expect((await annuler(a, { montantCredite: 600 })).statusCode).toBe(200);
+      expect(await statuts(a, b)).toEqual(["en_ligne", "a_expedier"]);
+      const apres = (await requete("GET", `/api/ventes/${v.id}`)).json<VenteLue>();
+      expect(apres.montantCredite).toBe(600);
+      expect(apres.articles.map((l) => l.id)).toEqual([b]);
+    });
+
+    it("« Envoyé » puis « Finalisé » : défaits pour tout le colis, dates effacées", async () => {
+      const a = await enLigne(900);
+      const b = await enLigne(600);
+      const v = await vendre([a, b], 1200);
+      await requete("POST", `/api/ventes/${v.id}/envoi`, {});
+      await requete("POST", `/api/ventes/${v.id}/finalisation`, {});
+      expect((await annuler(a)).statusCode).toBe(200);
+      expect(await statuts(a, b)).toEqual(["envoye", "envoye"]);
+      expect((await annuler(b)).statusCode).toBe(200);
+      expect(await statuts(a, b)).toEqual(["a_expedier", "a_expedier"]);
+      const apres = (await requete("GET", `/api/ventes/${v.id}`)).json<{
+        dateEnvoi: string | null;
+        dateFinalisation: string | null;
+      }>();
+      expect(apres).toMatchObject({ dateEnvoi: null, dateFinalisation: null });
+    });
+
+    it("annulation par l'acheteur supprimée : la vente redevient active pour tout le colis", async () => {
+      const a = await enLigne(900);
+      const b = await enLigne(600);
+      const v = await vendre([a, b], 1200);
+      await requete("POST", `/api/ventes/${v.id}/annulation`, {});
+      expect((await annuler(b)).statusCode).toBe(200);
+      expect(await statuts(a, b)).toEqual(["a_expedier", "a_expedier"]);
+      expect((await requete("GET", `/api/ventes/${v.id}`)).json<VenteLue>().annulee).toBe(false);
+    });
+
+    it("sortie du stock supprimée : motif effacé ; un retour ne se supprime pas", async () => {
+      const a = await enLigne(900);
+      await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "donne" });
+      expect((await annuler(a)).statusCode).toBe(200);
+      expect(await lire(a)).toMatchObject({ statut: "en_ligne", sortieStock: null });
+
+      const b = await enLigne(600);
+      const v = await vendre([b], 600);
+      await requete("POST", `/api/ventes/${v.id}/envoi`, {});
+      await requete("POST", `/api/ventes/${v.id}/retour`, { articleIds: [b] });
+      expect((await annuler(b)).statusCode).toBe(409);
+    });
+  });
 });

@@ -23,3 +23,14 @@
 - Modifiable ensuite dans la section Vinted de la fiche (affichée dès qu'un article est vendu) ; icône 💬 dans
   l'alerte « À expédier » (choix de l'utilisateur). Seules les adresses `https` d'un site Vinted sont acceptées ;
   simple lien enregistré, l'application n'interroge jamais Vinted.
+
+## 07/10/2026 — Supprimer le dernier changement de statut (issue #50)
+
+- Seul le **dernier** changement se supprime (bouton sur la dernière ligne de l'historique, confirmation) : l'article
+  revient au statut précédent, la ligne d'historique est effacée et les effets liés sont défaits (choix de
+  l'utilisateur ; on recommence pour remonter plus loin).
+- Colis (choix de l'utilisateur, « mixte ») : « Vendu » → seul l'article sort du colis (vente supprimée s'il était
+  seul, sinon nouveau montant crédité demandé pour les autres) ; « Envoyé », « Finalisé », « Annulation par
+  l'acheteur » → tout le colis (dates d'envoi / de finalisation effacées, vente réactivée).
+- Ne se suppriment pas : la création (corbeille), un retour, l'annulation d'une sortie du stock (motif déjà effacé :
+  refaire la sortie). Les photos réduites au passage Finalisé / Sortie du stock ne sont pas restaurées.

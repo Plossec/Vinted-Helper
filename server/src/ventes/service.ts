@@ -1,12 +1,12 @@
 // Ventes (= colis) et statuts liés — cahier des charges §4.2, §4.3, §5.6, §5.7.
 // Les montants (prix vendu, emballage) ne sont jamais stockés par article : ils sont calculés (§6.3, §6.4).
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, reglages, vente, venteArticle } from "../base/schema.js";
 import { chargerArticle, verifierDate } from "../articles/service.js";
 import { calculer } from "../couts/service.js";
 import type { MotifSortie } from "../calculs/benefice.js";
-import { STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
+import { estTransitionSimple, STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 
 /** Emballage par défaut d'un colis : 0,08 € (§5.6), modifiable dans les Réglages. */
@@ -275,4 +275,136 @@ export async function annulerSortieStock(
       dateSortieStock: null,
     });
   });
+}
+
+/**
+ * Supprime le dernier changement de statut d'un article (issue #50) : l'article revient au statut précédent et les
+ * effets liés sont défaits. Règles (choix de l'utilisateur) :
+ * - « Vendu » : seul cet article sort du colis ; s'il reste d'autres articles, leur nouveau montant crédité est demandé ;
+ * - « Envoyé », « Finalisé », « Annulation par l'acheteur » : tout le colis (un colis est envoyé et livré d'un bloc) ;
+ * - « Sortie du stock » : motif et revente effacés ;
+ * - la création de l'article, l'annulation d'une sortie du stock et un retour ne se suppriment pas.
+ */
+export async function annulerDernierChangement(
+  base: Base,
+  utilisateurId: string,
+  articleId: string,
+  d: { montantCredite: number | null },
+  maintenant: Date,
+): Promise<void> {
+  await base.transaction(async (tx) => {
+    const a = await chargerArticle(tx, utilisateurId, articleId);
+    const dernier = await dernierChangement(tx, articleId);
+    if (!dernier || dernier.de === null) throw conflit("La création de l'article ne s'annule pas.");
+    if (dernier.vers !== a.statut) throw conflit("Historique incohérent : corrigez le statut à la main.");
+    const passage = `${dernier.de}>${dernier.vers}`;
+
+    // Revient au statut précédent pour une liste d'articles dont ce passage est le dernier changement.
+    const revenir = async (ids: string[], autres: Partial<typeof article.$inferInsert> = {}) => {
+      for (const id of ids) {
+        const d2 = await dernierChangement(tx, id);
+        if (!d2 || d2.de === null || `${d2.de}>${d2.vers}` !== passage) {
+          throw conflit("Un autre article du colis a changé de statut depuis : annulez d'abord ce changement.");
+        }
+        await tx.delete(historiqueStatut).where(eq(historiqueStatut.id, d2.id));
+        await tx
+          .update(article)
+          .set({ statut: d2.de, modifieLe: maintenant, ...autres })
+          .where(eq(article.id, id));
+      }
+    };
+
+    if (passage === "sortie_stock>a_publier") {
+      throw conflit("L'annulation d'une sortie du stock ne se supprime pas : refaites la sortie du stock.");
+    }
+    if (passage === "envoye>a_publier") {
+      throw conflit("Un retour ne se supprime pas : refaites la vente si besoin.");
+    }
+    if (dernier.vers === "sortie_stock") {
+      await revenir([articleId], { motifSortie: null, canalRevente: null, prixRevente: null, dateSortieStock: null });
+      return;
+    }
+    if (passage === "en_ligne>a_expedier") {
+      const v = await venteActive(tx, utilisateurId, articleId);
+      const autres = v.lignes.filter((l) => !l.retourne && l.id !== articleId);
+      if (autres.length === 0) {
+        await tx.delete(vente).where(eq(vente.id, v.vente.id));
+      } else {
+        if (d.montantCredite === null) {
+          throw erreurSaisie("Indiquez le nouveau montant crédité pour les autres articles du colis.");
+        }
+        await tx
+          .delete(venteArticle)
+          .where(and(eq(venteArticle.venteId, v.vente.id), eq(venteArticle.articleId, articleId)));
+        await tx.update(vente).set({ montantCredite: d.montantCredite }).where(eq(vente.id, v.vente.id));
+      }
+      await revenir([articleId], { urlConversation: null });
+      return;
+    }
+    if (passage === "a_expedier>envoye" || passage === "envoye>finalise") {
+      const v = await venteActive(tx, utilisateurId, articleId);
+      await revenir(v.actifs.map((l) => l.id));
+      await tx
+        .update(vente)
+        .set(passage === "a_expedier>envoye" ? { dateEnvoi: null } : { dateFinalisation: null })
+        .where(eq(vente.id, v.vente.id));
+      return;
+    }
+    if (passage === "a_expedier>en_ligne") {
+      // Annulation par l'acheteur : la vente annulée la plus récente de l'article redevient active.
+      const [annulee] = await tx
+        .select({ id: vente.id })
+        .from(venteArticle)
+        .innerJoin(vente, eq(vente.id, venteArticle.venteId))
+        .where(
+          and(eq(venteArticle.articleId, articleId), eq(vente.utilisateurId, utilisateurId), eq(vente.annulee, true)),
+        )
+        .orderBy(desc(vente.creeLe))
+        .limit(1);
+      if (!annulee) throw conflit("Vente annulée introuvable.");
+      const lignes = await tx
+        .select({ id: venteArticle.articleId })
+        .from(venteArticle)
+        .where(and(eq(venteArticle.venteId, annulee.id), eq(venteArticle.retourne, false)));
+      await revenir(lignes.map((l) => l.id));
+      await tx.update(vente).set({ annulee: false }).where(eq(vente.id, annulee.id));
+      return;
+    }
+    if (estTransitionSimple(dernier.de, dernier.vers)) {
+      await revenir([articleId]);
+      return;
+    }
+    throw conflit("Ce changement ne peut pas être supprimé.");
+  });
+}
+
+/** Dernier changement de statut d'un article, dans l'ordre affiché (date, puis ordre d'enregistrement). */
+async function dernierChangement(tx: Transaction, articleId: string) {
+  const [h] = await tx
+    .select({ id: historiqueStatut.id, de: historiqueStatut.de, vers: historiqueStatut.vers })
+    .from(historiqueStatut)
+    .where(eq(historiqueStatut.articleId, articleId))
+    .orderBy(desc(historiqueStatut.date), desc(historiqueStatut.ordre))
+    .limit(1);
+  return h;
+}
+
+/** Vente en cours (non annulée) dont l'article fait partie (non renvoyé). */
+async function venteActive(tx: Transaction, utilisateurId: string, articleId: string) {
+  const [ligne] = await tx
+    .select({ venteId: vente.id })
+    .from(venteArticle)
+    .innerJoin(vente, eq(vente.id, venteArticle.venteId))
+    .where(
+      and(
+        eq(venteArticle.articleId, articleId),
+        eq(venteArticle.retourne, false),
+        eq(vente.annulee, false),
+        eq(vente.utilisateurId, utilisateurId),
+      ),
+    )
+    .orderBy(desc(vente.creeLe))
+    .limit(1);
+  if (!ligne) throw conflit("Vente de cet article introuvable.");
+  return chargerVente(tx, utilisateurId, ligne.venteId);
 }

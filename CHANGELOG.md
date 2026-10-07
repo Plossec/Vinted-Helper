@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Supprimer le dernier changement de statut** (erreur de saisie) depuis l'historique de la fiche, effets défaits
+  (vente, colis, sortie du stock) (#50).
 - **Lien de la conversation Vinted** saisi à la vente (« Vendu : à expédier »), gardé sur les articles du colis,
   modifiable sur la fiche, icône 💬 dans l'alerte « À expédier » (#48).
 - **Lien de l'annonce Vinted** saisi sur la fiche (l'article passe En ligne s'il a un prix affiché) ; repère « ↗ »
