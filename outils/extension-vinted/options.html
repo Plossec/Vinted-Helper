@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vinted Helper — réglages de l'extension</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        max-width: 560px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Réglages de l'extension</h1>
+    <form id="formulaire">
+      <label>
+        <span>Adresse de l'application</span>
+        <input id="adresse" type="url" placeholder="https://vps-6b2cf0b2.vps.ovh.net" required />
+      </label>
+      <label>
+        <span>Jeton (Réglages → Publication Vinted → Créer un jeton)</span>
+        <input id="jeton" type="password" autocomplete="off" required />
+      </label>
+      <div class="actions">
+        <button class="principal" type="submit">Enregistrer et tester</button>
+      </div>
+    </form>
+    <p id="message" role="status"></p>
+    <p class="secondaire">
+      L'extension n'utilise que votre session Vinted habituelle. Elle se met en pause d'elle-même si Vinted affiche une
+      vérification, une page de blocage, ou si vous n'êtes pas connecté.
+    </p>
+    <script src="options.js"></script>
+  </body>
+</html>
