@@ -116,3 +116,6 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   à l'égalité d'abord (« Bon état » ≠ « Très bon état ») ; le contrôle avant envoi exige l'état exact.
 - 07/10/2026 (#63, demande de l'utilisateur) : pause entre deux étapes ramenée à **5 secondes fixes** (au lieu de 15 à
   20 s). L'attente de 10 minutes entre deux annonces publiées est inchangée.
+- 07/10/2026 (#61) : « Vérifier maintenant » semblait ne rien faire (file vide, ou attente de 10 min après une
+  **erreur**). L'attente de 10 minutes ne suit plus qu'une **publication réelle** ; un passage demandé à la main écrit
+  toujours son résultat dans le journal (les passages automatiques restent silencieux quand il n'y a rien à faire).
