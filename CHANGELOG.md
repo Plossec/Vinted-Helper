@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- **Import de l'ancien tableur** (`npm run import-tableur -w server`, mode `--essai`) : sorties, lots, mises en ligne
+  et ventes recréés par les fonctions de l'application, en une seule transaction.
+
 ## [1.0.1] — 07/10/2026
 
 ### Ajouté
