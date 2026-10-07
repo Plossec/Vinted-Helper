@@ -8,13 +8,22 @@ function pageFormulaire({ sansChamp = null, deconnecte = false, titreCourt = fal
       ? ""
       : `<div><input data-testid="${id}-select-dropdown-input" readonly value="">
          <ul class="options" data-pour="${id}" hidden>${options.map((o) => `<li role="option">${o}</li>`).join("")}</ul></div>`;
+  // Liste des catégories comme sur Vinted (relevé du 07/10/2026) : cases « role=button » dans « …-dropdown-content ».
+  const categories = (options) =>
+    `<div><input data-testid="catalog-select-dropdown-input" readonly value="">
+       <div class="options" data-testid="catalog-select-dropdown-content" hidden><ul data-testid="category-list">${options
+         .map((o, i) => `<li class="web_ui__Item__item"><div role="button" id="catalog-${i}">${o}</div></li>`)
+         .join("")}</ul></div></div>`;
   return `<!doctype html><html><body>
   ${deconnecte ? '<a data-testid="header--login-button" href="/login">Se connecter</a>' : ""}
   ${captcha ? '<iframe src="/captcha" title="captcha"></iframe>' : ""}
+  <nav data-testid="nav-tabs"><ul role="tablist">
+    <li role="tab"><a href="/catalog/femmes">Femmes</a></li><li role="tab"><a href="/catalog/hommes">Hommes</a></li>
+  </ul></nav>
   <form onsubmit="return false">
     <input type="file" multiple id="fichiers"><div data-testid="image-grid"></div>
     <input data-testid="title--input"${titreCourt ? ' oninput="this.value = this.value.slice(0, 5)"' : ""}><textarea data-testid="description--input"></textarea>
-    ${liste("catalog", ["Hommes", "Vêtements", "Jeans", "Jeans droits", "Femmes"])}
+    ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
     ${liste("size", ["W32", "M"])}
     ${liste("condition", ["Neuf avec étiquette", "Bon état"])}

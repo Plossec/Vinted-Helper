@@ -74,7 +74,9 @@ async function option(texte, delai = DELAI_MS) {
   const voulu = normaliser(texte);
   const fin = Date.now() + delai;
   do {
-    const candidates = [...document.querySelectorAll(SELECTEURS.options.join(", "))].filter(visible);
+    const candidates = [...document.querySelectorAll(SELECTEURS.options.join(", "))].filter(
+      (el) => visible(el) && !el.closest(SELECTEURS.horsOptions),
+    );
     const trouvee =
       candidates.find((el) => normaliser(el.textContent) === voulu) ??
       candidates.find((el) => normaliser(el.textContent).includes(voulu));
@@ -223,6 +225,15 @@ function releve() {
   return [...document.querySelectorAll(ELEMENTS_UTILES)].filter(visible).slice(0, 1200).map(decrire);
 }
 
+function selecteursTrouves() {
+  return Object.fromEntries(
+    Object.entries(SELECTEURS.champs).map(([nom, liste]) => [
+      nom,
+      liste.find((s) => document.querySelector(s)) ?? null,
+    ]),
+  );
+}
+
 /** Ancêtres d'un élément (pour situer une option de liste dans la page). */
 function ancetres(el, niveaux = 8) {
   const liste = [];
@@ -256,12 +267,7 @@ async function diagnostic(niveau) {
     etat: etatPage(),
     date: new Date().toISOString(),
     champCategorieTrouve: !!champCategorie,
-    selecteursTrouves: Object.fromEntries(
-      Object.entries(SELECTEURS.champs).map(([nom, liste]) => [
-        nom,
-        liste.find((s) => document.querySelector(s)) ?? null,
-      ]),
-    ),
+    selecteursTrouves: selecteursTrouves(),
     elements: avant,
     apparusApresClicCategorie: apres,
     [`options « ${niveau} »`]: options,
@@ -291,7 +297,18 @@ async function traiter(message) {
       // Une vérification apparue en cours de route prime sur l'erreur de champ.
       const apres = etatPage();
       if (apres !== "pret") return { ok: false, etat: apres };
-      return { ok: false, message: erreur instanceof Error ? erreur.message : String(erreur) };
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      // Relevé automatique de la page au moment de l'erreur (liste éventuellement ouverte) : calibrage de selecteurs.js.
+      const releveErreur = {
+        adresse: location.href,
+        etat: apres,
+        date: new Date().toISOString(),
+        etape: message.nom,
+        erreur: texte,
+        selecteursTrouves: selecteursTrouves(),
+        elements: releve(),
+      };
+      return { ok: false, message: texte, releve: releveErreur };
     }
   }
 
