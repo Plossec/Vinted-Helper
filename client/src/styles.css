@@ -550,6 +550,7 @@ textarea:focus {
   object-fit: cover;
   border-radius: 0.5rem;
   background: var(--carte);
+  transition: transform 0.2s ease;
 }
 
 .photos .est-principale img {

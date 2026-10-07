@@ -93,8 +93,13 @@ export async function envoyerImage<T>(chemin: string, image: Blob): Promise<T> {
   return contenu as T;
 }
 
-export const urlPhoto = (id: string) => `/api/photos/${id}`;
-export const urlVignette = (id: string) => `/api/photos/${id}/vignette`;
+/**
+ * Version des adresses d'images : avant l'issue #39, les images étaient gardées une semaine par le navigateur sans
+ * redemander au serveur ; une nouvelle adresse ignore ces anciennes copies (désormais revérifiées à chaque affichage).
+ */
+const VERSION_IMAGES = 2;
+export const urlPhoto = (id: string) => `/api/photos/${id}?c=${VERSION_IMAGES}`;
+export const urlVignette = (id: string) => `/api/photos/${id}/vignette?c=${VERSION_IMAGES}`;
 
 // --- Types échangés avec le serveur (montants en centimes, dates au format ISO) ---
 

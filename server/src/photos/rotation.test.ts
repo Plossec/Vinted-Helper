@@ -51,6 +51,25 @@ describe("rotation des photos", () => {
     expect(await dimensions(`/api/photos/${id}`)).toEqual([64, 48]);
   });
 
+  it("tient compte de l'orientation enregistrée par l'appareil photo (EXIF)", async () => {
+    const id = randomUUID();
+    // Image stockée 64×48 mais marquée « à tourner de 90° » (orientation 6) : elle s'affiche en 48×64.
+    const contenu = await sharp({ create: { width: 64, height: 48, channels: 3, background: "#0b7a75" } })
+      .jpeg()
+      .withMetadata({ orientation: 6 })
+      .toBuffer();
+    await t.app.inject({
+      method: "PUT",
+      url: `/api/photos/${id}?type=annonce`,
+      headers: { cookie, "content-type": "image/jpeg" },
+      payload: contenu,
+    });
+    await pivoter(id, "droite");
+    expect(await dimensions(`/api/photos/${id}`)).toEqual([64, 48]);
+    const vignette = await sharp((await lire(`/api/photos/${id}/vignette`)).rawPayload).metadata();
+    expect([vignette.width, vignette.height]).toEqual([400, 400]);
+  });
+
   it("une photo PNG devient un JPEG tourné", async () => {
     const id = await envoyerPhoto("png");
     await pivoter(id, "droite");
