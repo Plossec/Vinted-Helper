@@ -123,3 +123,6 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   sans erreur). Cause probable : la recherche « contient » acceptait n'importe quelle option contenant un « s », et la
   taille n'était pas relue. Désormais : « contient » seulement pour un texte d'au moins 3 lettres, puces `button`
   cherchées dans les listes ouvertes, taille relue à l'identique par le contrôle (erreur + relevé sinon).
+- Première vraie publication (08/10/2026, 01:03) : arrêtée par le contrôle avant envoi, rien de publié. Vinted
+  affiche le prix saisi « 9,00 » sous la forme « 9.00 » (comparaison désormais en nombre) ; les photos déposées sont
+  des `[data-testid="image-wrapper-N"]` (le repère supposé `image-grid` ne trouvait rien, d'où « 0 sur 5 »).

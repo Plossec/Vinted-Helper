@@ -14,6 +14,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   colis coché dans ses cases ; choix proposés par Vinted affichés en cas d'erreur (#56).
 - Extension Vinted : choix de la **catégorie** calibré sur le vrai formulaire (options cherchées uniquement dans la
   liste ouverte) et **relevé automatique** de la page en cas d'erreur, bouton « Dernier relevé » (#56).
+- Extension Vinted : contrôle avant envoi corrigé : **prix** comparé en nombre (« 9.00 » = « 9,00 ») et **photos**
+  comptées avec le vrai repère de Vinted (#56).
 - Extension Vinted : **taille** comparée à l'identique (« S » ne prend plus « XS » ni une option quelconque) et
   relue par le contrôle avant envoi : une taille non remplie arrête la publication avec un relevé (#56).
 - Extension Vinted : **« Vérifier maintenant »** écrit toujours le résultat dans le journal (aucune annonce, attente,
