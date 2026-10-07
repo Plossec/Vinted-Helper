@@ -1,5 +1,7 @@
 // Règles de statut — cahier des charges §4.2. Le tableau attendu est recopié du cahier,
-// indépendamment du code, pour vérifier les 49 combinaisons (7 statuts × 7 statuts).
+// indépendamment du code, pour vérifier toutes les combinaisons (8 statuts × 8 statuts).
+// Évolution du 07/10/2026 (issue #52, docs/decisions/lot-3.md) : retour Envoyé → À récupérer, puis À publier,
+// En ligne ou Sortie du stock.
 import { describe, expect, it } from "vitest";
 import { estTransitionSimple, STATUTS, type Statut, transitionAutorisee, verifierTransition } from "./statuts.js";
 
@@ -8,17 +10,18 @@ const ATTENDU: Record<Statut, Statut[]> = {
   a_publier: ["en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
   a_expedier: ["envoye", "en_ligne", "sortie_stock"],
-  envoye: ["finalise", "a_publier", "sortie_stock"],
+  envoye: ["finalise", "a_recuperer", "sortie_stock"],
+  a_recuperer: ["a_publier", "en_ligne", "sortie_stock"],
   finalise: [],
   sortie_stock: ["a_publier"],
 };
 
-describe("§4.2 — transitions autorisées (49 combinaisons)", () => {
+describe("§4.2 — transitions autorisées (64 combinaisons)", () => {
   const combinaisons = STATUTS.flatMap((de) => STATUTS.map((vers) => [de, vers] as const));
 
-  it("couvre bien les 7 statuts du cahier des charges", () => {
+  it("couvre bien les 8 statuts (cahier des charges + « À récupérer »)", () => {
     expect([...STATUTS].sort()).toEqual(Object.keys(ATTENDU).sort());
-    expect(combinaisons).toHaveLength(49);
+    expect(combinaisons).toHaveLength(64);
   });
 
   it.each(combinaisons)("%s → %s", (de, vers) => {

@@ -104,6 +104,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **En ligne** | Annonce publiée sur Vinted (prix affiché obligatoire) |
 | **À expédier** | Acheté sur Vinted, colis à préparer |
 | **Envoyé** | Colis expédié |
+| **À récupérer** | Retour de l'acheteur : l'article est à aller chercher (point relais…) — ajouté le 07/10/2026 (issue #52) |
 | **Finalisé** | Vente validée, argent crédité |
 | **Sortie du stock** | Quitte le stock sans vente Vinted (avec motif) |
 
@@ -114,7 +115,8 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | À publier | En ligne, Brouillon |
 | En ligne | À expédier, À publier (annonce retirée temporairement) |
 | À expédier | Envoyé, En ligne (annulation par l'acheteur) |
-| Envoyé | Finalisé, **À publier** (retour du colis, retour partiel ou litige perdu : l'article est vérifié avant d'être remis en ligne) |
+| Envoyé | Finalisé, **À récupérer** (retour du colis, retour partiel ou litige perdu : l'article est à aller chercher) |
+| À récupérer | À publier ou En ligne (« Récupéré » : l'article est vérifié avant d'être remis en ligne) |
 | Finalisé | *aucune* (correction par modification manuelle uniquement) |
 | Tout statut sauf Finalisé | Sortie du stock |
 | Sortie du stock | À publier (annulation de la sortie) |
@@ -124,8 +126,8 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 
 ### 4.3 Colis (ventes groupées) et statuts
 - Les changements **Envoyé**, **Finalisé** et **Annulation** (retour En ligne depuis À expédier) s'appliquent **automatiquement à tous les articles du colis** en même temps.
-- **Retour partiel** : depuis Envoyé, on peut retirer un ou plusieurs articles du colis ; ils repassent **À publier**. Les articles restants poursuivent normalement (montants : §6.4).
-- **Retour du colis entier** : tous les articles repassent **À publier** et la vente est annulée.
+- **Retour partiel** : depuis Envoyé, on peut retirer un ou plusieurs articles du colis ; ils passent **À récupérer**. Les articles restants poursuivent normalement (montants : §6.4).
+- **Retour du colis entier** : tous les articles passent **À récupérer** et la vente est annulée.
 
 ### 4.4 Dates des changements
 - Chaque changement de statut est enregistré dans un **historique** (statut de départ, statut d'arrivée, date).
@@ -397,8 +399,8 @@ Chaque cas devient un test automatique.
 | 23 | Lot de 3 articles pour 10 €, un article supprimé | Total conservé : 5,00 / 5,00 |
 | 24 | Sortie du cas 7 (essence 1,30 €, aucun achat), puis ajout d'un article oublié | Frais général du mois : 0 € ; l'article porte 1,30 € d'essence (jamais compté deux fois) |
 | 25 | Article acheté 5 € + 0,65 € essence + boost 1,50 €, En ligne affiché 12 € | Valeur du stock : **7,15 €** au coût total, **12 €** au prix affiché |
-| 26 | Suite des cas 9-10 : colis Envoyé, l'acheteur renvoie B ; nouveau montant crédité 7,20 € | A : prix vendu 7,20 €, emballage 0,08 €, bénéfice = 7,20 − 2 − 0,40 − 0,08 = **4,72 €** ; B repasse **À publier**, sans prix vendu ni emballage |
-| 27 | Colis de 2 articles Envoyé, retour du colis entier | Les 2 articles repassent **À publier** ; la vente est annulée |
+| 26 | Suite des cas 9-10 : colis Envoyé, l'acheteur renvoie B ; nouveau montant crédité 7,20 € | A : prix vendu 7,20 €, emballage 0,08 €, bénéfice = 7,20 − 2 − 0,40 − 0,08 = **4,72 €** ; B passe **À récupérer** (modifié le 07/10/2026, issue #52 ; avant : « repasse À publier »), sans prix vendu ni emballage |
+| 27 | Colis de 2 articles Envoyé, retour du colis entier | Les 2 articles passent **À récupérer** (modifié le 07/10/2026, issue #52 ; avant : « repassent À publier ») ; la vente est annulée |
 | 28 | Article Brouillon créé le 01/10 | Alerte brouillon le **04/10** (3 jours ou plus) |
 | 29 | Jeans finalisés : J1 coût total 4 € vendu 12 € ; J2 coût total 6 € vendu 9 € | Marge moyenne = (8 + 3) / 2 = **5,50 €** ; en % = 11 / 10 = **110 %** |
 | 30 | Article acheté le 01/09, en ligne le 10/09, vendu le 15/09, finalisé le 19/09 | Délai mise en ligne → vente = **5 j** ; achat → vente = **14 j** |

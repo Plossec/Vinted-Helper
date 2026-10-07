@@ -25,7 +25,9 @@ interface Props {
 /** Libellé du bouton selon le statut de départ (certains passages ont un sens particulier). */
 function libelleAction(de: Statut, vers: Statut): string {
   if (de === "a_expedier" && vers === "en_ligne") return "Annulation par l'acheteur";
-  if (de === "envoye" && vers === "a_publier") return "Retour de l'acheteur";
+  if (de === "envoye" && vers === "a_recuperer") return "Retour de l'acheteur";
+  if (de === "a_recuperer" && vers === "a_publier") return "Récupéré : à publier";
+  if (de === "a_recuperer" && vers === "en_ligne") return "Récupéré : remettre en ligne";
   if (de === "sortie_stock" && vers === "a_publier") return "Annuler la sortie du stock";
   return ACTIONS_STATUT[vers];
 }
@@ -78,7 +80,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
       }
       if (article.vente && (article.statut === "envoye" || article.statut === "a_expedier")) {
         setVente(await api.get<Vente>(`/api/ventes/${article.vente.id}`));
-        if (vers === "a_publier") base.selection = [article.id];
+        if (vers === "a_recuperer") base.selection = [article.id];
       }
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "Chargement impossible.");
@@ -113,7 +115,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
         await api.post(`/api/ventes/${venteId}/finalisation`, { date });
       } else if (venteId && de === "a_expedier" && choix === "en_ligne") {
         await api.post(`/api/ventes/${venteId}/annulation`, { date });
-      } else if (venteId && de === "envoye" && choix === "a_publier") {
+      } else if (venteId && de === "envoye" && choix === "a_recuperer") {
         const restants = (vente?.articles ?? []).filter((a) => !a.retourne && !saisie.selection.includes(a.id));
         const montant = lireMontant(saisie.montant);
         if (saisie.selection.length === 0) return setErreur("Cochez les articles renvoyés.");
@@ -311,7 +313,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
             </>
           )}
 
-          {article.statut === "envoye" && choix === "a_publier" && vente && (
+          {article.statut === "envoye" && choix === "a_recuperer" && vente && (
             <>
               <p className="secondaire">Cochez les articles renvoyés. Ils repasseront « À publier ».</p>
               <ul className="cases">

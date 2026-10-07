@@ -6,7 +6,7 @@ import { article, historiquePrix, historiqueStatut } from "../base/schema.js";
 import { lireReglages } from "../frais/service.js";
 import { calculerAlertes } from "../metier/alertes.js";
 
-const SURVEILLES = ["brouillon", "en_ligne", "a_expedier"] as const;
+const SURVEILLES = ["brouillon", "en_ligne", "a_expedier", "a_recuperer"] as const;
 
 export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/alertes", async (requete) => {
@@ -64,6 +64,7 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
     return {
       ...alertes,
       aExpedier: alertes.aExpedier.map((a) => ({ ...a, urlConversation: conversations.get(a.id) ?? null })),
+      aRecuperer: alertes.aRecuperer.map((a) => ({ ...a, urlConversation: conversations.get(a.id) ?? null })),
     };
   });
 }

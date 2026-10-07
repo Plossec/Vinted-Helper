@@ -14,6 +14,7 @@
   --badge-en-ligne: #0b7a75;
   --badge-vente: #8250df;
   --badge-fin: #1a7f37;
+  --badge-recuperer: #bc4c00;
   color-scheme: light dark;
   font-family:
     system-ui,
@@ -40,6 +41,7 @@
     --badge-en-ligne: #2bb3ab;
     --badge-vente: #a371f7;
     --badge-fin: #3fb950;
+    --badge-recuperer: #f0883e;
   }
 }
 
@@ -315,6 +317,10 @@ textarea:focus {
 .badge--a_expedier,
 .badge--envoye {
   background: var(--badge-vente);
+}
+
+.badge--a_recuperer {
+  background: var(--badge-recuperer);
 }
 
 .badge--finalise {

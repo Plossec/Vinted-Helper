@@ -15,7 +15,8 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
   const [lien, setLien] = useState(article.urlVinted ?? "");
   const [conversation, setConversation] = useState(article.urlConversation ?? "");
   /** Vendu (colis en cours ou fini) : le lien de la conversation avec l'acheteur est proposé (issue #48). */
-  const vendu = ["a_expedier", "envoye", "finalise"].includes(article.statut) || article.urlConversation !== null;
+  const vendu =
+    ["a_expedier", "envoye", "a_recuperer", "finalise"].includes(article.statut) || article.urlConversation !== null;
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
 

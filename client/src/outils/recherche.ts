@@ -48,7 +48,14 @@ export const FILTRES_VIDES: Filtres = {
 };
 
 /** Statuts cochés par défaut : tout sauf Finalisé et Sortie du stock (le stock et les ventes en cours). */
-export const STATUTS_PAR_DEFAUT: Statut[] = ["brouillon", "a_publier", "en_ligne", "a_expedier", "envoye"];
+export const STATUTS_PAR_DEFAUT: Statut[] = [
+  "brouillon",
+  "a_publier",
+  "en_ligne",
+  "a_expedier",
+  "envoye",
+  "a_recuperer",
+];
 
 export const FILTRES_PAR_DEFAUT: Filtres = { ...FILTRES_VIDES, statuts: STATUTS_PAR_DEFAUT };
 

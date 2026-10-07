@@ -7,6 +7,8 @@ export const STATUTS = [
   "en_ligne",
   "a_expedier",
   "envoye",
+  /** Retour de l'acheteur : l'article est à aller chercher (issue #52). */
+  "a_recuperer",
   "finalise",
   "sortie_stock",
 ] as const;
@@ -19,6 +21,7 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
   en_ligne: "En ligne",
   a_expedier: "À expédier",
   envoye: "Envoyé",
+  a_recuperer: "À récupérer",
   finalise: "Finalisé",
   sortie_stock: "Sortie du stock",
 };
@@ -29,7 +32,9 @@ const TRANSITIONS: Record<Statut, readonly Statut[]> = {
   a_publier: ["en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
   a_expedier: ["envoye", "en_ligne", "sortie_stock"],
-  envoye: ["finalise", "a_publier", "sortie_stock"],
+  // Retour de l'acheteur : Envoyé → À récupérer (issue #52, au lieu d'À publier).
+  envoye: ["finalise", "a_recuperer", "sortie_stock"],
+  a_recuperer: ["a_publier", "en_ligne", "sortie_stock"],
   finalise: [],
   sortie_stock: ["a_publier"],
 };
@@ -45,6 +50,8 @@ const TRANSITIONS_SIMPLES = new Set<string>([
   "a_publier>en_ligne",
   "a_publier>brouillon",
   "en_ligne>a_publier",
+  "a_recuperer>a_publier",
+  "a_recuperer>en_ligne",
 ]);
 
 export function estTransitionSimple(de: Statut, vers: Statut): boolean {

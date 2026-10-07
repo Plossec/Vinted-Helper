@@ -65,6 +65,7 @@ export function calculerAlertes(
   const brouillons: Alerte[] = [];
   const dormants: Alerte[] = [];
   const aExpedier: Alerte[] = [];
+  const aRecuperer: Alerte[] = [];
   for (const a of articles) {
     if (a.statut === "brouillon") {
       const date = arriveeDansStatut(a);
@@ -78,9 +79,9 @@ export function calculerAlertes(
         const al = alerte(a, date);
         if (al.jours >= delais.delaiDormant) dormants.push(al);
       }
-    } else if (a.statut === "a_expedier") {
+    } else if (a.statut === "a_expedier" || a.statut === "a_recuperer") {
       const date = arriveeDansStatut(a);
-      if (date) aExpedier.push(alerte(a, date));
+      if (date) (a.statut === "a_expedier" ? aExpedier : aRecuperer).push(alerte(a, date));
     }
   }
   const plusAnciens = (x: Alerte, y: Alerte) => y.jours - x.jours || x.reference - y.reference;
@@ -88,5 +89,7 @@ export function calculerAlertes(
     brouillons: brouillons.sort(plusAnciens),
     dormants: dormants.sort(plusAnciens),
     aExpedier: aExpedier.sort(plusAnciens),
+    /** Retours à aller chercher (issue #52). */
+    aRecuperer: aRecuperer.sort(plusAnciens),
   };
 }
