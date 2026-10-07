@@ -1,10 +1,17 @@
 // Routes des photos : envoi (contenu brut de l'image), lecture, rattachement aux articles.
-import { createReadStream, existsSync } from "node:fs";
+import { createReadStream, existsSync, statSync } from "node:fs";
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { objet, uuidFacultatif, uuidObligatoire } from "../outils/validation.js";
-import { ajouterPhotoArticle, enregistrerPhoto, lirePhoto, ordonnerPhotos, retirerPhoto } from "./service.js";
+import {
+  ajouterPhotoArticle,
+  enregistrerPhoto,
+  lirePhoto,
+  ordonnerPhotos,
+  pivoterPhoto,
+  retirerPhoto,
+} from "./service.js";
 import { nomVignette, type StockagePhotos } from "./stockage.js";
 
 /** Taille maximale d'une photo envoyée (les photos de téléphone font quelques Mo). */
@@ -32,7 +39,10 @@ export function routesPhotos(
   async function envoyerFichier(utilisateurId: string, fichier: string, type: string) {
     const chemin = stockage.chemin(utilisateurId, fichier);
     if (!existsSync(chemin)) throw introuvable("Photo");
-    return { flux: createReadStream(chemin), type };
+    const infos = statSync(chemin);
+    // Empreinte du fichier : une photo peut changer de contenu (réduction, rotation) sous le même identifiant.
+    const empreinte = `"${Math.trunc(infos.mtimeMs).toString(36)}-${infos.size.toString(36)}"`;
+    return { chemin, empreinte, type };
   }
 
   const TYPES_FICHIER: Record<string, string> = {
@@ -48,13 +58,23 @@ export function routesPhotos(
       const id = uuidObligatoire(objet(requete.params).id, "Identifiant");
       const { fichier } = await lirePhoto(base, utilisateurId, id);
       const extension = fichier.split(".").pop() ?? "";
-      const { flux, type } = vignette
+      const { chemin, empreinte, type } = vignette
         ? await envoyerFichier(utilisateurId, nomVignette(id), "image/webp")
         : await envoyerFichier(utilisateurId, fichier, TYPES_FICHIER[extension] ?? "application/octet-stream");
-      // Une photo ne change jamais de contenu sous le même identifiant (sauf réduction au lot 7) : cache long.
-      return reponse.header("Content-Type", type).header("Cache-Control", "private, max-age=604800").send(flux);
+      // Gardée en cache par le navigateur, mais revérifiée à chaque affichage (304 si elle n'a pas changé).
+      reponse.header("Cache-Control", "private, no-cache").header("ETag", empreinte);
+      if (requete.headers["if-none-match"] === empreinte) return reponse.code(304).send();
+      return reponse.header("Content-Type", type).send(createReadStream(chemin));
     });
   }
+
+  app.post("/api/photos/:id/rotation", async (requete) => {
+    const id = uuidObligatoire(objet(requete.params).id, "Identifiant");
+    const sens = objet(requete.body).sens;
+    if (sens !== "gauche" && sens !== "droite") throw erreurSaisie("Sens de rotation : « gauche » ou « droite ».");
+    await pivoterPhoto(base, stockage, utilisateurDe(requete).id, id, sens === "droite" ? 90 : -90);
+    return { ok: true };
+  });
 
   app.post("/api/articles/:id/photos", async (requete, reponse) => {
     const articleId = uuidObligatoire(objet(requete.params).id, "Identifiant");

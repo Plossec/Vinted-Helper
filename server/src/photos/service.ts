@@ -42,6 +42,19 @@ export async function lirePhoto(base: Base, utilisateurId: string, id: string) {
   return ligne;
 }
 
+/** Fait pivoter une photo d'un quart de tour, définitivement (issue #35) ; elle change pour tous ses articles. */
+export async function pivoterPhoto(
+  base: Base,
+  stockage: StockagePhotos,
+  utilisateurId: string,
+  id: string,
+  angle: 90 | -90,
+): Promise<void> {
+  const { fichier } = await lirePhoto(base, utilisateurId, id);
+  const nouveau = await stockage.pivoter(utilisateurId, id, fichier, angle);
+  if (nouveau !== fichier) await base.update(photo).set({ fichier: nouveau }).where(eq(photo.id, id));
+}
+
 export async function verifierPhoto(tx: Base | Transaction, utilisateurId: string, photoId: string) {
   const [ligne] = await tx
     .select({ type: photo.type })

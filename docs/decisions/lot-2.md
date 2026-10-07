@@ -52,3 +52,13 @@ automatique depuis la saisie terrain » de l'issue #7.
   son essence sont supprimées.
 - Sans réseau : ce qui n'est pas encore envoyé (sortie, achats, photos, essence) est retiré du téléphone, puis
   l'annulation est mise dans la file ; le serveur l'accepte même si la sortie ne lui est jamais parvenue.
+
+---
+
+## 07/10/2026 — Rotation des photos (issue #35)
+
+- Boutons ↺ ↻ sous chaque photo de la fiche (terrain et annonce) : quart de tour, **définitif** (choix de
+  l'utilisateur). Le fichier est réécrit en JPEG sur le serveur (orientation de l'appareil photo appliquée avant) et sa
+  vignette recréée ; une photo terrain de lot tourne pour tous les articles du lot.
+- Les images ne sont plus gardées une semaine sans vérification : le navigateur les revérifie (empreinte `ETag`,
+  réponse 304 si inchangée), pour afficher partout la photo tournée.
