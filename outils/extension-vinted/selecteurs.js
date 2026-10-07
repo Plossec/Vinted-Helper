@@ -42,11 +42,13 @@ const SELECTEURS = {
    * `div[role="button"][id^="catalog-"]`. On ne cherche QUE dans les listes ouvertes : le menu du haut de Vinted
    * contient aussi « Femmes », « Hommes »…
    */
+  // Relevé du 07/10/2026 (22:30) : la liste « État » est `[data-testid="category-condition-single-list-content"]`,
+  // chaque état une case `role="radio"` (titre « Très bon état » + description) : on cherche dans tout « …-content ».
   options: [
-    '[data-testid$="-dropdown-content"] [role="button"]',
-    '[data-testid$="-dropdown-content"] [role="option"]',
-    '[data-testid$="-dropdown-content"] [role="radio"]',
-    '[data-testid$="-dropdown-content"] [role="checkbox"]',
+    '[data-testid$="-content"] [role="button"]',
+    '[data-testid$="-content"] [role="option"]',
+    '[data-testid$="-content"] [role="radio"]',
+    '[data-testid$="-content"] [role="checkbox"]',
     '[role="option"]',
     '[data-testid$="-option"]',
   ],

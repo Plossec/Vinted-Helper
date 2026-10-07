@@ -110,3 +110,9 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   identique ou le plus proche (nom de Vinted par lequel commence celui de l'application). Si le bon résultat est déjà
   coché, rien n'est touché (demande de l'utilisateur) ; le contrôle avant envoi relit le nom retenu. L'arbre des
   catégories de l'application (`server/src/catalogue/`) reste à rapprocher de celui de Vinted (sujet à part).
+- Relevé du 07/10/2026 (22:30) : catégorie, marque (« Macron ») et étapes précédentes passées ; la liste « État » est
+  `[data-testid="category-condition-single-list-content"]`, chaque état une case `role="radio"` avec titre et
+  description. Les options sont désormais cherchées dans tout conteneur « …-content » et comparées sur leur **titre**,
+  à l'égalité d'abord (« Bon état » ≠ « Très bon état ») ; le contrôle avant envoi exige l'état exact.
+- 07/10/2026 (#63, demande de l'utilisateur) : pause entre deux étapes ramenée à **5 secondes fixes** (au lieu de 15 à
+  20 s). L'attente de 10 minutes entre deux annonces publiées est inchangée.

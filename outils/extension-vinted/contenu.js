@@ -77,9 +77,11 @@ async function option(texte, delai = DELAI_MS) {
     const candidates = [...document.querySelectorAll(SELECTEURS.options.join(", "))].filter(
       (el) => visible(el) && !el.closest(SELECTEURS.horsOptions),
     );
+    // Libellé d'une option : son titre s'il y en a un (une case « état » porte aussi une description), sinon son
+    // texte. Égalité d'abord : « Bon état » ne doit pas choisir « Très bon état ».
+    const libelle = (el) => normaliser(el.querySelector(SELECTEURS.titreResultat)?.textContent ?? el.textContent);
     const trouvee =
-      candidates.find((el) => normaliser(el.textContent) === voulu) ??
-      candidates.find((el) => normaliser(el.textContent).includes(voulu));
+      candidates.find((el) => libelle(el) === voulu) ?? candidates.find((el) => libelle(el).includes(voulu));
     if (trouvee) return trouvee;
     await attendreMs(250);
   } while (Date.now() < fin);
@@ -107,7 +109,14 @@ const fermerListe = () =>
  */
 async function choisir(nom, texte, { fermer = false } = {}) {
   const el0 = await champ(nom);
-  if (valeurDe(el0).includes(normaliser(texte))) return;
+  // Valeur déjà choisie (par Vinted ou un passage précédent) : égalité exacte, une valeur par virgule (couleurs).
+  if (
+    valeurDe(el0)
+      .split(",")
+      .map((v) => v.trim())
+      .includes(normaliser(texte))
+  )
+    return;
   cliquer(el0);
   const recherche = await attendre(SELECTEURS.rechercheDansListe, 800);
   if (recherche && visible(recherche)) saisir(recherche, texte);
@@ -295,7 +304,7 @@ async function controler(article, nombrePhotos) {
   await attendu("prix", article.prix, "contient");
   await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
-  await attendu("etat", article.etat, "contient");
+  await attendu("etat", article.etat); // égalité : « Bon état » ≠ « Très bon état »
   for (const couleur of article.couleurs) await attendu("couleur", couleur, "contient");
   await attendre(SELECTEURS.photosDeposees, 3000);
   const nombre = document.querySelectorAll(SELECTEURS.photosDeposees.join(", ")).length;

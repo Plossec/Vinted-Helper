@@ -14,6 +14,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   colis coché dans ses cases ; choix proposés par Vinted affichés en cas d'erreur (#56).
 - Extension Vinted : choix de la **catégorie** calibré sur le vrai formulaire (options cherchées uniquement dans la
   liste ouverte) et **relevé automatique** de la page en cas d'erreur, bouton « Dernier relevé » (#56).
+- Extension Vinted : **état** (« Très bon état », « Bon état »…) choisi par le titre exact de sa case (#56) ; pause
+  ramenée à **5 secondes** entre chaque étape, une annonce en 1 minute environ (#63).
 - Extension Vinted : **pause de 15 à 20 secondes** entre chaque étape du remplissage (#57) et bouton **Diagnostic**
   qui relève la structure du formulaire Vinted pour corriger les repères (#56).
 - **Extension Chrome de publication Vinted** (`outils/extension-vinted/`), dans le Chrome habituel : même file et
