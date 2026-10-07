@@ -1,6 +1,6 @@
 // Filtres, recherche et tris de la liste des articles (§5.3). Fonctions pures, testées.
 import type { ResumeArticle } from "../api.js";
-import type { Statut } from "../statuts.js";
+import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 export interface Filtres {
   texte: string;
@@ -13,7 +13,28 @@ export interface Filtres {
   sortieId: string;
 }
 
-export type Tri = "achat" | "mise_en_ligne" | "prix" | "anciennete_statut" | "creation";
+export type Tri =
+  | "achat"
+  | "mise_en_ligne"
+  | "prix"
+  | "anciennete_statut"
+  | "creation"
+  | "reference"
+  | "nom"
+  | "statut"
+  | "marque"
+  | "categorie"
+  | "lieu"
+  | "prix_achat"
+  | "benefice";
+
+/** Libellés lisibles pour trier sur les colonnes texte (catégorie, lieu). */
+export interface Libelles {
+  categorie: (code: string) => string;
+  lieu: (id: string) => string;
+}
+
+const ORDRE_STATUT = Object.keys(LIBELLES_STATUT);
 
 export const FILTRES_VIDES: Filtres = {
   texte: "",
@@ -49,8 +70,24 @@ function pertinence(a: ResumeArticle, texte: string, libelleCategorie: (code: st
 const horodatage = (iso: string | null) => (iso === null ? null : new Date(iso).getTime());
 
 /** Valeur de tri ; les articles sans valeur vont à la fin. */
-function cle(a: ResumeArticle, tri: Tri): number | null {
+function cle(a: ResumeArticle, tri: Tri, libelles: Libelles): number | string | null {
   switch (tri) {
+    case "reference":
+      return a.reference;
+    case "nom":
+      return a.nom ? normaliser(a.nom) : null;
+    case "statut":
+      return ORDRE_STATUT.indexOf(a.statut);
+    case "marque":
+      return a.marque ? normaliser(a.marque) : null;
+    case "categorie":
+      return a.categorie ? normaliser(libelles.categorie(a.categorie)) : null;
+    case "lieu":
+      return a.lieuId ? normaliser(libelles.lieu(a.lieuId)) : null;
+    case "prix_achat":
+      return a.prixAchat;
+    case "benefice":
+      return a.benefice;
     case "achat":
       return horodatage(a.dateAchat);
     case "mise_en_ligne":
@@ -76,7 +113,9 @@ export function filtrerEtTrier(
   tri: Tri,
   croissant: boolean,
   libelleCategorie: (code: string) => string = (code) => code,
+  libelleLieu: (id: string) => string = (id) => id,
 ): ResumeArticle[] {
+  const libelles: Libelles = { categorie: libelleCategorie, lieu: libelleLieu };
   const gamme = normaliser(f.gamme.trim());
   const notes = new Map<string, number>();
   const retenus = articles.filter((a) => {
@@ -94,11 +133,13 @@ export function filtrerEtTrier(
   return retenus.sort((a, b) => {
     const parNote = (notes.get(b.id) ?? 0) - (notes.get(a.id) ?? 0);
     if (parNote !== 0) return parNote;
-    const ka = cle(a, tri);
-    const kb = cle(b, tri);
+    const ka = cle(a, tri, libelles);
+    const kb = cle(b, tri, libelles);
     if (ka === null && kb === null) return b.reference - a.reference;
     if (ka === null) return 1;
     if (kb === null) return -1;
-    return (ka - kb) * sens || b.reference - a.reference;
+    const ecart =
+      typeof ka === "string" || typeof kb === "string" ? String(ka).localeCompare(String(kb), "fr") : ka - kb;
+    return ecart * sens || b.reference - a.reference;
   });
 }

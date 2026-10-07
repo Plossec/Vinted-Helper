@@ -161,6 +161,10 @@ export interface ResumeArticle {
   dateMiseEnLigne: string | null;
   /** Photo à afficher en vignette (identifiant), ou null. */
   vignette: string | null;
+  /** Centimes, calculés par le serveur : prix d'achat (part du lot comprise) et bénéfice (réalisé ou provisoire). */
+  prixAchat: number | null;
+  benefice: number | null;
+  beneficeRealise: boolean;
 }
 
 export interface PhotoArticle {
