@@ -147,9 +147,34 @@ sudo docker compose start app
 
 ⚠️ La base est **remplacée** par celle de la sauvegarde.
 
-## Mettre à jour l'application
+## Déploiement continu (automatique)
 
-Quand Claude annonce une nouvelle version :
+Une fois activé, **chaque fusion dans `main`** met le serveur à jour toute seule : GitHub vérifie d'abord le code
+(types, lint, tests, construction) ; si tout est vert, il lance sur le serveur le script de mise à jour ci-dessous
+(sauvegarde de la base, nouvelle version, redémarrage). Suivi : onglet **Actions** du dépôt GitHub ; en cas d'échec,
+GitHub envoie un e-mail et l'ancienne version reste en ligne.
+
+Activation (une seule fois) :
+
+1. Sur le serveur :
+
+   ```bash
+   sudo bash /opt/vinted-helper/scripts/ovh/activer-deploiement-continu.sh
+   ```
+
+   Le script crée un utilisateur `deploiement` dont la clé ne peut **que** lancer la mise à jour, puis affiche
+   deux secrets.
+2. Sur GitHub : dépôt → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**, deux fois :
+   - `DEPLOIEMENT_HOTE_CONNU` : la ligne affichée (adresse du serveur + empreinte) ;
+   - `DEPLOIEMENT_CLE` : toutes les lignes de la clé, de `-----BEGIN` à `-----END …-----` comprises.
+3. Test : onglet **Actions** → « Vérification et déploiement » → **Run workflow**. Résultat attendu : deux coches
+   vertes ; sur le serveur, le journal `/var/log/vinted-helper-deploiement.log` se termine par `Version en ligne : …`.
+
+Pour désactiver : supprimez le secret `DEPLOIEMENT_CLE` sur GitHub.
+
+## Mettre à jour l'application à la main
+
+Sans déploiement continu, ou pour forcer une mise à jour :
 
 ```bash
 ssh ubuntu@vps-1234abcd.vps.ovh.net

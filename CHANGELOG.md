@@ -6,6 +6,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Déploiement continu** : vérification automatique (GitHub Actions) de chaque pull request, et mise à jour du
+  serveur après chaque fusion dans `main` si tout est vert (`scripts/ovh/activer-deploiement-continu.sh`).
 - **Import de l'ancien tableur** (`npm run import-tableur -w server`, mode `--essai`) : sorties, lots, mises en ligne
   et ventes recréés par les fonctions de l'application, en une seule transaction.
 

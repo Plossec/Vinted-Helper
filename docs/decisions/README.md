@@ -20,6 +20,7 @@ façon de travailler), avec la date.
 | [mise-en-ligne-ovh.md](mise-en-ligne-ovh.md) | Mise en ligne OVH |
 | [publication-vinted.md](publication-vinted.md) | Publication automatique sur Vinted |
 | [import-tableur.md](import-tableur.md) | Import de l'ancien tableur dans la base du serveur |
+| [deploiement-continu.md](deploiement-continu.md) | Déploiement automatique sur le serveur à chaque fusion dans main |
 
 ## À relire par l'utilisateur
 

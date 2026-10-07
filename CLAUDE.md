@@ -72,7 +72,8 @@ migrations : `.claude/rules/migrations.md`.
 secret dans le code, les logs, les tests ou les messages de commit.
 
 **Git** — Travailler sur une branche (`lot-N` ou nommée d'après le sujet), **jamais directement sur `main`**. Aucun
-push sans demande. Ne jamais réécrire l'historique ni contourner les vérifications (`--no-verify`). Commits **petits
+push sans demande. **Une fusion dans `main` part en production** (déploiement continu, si les vérifications
+GitHub passent). Ne jamais réécrire l'historique ni contourner les vérifications (`--no-verify`). Commits **petits
 et fréquents**.
 
 **Code et tests**

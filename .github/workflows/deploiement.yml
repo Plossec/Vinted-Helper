@@ -1,0 +1,59 @@
+# Vérification (chaque pull request et chaque fusion dans main) puis déploiement automatique sur le serveur OVH
+# (fusion dans main uniquement, si la vérification est verte). Décision : docs/decisions/deploiement-continu.md.
+# Secrets (GitHub → Settings → Secrets and variables → Actions), créés par scripts/ovh/activer-deploiement-continu.sh :
+#   DEPLOIEMENT_CLE         clé SSH privée, limitée sur le serveur au lancement de la mise à jour ;
+#   DEPLOIEMENT_HOTE_CONNU  ligne « known_hosts » du serveur (son adresse et son empreinte).
+name: Vérification et déploiement
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    name: Vérifier (types, lint, format, tests, construction)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+
+  deployer:
+    name: Déployer sur le serveur
+    needs: verifier
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # Un seul déploiement à la fois ; une fusion arrivée pendant un déploiement attend son tour.
+    concurrency:
+      group: deploiement
+      cancel-in-progress: false
+    steps:
+      - name: Mise à jour du serveur
+        env:
+          CLE: ${{ secrets.DEPLOIEMENT_CLE }}
+          HOTE_CONNU: ${{ secrets.DEPLOIEMENT_HOTE_CONNU }}
+        run: |
+          if [ -z "$CLE" ] || [ -z "$HOTE_CONNU" ]; then
+            echo "::warning::Déploiement non activé (secrets DEPLOIEMENT_CLE et DEPLOIEMENT_HOTE_CONNU absents) : voir docs/guides/mise-en-ligne-ovh.md."
+            exit 0
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$CLE" > ~/.ssh/deploiement
+          chmod 600 ~/.ssh/deploiement
+          printf '%s\n' "$HOTE_CONNU" > ~/.ssh/known_hosts
+          hote="$(printf '%s' "$HOTE_CONNU" | head -n 1 | cut -d' ' -f1)"
+          # La clé ne peut que lancer la mise à jour (commande imposée par le serveur) : aucune commande n'est envoyée.
+          ssh -i ~/.ssh/deploiement -o BatchMode=yes -o IdentitiesOnly=yes "deploiement@$hote"

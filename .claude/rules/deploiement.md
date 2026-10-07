@@ -11,6 +11,8 @@ paths:
 
 Guides : `docs/guides/mise-en-ligne-ovh.md` (serveur OVH), `docs/guides/sauvegarde-restauration.md` (PC).
 
+- **Déploiement continu** : toute fusion dans `main` est mise en production automatiquement (GitHub Actions,
+  `.github/workflows/deploiement.yml`, si la vérification est verte). Ne fusionner dans `main` que du code prêt.
 - **Aucune commande vers le VPS** sans demande explicite : c'est l'utilisateur qui lance les scripts sur le serveur,
   guidé pas à pas.
 - Le même `docker-compose.yml` sert au PC et au serveur ; les différences du serveur sont dans
