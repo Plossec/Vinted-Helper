@@ -6,6 +6,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Extension Vinted : catégorie **déjà remplie par Vinted** et identique laissée telle quelle (de même pour marque,
+  taille, état, couleurs) ; recherche de la catégorie finale quand le chemin diffère de celui de Vinted ; format du
+  colis coché dans ses cases ; choix proposés par Vinted affichés en cas d'erreur (#56).
 - Extension Vinted : choix de la **catégorie** calibré sur le vrai formulaire (options cherchées uniquement dans la
   liste ouverte) et **relevé automatique** de la page en cas d'erreur, bouton « Dernier relevé » (#56).
 - Extension Vinted : **pause de 15 à 20 secondes** entre chaque étape du remplissage (#57) et bouton **Diagnostic**

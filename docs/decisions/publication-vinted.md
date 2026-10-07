@@ -97,3 +97,10 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   catégorie une case `role="button"` ; le menu du haut du site porte les mêmes libellés (« Femmes »…). Les options ne
   sont donc cherchées **que dans les listes ouvertes**, jamais dans l'en-tête ni la navigation. En cas d'erreur
   d'étape, l'extension enregistre un **relevé automatique** de la page (bouton « Dernier relevé »).
+- Relevé du 07/10/2026 (essai « Doudoune FC Nantes ») : Femmes › Vêtements › Manteaux et vestes est bien parcouru,
+  mais « Doudounes et vestes matelassées » n'existe pas à ce niveau sur Vinted (Capes et ponchos, Manteaux, Vestes sans
+  manches, Vestes). Vinted peut aussi **remplir lui-même la catégorie** (suggestion). Décision (utilisateur) : vérifier
+  d'abord si le champ est déjà rempli avec la bonne valeur et n'y toucher que sinon (étendu par Claude à la marque,
+  la taille, l'état et aux couleurs : recliquer une couleur la décocherait). Si un niveau du chemin manque, la
+  catégorie finale est cherchée avec « Trouver une catégorie » ; en dernier recours, erreur listant les choix
+  proposés par Vinted. Le format du colis est une série de cases (« Petit », « Recommandé Moyen »…), pas une liste.

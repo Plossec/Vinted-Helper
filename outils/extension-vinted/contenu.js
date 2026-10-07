@@ -86,15 +86,42 @@ async function option(texte, delai = DELAI_MS) {
   return null;
 }
 
-/** Ouvre une liste de choix et clique l'option portant ce texte (recherche tapée si la liste en propose une). */
+/** Valeur affichée d'un champ (saisie ou liste de choix), normalisée. */
+const valeurDe = (el) => normaliser("value" in el && typeof el.value === "string" ? el.value : el.textContent);
+
+/** Libellés des options visibles (pour un message d'erreur utile). */
+function optionsVisibles() {
+  return [...document.querySelectorAll(SELECTEURS.options.join(", "))]
+    .filter((el) => visible(el) && !el.closest(SELECTEURS.horsOptions))
+    .map((el) => el.textContent?.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 15);
+}
+
+const fermerListe = () =>
+  document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+
+/**
+ * Ouvre une liste de choix et clique l'option portant ce texte (recherche tapée si la liste en propose une).
+ * Si Vinted a déjà rempli le champ avec cette valeur (suggestion automatique), on n'y touche pas.
+ */
 async function choisir(nom, texte, { fermer = false } = {}) {
-  cliquer(await champ(nom));
+  const el0 = await champ(nom);
+  if (valeurDe(el0).includes(normaliser(texte))) return;
+  cliquer(el0);
   const recherche = await attendre(SELECTEURS.rechercheDansListe, 800);
   if (recherche && visible(recherche)) saisir(recherche, texte);
   const el = await option(texte);
-  if (!el) throw new ErreurPublication(`« ${texte} » introuvable dans la liste « ${nom} » de Vinted.`);
+  if (!el) {
+    const proposes = optionsVisibles();
+    fermerListe();
+    throw new ErreurPublication(
+      `« ${texte} » introuvable dans la liste « ${nom} » de Vinted.` +
+        (proposes.length > 0 ? ` Choix proposés : ${proposes.join(", ")}.` : ""),
+    );
+  }
   cliquer(el);
-  if (fermer) document.activeElement?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  if (fermer) fermerListe();
 }
 
 function fichier({ nom, type, base64 }) {
@@ -104,19 +131,60 @@ function fichier({ nom, type, base64 }) {
   return new File([octets], nom, { type });
 }
 
-/** Liste de choix à plusieurs niveaux (catégorie : Femmes › Vêtements › Manteaux et vestes › …). */
-async function choisirChemin(nom, chemin) {
-  cliquer(await champ(nom));
-  for (const niveau of chemin) {
-    const el = await option(niveau);
-    if (!el)
-      throw new ErreurPublication(
-        `Catégorie « ${niveau} » introuvable sur Vinted (chemin : ${chemin.join(" › ")}). ` +
-          "La liste ne s'est peut-être pas ouverte : lancez le Diagnostic de l'extension.",
-      );
+/**
+ * Catégorie (Femmes › Vêtements › Manteaux et vestes › …).
+ * - Déjà remplie par Vinted avec la bonne catégorie (suggestion automatique) : rien n'est touché.
+ * - Sinon, on descend l'arbre niveau par niveau. Si un niveau n'existe pas (l'arbre de Vinted diffère de celui de
+ *   l'application, ou la liste s'ouvre déjà sur une sous-catégorie), on tape la catégorie finale dans la recherche
+ *   de la liste et on la choisit parmi les résultats.
+ */
+async function choisirCategorie(chemin) {
+  const entree = await champ("categorie");
+  const finale = chemin.at(-1) ?? "";
+  if (valeurDe(entree).includes(normaliser(finale))) return;
+  cliquer(entree);
+  for (const [i, niveau] of chemin.entries()) {
+    const el = await option(niveau, i === 0 ? DELAI_MS : 3000);
+    if (!el) break;
     cliquer(el);
     await attendreMs(500);
+    if (i === chemin.length - 1) return;
   }
+  const recherche = await attendre(SELECTEURS.rechercheCategorie, 2000);
+  if (recherche) {
+    saisir(recherche, finale);
+    await attendreMs(1500);
+    const el = await option(finale, 5000);
+    if (el) {
+      cliquer(el);
+      await attendreMs(500);
+      if (valeurDe(entree).includes(normaliser(finale))) return;
+    }
+  }
+  const proposes = optionsVisibles();
+  fermerListe();
+  throw new ErreurPublication(
+    `Catégorie « ${finale} » introuvable sur Vinted (chemin : ${chemin.join(" › ")}).` +
+      (proposes.length > 0 ? ` Choix proposés par Vinted : ${proposes.join(", ")}.` : "") +
+      " Corrigez la catégorie de l'article, ou envoyez le Dernier relevé à Claude.",
+  );
+}
+
+/** Format du colis : case « Petit / Moyen / Grand » (titre éventuellement précédé de « Recommandé »). */
+async function choisirColis(libelle) {
+  if (!(await attendre(SELECTEURS.champs.colis, 1500))) return; // pas de choix proposé : rien à faire
+  const voulu = normaliser(libelle);
+  const cases = [...document.querySelectorAll(SELECTEURS.champs.colis.join(", "))];
+  const caseColis = cases.find((c) => {
+    const titre = normaliser(c.querySelector(SELECTEURS.titreColis)?.textContent);
+    return titre === voulu || titre.endsWith(voulu);
+  });
+  if (!caseColis) throw new ErreurPublication(`Format de colis « ${libelle} » introuvable sur Vinted.`);
+  const radio = caseColis.querySelector('input[type="radio"]');
+  if (radio?.checked) return;
+  cliquer(radio ?? caseColis);
+  await attendreMs(500);
+  if (radio && !radio.checked) throw new ErreurPublication(`Format de colis « ${libelle} » : la case ne se coche pas.`);
 }
 
 /**
@@ -139,7 +207,7 @@ const ETAPES = {
     saisir(await champ("description"), article.description);
   },
   async categorie(article) {
-    await choisirChemin("categorie", article.categorie);
+    await choisirCategorie(article.categorie);
   },
   async marque(article) {
     await choisir("marque", article.marque);
@@ -152,16 +220,14 @@ const ETAPES = {
     await choisir("etat", article.etat);
   },
   async couleurs(article) {
+    // Une couleur déjà choisie (par Vinted ou un passage précédent) n'est pas recliquée : ce serait la décocher.
     for (const couleur of article.couleurs) await choisir("couleur", couleur, { fermer: true });
   },
   async prix(article) {
     saisir(await champ("prix"), article.prix);
   },
   async colis(article) {
-    if (await champ("colis", false)) {
-      const libelle = { petit: "Petit", moyen: "Moyen", grand: "Grand" }[article.formatColis] ?? "Petit";
-      await choisir("colis", libelle);
-    }
+    await choisirColis({ petit: "Petit", moyen: "Moyen", grand: "Grand" }[article.formatColis] ?? "Petit");
   },
 };
 
@@ -212,6 +278,12 @@ function decrire(el) {
     aria: el.getAttribute("aria-label"),
     ariaExpanded: el.getAttribute("aria-expanded"),
     placeholder: el.getAttribute("placeholder"),
+    // Valeur des champs (sauf fichiers) : pour voir ce que Vinted a déjà rempli de lui-même.
+    valeur:
+      el instanceof HTMLInputElement && el.type !== "file" && el.type !== "password"
+        ? el.value.slice(0, 80) || null
+        : null,
+    coche: el instanceof HTMLInputElement && (el.type === "radio" || el.type === "checkbox") ? el.checked : null,
     classe: (el.getAttribute("class") ?? "").slice(0, 120) || null,
     texte: texte || null,
     visible: visible(el),

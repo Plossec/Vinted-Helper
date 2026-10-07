@@ -148,3 +148,24 @@ test("diagnostic (#56) : relevé du formulaire et de la liste des catégories, a
   assert.ok(d.apparusApresClicCategorie.some((e) => e.texte === "hommes"));
   assert.ok(d["options « Femmes »"].length >= 1);
 });
+
+test("catégorie déjà remplie par Vinted avec la bonne valeur : on n'y touche pas (#56)", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(true), vinted: { categoriePreremplie: "Jeans droits" } });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+  assert.equal(vinted.clicsCategorie, 0);
+});
+
+test("chemin de catégorie différent de celui de Vinted : recherche de la catégorie finale (#56)", async () => {
+  const demande = DEMANDE(true);
+  demande.article.categorie = ["Hommes", "Vêtements", "Pantalons", "Jeans droits"];
+  const { app } = await lancer({ demande });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+});
+
+test("catégorie inexistante sur Vinted : erreur avec les choix proposés, aucun clic sur « Ajouter »", async () => {
+  const demande = DEMANDE(false);
+  demande.article.categorie = ["Hommes", "Vêtements", "Doudounes"];
+  const { app, vinted } = await lancer({ demande });
+  assert.equal(vinted.clics, 0);
+  assert.match(app.resultats[0].message, /Catégorie « Doudounes » introuvable/);
+});
