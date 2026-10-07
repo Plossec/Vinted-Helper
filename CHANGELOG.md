@@ -6,6 +6,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- **Extension Chrome de publication Vinted** (`outils/extension-vinted/`), dans le Chrome habituel : même file et
+  même jeton, une annonce au plus toutes les 10 minutes, pause automatique sur vérification, page « session
+  bloquée » ou déconnexion (#54).
 - Statut **« À récupérer »** après un retour de l'acheteur, puis « Récupéré » → À publier ou En ligne ; alerte sur
   l'écran Articles (#52).
 - **Supprimer le dernier changement de statut** (erreur de saisie) depuis l'historique de la fiche, effets défaits

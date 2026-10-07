@@ -1,4 +1,4 @@
-// Vinted sur la fiche : lien de l'annonce (saisi à la main, issue #46, ou noté par le programme de publication),
+// Vinted sur la fiche : lien de l'annonce (saisi à la main, issue #46, ou noté par l'extension de publication),
 // et bouton « Publier sur Vinted » pour un article À publier. L'application n'interroge jamais Vinted.
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
@@ -168,7 +168,8 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
             Publier sur Vinted{lireModeEssai() ? " (essai)" : ""}
           </button>
           <p className="secondaire">
-            Le programme du PC remplit l'annonce sur Vinted. Suivi : <Link to="/publication">Publication Vinted</Link>.
+            L'extension Chrome du PC remplit l'annonce sur Vinted. Suivi :{" "}
+            <Link to="/publication">Publication Vinted</Link>.
           </p>
         </>
       )}

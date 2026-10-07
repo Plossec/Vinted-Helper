@@ -1,4 +1,4 @@
-// Publication sur Vinted : demande d'ajout à la file (traitée par le programme du PC) et mode essai.
+// Publication sur Vinted : demande d'ajout à la file (traitée par l'extension Chrome du PC) et mode essai.
 import { api, type ReponsePublication } from "./api.js";
 import { formatReference } from "./statuts.js";
 

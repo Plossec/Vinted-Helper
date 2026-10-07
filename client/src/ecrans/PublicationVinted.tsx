@@ -1,4 +1,4 @@
-// Publication Vinted (décision du 06/10/2026) : mode essai, état du programme du PC, file de publication, jeton.
+// Publication Vinted (décisions du 06 et du 07/10/2026) : mode essai, état de l'extension Chrome, file, jeton.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type EtatPublication, type Publication } from "../api.js";
@@ -21,8 +21,8 @@ interface Suivi {
   jetonCree: boolean;
 }
 
-/** Le programme interroge l'application toutes les 5 minutes et attend 10 minutes entre deux publications :
- * au-delà de 16 minutes sans contact, il est considéré arrêté. */
+/** L'extension interroge l'application toutes les 5 minutes et attend 10 minutes entre deux publications :
+ * au-delà de 16 minutes sans contact, elle est considérée inactive. */
 const programmeActif = (vuLe: string | null) => vuLe !== null && Date.now() - new Date(vuLe).getTime() < 16 * 60_000;
 
 export function PublicationVinted() {
@@ -47,7 +47,7 @@ export function PublicationVinted() {
   }, [charger]);
 
   async function creerJeton() {
-    if (suivi?.jetonCree && !window.confirm("Remplacer le jeton actuel ? Le programme devra être reconfiguré.")) return;
+    if (suivi?.jetonCree && !window.confirm("Remplacer le jeton actuel ? L'extension devra être reconfigurée.")) return;
     setJeton((await api.post<{ jeton: string }>("/api/publication/jeton")).jeton);
     void charger();
   }
@@ -68,14 +68,14 @@ export function PublicationVinted() {
 
       <section className="encadre">
         <p>
-          Programme du PC :{" "}
+          Extension Chrome :{" "}
           {suivi === null ? (
             "…"
           ) : programmeActif(suivi.programmeVuLe) ? (
             <strong className="positif">actif</strong>
           ) : (
             <strong className="negatif">
-              arrêté{suivi.programmeVuLe ? ` (dernier contact ${formatDateHeure(suivi.programmeVuLe)})` : ""}
+              inactive{suivi.programmeVuLe ? ` (dernier contact ${formatDateHeure(suivi.programmeVuLe)})` : ""}
             </strong>
           )}
         </p>
@@ -137,10 +137,10 @@ export function PublicationVinted() {
       </section>
 
       <section className="section">
-        <h2>Jeton du programme</h2>
+        <h2>Jeton de l'extension</h2>
         <p className="secondaire">
-          Le programme du PC s'identifie avec ce jeton (à saisir lors de son installation). Il ne peut que lire la file
-          de publication et les photos.
+          L'extension Chrome s'identifie avec ce jeton (à saisir dans ses réglages). Elle ne peut que lire la file de
+          publication et les photos.
         </p>
         {jeton ? (
           <p className="message message--ok">
