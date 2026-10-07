@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { ResumeArticle } from "../api.js";
-import { FILTRES_VIDES, filtrerEtTrier } from "./recherche.js";
+import {
+  FILTRES_PAR_DEFAUT,
+  FILTRES_VIDES,
+  filtrerEtTrier,
+  lireFiltres,
+  nombreFiltresActifs,
+  STATUTS_PAR_DEFAUT,
+} from "./recherche.js";
 
 const article = (reference: number, extra: Partial<ResumeArticle> = {}): ResumeArticle => ({
   id: `a${reference}`,
@@ -61,12 +68,41 @@ describe("filtres", () => {
       article(3, { statut: "brouillon" }),
     ];
     const f = (extra: object) => refs(filtrerEtTrier(liste, { ...FILTRES_VIDES, ...extra }, "creation", true));
-    expect(f({ statut: "en_ligne" })).toEqual([2, 1]);
-    expect(f({ categorie: "hommes/vetements" })).toEqual([1]);
-    expect(f({ marqueId: "M" })).toEqual([1]);
+    expect(f({ statuts: ["en_ligne"] })).toEqual([2, 1]);
+    expect(f({ categories: ["hommes/vetements"] })).toEqual([1]);
+    expect(f({ marqueIds: ["M"] })).toEqual([1]);
     expect(f({ gamme: "vint" })).toEqual([1]);
-    expect(f({ lieuId: "L" })).toEqual([2]);
-    expect(f({ sortieId: "S" })).toEqual([2]);
+    expect(f({ lieuIds: ["L"] })).toEqual([2]);
+    expect(f({ sortieIds: ["S"] })).toEqual([2]);
+  });
+
+  it("choix multiples (#30) : un article est retenu s'il correspond à l'une des valeurs de chaque filtre", () => {
+    const liste = [
+      article(1, { statut: "en_ligne", categorie: "hommes/jeans", marqueId: "A", lieuId: "L1" }),
+      article(2, { statut: "brouillon", categorie: "femmes/robes", marqueId: "B", lieuId: "L2" }),
+      article(3, { statut: "finalise", categorie: "enfants", marqueId: null, lieuId: null }),
+    ];
+    const f = (extra: object) => refs(filtrerEtTrier(liste, { ...FILTRES_VIDES, ...extra }, "creation", true));
+    expect(f({ statuts: ["en_ligne", "brouillon"] })).toEqual([2, 1]);
+    expect(f({ categories: ["hommes", "femmes"] })).toEqual([2, 1]);
+    expect(f({ marqueIds: ["A", "B"], lieuIds: ["L2"] })).toEqual([2]);
+    expect(f({ statuts: [] })).toEqual([3, 2, 1]);
+  });
+
+  it("par défaut : tous les statuts sauf Finalisé et Sortie du stock", () => {
+    const liste = STATUTS_PAR_DEFAUT.map((statut, i) => article(i + 1, { statut })).concat(
+      article(10, { statut: "finalise" }),
+      article(11, { statut: "sortie_stock" }),
+    );
+    expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5]);
+    expect(nombreFiltresActifs(FILTRES_PAR_DEFAUT)).toBe(0);
+    expect(nombreFiltresActifs({ ...FILTRES_PAR_DEFAUT, statuts: ["en_ligne"], marqueIds: ["A"] })).toBe(2);
+  });
+
+  it("relit les filtres mémorisés, et revient au défaut pour l'ancien format", () => {
+    expect(lireFiltres({ texte: "x", statut: "en_ligne", categorie: "", marqueId: "" })).toEqual(FILTRES_PAR_DEFAUT);
+    const f = { ...FILTRES_VIDES, statuts: ["en_ligne", "inconnu"], marqueIds: ["A"] };
+    expect(lireFiltres(f)).toEqual({ ...FILTRES_VIDES, statuts: ["en_ligne"], marqueIds: ["A"] });
   });
 });
 

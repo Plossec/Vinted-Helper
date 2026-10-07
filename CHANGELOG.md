@@ -15,6 +15,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ### Modifié
 - Terrain : « Toutes les sorties » devient un bouton (#32).
+- Liste des articles : **filtres à choix multiples** (statuts, catégories, marques, lieux, sorties) ; par défaut, tous
+  les statuts sauf Finalisé et Sortie du stock (#30).
 
 ## [1.0.1] — 07/10/2026
 

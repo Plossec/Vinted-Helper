@@ -25,6 +25,10 @@ Ouvrez un brouillon pour compléter sa fiche (nom, catégorie, marque, état…)
 (galerie : plusieurs à la fois, ou appareil photo), les réordonner (← →) et choisir la **photo principale** (★).
 Pour un article de lot, c'est le **prix total du lot** qui se corrige ; il est réparti à nouveau sur les articles.
 
+**Filtres** (bouton « Filtres ») : touchez les statuts à afficher (par défaut tous sauf Finalisé et Sortie du stock) ;
+pour les catégories, marques, lieux et sorties, cherchez puis ajoutez une ou plusieurs valeurs (« × » pour en
+retirer une). « Effacer les filtres » revient au réglage par défaut.
+
 **Affichage de la liste** (boutons « Affichage », sous le tri ; choix gardé sur chaque appareil) :
 - ▤ **Vignettes** : photo, référence, statut, nom, marque et prix ;
 - ☰ **Liste compacte** : une ligne par article, sans photo ;
