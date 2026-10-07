@@ -155,6 +155,24 @@ test("catégorie déjà remplie par Vinted avec la bonne valeur : on n'y touche 
   assert.equal(vinted.clicsCategorie, 0);
 });
 
+test("catégorie suggérée par Vinted dans le mauvais rayon (Femmes au lieu d'Hommes) : corrigée", async () => {
+  const { app, vinted } = await lancer({
+    demande: DEMANDE(true),
+    vinted: { categoriePreremplie: "Jeans droits", genrePrerempli: "Femmes" },
+  });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+  assert.equal(vinted.clicsCategorie, 1);
+});
+
+test("nom de catégorie plus long que celui de Vinted : le résultat le plus proche du même rayon est retenu", async () => {
+  // Comme « Doudounes et vestes matelassées » (application) → « Doudounes » (Vinted).
+  const demande = DEMANDE(true);
+  demande.article.categorie = ["Hommes", "Vêtements", "Jeans", "Jeans droits et coupe classique"];
+  const { app, vinted } = await lancer({ demande });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+  assert.equal(vinted.clicsCategorie, 1);
+});
+
 test("chemin de catégorie différent de celui de Vinted : recherche de la catégorie finale (#56)", async () => {
   const demande = DEMANDE(true);
   demande.article.categorie = ["Hommes", "Vêtements", "Pantalons", "Jeans droits"];

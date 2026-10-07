@@ -25,6 +25,14 @@ const SELECTEURS = {
   /** Recherche de la liste des catégories : utilisée quand le chemin de l'application diffère de celui de Vinted. */
   rechercheCategorie: ["#catalog-search-input", 'input[name="catalog-search-input"]'],
 
+  /**
+   * Résultats de la recherche de catégorie (relevé du 07/10/2026) : cases `role="radio"` dont le titre est le nom
+   * (« Doudounes ») et le corps le chemin (« Femmes > Vêtements > Manteaux et vestes > Vestes »).
+   */
+  resultatsCategorie: ['[data-testid="catalog-select-dropdown-content"] [role="radio"]'],
+  titreResultat: '[class*="Cell__title"]',
+  cheminResultat: '[class*="Cell__body"]',
+
   /** Champ de recherche affiché dans une liste de choix (marque, taille…), s'il existe. */
   rechercheDansListe: ['[data-testid$="-search-input"]', 'input[type="search"]'],
 

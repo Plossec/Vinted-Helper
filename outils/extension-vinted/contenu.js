@@ -138,27 +138,75 @@ function fichier({ nom, type, base64 }) {
  *   l'application, ou la liste s'ouvre déjà sur une sous-catégorie), on tape la catégorie finale dans la recherche
  *   de la liste et on la choisit parmi les résultats.
  */
+/** Catégorie retenue sur Vinted (son nom peut différer de celui de l'application) : relue par le contrôle. */
+let categorieChoisie = null;
+
+/**
+ * Meilleur résultat de la recherche de catégorie : même premier niveau que l'article (Femmes, Hommes…), puis nom
+ * identique, ou nom par lequel commence celui de l'application (« Doudounes » pour « Doudounes et vestes
+ * matelassées »), puis le plus de niveaux du chemin en commun. Null si rien ne convient.
+ */
+function meilleurResultat(chemin) {
+  const finale = normaliser(chemin.at(-1));
+  const niveaux = chemin.slice(0, -1).map(normaliser);
+  let meilleur = null;
+  for (const el of document.querySelectorAll(SELECTEURS.resultatsCategorie.join(", "))) {
+    if (!visible(el)) continue;
+    const nom = normaliser(el.querySelector(SELECTEURS.titreResultat)?.textContent ?? el.textContent);
+    const parcours = normaliser(el.querySelector(SELECTEURS.cheminResultat)?.textContent)
+      .split(">")
+      .map((n) => n.trim())
+      .filter(Boolean);
+    if (niveaux.length > 0 && parcours.length > 0 && parcours[0] !== niveaux[0]) continue;
+    const score =
+      (nom === finale ? 100 : finale.startsWith(`${nom} `) ? 50 : finale.includes(nom) ? 30 : 0) +
+      parcours.filter((n) => niveaux.includes(n)).length;
+    if (score >= 30 && (!meilleur || score > meilleur.score)) meilleur = { el, nom, score };
+  }
+  return meilleur;
+}
+
+/**
+ * Catégorie : on l'ouvre, on tape la catégorie finale dans « Trouver une catégorie » et on retient le meilleur
+ * résultat. S'il est déjà coché (Vinted l'a choisi de lui-même), on n'y touche pas. Sans recherche ni résultat,
+ * on descend l'arbre niveau par niveau. Le genre (Femmes / Hommes…) est toujours vérifié : Vinted peut suggérer
+ * la bonne catégorie dans le mauvais rayon.
+ */
 async function choisirCategorie(chemin) {
   const entree = await champ("categorie");
   const finale = chemin.at(-1) ?? "";
-  if (valeurDe(entree).includes(normaliser(finale))) return;
+  categorieChoisie = null;
   cliquer(entree);
+  const recherche = await attendre(SELECTEURS.rechercheCategorie, 3000);
+  if (recherche) {
+    saisir(recherche, finale);
+    const fin = Date.now() + 6000;
+    let trouve = null;
+    while (!trouve && Date.now() < fin) {
+      await attendreMs(500);
+      trouve = meilleurResultat(chemin);
+    }
+    if (trouve) {
+      const radio = trouve.el.querySelector('input[type="radio"]');
+      if (radio?.checked) fermerListe();
+      else cliquer(trouve.el);
+      await attendreMs(500);
+      if (valeurDe(entree).includes(trouve.nom)) {
+        categorieChoisie = trouve.nom;
+        return;
+      }
+    }
+    saisir(recherche, ""); // retour à l'arbre
+    await attendreMs(500);
+  }
   for (const [i, niveau] of chemin.entries()) {
     const el = await option(niveau, i === 0 ? DELAI_MS : 3000);
     if (!el) break;
     cliquer(el);
     await attendreMs(500);
-    if (i === chemin.length - 1) return;
-  }
-  const recherche = await attendre(SELECTEURS.rechercheCategorie, 2000);
-  if (recherche) {
-    saisir(recherche, finale);
-    await attendreMs(1500);
-    const el = await option(finale, 5000);
-    if (el) {
-      cliquer(el);
-      await attendreMs(500);
-      if (valeurDe(entree).includes(normaliser(finale))) return;
+    if (i === chemin.length - 1) {
+      categorieChoisie = normaliser(niveau);
+      return;
     }
   }
   const proposes = optionsVisibles();
@@ -245,7 +293,7 @@ async function controler(article, nombrePhotos) {
   await attendu("titre", article.titre);
   await attendu("description", article.description);
   await attendu("prix", article.prix, "contient");
-  await attendu("categorie", article.categorie.at(-1) ?? "", "contient");
+  await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
   await attendu("etat", article.etat, "contient");
   for (const couleur of article.couleurs) await attendu("couleur", couleur, "contient");

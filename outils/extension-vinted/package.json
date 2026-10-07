@@ -1,6 +1,6 @@
 {
   "name": "vinted-helper-extension",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Tests de l'extension Chrome de publication Vinted (docs/guides/publication-vinted.md)",
   "type": "module",
