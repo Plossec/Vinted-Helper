@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type Referentiels, type ResumeArticle, type ResumeSortie } from "../api.js";
 import { Alertes } from "../composants/Alertes.js";
-import { ListeDeroulante, type OptionListe } from "../composants/ListeDeroulante.js";
+import { ChoixMultiple } from "../composants/ChoixMultiple.js";
+import type { OptionListe } from "../composants/ListeDeroulante.js";
 import {
   ecrireModeAffichage,
   lireModeAffichage,
@@ -15,7 +16,14 @@ import {
 import { chargerReferentiels } from "../hors-ligne/cache.js";
 import { demanderPublication } from "../publication.js";
 import { formatDate } from "../outils/dates.js";
-import { FILTRES_VIDES, type Filtres, filtrerEtTrier, type Tri } from "../outils/recherche.js";
+import {
+  FILTRES_PAR_DEFAUT,
+  type Filtres,
+  filtrerEtTrier,
+  lireFiltres,
+  nombreFiltresActifs,
+  type Tri,
+} from "../outils/recherche.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 const CLE = "vh-liste-articles";
@@ -40,23 +48,20 @@ interface Etat {
   filtres: Filtres;
   tri: Tri;
   croissant: boolean;
-  /** Texte affiché dans les listes déroulantes (catégorie, marque). */
-  categorieTexte: string;
-  marqueTexte: string;
 }
 
 const ETAT_INITIAL: Etat = {
-  filtres: FILTRES_VIDES,
+  filtres: FILTRES_PAR_DEFAUT,
   tri: "creation",
   croissant: false,
-  categorieTexte: "",
-  marqueTexte: "",
 };
 
 function lireEtat(): Etat {
   try {
     const brut = sessionStorage.getItem(CLE);
-    return brut ? { ...ETAT_INITIAL, ...(JSON.parse(brut) as Partial<Etat>) } : ETAT_INITIAL;
+    if (!brut) return ETAT_INITIAL;
+    const lu = JSON.parse(brut) as Partial<Etat>;
+    return { ...ETAT_INITIAL, ...lu, filtres: lireFiltres(lu.filtres) };
   } catch {
     return ETAT_INITIAL;
   }
@@ -128,8 +133,14 @@ export function ListeArticles() {
         /** Affichage (mode détaillé) : dernier niveau de la catégorie, nom du lieu. */
         categoriesCourtes: new Map(refs.categories.map((c) => [c.code, c.chemin[c.chemin.length - 1] ?? c.code])),
         lieux: new Map(refs.lieux.map((l) => [l.id, l.nom])),
+        optionsLieux: refs.lieux.map((l): OptionListe => ({ cle: l.id, libelle: l.nom })),
+        optionsSorties: sorties.map((s): OptionListe => ({
+          cle: s.id,
+          libelle: `${formatDate(s.date)} ${s.lieu}`,
+          recherche: `${s.date} ${s.lieu}`,
+        })),
       },
-    [refs],
+    [refs, sorties],
   );
 
   const resultats = useMemo(
@@ -147,8 +158,14 @@ export function ListeArticles() {
   );
 
   const filtrer = (modif: Partial<Filtres>) => setEtat((e) => ({ ...e, filtres: { ...e.filtres, ...modif } }));
-  const nombreFiltres = Object.entries(etat.filtres).filter(([cle, v]) => cle !== "texte" && v !== "").length;
-  const selectionPossible = etat.filtres.statut === "a_publier";
+  const nombreFiltres = nombreFiltresActifs(etat.filtres);
+  const selectionPossible = etat.filtres.statuts.length === 1 && etat.filtres.statuts[0] === "a_publier";
+  const basculerStatut = (statut: Statut) =>
+    filtrer({
+      statuts: etat.filtres.statuts.includes(statut)
+        ? etat.filtres.statuts.filter((x) => x !== statut)
+        : [...etat.filtres.statuts, statut],
+    });
   const selectionActive = selectionPossible && selection !== null;
 
   const basculer = (id: string) =>
@@ -231,82 +248,55 @@ export function ListeArticles() {
 
         {filtresOuverts && options && refs && (
           <div className="encadre">
-            <label className="champ">
-              <span>Statut</span>
-              <select value={etat.filtres.statut} onChange={(e) => filtrer({ statut: e.target.value as Statut | "" })}>
-                <option value="">Tous</option>
-                {Object.entries(LIBELLES_STATUT).map(([code, libelle]) => (
-                  <option key={code} value={code}>
+            <div className="champ">
+              <span id="filtre-statuts">Statut {etat.filtres.statuts.length === 0 ? "(tous)" : ""}</span>
+              <div className="puces" role="group" aria-labelledby="filtre-statuts">
+                {(Object.entries(LIBELLES_STATUT) as [Statut, string][]).map(([code, libelle]) => (
+                  <button
+                    key={code}
+                    type="button"
+                    className={`puce${etat.filtres.statuts.includes(code) ? " puce--active" : ""}`}
+                    aria-pressed={etat.filtres.statuts.includes(code)}
+                    onClick={() => basculerStatut(code)}
+                  >
                     {libelle}
-                  </option>
+                  </button>
                 ))}
-              </select>
-            </label>
-            <ListeDeroulante
+              </div>
+            </div>
+            <ChoixMultiple
               libelle="Catégorie"
-              texte={etat.categorieTexte}
-              onTexte={(texte) =>
-                setEtat((s) => ({ ...s, categorieTexte: texte, filtres: { ...s.filtres, categorie: "" } }))
-              }
               options={options.categories}
-              onChoix={(o) =>
-                setEtat((s) => ({
-                  ...s,
-                  categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
-                  filtres: { ...s.filtres, categorie: o.cle },
-                }))
-              }
+              valeurs={etat.filtres.categories}
+              onChange={(categories) => filtrer({ categories })}
             />
-            <ListeDeroulante
+            <ChoixMultiple
               libelle="Marque"
-              texte={etat.marqueTexte}
-              onTexte={(texte) =>
-                setEtat((s) => ({ ...s, marqueTexte: texte, filtres: { ...s.filtres, marqueId: "" } }))
-              }
               options={options.marques}
-              onChoix={(o) =>
-                setEtat((s) => ({ ...s, marqueTexte: o.libelle, filtres: { ...s.filtres, marqueId: o.cle } }))
-              }
+              valeurs={etat.filtres.marqueIds}
+              onChange={(marqueIds) => filtrer({ marqueIds })}
             />
             <label className="champ">
               <span>Gamme</span>
               <input value={etat.filtres.gamme} onChange={(e) => filtrer({ gamme: e.target.value })} />
             </label>
-            <div className="champs-ligne">
-              <label className="champ">
-                <span>Lieu</span>
-                <select value={etat.filtres.lieuId} onChange={(e) => filtrer({ lieuId: e.target.value })}>
-                  <option value="">Tous</option>
-                  {refs.lieux.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.nom}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="champ">
-                <span>Sortie</span>
-                <select value={etat.filtres.sortieId} onChange={(e) => filtrer({ sortieId: e.target.value })}>
-                  <option value="">Toutes</option>
-                  {sorties.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {formatDate(s.date)} {s.lieu}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            <ChoixMultiple
+              libelle="Lieu"
+              placeholder="Tous"
+              options={options.optionsLieux}
+              valeurs={etat.filtres.lieuIds}
+              onChange={(lieuIds) => filtrer({ lieuIds })}
+            />
+            <ChoixMultiple
+              libelle="Sortie"
+              options={options.optionsSorties}
+              valeurs={etat.filtres.sortieIds}
+              onChange={(sortieIds) => filtrer({ sortieIds })}
+            />
             <button
               type="button"
               className="bouton"
-              onClick={() =>
-                setEtat((s) => ({
-                  ...s,
-                  filtres: { ...FILTRES_VIDES, texte: s.filtres.texte },
-                  categorieTexte: "",
-                  marqueTexte: "",
-                }))
-              }
+              onClick={() => setEtat((s) => ({ ...s, filtres: { ...FILTRES_PAR_DEFAUT, texte: s.filtres.texte } }))}
             >
               Effacer les filtres
             </button>

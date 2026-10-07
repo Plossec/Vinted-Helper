@@ -24,3 +24,15 @@
   l'utilisateur). Prix d'achat et bénéfice calculés par le module de calcul et ajoutés à la liste renvoyée par le
   serveur (jamais stockés). Bénéfice provisoire en italique.
 - Les colonnes du tableau sont aussi proposées dans « Trier par ».
+
+---
+
+## 07/10/2026 — Filtres à choix multiples (issue #30)
+
+- Statut, catégorie, marque, lieu et sortie acceptent plusieurs valeurs : un article est retenu s'il correspond à
+  l'une des valeurs de chaque filtre ; une catégorie inclut ses sous-catégories ; aucun statut coché = tous.
+- Statuts : puces à toucher ; autres filtres : recherche à la frappe, chaque choix devient une puce « × » (choix de
+  l'utilisateur).
+- Par défaut : tous les statuts sauf Finalisé et Sortie du stock ; « Effacer les filtres » y revient ; filtres gardés
+  le temps de la session ; le compteur « Filtres (N) » ne compte pas ce réglage par défaut (choix de l'utilisateur).
+- Sélection pour Vinted : proposée quand seul le statut « À publier » est coché.

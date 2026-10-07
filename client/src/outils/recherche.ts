@@ -2,15 +2,16 @@
 import type { ResumeArticle } from "../api.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
+/** Filtres à choix multiples (issue #30) : une liste vide ne filtre pas. */
 export interface Filtres {
   texte: string;
-  statut: Statut | "";
-  /** Code de catégorie : l'article est retenu s'il est dans cette catégorie ou une sous-catégorie. */
-  categorie: string;
-  marqueId: string;
+  statuts: Statut[];
+  /** Codes de catégorie : l'article est retenu s'il est dans l'une d'elles ou une de leurs sous-catégories. */
+  categories: string[];
+  marqueIds: string[];
   gamme: string;
-  lieuId: string;
-  sortieId: string;
+  lieuIds: string[];
+  sortieIds: string[];
 }
 
 export type Tri =
@@ -38,13 +39,50 @@ const ORDRE_STATUT = Object.keys(LIBELLES_STATUT);
 
 export const FILTRES_VIDES: Filtres = {
   texte: "",
-  statut: "",
-  categorie: "",
-  marqueId: "",
+  statuts: [],
+  categories: [],
+  marqueIds: [],
   gamme: "",
-  lieuId: "",
-  sortieId: "",
+  lieuIds: [],
+  sortieIds: [],
 };
+
+/** Statuts cochés par défaut : tout sauf Finalisé et Sortie du stock (le stock et les ventes en cours). */
+export const STATUTS_PAR_DEFAUT: Statut[] = ["brouillon", "a_publier", "en_ligne", "a_expedier", "envoye"];
+
+export const FILTRES_PAR_DEFAUT: Filtres = { ...FILTRES_VIDES, statuts: STATUTS_PAR_DEFAUT };
+
+/** Les statuts sont-ils ceux par défaut (le compteur « Filtres (N) » ne les compte pas) ? */
+export function statutsParDefaut(statuts: readonly Statut[]): boolean {
+  return statuts.length === STATUTS_PAR_DEFAUT.length && STATUTS_PAR_DEFAUT.every((s) => statuts.includes(s));
+}
+
+/** Nombre de filtres actifs (hors recherche texte et statuts par défaut). */
+export function nombreFiltresActifs(f: Filtres): number {
+  return (
+    (statutsParDefaut(f.statuts) || f.statuts.length === 0 ? 0 : 1) +
+    [f.categories, f.marqueIds, f.lieuIds, f.sortieIds].filter((l) => l.length > 0).length +
+    (f.gamme.trim() ? 1 : 0)
+  );
+}
+
+const estListe = (v: unknown): v is string[] => Array.isArray(v) && v.every((x) => typeof x === "string");
+
+/** Relit des filtres mémorisés (format d'une version précédente : filtres par défaut). */
+export function lireFiltres(brut: unknown): Filtres {
+  if (typeof brut !== "object" || brut === null) return FILTRES_PAR_DEFAUT;
+  const f = brut as Record<string, unknown>;
+  if (![f.statuts, f.categories, f.marqueIds, f.lieuIds, f.sortieIds].every(estListe)) return FILTRES_PAR_DEFAUT;
+  return {
+    texte: typeof f.texte === "string" ? f.texte : "",
+    gamme: typeof f.gamme === "string" ? f.gamme : "",
+    statuts: (f.statuts as string[]).filter((s): s is Statut => s in LIBELLES_STATUT),
+    categories: f.categories as string[],
+    marqueIds: f.marqueIds as string[],
+    lieuIds: f.lieuIds as string[],
+    sortieIds: f.sortieIds as string[],
+  };
+}
 
 /** Minuscules sans accents, pour comparer « Levi's » et « levis », « été » et « ete ». */
 export const normaliser = (texte: string) => texte.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -119,12 +157,16 @@ export function filtrerEtTrier(
   const gamme = normaliser(f.gamme.trim());
   const notes = new Map<string, number>();
   const retenus = articles.filter((a) => {
-    if (f.statut && a.statut !== f.statut) return false;
-    if (f.categorie && !(a.categorie === f.categorie || a.categorie?.startsWith(`${f.categorie}/`))) return false;
-    if (f.marqueId && a.marqueId !== f.marqueId) return false;
+    if (f.statuts.length > 0 && !f.statuts.includes(a.statut)) return false;
+    if (
+      f.categories.length > 0 &&
+      !f.categories.some((c) => a.categorie === c || a.categorie?.startsWith(`${c}/`) === true)
+    )
+      return false;
+    if (f.marqueIds.length > 0 && (a.marqueId === null || !f.marqueIds.includes(a.marqueId))) return false;
     if (gamme && !normaliser(a.gamme ?? "").includes(gamme)) return false;
-    if (f.lieuId && a.lieuId !== f.lieuId) return false;
-    if (f.sortieId && a.sortieId !== f.sortieId) return false;
+    if (f.lieuIds.length > 0 && (a.lieuId === null || !f.lieuIds.includes(a.lieuId))) return false;
+    if (f.sortieIds.length > 0 && (a.sortieId === null || !f.sortieIds.includes(a.sortieId))) return false;
     const note = pertinence(a, f.texte, libelleCategorie);
     notes.set(a.id, note);
     return note > 0;

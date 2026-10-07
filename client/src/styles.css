@@ -1197,3 +1197,36 @@ a {
   min-height: 0;
   flex: none;
 }
+
+/* --- Filtres à choix multiples (issue #30) : puces --- */
+.puces {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.puce {
+  font: inherit;
+  font-size: 0.95rem;
+  min-height: 2.5rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--bordure);
+  background: var(--fond);
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.puce--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-texte);
+}
+
+.choix-multiple {
+  display: flex;
+  flex-direction: column;
+}
