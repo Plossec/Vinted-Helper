@@ -43,7 +43,7 @@ function pageFormulaire({
     <li role="tab"><a href="/catalog/femmes">Femmes</a></li><li role="tab"><a href="/catalog/hommes">Hommes</a></li>
   </ul></nav>
   <form onsubmit="return false">
-    <input type="file" multiple id="fichiers"><div data-testid="image-grid"></div>
+    <input type="file" multiple id="fichiers"><div data-testid="media-upload-grid"></div>
     <input data-testid="title--input"${titreCourt ? ' oninput="this.value = this.value.slice(0, 5)"' : ""}><textarea data-testid="description--input"></textarea>
     ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
@@ -64,7 +64,7 @@ function pageFormulaire({
              .join("")}</div></div>`
     }
     ${liste("color", ["Bleu", "Noir"])}
-    <input data-testid="price-input--input">
+    <input data-testid="price-input--input" oninput="this.value = this.value.replace(',', '.')">
     ${["Petit", "Moyen", "Grand"]
       .map(
         (o, i) => `<div data-testid="${i + 1}-package-size--cell" role="button">
@@ -76,8 +76,14 @@ function pageFormulaire({
   </form>
   <script>
     document.getElementById("fichiers").addEventListener("change", (e) => {
-      const grille = document.querySelector('[data-testid="image-grid"]');
-      for (const f of e.target.files) { const img = document.createElement("img"); img.alt = f.name; grille.appendChild(img); }
+      // Comme Vinted (relevé du 07/10/2026) : une « image-wrapper-N » par photo.
+      const grille = document.querySelector('[data-testid="media-upload-grid"]');
+      [...e.target.files].forEach((f, i) => {
+        const boite = document.createElement("div");
+        boite.dataset.testid = "image-wrapper-" + i;
+        boite.innerHTML = "<img alt='" + f.name + "'>";
+        grille.appendChild(boite);
+      });
     });
     document.querySelectorAll('[data-testid$="-select-dropdown-input"]').forEach((champ) => {
       const ul = champ.nextElementSibling;

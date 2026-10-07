@@ -59,7 +59,13 @@ const SELECTEURS = {
   horsOptions: 'header, nav, [role="tablist"]',
 
   /** Vignettes des photos déposées dans le formulaire (leur nombre est contrôlé avant l'envoi). */
-  photosDeposees: ['[data-testid="image-grid"] img', '[data-testid^="media-select-item"] img'],
+  // Relevé du 07/10/2026 : chaque photo déposée est un `[data-testid="image-wrapper-N"]` dans `media-upload-grid`.
+  // On compte avec le premier repère qui trouve quelque chose (sans additionner les repères).
+  photosDeposees: [
+    '[data-testid^="image-wrapper-"]',
+    '[data-testid="media-upload-grid"] img',
+    '[data-testid="image-grid"] img',
+  ],
 
   boutonAjouter: ['[data-testid="upload-form-save-button"]'],
   texteBoutonAjouter: "Ajouter",

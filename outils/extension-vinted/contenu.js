@@ -304,15 +304,25 @@ async function controler(article, nombrePhotos) {
   };
   await attendu("titre", article.titre);
   await attendu("description", article.description);
-  await attendu("prix", article.prix, "contient");
+  // Prix : comparé en nombre (Vinted affiche « 9.00 » pour « 9,00 » saisi).
+  const prix = await champ("prix", false);
+  const montant = (t) =>
+    Number(
+      String(t ?? "")
+        .replace(/[^\d,.-]/g, "")
+        .replace(",", "."),
+    );
+  if (!prix) ecarts.push("prix : champ introuvable");
+  else if (montant(prix.value) !== montant(article.prix))
+    ecarts.push(`prix : « ${prix.value} » au lieu de « ${article.prix} »`);
   await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
   await attendu("etat", article.etat); // égalité : « Bon état » ≠ « Très bon état »
   // Taille : égalité (« S » ≠ « XS »). Seulement si l'article en a une et si Vinted propose le champ.
   if (article.taille && (await champ("taille", false))) await attendu("taille", article.taille);
   for (const couleur of article.couleurs) await attendu("couleur", couleur, "contient");
-  await attendre(SELECTEURS.photosDeposees, 3000);
-  const nombre = document.querySelectorAll(SELECTEURS.photosDeposees.join(", ")).length;
+  await attendre(SELECTEURS.photosDeposees, 5000);
+  const nombre = SELECTEURS.photosDeposees.map((s) => document.querySelectorAll(s).length).find((n) => n > 0) ?? 0;
   if (nombre < nombrePhotos) ecarts.push(`photos : ${nombre} déposée(s) sur ${nombrePhotos}`);
   return ecarts;
 }
