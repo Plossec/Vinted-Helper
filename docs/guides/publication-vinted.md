@@ -64,6 +64,10 @@ entre chaque étape (photos, titre, description, catégorie…) : une annonce pr
 Une publication interrompue (Chrome fermé, PC éteint…) passe en **erreur** et n'est **jamais relancée
 automatiquement**, pour éviter une annonce en double : vérifiez sur Vinted avant de la redemander.
 
+Quand une **vraie** publication échoue (pas un essai), l'article passe au statut **Erreur** : badge rouge, alerte
+sur l'écran Articles et message de l'échec dans la section Vinted de la fiche. Depuis la fiche : **Publier sur
+Vinted** (l'article repasse À publier et retourne dans la file) ou **Revenir à « À publier »**.
+
 ## 6. Mode essai (activé par défaut)
 
 Case **Mode essai** de l'écran Publication Vinted. En essai, l'extension remplit et contrôle le formulaire mais **ne
@@ -111,4 +115,5 @@ l'extension → **Dernier relevé** → **Télécharger le fichier**, et envoyez
 | « Extension Chrome : inactive » dans l'application | Chrome est fermé, ou l'extension est en pause : ouvrez sa fenêtre |
 | « Jeton refusé » | Créez un nouveau jeton et saisissez-le dans les Réglages de l'extension |
 | L'article reste « en attente » | L'extension est en pause (badge « ! ») ou attend les 10 minutes entre deux articles |
+| Article au statut « Erreur » | La publication a échoué : lisez le message sur la fiche, vérifiez sur Vinted, puis « Publier sur Vinted » |
 | Erreur « contrôle avant envoi » | Un champ n'a pas été rempli comme prévu ; rien n'a été publié (voir §8) |

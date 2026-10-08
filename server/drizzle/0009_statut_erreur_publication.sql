@@ -1,0 +1,1 @@
+ALTER TYPE "public"."statut_article" ADD VALUE 'erreur_publication' BEFORE 'en_ligne';

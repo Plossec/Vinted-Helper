@@ -10,6 +10,7 @@ import {
   lieu,
   lotAchat,
   marque,
+  publicationVinted,
   sortie,
   utilisateur,
   vente,
@@ -396,6 +397,16 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
       .orderBy(asc(article.reference));
     lot = { id: a.lotId, prixTotal: l?.prixTotal ?? 0, articles: membres };
   }
+  // Article en Erreur (#72) : message de la dernière publication Vinted en échec, affiché sur la fiche.
+  const [echec] =
+    a.statut === "erreur_publication"
+      ? await base
+          .select({ message: publicationVinted.message })
+          .from(publicationVinted)
+          .where(and(eq(publicationVinted.articleId, id), eq(publicationVinted.etat, "erreur")))
+          .orderBy(desc(publicationVinted.finLe))
+          .limit(1)
+      : [];
   return {
     id: a.id,
     reference: a.reference,
@@ -427,6 +438,7 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     formatColis: a.formatColis,
     urlVinted: a.urlVinted,
     urlConversation: a.urlConversation,
+    erreurPublication: echec?.message ?? null,
     descriptionAnnonce: a.descriptionAnnonce,
     photos,
     dateAchat: a.dateAchat,

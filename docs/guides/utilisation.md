@@ -39,6 +39,12 @@ renvoyés + nouveau montant crédité). L'article passe **À récupérer** (aler
 conversation est connue). Une fois l'article récupéré : « Récupéré : à publier », « Récupéré : remettre en ligne »
 (prix affiché demandé) ou « Sortir du stock ».
 
+**Publication Vinted en erreur** : si l'extension Chrome échoue sur une vraie publication (pas en mode essai),
+l'article passe **Erreur** (badge rouge, alerte « Publications Vinted en erreur » sur l'écran Articles). Le message
+de l'échec est dans la section Vinted de la fiche. Vérifiez sur Vinted qu'aucune annonce n'a été créée, puis :
+« Publier sur Vinted » (l'article repasse À publier et retourne dans la file), « Revenir à « À publier » », ou
+« Publié à la main : mettre en ligne » si vous l'avez publiée vous-même.
+
 **Supprimer un changement de statut fait par erreur** : sur la fiche, historique des statuts → « Supprimer » sur la
 dernière ligne (après confirmation). L'article revient au statut précédent : « Vendu » annulé → la vente est supprimée
 (colis de plusieurs articles : seul cet article en sort, nouveau montant demandé pour les autres) ; « Envoyé »,

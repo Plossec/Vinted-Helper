@@ -15,6 +15,7 @@
   --badge-vente: #8250df;
   --badge-fin: #1a7f37;
   --badge-recuperer: #bc4c00;
+  --badge-erreur: #cf222e;
   color-scheme: light dark;
   font-family:
     system-ui,
@@ -42,6 +43,7 @@
     --badge-vente: #a371f7;
     --badge-fin: #3fb950;
     --badge-recuperer: #f0883e;
+    --badge-erreur: #f85149;
   }
 }
 
@@ -321,6 +323,10 @@ textarea:focus {
 
 .badge--a_recuperer {
   background: var(--badge-recuperer);
+}
+
+.badge--erreur_publication {
+  background: var(--badge-erreur);
 }
 
 .badge--finalise {
@@ -840,6 +846,10 @@ a {
 
 .alerte--aExpedier {
   border-left-color: var(--badge-vente);
+}
+
+.alerte--erreursPublication {
+  border-left-color: var(--badge-erreur);
 }
 
 .alerte__titre {
