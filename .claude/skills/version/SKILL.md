@@ -40,9 +40,13 @@ Explique ton choix en une phrase et **attends la confirmation** de l'utilisateur
    ```
    Rédige les entrées à partir de `git log <dernier tag>..HEAD`, en langage compréhensible par l'utilisateur
    (pas de jargon technique). Omets les rubriques vides.
+3. `docs/architecture.md` : compare-le à `git diff <dernier tag>..HEAD --stat`. Mets les schémas à jour si la
+   version ajoute, retire ou renomme une table ou une migration (`server/drizzle/`), un module de `server/src/` ou
+   de `client/src/`, un service de `docker-compose*.yml`, un service externe ou un composant de l'extension.
+   Dans tous les cas, mets à jour la ligne « À jour pour la version X.Y.Z » en tête du fichier.
 
 ## 4. Commit et tag
-- `git add package.json client/package.json server/package.json CHANGELOG.md` (ceux qui existent)
+- `git add package.json client/package.json server/package.json CHANGELOG.md docs/architecture.md` (ceux qui existent)
 - `git commit -m "Version X.Y.Z"`
 - `git tag -a vX.Y.Z -m "Version X.Y.Z"`
 
