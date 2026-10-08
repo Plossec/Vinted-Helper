@@ -77,19 +77,47 @@ function venteParArticle(ventes: readonly VentePourCalcul[]) {
   return resultat;
 }
 
+/** Postes de la trésorerie d'un mois (centimes, tous positifs) : trésorerie = encaissé − toutes les dépenses. */
+export interface PostesTresorerie {
+  /** Crédits Vinted (date de finalisation) + reventes hors Vinted (date de sortie du stock). */
+  encaisse: number;
+  achats: number;
+  essence: number;
+  emballages: number;
+  boosts: number;
+  fraisDivers: number;
+}
+
+const postesVides = (): PostesTresorerie => ({
+  encaisse: 0,
+  achats: 0,
+  essence: 0,
+  emballages: 0,
+  boosts: 0,
+  fraisDivers: 0,
+});
+
 /**
- * CA, bénéfice réalisé, trésorerie et frais généraux de chaque mois (§6.6), indexés par « AAAA-MM ».
+ * CA, bénéfice réalisé, trésorerie et frais généraux de chaque mois (§6.6), indexés par « AAAA-MM », avec le détail
+ * de la trésorerie (issue #88 : affiché sous la tuile).
  * - CA : prix vendus des articles finalisés (date de finalisation) + reventes hors Vinted (date de sortie du stock).
  * - Bénéfice réalisé : bénéfices des articles finalisés / sortis du stock du mois − frais généraux du mois.
  * - Trésorerie : + crédits (finalisation) + reventes − achats (date d'achat) − essence (date de sortie)
- *   − emballages (date d'envoi) − boosts (date du boost) − frais divers.
+ *   − emballages (date d'envoi) − boosts (date du boost) − frais divers. Elle est la somme de ses postes.
  */
-export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
+export function indicateursEtTresorerieParMois(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
   const mois = new Map<string, Periode>();
+  const postes = new Map<string, PostesTresorerie>();
   const de = (cle: string) => {
     let p = mois.get(cle);
     if (!p) mois.set(cle, (p = periodeVide()));
     return p;
+  };
+  const tr = (cle: string) => {
+    de(cle);
+    let t = postes.get(cle);
+    if (!t) postes.set(cle, (t = postesVides()));
+    return t;
   };
   const ventes = venteParArticle(d.calcul.ventes);
   const sorties = new Map(d.calcul.articles.map((a) => [a.id, a]));
@@ -97,7 +125,7 @@ export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<s
   for (const a of d.articles) {
     const detail = details.get(a.id);
     if (!detail) continue;
-    if (a.dateAchat) de(moisParis(a.dateAchat)).tresorerie -= detail.prixAchat;
+    if (a.dateAchat) tr(moisParis(a.dateAchat)).achats += detail.prixAchat;
     if (a.statut === "finalise") {
       const v = ventes.get(a.id);
       const date = v ? d.datesVentes.get(v.id)?.finalisation : null;
@@ -107,11 +135,12 @@ export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<s
         p.beneficeRealise += detail.benefice;
       }
     } else if (a.statut === "sortie_stock" && a.dateSortieStock) {
-      const p = de(moisParis(a.dateSortieStock));
+      const cle = moisParis(a.dateSortieStock);
+      const p = de(cle);
       const calcul = sorties.get(a.id);
       if (calcul?.motifSortie === "revendu") {
         p.chiffreAffaires += calcul.prixRevente ?? 0;
-        p.tresorerie += calcul.prixRevente ?? 0;
+        tr(cle).encaisse += calcul.prixRevente ?? 0;
       }
       p.beneficeRealise += detail.benefice;
     }
@@ -120,13 +149,13 @@ export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<s
   for (const v of d.calcul.ventes) {
     if (v.annulee || v.lignes.every((l) => l.retourne)) continue;
     const dates = d.datesVentes.get(v.id);
-    if (dates?.finalisation) de(moisParis(dates.finalisation)).tresorerie += v.montantCredite;
-    if (dates?.envoi) de(moisParis(dates.envoi)).tresorerie -= v.emballage;
+    if (dates?.finalisation) tr(moisParis(dates.finalisation)).encaisse += v.montantCredite;
+    if (dates?.envoi) tr(moisParis(dates.envoi)).emballages += v.emballage;
   }
 
   for (const s of d.calcul.sorties) {
     const date = d.datesSorties.get(s.id);
-    if (date) de(moisParis(date)).tresorerie -= s.montantEssence;
+    if (date) tr(moisParis(date)).essence += s.montantEssence;
   }
   for (const [sortieId, montant] of essenceSortiesVides(d.calcul.articles, d.calcul.sorties)) {
     const date = d.datesSorties.get(sortieId);
@@ -136,15 +165,39 @@ export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<s
     p.beneficeRealise -= montant;
   }
 
-  for (const b of d.boosts) de(moisParis(b.date)).tresorerie -= b.montant;
+  for (const b of d.boosts) tr(moisParis(b.date)).boosts += b.montant;
 
   for (const f of d.frais) {
     const p = de(moisParis(f.date));
     p.fraisGeneraux += f.montant;
     p.beneficeRealise -= f.montant;
-    p.tresorerie -= f.montant;
+    tr(moisParis(f.date)).fraisDivers += f.montant;
   }
-  return mois;
+
+  for (const [cle, t] of postes) {
+    de(cle).tresorerie = t.encaisse - t.achats - t.essence - t.emballages - t.boosts - t.fraisDivers;
+  }
+  return { mois, postes };
+}
+
+/** CA, bénéfice réalisé, trésorerie et frais généraux de chaque mois (§6.6), indexés par « AAAA-MM ». */
+export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
+  return indicateursEtTresorerieParMois(d, details).mois;
+}
+
+/**
+ * Coût total, prix affiché et nombre d'articles de chaque statut (issue #88 : tableau du stock par statut). Le
+ * prix affiché manquant compte pour 0.
+ */
+export function stockParStatut(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
+  const resultat: Record<string, { nombre: number; coutTotal: number; prixAffiche: number }> = {};
+  for (const a of d.articles) {
+    const ligne = (resultat[a.statut] ??= { nombre: 0, coutTotal: 0, prixAffiche: 0 });
+    ligne.nombre += 1;
+    ligne.coutTotal += details.get(a.id)?.coutTotal ?? 0;
+    ligne.prixAffiche += a.prixAffiche ?? 0;
+  }
+  return resultat;
 }
 
 export interface EnCours {
@@ -192,6 +245,18 @@ export function cumulerEnCours(periodes: readonly (EnCours | undefined)[]): EnCo
 /** CA et bénéfice théoriques (issue #85) : réalisés (frais généraux déduits) + ventes en cours. */
 export function theorique(p: Periode, e: EnCours): EnCours {
   return { chiffreAffaires: p.chiffreAffaires + e.chiffreAffaires, benefice: p.beneficeRealise + e.benefice };
+}
+
+/**
+ * Théorique de chaque mesure du graphique (issue #88) : CA et bénéfice comme `theorique` ; trésorerie + crédits
+ * attendus des ventes en cours (= CA en cours).
+ */
+export function theoriqueDesMesures(p: Periode, e: EnCours) {
+  return {
+    chiffreAffaires: p.chiffreAffaires + e.chiffreAffaires,
+    beneficeRealise: p.beneficeRealise + e.benefice,
+    tresorerie: p.tresorerie + e.chiffreAffaires,
+  };
 }
 
 /** Somme de plusieurs périodes (ex. les 12 mois d'une année). */

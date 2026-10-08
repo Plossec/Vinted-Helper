@@ -9,10 +9,14 @@ import {
   cumuler,
   cumulerEnCours,
   type DonneesIndicateurs,
-  indicateursParMois,
+  indicateursEtTresorerieParMois,
+  jourParis,
+  type PostesTresorerie,
   type Periode,
   rentabilite,
+  stockParStatut,
   theorique,
+  theoriqueDesMesures,
   valeurStock,
   ventesEnCoursParMois,
 } from "../calculs/indicateurs.js";
@@ -99,17 +103,56 @@ function libelleCategorie(code: string): string {
   return feuille ? feuille.chemin.slice(0, niveau).join(" › ") : code;
 }
 
-export async function tableauDeBord(base: Base, utilisateurId: string, annee: number, mois: number, niveau: number) {
+/**
+ * Années proposées (issue #88) : de la première année où il y a une donnée datée (achat, sortie, vente, boost, frais,
+ * sortie du stock) jusqu'à l'année en cours ; l'année en cours seule s'il n'y a encore rien.
+ */
+function anneesActivite(d: DonneesIndicateurs, anneeActuelle: number): number[] {
+  const dates = [
+    ...d.articles.flatMap((a) => [a.dateAchat, a.dateSortieStock]),
+    ...d.datesSorties.values(),
+    ...[...d.datesVentes.values()].map((v) => v.vente),
+    ...d.boosts.map((b) => b.date),
+    ...d.frais.map((f) => f.date),
+  ].filter((x): x is string => x !== null);
+  const premiere = Math.min(anneeActuelle, ...dates.map((x) => Number(jourParis(x).slice(0, 4))));
+  return Array.from({ length: anneeActuelle - premiere + 1 }, (_, i) => anneeActuelle - i);
+}
+
+export async function tableauDeBord(
+  base: Base,
+  utilisateurId: string,
+  annee: number,
+  mois: number,
+  niveau: number,
+  anneeActuelle: number,
+) {
   const d = await chargerDonnees(base, utilisateurId);
   const details = calculerDetails(d.calcul);
-  const parMois = indicateursParMois(d, details);
+  const { mois: parMois, postes } = indicateursEtTresorerieParMois(d, details);
   const enCours = ventesEnCoursParMois(d, details);
   const cleMois = (m: number) => `${annee}-${String(m).padStart(2, "0")}`;
   const vide: Periode = { chiffreAffaires: 0, beneficeRealise: 0, tresorerie: 0, fraisGeneraux: 0 };
-  const serie = Array.from({ length: 12 }, (_, i) => ({
-    mois: cleMois(i + 1),
-    ...(parMois.get(cleMois(i + 1)) ?? vide),
-  }));
+  const serie = Array.from({ length: 12 }, (_, i) => {
+    const periode = parMois.get(cleMois(i + 1)) ?? vide;
+    // Complément théorique du graphique (issue #88) : ventes en cours du mois ; pour la trésorerie, crédits attendus
+    // (= CA en cours).
+    const enCoursMois = cumulerEnCours([enCours.get(cleMois(i + 1))]);
+    return {
+      mois: cleMois(i + 1),
+      ...periode,
+      enCours: enCoursMois,
+      theorique: theoriqueDesMesures(periode, enCoursMois),
+    };
+  });
+  const postesVides: PostesTresorerie = {
+    encaisse: 0,
+    achats: 0,
+    essence: 0,
+    emballages: 0,
+    boosts: 0,
+    fraisDivers: 0,
+  };
 
   const [sorties, lieux] = await Promise.all([
     base
@@ -132,13 +175,16 @@ export async function tableauDeBord(base: Base, utilisateurId: string, annee: nu
 
   return {
     annee,
+    annees: anneesActivite(d, anneeActuelle),
     mois: cleMois(mois),
     duMois,
+    /** Calcul de la trésorerie du mois, affiché sous la tuile (issue #88). */
+    tresorerieDuMois: postes.get(cleMois(mois)) ?? postesVides,
     deLAnnee,
     enCours: { duMois: enCoursDuMois, deLAnnee: enCoursDeLAnnee },
     theorique: { duMois: theorique(duMois, enCoursDuMois), deLAnnee: theorique(deLAnnee, enCoursDeLAnnee) },
     serie,
-    stock: valeurStock(d, details),
+    stock: { ...valeurStock(d, details), detail: stockParStatut(d, details) },
     rentabiliteSorties: {
       classement: parSortie.classement.map((r) => ({
         ...r,

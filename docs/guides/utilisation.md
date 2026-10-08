@@ -68,10 +68,15 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
 - **Chiffre d'affaires** et **bénéfice réalisé** ne comptent que les ventes **Finalisées** (à la date de
   finalisation) et les reventes hors Vinted. Le bénéfice du mois est diminué des **frais généraux** (frais divers,
   essence des sorties sans achat).
-- Sous ces deux tuiles, la ligne **« théorique … · dont en cours … »** ajoute les ventes pas encore finalisées
-  (**À expédier**, **Envoyé**), comptées au mois de la **date de vente**. Elle n'apparaît que s'il y a des ventes en
-  cours. Une fois la vente finalisée, elle passe dans le réalisé (au mois de la finalisation).
-- **Trésorerie** : l'argent réellement entré et sorti, à la date de chaque mouvement.
+- Dans ces deux tuiles : **« Octobre 2026 réalisé »** (ventes finalisées) et **« Octobre 2026 théorique »**, qui
+  ajoute les ventes pas encore finalisées (**À expédier**, **Envoyé**), comptées au mois de la **date de vente**. Une
+  fois la vente finalisée, elle passe dans le réalisé (au mois de la finalisation).
+- **Trésorerie** : l'argent réellement entré et sorti, à la date de chaque mouvement ; son calcul est détaillé dans
+  la tuile (encaissé, achats, essence, emballages, boosts, frais divers).
+- **Graphique** : barre foncée = réalisé, partie claire au-dessus = ventes en cours (théorique). Pour la trésorerie,
+  la partie claire est l'argent que Vinted doit encore verser. « Voir le tableau » donne les montants mois par mois.
+- **Stock** : par statut, le coût total, le prix affiché et le nombre d'articles. Seules les années où il y a de
+  l'activité sont proposées.
 - L'essence d'une sortie est partagée entre tous ses articles, vendus ou non : celle des invendus est dans la
   **valeur du stock**, pas dans le bénéfice.
 

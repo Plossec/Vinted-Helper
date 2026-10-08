@@ -23,3 +23,18 @@ du bénéfice théorique. Bénéfice en cours = prix vendu − coût total (le b
 reste inchangé ailleurs). Choix de Claude (*à relire*) : graphique mensuel inchangé (réalisé) ; la ligne n'apparaît
 que s'il y a des ventes en cours. Une vente finalisée passe du « en cours » (mois de vente) au réalisé (mois de
 finalisation). Cahier des charges §5.9, §6.6 et cas 34-35 de l'annexe §11 ajoutés avec l'accord de l'utilisateur.
+
+## 08/10/2026 — Affichage du tableau de bord revu (#88)
+
+Constat : « octobre · année 392 € » était lu comme un chiffre d'octobre (c'était le total de l'année) ; les calculs
+ne changent pas. Décisions (utilisateur) :
+- années proposées : seulement les années d'activité (de la première donnée datée à l'année en cours) ;
+- tuiles CA et bénéfice : gros chiffre = mois réalisé, lignes « *Mois Année* réalisé » et « *Mois Année* théorique » ;
+  plus de total d'année ni de « dont en cours » dans les tuiles (comparatif annuel : évolution possible plus tard) ;
+- trésorerie : chiffre du mois + son calcul (postes) ; frais généraux : info-bulle ⓘ et bouton « Ajouter des frais
+  divers » ;
+- graphique : barres empilées réalisé + théorique pour les trois mesures ; trésorerie : complément = crédits Vinted
+  attendus des ventes en cours ; « Voir le tableau » en bouton ;
+- stock par statut : colonnes coût total et prix affiché avant la quantité.
+Choix de Claude (*à relire*) : sur téléphone, les tuiles du haut prennent toute la largeur ; complément de bénéfice
+dessiné seulement s'il est positif (la bulle et le tableau donnent toujours le théorique).

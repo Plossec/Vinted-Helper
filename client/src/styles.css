@@ -706,6 +706,11 @@ select {
   color: var(--texte-secondaire);
 }
 
+/* Tuiles du haut du tableau de bord (issue #88) : une par ligne sur téléphone, côte à côte sur PC. */
+.tuiles--larges {
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
 .tuile__valeur {
   font-size: 1.35rem;
   font-variant-numeric: tabular-nums;
@@ -736,6 +741,87 @@ select {
 
 .graphique__barre {
   fill: var(--graphique);
+}
+
+.graphique__barre--theorique {
+  opacity: 0.4;
+}
+
+.graphique__legende {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.8rem;
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+  margin: 0 0 0.4rem;
+}
+
+.graphique__pastille {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 0.2rem;
+  background: var(--graphique);
+  margin-right: -0.4rem;
+  vertical-align: -0.1rem;
+}
+
+.graphique__pastille--theorique {
+  opacity: 0.4;
+}
+
+.graphique .bouton {
+  margin-top: 0.5rem;
+}
+
+/* Tableau de bord (issue #88) : calcul de la trésorerie sous la tuile, frais généraux et info-bulle. */
+.tuile__calcul {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  color: var(--texte-secondaire);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuile__calcul td {
+  padding: 0.1rem 0;
+}
+
+.tuile__calcul td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  padding-left: 0.5rem;
+}
+
+.frais-generaux {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+}
+
+.frais-generaux p {
+  margin: 0;
+}
+
+.info {
+  min-width: 2rem;
+  min-height: 2rem;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 1.05rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.info__texte {
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+  border-left: 3px solid var(--bordure);
+  padding-left: 0.6rem;
 }
 
 .graphique__barre.est-actif {
@@ -793,6 +879,16 @@ select {
 .tableau td:first-child {
   text-align: left;
   white-space: normal;
+}
+
+/* Stock par statut (issue #88) : 4 colonnes lisibles à 360 px sans défilement. */
+.tableau--serre {
+  font-size: 0.82rem;
+}
+
+.tableau--serre th,
+.tableau--serre td {
+  padding: 0.4rem 0.2rem;
 }
 
 .tableau th {

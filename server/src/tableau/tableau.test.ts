@@ -3,10 +3,17 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { creerAppDeTest, seConnecter } from "../test/outils.js";
 
 interface Tableau {
+  annees: number[];
+  tresorerieDuMois: Record<string, number>;
+  serie: { mois: string; chiffreAffaires: number; theorique: { chiffreAffaires: number; tresorerie: number } }[];
   duMois: { chiffreAffaires: number; beneficeRealise: number; tresorerie: number };
   deLAnnee: { chiffreAffaires: number };
-  serie: { mois: string; chiffreAffaires: number }[];
-  stock: { coutTotal: number; prixAffiche: number; parStatut: Record<string, number> };
+  stock: {
+    coutTotal: number;
+    prixAffiche: number;
+    parStatut: Record<string, number>;
+    detail: Record<string, { nombre: number; coutTotal: number; prixAffiche: number }>;
+  };
   enCours: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { chiffreAffaires: number } };
   theorique: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { benefice: number } };
   rentabiliteLieux: { classement: { libelle: string; realise: number }[] };
@@ -54,6 +61,12 @@ describe("tableau de bord", () => {
     expect(enCours.enCours.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
     expect(enCours.theorique.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
     expect(enCours.enCours.deLAnnee.chiffreAffaires).toBe(900);
+    // Graphique (issue #88) : complément théorique de septembre ; trésorerie + crédits attendus.
+    const septembre = enCours.serie.find((m) => m.mois === "2026-09");
+    expect(septembre?.theorique.chiffreAffaires).toBe(900);
+    expect(septembre?.theorique.tresorerie).toBe(-200 + 900);
+    // Années d'activité : 2026 seulement (rien avant).
+    expect(enCours.annees).toEqual([2026]);
     await requete("POST", `/api/ventes/${vente.id}/finalisation`, { date: "2026-10-04T09:00:00Z" });
 
     let tableau = (await requete("GET", "/api/tableau-de-bord?annee=2026&mois=10")).json<Tableau>();
@@ -69,6 +82,15 @@ describe("tableau de bord", () => {
     await requete("POST", "/api/frais", { date: "2026-10-10", montant: 300, libelle: "Étiquettes" });
     tableau = (await requete("GET", "/api/tableau-de-bord?annee=2026&mois=10")).json<Tableau>();
     expect(tableau.duMois).toMatchObject({ beneficeRealise: 392, tresorerie: 592 });
+    // Calcul de la trésorerie d'octobre (issue #88) : 9 € crédités − 0,08 € d'emballage − 3 € de frais divers.
+    expect(tableau.tresorerieDuMois).toEqual({
+      encaisse: 900,
+      achats: 0,
+      essence: 0,
+      emballages: 8,
+      boosts: 0,
+      fraisDivers: 300,
+    });
     expect(tableau.deLAnnee.chiffreAffaires).toBe(900);
     // Finalisé : plus rien en cours ; théorique = réalisé.
     expect(tableau.enCours.deLAnnee.chiffreAffaires).toBe(0);
@@ -92,6 +114,11 @@ describe("tableau de bord", () => {
       });
     }
     const tableau = (await requete("GET", "/api/tableau-de-bord")).json<Tableau>();
-    expect(tableau.stock).toEqual({ coutTotal: 350, prixAffiche: 0, parStatut: { brouillon: 2 } });
+    expect(tableau.stock).toEqual({
+      coutTotal: 350,
+      prixAffiche: 0,
+      parStatut: { brouillon: 2 },
+      detail: { brouillon: { nombre: 2, coutTotal: 350, prixAffiche: 0 } },
+    });
   });
 });

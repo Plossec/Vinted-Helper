@@ -1,5 +1,6 @@
-// Tableau de bord (§5.9) : CA, bénéfice réalisé, trésorerie (mois et année) + graphique mensuel, stock,
-// rentabilité par sortie et par lieu (Maison à part), analyse par catégorie / marque / gamme.
+// Tableau de bord (§5.9) : CA, bénéfice réalisé (réalisé et théorique du mois), trésorerie et son calcul, graphique
+// mensuel réalisé + théorique, stock par statut, rentabilité par sortie et par lieu (Maison à part), analyse par
+// catégorie / marque / gamme. Affichage revu le 08/10/2026 (issue #88).
 // Tous les montants sont calculés par le serveur.
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
@@ -41,20 +42,49 @@ interface EnCours {
   benefice: number;
 }
 
-/** Mesure en cours correspondant à une tuile (CA, bénéfice) ; la trésorerie n'en a pas. */
+/** Mesure théorique correspondant à une tuile (CA, bénéfice) ; la trésorerie a son calcul détaillé. */
 const MESURE_EN_COURS = { chiffreAffaires: "chiffreAffaires", beneficeRealise: "benefice" } as const;
+
+interface PostesTresorerie {
+  encaisse: number;
+  achats: number;
+  essence: number;
+  emballages: number;
+  boosts: number;
+  fraisDivers: number;
+}
+
+const POSTES_TRESORERIE: [keyof PostesTresorerie, string][] = [
+  ["encaisse", "+ Encaissé (crédits Vinted, reventes)"],
+  ["achats", "− Achats"],
+  ["essence", "− Essence"],
+  ["emballages", "− Emballages"],
+  ["boosts", "− Boosts"],
+  ["fraisDivers", "− Frais divers"],
+];
 
 interface Tableau {
   annee: number;
+  /** Années d'activité, de la plus récente à la plus ancienne (issue #88). */
+  annees: number[];
   mois: string;
+  tresorerieDuMois: PostesTresorerie;
   duMois: Periode;
   deLAnnee: Periode;
   /** Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85). */
   enCours: { duMois: EnCours; deLAnnee: EnCours };
   /** Réalisé + en cours, calculé par le serveur. */
   theorique: { duMois: EnCours; deLAnnee: EnCours };
-  serie: (Periode & { mois: string })[];
-  stock: { coutTotal: number; prixAffiche: number; parStatut: Partial<Record<Statut, number>> };
+  serie: (Periode & {
+    mois: string;
+    enCours: EnCours;
+    theorique: { chiffreAffaires: number; beneficeRealise: number; tresorerie: number };
+  })[];
+  stock: {
+    coutTotal: number;
+    prixAffiche: number;
+    detail: Partial<Record<Statut, { nombre: number; coutTotal: number; prixAffiche: number }>>;
+  };
   rentabiliteSorties: { classement: Rentabilite[]; maison: Rentabilite | null };
   rentabiliteLieux: { classement: Rentabilite[]; maison: Rentabilite | null };
   analyse: { categories: Analyse[]; marques: Analyse[]; gammes: Analyse[] };
@@ -81,29 +111,6 @@ const MESURES = {
 } as const;
 type Mesure = keyof typeof MESURES;
 
-const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
-
-/**
- * « Théorique X € · dont en cours Y € » (issue #85) : réalisé + ventes À expédier ou Envoyé, pour le mois et
- * l'année. Montants calculés par le serveur ; rien n'est affiché sans vente en cours.
- */
-function LigneEnCours({ tableau, mesure }: { tableau: Tableau; mesure: keyof typeof MESURE_EN_COURS }) {
-  const cle = MESURE_EN_COURS[mesure];
-  const ligne = (periode: "duMois" | "deLAnnee", libelle: string) =>
-    tableau.enCours[periode][cle] === 0 ? null : (
-      <span className="tuile__detail">
-        {libelle} : théorique {formatEuros(tableau.theorique[periode][cle])} · dont en cours{" "}
-        {formatEuros(tableau.enCours[periode][cle])}
-      </span>
-    );
-  return (
-    <>
-      {ligne("duMois", majuscule(MOIS[Number(tableau.mois.slice(5, 7)) - 1] ?? ""))}
-      {ligne("deLAnnee", "Année")}
-    </>
-  );
-}
-
 const pourcentage = (taux: number | null) =>
   taux === null ? "—" : `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(taux * 100)} %`;
 const jours = (n: number | null) =>
@@ -118,6 +125,7 @@ export function TableauDeBord() {
   const [analyse, setAnalyse] = useState<"categories" | "marques" | "gammes">("categories");
   const [rentaPar, setRentaPar] = useState<"sorties" | "lieux">("sorties");
   const [tableau, setTableau] = useState<Tableau | null>(null);
+  const [aideFrais, setAideFrais] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
   useEffect(() => {
@@ -131,7 +139,10 @@ export function TableauDeBord() {
     };
   }, [annee, mois, niveau]);
 
-  const annees = Array.from({ length: 5 }, (_, i) => maintenant.getFullYear() - i);
+  // Années d'activité fournies par le serveur ; l'année en cours tant que le tableau n'est pas chargé.
+  const annees = tableau?.annees ?? [annee];
+  const libelleMois = `${MOIS[mois - 1] ?? ""} ${annee}`;
+  const libelleMoisMajuscule = libelleMois.charAt(0).toUpperCase() + libelleMois.slice(1);
   const renta = tableau ? (rentaPar === "sorties" ? tableau.rentabiliteSorties : tableau.rentabiliteLieux) : null;
 
   return (
@@ -163,22 +174,60 @@ export function TableauDeBord() {
       {!tableau && !erreur && <p className="statut">Chargement…</p>}
       {tableau && (
         <>
-          <div className="tuiles">
-            {(Object.keys(MESURES) as Mesure[]).map((m) => (
+          <div className="tuiles tuiles--larges">
+            {(["chiffreAffaires", "beneficeRealise"] as const).map((m) => (
               <div key={m} className="tuile">
                 <span className="tuile__titre">{MESURES[m]}</span>
                 <strong className="tuile__valeur">{formatEuros(tableau.duMois[m])}</strong>
                 <span className="tuile__detail">
-                  {MOIS[mois - 1]} · année {formatEuros(tableau.deLAnnee[m])}
+                  {libelleMoisMajuscule} réalisé : {formatEuros(tableau.duMois[m])}
                 </span>
-                {m !== "tresorerie" && <LigneEnCours tableau={tableau} mesure={m} />}
+                <span className="tuile__detail">
+                  {libelleMoisMajuscule} théorique : {formatEuros(tableau.theorique.duMois[MESURE_EN_COURS[m]])}
+                </span>
               </div>
             ))}
+            <div className="tuile">
+              <span className="tuile__titre">{MESURES.tresorerie}</span>
+              <strong className="tuile__valeur">{formatEuros(tableau.duMois.tresorerie)}</strong>
+              <span className="tuile__detail">{libelleMoisMajuscule} :</span>
+              <table className="tuile__calcul">
+                <tbody>
+                  {POSTES_TRESORERIE.filter(([cle]) => cle === "encaisse" || tableau.tresorerieDuMois[cle] !== 0).map(
+                    ([cle, libelle]) => (
+                      <tr key={cle}>
+                        <td>{libelle}</td>
+                        <td>{formatEuros(tableau.tresorerieDuMois[cle])}</td>
+                      </tr>
+                    ),
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <p className="secondaire">
-            Frais généraux du mois (frais divers + essence des sorties sans achat) :{" "}
-            {formatEuros(tableau.duMois.fraisGeneraux)}. <Link to="/frais">Frais divers</Link>
-          </p>
+          <div className="frais-generaux">
+            <p>
+              Frais généraux du mois : <strong>{formatEuros(tableau.duMois.fraisGeneraux)}</strong>{" "}
+              <button
+                type="button"
+                className="info"
+                aria-expanded={aideFrais}
+                aria-label="Qu'est-ce que les frais généraux ?"
+                onClick={() => setAideFrais((v) => !v)}
+              >
+                ⓘ
+              </button>
+            </p>
+            {aideFrais && (
+              <p className="info__texte" role="note">
+                Frais divers (étiquettes, sachets…) et essence des sorties sans achat. Ils sont déduits du bénéfice
+                réalisé et de la trésorerie du mois.
+              </p>
+            )}
+            <Link to="/frais" className="bouton">
+              Ajouter des frais divers
+            </Link>
+          </div>
 
           <section className="section">
             <div className="segments">
@@ -195,7 +244,13 @@ export function TableauDeBord() {
             </div>
             <GraphiqueMensuel
               titre={`${MESURES[mesure]} ${annee}`}
-              points={tableau.serie.map((p) => ({ mois: p.mois, valeur: p[mesure] }))}
+              points={tableau.serie.map((p) => ({
+                mois: p.mois,
+                valeur: p[mesure],
+                // Complément : ventes en cours (bénéfice en cours ; crédits attendus = CA en cours pour la trésorerie).
+                complement: mesure === "beneficeRealise" ? p.enCours.benefice : p.enCours.chiffreAffaires,
+                theorique: p.theorique[mesure],
+              }))}
             />
           </section>
 
@@ -211,16 +266,35 @@ export function TableauDeBord() {
                 <strong className="tuile__valeur">{formatEuros(tableau.stock.prixAffiche)}</strong>
               </div>
             </div>
-            <ul className="historique">
-              {(Object.keys(LIBELLES_STATUT) as Statut[])
-                .filter((s) => tableau.stock.parStatut[s])
-                .map((s) => (
-                  <li key={s}>
-                    <span className={`badge badge--${s}`}>{LIBELLES_STATUT[s]}</span>
-                    <strong>{tableau.stock.parStatut[s]}</strong>
-                  </li>
-                ))}
-            </ul>
+            <div className="defilement">
+              <table className="tableau tableau--serre">
+                <thead>
+                  <tr>
+                    <th>Statut</th>
+                    <th>Coût total</th>
+                    <th>Prix affiché</th>
+                    <th>Qté</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(Object.keys(LIBELLES_STATUT) as Statut[]).map((s) => {
+                    const ligne = tableau.stock.detail[s];
+                    return (
+                      ligne && (
+                        <tr key={s}>
+                          <td>
+                            <span className={`badge badge--${s}`}>{LIBELLES_STATUT[s]}</span>
+                          </td>
+                          <td>{formatEuros(ligne.coutTotal)}</td>
+                          <td>{ligne.prixAffiche === 0 ? "—" : formatEuros(ligne.prixAffiche)}</td>
+                          <td>{ligne.nombre}</td>
+                        </tr>
+                      )
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className="section">

@@ -206,9 +206,13 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 
 ### 5.9 Tableau de bord
 - **Chiffre d'affaires**, **bénéfice réalisé** et **trésorerie** du mois / de l'année + graphique mensuel (§6.6).
-  Sous le CA et le bénéfice : **« Théorique X € · dont en cours Y € »**, qui ajoute les ventes pas encore finalisées
-  (À expédier, Envoyé) — ajouté le 08/10/2026 (issue #85).
-- **Valeur du stock** au **coût total** et au **prix affiché**, nombre d'articles par statut.
+  Affichage revu le 08/10/2026 (issue #88) : tuiles CA et bénéfice avec « *Mois Année* réalisé : X € » et
+  « *Mois Année* théorique : Y € » (le théorique ajoute les ventes À expédier et Envoyé, issue #85) ; tuile trésorerie
+  avec son **calcul** (encaissé − achats − essence − emballages − boosts − frais divers) ; frais généraux du mois avec
+  explication en info-bulle et bouton « Ajouter des frais divers » ; graphique en **barres empilées** réalisé +
+  théorique (trésorerie : + crédits attendus des ventes en cours) ; seules les **années d'activité** sont proposées.
+- **Valeur du stock** au **coût total** et au **prix affiché** ; par statut : coût total, prix affiché et nombre
+  d'articles (issue #88).
 - **Rentabilité par sortie et par lieu** : **bénéfice réalisé** + **bénéfice provisoire** (articles encore en stock) + nombre d'articles restants. Les articles Maison sont affichés à part, hors classement.
 - **Analyse par catégorie / marque / gamme** : **marge moyenne en € et en %**, **délai moyen de vente** (mise en ligne → vente **et** achat → vente).
 
