@@ -58,9 +58,9 @@ Si le relevé manque, arrête-toi et dis-le.
 2. **Constat** : ce que le code attendait ↔ ce que la page contient, avec **l'extrait utile du relevé** (quelques
    lignes : `testid`, `role`, `texte`, `valeur`, et leurs numéros de ligne dans le fichier).
 3. **Correction proposée** (ou « **déjà corrigé** par … : mettre l'extension à jour », sans autre proposition) :
-   sélecteur à ajouter ou modifier dans `selecteurs.js` (valeur exacte), ou logique à
-   changer dans `contenu.js` (fonction et principe). Ne rien proposer qui contourne une détection de Vinted
-   (camouflage, captcha, rechargement en boucle).
+   sélecteur à ajouter ou modifier dans `selecteurs.js` (valeur exacte), ou logique à changer dans `contenu.js`
+   (fonction et principe). Ne rien proposer qui contourne une détection de Vinted (camouflage, captcha,
+   rechargement en boucle).
 4. **Structure à reproduire dans `outils/extension-vinted/test/faux-vinted.mjs`** : le fragment HTML minimal
    (balises, `data-testid`, `role`, textes) pour un test qui échoue avant la correction.
 5. **Autres anomalies** repérées dans le relevé, s'il y en a (une ligne chacune).
