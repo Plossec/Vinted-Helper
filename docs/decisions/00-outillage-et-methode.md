@@ -70,3 +70,13 @@ Points tranchés par Claude (*à relire*) : le sous-agent lit aussi les captures
 relevé arrive, seul ou depuis le skill ; le skill peut être lancé par Claude dès qu'un relevé ou une erreur de
 remplissage est envoyé ; la PR est fusionnée quand les vérifications GitHub sont vertes (l'extension ne part pas en
 production : l'utilisateur la met à jour par `git pull`), puis l'utilisateur refait un essai.
+
+---
+
+## 08/10/2026 — `/lot` en mode issues / PR (#82)
+
+**Décision (utilisateur)** : les lots du §9 étant terminés, `/lot` ne démarre plus un lot mais **réalise une issue**
+de bout en bout : `/lot <numéro>` (ou une demande en texte libre, qui crée d'abord l'issue). Étapes : point de départ,
+lecture de l'issue et des sources, questions, plan (validation demandée pour une migration, le calcul, le cahier des
+charges, une règle, une dépendance ou plusieurs écrans), réalisation avec tests, `/verifier`, documentation, PR
+`#N — …` fusionnée quand la CI est verte. Une nouvelle décision va dans le fichier de son sujet.

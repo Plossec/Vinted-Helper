@@ -100,7 +100,8 @@ l'utilisateur le fait.
 - **Un lot à la fois** (§9). On ne commence pas le lot suivant tant que le lot courant n'est pas validé
   par l'utilisateur sur son téléphone (ou sur PC pour les lots 0 et 1).
 - **Plan d'abord** : pour chaque lot, propose un plan (fichiers, étapes, critères §8 couverts) et **attends la
-  validation** avant de coder. La commande `/lot N` fait cela.
+  validation** avant de coder. Les lots étant terminés, `/lot <issue>` réalise une issue de bout en bout (plan,
+  tests, `/verifier`, documentation, PR fusionnée).
 - **Tests avant le code** pour le module de calcul : chaque cas de l'annexe §11 devient un test, écrit avant
   l'implémentation.
 - **Fin de lot** : `/verifier` entièrement vert ; sous-agent `relecteur` **uniquement à la demande de

@@ -24,7 +24,8 @@ nouveautés de chaque version dans le [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Où écrire quoi
 
-- Une **décision** (choix, compromis, règle précisée) → `decisions/lot-N.md` du lot en cours, datée.
+- Une **décision** (choix, compromis, règle précisée) → le fichier de son sujet dans `decisions/` (anciennement
+  `lot-N.md` du lot en cours), datée.
 - Un **changement d'architecture** (table, module, service, outil externe) → `architecture.md`, relu à chaque
   nouvelle version.
 - Une **procédure pour l'utilisateur** → un guide dans `guides/`, lié depuis ce sommaire.

@@ -3,8 +3,8 @@
 Complètent [`../cahier-des-charges.md`](../cahier-des-charges.md). En cas de contradiction, **la décision la plus
 récente fait foi**. Format de chaque décision : date, sujet, décision, raison.
 
-Toute nouvelle décision va dans le fichier du lot en cours (ou dans `00-outillage-et-methode.md` si elle concerne la
-façon de travailler), avec la date.
+Toute nouvelle décision va dans le fichier de son sujet (le fichier du lot concerné, ou par exemple
+`publication-vinted.md`), ou dans `00-outillage-et-methode.md` si elle concerne la façon de travailler, avec la date.
 
 | Fichier | Contenu |
 |---|---|
