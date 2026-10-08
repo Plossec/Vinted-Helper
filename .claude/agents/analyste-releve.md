@@ -39,13 +39,17 @@ Si le relevé manque, arrête-toi et dis-le.
    (`radio`, `option`, `button`, `checkbox`), les `valeur` non nulles, le texte attendu.
 2. Lis `outils/extension-vinted/selecteurs.js` et la partie de `contenu.js` qui traite l'étape (objet `ETAPES`,
    `choisir`, `option`, `optionsVisibles`, `choisirCategorie`, `meilleurResultat`, `choisirColis`, `controler`),
-   pour comprendre ce que le code attendait.
+   pour comprendre ce que le code attendait. Repère-les avec `Grep` (`function nom`) et lis seulement ces
+   passages.
 3. Compare : ce que le code cherche ↔ ce que la page contient réellement. Causes déjà rencontrées (PR #59 à #67) :
    option hors du conteneur attendu, valeur pré-remplie par Vinted (parfois dans le mauvais rayon), texte proche
    (« Bon état » / « Très bon état »), libellé absent du catalogue Vinted, format affiché différent (« 9.00 » pour
    « 9,00 »), compteur de photos sur le mauvais repère, options du menu du haut (« Femmes ») prises pour celles de
    la liste.
-4. Si le relevé ne permet pas de conclure, dis exactement ce qui manque (autre relevé, capture, Diagnostic à la
+4. **Déjà corrigé ?** Le relevé peut dater d'avant une correction : cherche dans `selecteurs.js` les commentaires
+   « Relevé du JJ/MM/AAAA », et dans `CHANGELOG.md` les entrées sur l'extension, puis vérifie que le code actuel
+   gère la structure relevée (et que `test/faux-vinted.mjs` la reproduit).
+5. Si le relevé ne permet pas de conclure, dis exactement ce qui manque (autre relevé, capture, Diagnostic à la
    demande) plutôt que de supposer.
 
 ## Rapport attendu (moins de 40 lignes)
@@ -53,7 +57,8 @@ Si le relevé manque, arrête-toi et dis-le.
 1. **Étape en cause** et message d'erreur, en une phrase.
 2. **Constat** : ce que le code attendait ↔ ce que la page contient, avec **l'extrait utile du relevé** (quelques
    lignes : `testid`, `role`, `texte`, `valeur`, et leurs numéros de ligne dans le fichier).
-3. **Correction proposée** : sélecteur à ajouter ou modifier dans `selecteurs.js` (valeur exacte), ou logique à
+3. **Correction proposée** (ou « **déjà corrigé** par … : mettre l'extension à jour », sans autre proposition) :
+   sélecteur à ajouter ou modifier dans `selecteurs.js` (valeur exacte), ou logique à
    changer dans `contenu.js` (fonction et principe). Ne rien proposer qui contourne une détection de Vinted
    (camouflage, captcha, rechargement en boucle).
 4. **Structure à reproduire dans `outils/extension-vinted/test/faux-vinted.mjs`** : le fragment HTML minimal
