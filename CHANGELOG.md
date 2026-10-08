@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Schéma d'architecture du projet (`docs/architecture.md`), tenu à jour à chaque version (#75).
+- Outillage de Claude pour corriger l'extension Vinted à partir d'un relevé : sous-agent `analyste-releve` et
+  commande `/calibrer-vinted` (#73, #74).
+
 ## [1.2.0] — 08/10/2026
 
 ### Ajouté
