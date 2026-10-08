@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.5.0] — 08/10/2026
+
 ### Modifié
 - **Tableau de bord** plus lisible : seules les années d'activité ; tuiles « Octobre 2026 réalisé / théorique » ;
   calcul de la trésorerie détaillé ; frais généraux expliqués (ⓘ) avec bouton « Ajouter des frais divers » ;
