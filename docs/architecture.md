@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.2.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.3.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -117,5 +117,5 @@ erDiagram
 | `historique_statut`, `historique_prix`, `boost` | Suivi dans le temps |
 | `vente`, `vente_article` | Une vente (simple ou groupée), retours compris |
 | `frais_general` | Frais divers hors articles |
-| `publication_vinted` | File d'attente de l'extension et résultat de chaque publication |
+| `publication_vinted` | File d'attente de l'extension et résultat de chaque publication (échec d'une vraie publication → article au statut Erreur) |
 | `reglages`, `session`, `marque` | Paramètres de calcul, connexions, marques |
