@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.4.0] — 08/10/2026
+
 ### Ajouté
 - Tableau de bord : sous le chiffre d'affaires et le bénéfice, ligne **« théorique … · dont en cours … »** qui
   ajoute les ventes À expédier et Envoyé (au mois de la vente), pour le mois et l'année (#85).
