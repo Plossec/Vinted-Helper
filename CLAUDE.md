@@ -115,7 +115,8 @@ l'utilisateur le fait.
 
 - SemVer, source unique : `version` du `package.json` racine, affichée dans les Réglages.
 - Lot 0 → `0.0.1` ; lot N validé → `0.N.0` ; correctifs → `0.N.1`… ; mise en ligne OVH validée → `1.0.0`.
-- Chaque version : tag Git `vX.Y.Z` + entrée dans `CHANGELOG.md` (Ajouté / Modifié / Corrigé).
+- Chaque version : tag Git `vX.Y.Z` + entrée dans `CHANGELOG.md` (Ajouté / Modifié / Corrigé) + mise à jour de
+  `docs/architecture.md` (schémas et ligne « À jour pour la version »).
 - La PWA affiche « Nouvelle version disponible — Mettre à jour » quand une nouvelle version est déployée.
 
 ## Profil de l'utilisateur
