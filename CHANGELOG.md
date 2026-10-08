@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.3.1] — 08/10/2026
+
+### Modifié
+- Outillage de Claude : `/verifier` fait les mêmes contrôles que la vérification automatique de GitHub (formatage et
+  construction en plus, tests de l'extension si elle a changé) (#80) ; `/lot` réalise une issue de bout en bout,
+  jusqu'à la PR fusionnée (#82). Aucun changement dans l'application.
+
 ## [1.3.0] — 08/10/2026
 
 ### Ajouté
