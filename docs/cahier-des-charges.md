@@ -206,6 +206,8 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 
 ### 5.9 Tableau de bord
 - **Chiffre d'affaires**, **bénéfice réalisé** et **trésorerie** du mois / de l'année + graphique mensuel (§6.6).
+  Sous le CA et le bénéfice : **« Théorique X € · dont en cours Y € »**, qui ajoute les ventes pas encore finalisées
+  (À expédier, Envoyé) — ajouté le 08/10/2026 (issue #85).
 - **Valeur du stock** au **coût total** et au **prix affiché**, nombre d'articles par statut.
 - **Rentabilité par sortie et par lieu** : **bénéfice réalisé** + **bénéfice provisoire** (articles encore en stock) + nombre d'articles restants. Les articles Maison sont affichés à part, hors classement.
 - **Analyse par catégorie / marque / gamme** : **marge moyenne en € et en %**, **délai moyen de vente** (mise en ligne → vente **et** achat → vente).
@@ -269,6 +271,8 @@ Bénéfice   = Prix vendu − Coût total                       (Finalisé)
 |---|---|
 | **Chiffre d'affaires** (mois) | Σ prix vendus des articles **finalisés** dans le mois (date de finalisation) + Σ prix de revente hors Vinted (date de sortie du stock) |
 | **Bénéfice réalisé** (mois) | Σ bénéfices des articles **finalisés** ou **sortis du stock** dans le mois + (− frais généraux du mois) |
+| **Ventes en cours** (mois) | Articles **À expédier** ou **Envoyé** d'une vente non annulée, non renvoyés, rattachés à la **date de vente** : Σ prix vendus (CA en cours) et Σ (prix vendu − coût total) (bénéfice en cours) — issue #85 |
+| **CA / bénéfice théoriques** (mois) | CA + CA en cours ; bénéfice réalisé (frais généraux déduits) + bénéfice en cours |
 | **Trésorerie** (mois) | + montants crédités (date de finalisation) + reventes hors Vinted (date de sortie du stock) − achats (date d'achat) − essence (date de sortie) − emballages (date d'envoi) − boosts (date du boost) − frais généraux |
 | **Valeur du stock** | Σ coûts totaux des articles ni Finalisés ni Sortis du stock (et Σ de leurs prix affichés) |
 | **Marge moyenne** | Moyenne des bénéfices des articles Finalisés, en **€** ; et en **%** = Σ bénéfices / Σ coûts totaux. Si Σ coûts totaux = 0 € (ex. uniquement des articles Maison sans emballage), le taux affiche **« — »** |
@@ -409,6 +413,8 @@ Chaque cas devient un test automatique.
 | 31 | Sortie : 3 articles achetés 2 € chacun + 0,90 € essence ; A finalisé 9 € (emballage 0,08 €) ; B et C En ligne | Réalisé = 9 − 2 − 0,30 − 0,08 = **6,62 €** ; provisoire = 6,62 − 2,30 − 2,30 = **2,02 €** ; 2 articles restants |
 | 32 | Articles Maison finalisés : 0 € d'achat, sans essence, emballage 0 €, vendus 5 € et 3 € | Marge moyenne = **4,00 €** ; taux de marge = **« — »** (aucun coût) |
 | 33 | Frais divers « Rouleau d'étiquettes » 3 € le 10/10 ; en octobre, un article finalisé avec 6,52 € de bénéfice et 9 € crédités, aucun autre mouvement | Bénéfice réalisé oct. = 6,52 + (−3,00) = **3,52 €** ; trésorerie oct. = 9 − 3 = **6,00 €** |
+| 34 | Article acheté 2 €, vendu le 28/09 à 12,50 € (emballage 0,08 €), envoyé le 01/10, pas encore finalisé (ajouté le 08/10/2026, issue #85) | En cours **septembre** : CA **12,50 €**, bénéfice 12,50 − 2 − 0,08 = **10,42 €** ; rien en octobre ; CA et bénéfice réalisés de septembre inchangés (**0 €**) |
+| 35 | Colis A + B (prix affichés 10 € et 5 €) vendu le 02/10 15 € (emballage 0,10 €), Envoyé ; B renvoyé, nouveau montant 9 € ; A acheté 3 €, B 2 € ; un autre article C finalisé en octobre (bénéfice 4 €) ; frais divers 1 € en octobre (issue #85) | En cours oct. : A seul, CA **9,00 €**, bénéfice 9 − 3 − 0,10 = **5,90 €** ; théorique oct. : bénéfice = (4 − 1) + 5,90 = **8,90 €** |
 
 ## 12. Organisation du projet, outillage IA et versions
 
