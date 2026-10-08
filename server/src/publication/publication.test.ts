@@ -168,6 +168,76 @@ describe("publication Vinted", () => {
     ).toBe(409);
   });
 
+  /** Demande une publication et la fait prendre par l'extension ; renvoie l'identifiant de la demande. */
+  async function prendre(articleId: string, essai: boolean) {
+    await requete("POST", "/api/publications", { articleIds: [articleId], essai });
+    return (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication.id;
+  }
+  const erreur = (id: string, message = "Champ « marque » introuvable sur la page Vinted (à calibrer).") =>
+    programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "erreur", message });
+
+  it("statut Erreur (#72) : une vraie publication en erreur y fait passer l'article, avec le message", async () => {
+    const a = await article();
+    expect((await erreur(await prendre(a.id, false))).statusCode).toBe(200);
+    const fiche = (await requete("GET", `/api/articles/${a.id}`)).json<{
+      statut: string;
+      erreurPublication: string | null;
+      transitionsPossibles: string[];
+      historiqueStatuts: { de: string | null; vers: string }[];
+    }>();
+    expect(fiche).toMatchObject({
+      statut: "erreur_publication",
+      erreurPublication: "Champ « marque » introuvable sur la page Vinted (à calibrer).",
+    });
+    expect(fiche.historiqueStatuts.at(-1)).toMatchObject({ de: "a_publier", vers: "erreur_publication" });
+    expect(fiche.transitionsPossibles).toEqual(["a_publier", "en_ligne", "brouillon", "sortie_stock"]);
+    // Alerte sur l'écran Articles.
+    const alertes = (await requete("GET", "/api/alertes")).json<{ erreursPublication: { id: string }[] }>();
+    expect(alertes.erreursPublication.map((x) => x.id)).toEqual([a.id]);
+  });
+
+  it("statut Erreur (#72) : en mode essai, une erreur ne change pas le statut", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, true));
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "a_publier",
+      erreurPublication: null,
+    });
+  });
+
+  it("statut Erreur (#72) : redemander la publication repasse l'article À publier et le remet en file", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false));
+    const r = (await requete("POST", "/api/publications", { articleIds: [a.id], essai: false })).json<{
+      acceptes: number[];
+      refuses: unknown[];
+    }>();
+    expect(r).toEqual({ acceptes: [a.reference], refuses: [] });
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "a_publier",
+      erreurPublication: null,
+    });
+    expect((await programme("GET", "/api/programme/suivante")).json<{ publication: unknown }>().publication).not.toBe(
+      null,
+    );
+  });
+
+  it("statut Erreur (#72) : retour à « À publier » à la main ; une publication interrompue passe aussi en Erreur", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false));
+    expect((await requete("POST", `/api/articles/${a.id}/statut`, { vers: "a_publier" })).statusCode).toBe(200);
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({ statut: "a_publier" });
+
+    const b = await article();
+    await prendre(b.id, false);
+    t.horloge.avancer(16 * 60 * 1000);
+    await programme("GET", "/api/programme/suivante");
+    expect((await requete("GET", `/api/articles/${b.id}`)).json()).toMatchObject({
+      statut: "erreur_publication",
+      erreurPublication: expect.stringMatching(/Interrompue/),
+    });
+  });
+
   it("couleurs : 2 au plus, codes connus", async () => {
     const refs = (await requete("GET", "/api/referentiels")).json<{
       lieux: { id: string }[];

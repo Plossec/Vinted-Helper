@@ -51,6 +51,7 @@ export const FILTRES_VIDES: Filtres = {
 export const STATUTS_PAR_DEFAUT: Statut[] = [
   "brouillon",
   "a_publier",
+  "erreur_publication",
   "en_ligne",
   "a_expedier",
   "envoye",
@@ -80,10 +81,12 @@ export function lireFiltres(brut: unknown): Filtres {
   if (typeof brut !== "object" || brut === null) return FILTRES_PAR_DEFAUT;
   const f = brut as Record<string, unknown>;
   if (![f.statuts, f.categories, f.marqueIds, f.lieuIds, f.sortieIds].every(estListe)) return FILTRES_PAR_DEFAUT;
+  const statuts = (f.statuts as string[]).filter((s): s is Statut => s in LIBELLES_STATUT);
   return {
     texte: typeof f.texte === "string" ? f.texte : "",
     gamme: typeof f.gamme === "string" ? f.gamme : "",
-    statuts: (f.statuts as string[]).filter((s): s is Statut => s in LIBELLES_STATUT),
+    // Statuts par défaut d'avant le statut Erreur (#72) : on y ajoute Erreur, pour que ces articles restent visibles.
+    statuts: statutsParDefaut([...statuts, "erreur_publication"]) ? STATUTS_PAR_DEFAUT : statuts,
     categories: f.categories as string[],
     marqueIds: f.marqueIds as string[],
     lieuIds: f.lieuIds as string[],

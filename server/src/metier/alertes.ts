@@ -1,4 +1,5 @@
-// Alertes affichées dans l'application (§5.8) : brouillon trop ancien, article dormant, articles à expédier.
+// Alertes affichées dans l'application (§5.8) : brouillon trop ancien, article dormant, articles à expédier,
+// retours à récupérer, publications Vinted en erreur (#72).
 // Fonction pure : la date « maintenant » est passée en paramètre ; les jours sont ceux de l'heure de Paris.
 import { jourParis } from "../calculs/indicateurs.js";
 
@@ -66,6 +67,7 @@ export function calculerAlertes(
   const dormants: Alerte[] = [];
   const aExpedier: Alerte[] = [];
   const aRecuperer: Alerte[] = [];
+  const erreursPublication: Alerte[] = [];
   for (const a of articles) {
     if (a.statut === "brouillon") {
       const date = arriveeDansStatut(a);
@@ -79,9 +81,11 @@ export function calculerAlertes(
         const al = alerte(a, date);
         if (al.jours >= delais.delaiDormant) dormants.push(al);
       }
-    } else if (a.statut === "a_expedier" || a.statut === "a_recuperer") {
+    } else if (a.statut === "a_expedier" || a.statut === "a_recuperer" || a.statut === "erreur_publication") {
       const date = arriveeDansStatut(a);
-      if (date) (a.statut === "a_expedier" ? aExpedier : aRecuperer).push(alerte(a, date));
+      const groupe =
+        a.statut === "a_expedier" ? aExpedier : a.statut === "a_recuperer" ? aRecuperer : erreursPublication;
+      if (date) groupe.push(alerte(a, date));
     }
   }
   const plusAnciens = (x: Alerte, y: Alerte) => y.jours - x.jours || x.reference - y.reference;
@@ -91,5 +95,7 @@ export function calculerAlertes(
     aExpedier: aExpedier.sort(plusAnciens),
     /** Retours à aller chercher (issue #52). */
     aRecuperer: aRecuperer.sort(plusAnciens),
+    /** Publications Vinted en échec, à redemander ou à remettre À publier (issue #72). */
+    erreursPublication: erreursPublication.sort(plusAnciens),
   };
 }

@@ -6,6 +6,9 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Ajouté
+- Statut **« Erreur »** : une vraie publication Vinted en échec y fait passer l'article (pas en mode essai), avec le
+  message de l'échec sur la fiche et une alerte sur l'écran Articles ; on en sort en redemandant la publication ou
+  en revenant à « À publier » (#72).
 - Schéma d'architecture du projet (`docs/architecture.md`), tenu à jour à chaque version (#75).
 - Outillage de Claude pour corriger l'extension Vinted à partir d'un relevé : sous-agent `analyste-releve` et
   commande `/calibrer-vinted` (#73, #74).

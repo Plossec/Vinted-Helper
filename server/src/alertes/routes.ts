@@ -6,7 +6,7 @@ import { article, historiquePrix, historiqueStatut } from "../base/schema.js";
 import { lireReglages } from "../frais/service.js";
 import { calculerAlertes } from "../metier/alertes.js";
 
-const SURVEILLES = ["brouillon", "en_ligne", "a_expedier", "a_recuperer"] as const;
+const SURVEILLES = ["brouillon", "en_ligne", "a_expedier", "a_recuperer", "erreur_publication"] as const;
 
 export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/alertes", async (requete) => {

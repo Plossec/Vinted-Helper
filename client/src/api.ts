@@ -253,6 +253,8 @@ export interface Article {
   urlVinted: string | null;
   /** Lien de la conversation Vinted avec l'acheteur (issue #48). */
   urlConversation: string | null;
+  /** Article en Erreur (#72) : message de la dernière publication Vinted en échec. */
+  erreurPublication: string | null;
   photos: PhotoArticle[];
   dateAchat: string | null;
   statut: Statut;

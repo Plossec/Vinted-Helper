@@ -4,7 +4,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, lt } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
-import { article, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
+import { article, historiqueStatut, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
 import { changerStatut } from "../articles/service.js";
 import { CATEGORIES } from "../catalogue/categories.js";
 import { libelleCouleur } from "../catalogue/couleurs.js";
@@ -64,10 +64,10 @@ async function chargerArticles(base: Base, utilisateurId: string, ids: string[])
     .where(and(eq(article.utilisateurId, utilisateurId), inArray(article.id, ids), isNull(article.supprimeLe)));
 }
 
-/** Ce qui manque à un article pour être publié (liste vide = publiable). */
+/** Ce qui manque à un article pour être publié (liste vide = publiable). Depuis Erreur, on peut redemander (#72). */
 export function manques(a: ArticleComplet, nombrePhotosAnnonce: number): string[] {
   const m: string[] = [];
-  if (a.statut !== "a_publier") m.push("statut « À publier »");
+  if (a.statut !== "a_publier" && a.statut !== "erreur_publication") m.push("statut « À publier »");
   if (nombrePhotosAnnonce === 0) m.push("photos d'annonce");
   if (!a.prixAffiche) m.push("prix affiché");
   if (!a.titre?.trim()) m.push("titre de l'annonce");
@@ -111,6 +111,16 @@ export async function demanderPublication(
     if (m.length > 0) {
       refuses.push({ reference: a.reference, nom: a.nom, manques: m });
       continue;
+    }
+    // Nouvelle demande depuis Erreur (#72) : l'article repasse d'abord À publier.
+    if (a.statut === "erreur_publication") {
+      await changerStatut(
+        base,
+        utilisateurId,
+        a.id,
+        { vers: "a_publier", date: maintenant, prixAffiche: null },
+        maintenant,
+      );
     }
     await base.insert(publicationVinted).values({ utilisateurId, articleId: a.id, essai, demandeLe: maintenant });
     acceptes.push(a.reference);
@@ -172,13 +182,29 @@ export async function nombreEnAttente(base: Base, utilisateurId: string, mainten
 }
 
 /**
+ * Échec d'une vraie publication (pas d'un essai) : l'article À publier passe en Erreur (issue #72). Ce passage
+ * n'est jamais proposé à l'utilisateur (absent du tableau du §4.2) : seule la publication le fait.
+ */
+async function passerEnErreur(base: Base, utilisateurId: string, articleId: string, maintenant: Date) {
+  const r = await base
+    .update(article)
+    .set({ statut: "erreur_publication", modifieLe: maintenant })
+    .where(and(eq(article.id, articleId), eq(article.utilisateurId, utilisateurId), eq(article.statut, "a_publier")))
+    .returning({ id: article.id });
+  if (r.length === 0) return;
+  await base
+    .insert(historiqueStatut)
+    .values({ utilisateurId, articleId, de: "a_publier", vers: "erreur_publication", date: maintenant });
+}
+
+/**
  * Demande suivante pour le programme du PC (la plus ancienne en attente), passée « en cours ».
  * Une demande restée « en cours » trop longtemps passe en erreur : on ne la relance jamais seule, pour ne pas
  * risquer une annonce en double (l'utilisateur vérifie sur Vinted, puis la redemande si besoin).
  */
 export async function demandeSuivante(base: Base, utilisateurId: string, maintenant: Date) {
   await base.update(reglages).set({ programmeVuLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
-  await base
+  const interrompues = await base
     .update(publicationVinted)
     .set({
       etat: "erreur",
@@ -191,7 +217,9 @@ export async function demandeSuivante(base: Base, utilisateurId: string, mainten
         eq(publicationVinted.etat, "en_cours"),
         lt(publicationVinted.debutLe, new Date(maintenant.getTime() - DELAI_INTERRUPTION_MS)),
       ),
-    );
+    )
+    .returning({ articleId: publicationVinted.articleId, essai: publicationVinted.essai });
+  for (const p of interrompues) if (!p.essai) await passerEnErreur(base, utilisateurId, p.articleId, maintenant);
   const [enCours] = await base
     .select({ id: publicationVinted.id })
     .from(publicationVinted)
@@ -213,6 +241,7 @@ export async function demandeSuivante(base: Base, utilisateurId: string, mainten
       .update(publicationVinted)
       .set({ etat: "erreur", finLe: maintenant, message: "Article modifié depuis la demande : il n'est plus complet." })
       .where(eq(publicationVinted.id, suivante.id));
+    if (!suivante.essai) await passerEnErreur(base, utilisateurId, suivante.articleId, maintenant);
     return demandeSuivante(base, utilisateurId, maintenant);
   }
   await base
@@ -244,7 +273,10 @@ export async function demandeSuivante(base: Base, utilisateurId: string, mainten
 export type ResultatProgramme =
   { resultat: "publie"; url: string } | { resultat: "essai" } | { resultat: "erreur"; message: string };
 
-/** Résultat renvoyé par le programme. Publié → l'article passe En ligne et garde le lien de l'annonce. */
+/**
+ * Résultat renvoyé par le programme. Publié → l'article passe En ligne et garde le lien de l'annonce ; erreur d'une
+ * vraie publication → l'article passe en Erreur (#72) ; essai → rien ne change.
+ */
 export async function enregistrerResultat(
   base: Base,
   utilisateurId: string,
@@ -268,6 +300,7 @@ export async function enregistrerResultat(
     );
     await base.update(article).set({ urlVinted: r.url }).where(eq(article.id, p.articleId));
   }
+  if (r.resultat === "erreur" && !p.essai) await passerEnErreur(base, utilisateurId, p.articleId, maintenant);
   await base
     .update(publicationVinted)
     .set({

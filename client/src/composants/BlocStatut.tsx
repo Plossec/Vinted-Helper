@@ -26,6 +26,8 @@ interface Props {
 function libelleAction(de: Statut, vers: Statut): string {
   if (de === "a_expedier" && vers === "en_ligne") return "Annulation par l'acheteur";
   if (de === "envoye" && vers === "a_recuperer") return "Retour de l'acheteur";
+  if (de === "erreur_publication" && vers === "a_publier") return "Revenir à « À publier »";
+  if (de === "erreur_publication" && vers === "en_ligne") return "Publié à la main : mettre en ligne";
   if (de === "a_recuperer" && vers === "a_publier") return "Récupéré : à publier";
   if (de === "a_recuperer" && vers === "en_ligne") return "Récupéré : remettre en ligne";
   if (de === "sortie_stock" && vers === "a_publier") return "Annuler la sortie du stock";

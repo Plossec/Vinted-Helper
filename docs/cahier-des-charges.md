@@ -101,6 +101,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 |---|---|
 | **Brouillon** | Photo terrain + prix d'achat, fiche incomplète |
 | **À publier** | Fiche complète, photos annonce prêtes, pas encore en ligne |
+| **Erreur** | La publication automatique sur Vinted (extension Chrome) a échoué ; le message de l'échec est sur la fiche — ajouté le 08/10/2026 (issue #72) |
 | **En ligne** | Annonce publiée sur Vinted (prix affiché obligatoire) |
 | **À expédier** | Acheté sur Vinted, colis à préparer |
 | **Envoyé** | Colis expédié |
@@ -112,7 +113,8 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | Statut actuel | Peut passer à |
 |---|---|
 | Brouillon | À publier, En ligne |
-| À publier | En ligne, Brouillon |
+| À publier | En ligne, Brouillon ; **Erreur** uniquement par une publication Vinted en échec (jamais à la main, jamais en mode essai) |
+| Erreur | À publier (nouvelle demande « Publier sur Vinted », ou retour à la main), En ligne (annonce publiée à la main), Brouillon |
 | En ligne | À expédier, À publier (annonce retirée temporairement) |
 | À expédier | Envoyé, En ligne (annulation par l'acheteur) |
 | Envoyé | Finalisé, **À récupérer** (retour du colis, retour partiel ou litige perdu : l'article est à aller chercher) |

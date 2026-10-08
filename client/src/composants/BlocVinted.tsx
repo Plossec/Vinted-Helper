@@ -1,5 +1,6 @@
 // Vinted sur la fiche : lien de l'annonce (saisi à la main, issue #46, ou noté par l'extension de publication),
-// et bouton « Publier sur Vinted » pour un article À publier. L'application n'interroge jamais Vinted.
+// et bouton « Publier sur Vinted » pour un article À publier ou en Erreur (message de l'échec affiché, #72).
+// L'application n'interroge jamais Vinted.
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article } from "../api.js";
@@ -162,7 +163,14 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
           </div>
         </form>
       )}
-      {article.statut === "a_publier" && (
+      {article.statut === "erreur_publication" && (
+        <p className="message message--erreur message--lignes" role="alert">
+          La publication sur Vinted a échoué{article.erreurPublication ? ` : ${article.erreurPublication}` : "."}
+          {"\n"}Vérifiez sur Vinted qu'aucune annonce n'a été créée, puis redemandez la publication ou revenez à « À
+          publier » (bloc Statut).
+        </p>
+      )}
+      {(article.statut === "a_publier" || article.statut === "erreur_publication") && (
         <>
           <button type="button" className="bouton bouton--principal" onClick={() => void publier()}>
             Publier sur Vinted{lireModeEssai() ? " (essai)" : ""}

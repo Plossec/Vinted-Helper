@@ -1,4 +1,5 @@
-// Alertes (§5.8), affichées sur l'écran d'accueil : à expédier, brouillons trop anciens, articles dormants.
+// Alertes (§5.8), affichées sur l'écran d'accueil : à expédier, à récupérer, publications Vinted en erreur (#72),
+// brouillons trop anciens, articles dormants.
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
@@ -21,14 +22,27 @@ export interface AlertesServeur {
   aExpedier: Alerte[];
   /** Retours à aller chercher (issue #52). */
   aRecuperer?: Alerte[];
+  /** Publications Vinted en échec (issue #72). */
+  erreursPublication?: Alerte[];
 }
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
-  a ? a.brouillons.length + a.dormants.length + a.aExpedier.length + (a.aRecuperer?.length ?? 0) : 0;
+  a
+    ? a.brouillons.length +
+      a.dormants.length +
+      a.aExpedier.length +
+      (a.aRecuperer?.length ?? 0) +
+      (a.erreursPublication?.length ?? 0)
+    : 0;
 
 const GROUPES = [
   { cle: "aExpedier", titre: "À expédier", detail: (a: Alerte) => `vendu le ${formatDate(a.depuis)}` },
   { cle: "aRecuperer", titre: "À récupérer", detail: (a: Alerte) => `retour du ${formatDate(a.depuis)}` },
+  {
+    cle: "erreursPublication",
+    titre: "Publications Vinted en erreur",
+    detail: (a: Alerte) => `échec le ${formatDate(a.depuis)}`,
+  },
   {
     cle: "brouillons",
     titre: "Brouillons à compléter",

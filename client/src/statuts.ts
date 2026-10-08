@@ -1,10 +1,19 @@
 // Libellés des statuts (§4.1). Les transitions possibles sont fournies par le serveur (source unique).
 export type Statut =
-  "brouillon" | "a_publier" | "en_ligne" | "a_expedier" | "envoye" | "a_recuperer" | "finalise" | "sortie_stock";
+  | "brouillon"
+  | "a_publier"
+  | "erreur_publication"
+  | "en_ligne"
+  | "a_expedier"
+  | "envoye"
+  | "a_recuperer"
+  | "finalise"
+  | "sortie_stock";
 
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",
   a_publier: "À publier",
+  erreur_publication: "Erreur",
   en_ligne: "En ligne",
   a_expedier: "À expédier",
   envoye: "Envoyé",
@@ -17,6 +26,8 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
 export const ACTIONS_STATUT: Record<Statut, string> = {
   brouillon: "Repasser en brouillon",
   a_publier: "Marquer « À publier »",
+  // Jamais proposé : seule une publication Vinted en échec fait passer l'article en Erreur (#72).
+  erreur_publication: "Erreur de publication",
   en_ligne: "Mettre en ligne",
   a_expedier: "Vendu : à expédier",
   envoye: "Marquer envoyé",
