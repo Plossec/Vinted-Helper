@@ -147,6 +147,53 @@ export function indicateursParMois(d: DonneesIndicateurs, details: ReadonlyMap<s
   return mois;
 }
 
+export interface EnCours {
+  /** Centimes : prix vendus des ventes pas encore finalisées. */
+  chiffreAffaires: number;
+  /** Centimes : bénéfices attendus de ces articles (prix vendu − coût total). */
+  benefice: number;
+}
+
+/**
+ * Ventes en cours de chaque mois (issue #85), indexées par « AAAA-MM » de la **date de vente** : articles À expédier
+ * ou Envoyé d'une vente non annulée, non renvoyés. CA et bénéfice théoriques = réalisés + en cours.
+ */
+export function ventesEnCoursParMois(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
+  const mois = new Map<string, EnCours>();
+  const ventes = venteParArticle(d.calcul.ventes);
+  for (const a of d.articles) {
+    if (a.statut !== "a_expedier" && a.statut !== "envoye") continue;
+    const detail = details.get(a.id);
+    const v = ventes.get(a.id);
+    const date = v ? d.datesVentes.get(v.id)?.vente : null;
+    if (!detail || detail.prixVendu === null || !date) continue;
+    const cle = moisParis(date);
+    const p = mois.get(cle) ?? { chiffreAffaires: 0, benefice: 0 };
+    p.chiffreAffaires += detail.prixVendu;
+    // Le bénéfice provisoire (§6.5) vaut −coût total tant que la vente n'est pas finalisée : ici, on compte le prix
+    // vendu attendu.
+    p.benefice += detail.prixVendu - detail.coutTotal;
+    mois.set(cle, p);
+  }
+  return mois;
+}
+
+/** Somme des ventes en cours de plusieurs mois (mois sans vente en cours : `undefined`). */
+export function cumulerEnCours(periodes: readonly (EnCours | undefined)[]): EnCours {
+  return periodes.reduce<EnCours>(
+    (t, p) => ({
+      chiffreAffaires: t.chiffreAffaires + (p?.chiffreAffaires ?? 0),
+      benefice: t.benefice + (p?.benefice ?? 0),
+    }),
+    { chiffreAffaires: 0, benefice: 0 },
+  );
+}
+
+/** CA et bénéfice théoriques (issue #85) : réalisés (frais généraux déduits) + ventes en cours. */
+export function theorique(p: Periode, e: EnCours): EnCours {
+  return { chiffreAffaires: p.chiffreAffaires + e.chiffreAffaires, benefice: p.beneficeRealise + e.benefice };
+}
+
 /** Somme de plusieurs périodes (ex. les 12 mois d'une année). */
 export function cumuler(periodes: readonly Periode[]): Periode {
   return periodes.reduce(

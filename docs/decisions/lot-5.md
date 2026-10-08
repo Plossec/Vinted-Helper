@@ -13,3 +13,13 @@
 | Analyse par catégorie | Regroupée au niveau 3 par défaut (ex. « Hommes › Vêtements › Jeans »), modifiable. Articles sans valeur : « (non renseigné) ». |
 | Graphique | Une seule mesure à la fois (une seule échelle), choisie par boutons ; couleur vérifiée (contraste, lisibilité). |
 | Rentabilité | Classement par bénéfice provisoire décroissant. Une sortie sans article n'apparaît pas (son essence est en frais généraux). |
+
+## 08/10/2026 — CA et bénéfice théoriques (ventes en cours, #85)
+
+Demande de l'utilisateur : voir aussi les ventes pas encore finalisées. Décisions (utilisateur) : ventes **À
+expédier** et **Envoyé** (non renvoyées, vente non annulée) rattachées à la **date de vente** ; affichage par une
+ligne « théorique X € · dont en cours Y € » sous les tuiles CA et bénéfice (mois et année) ; frais généraux déduits
+du bénéfice théorique. Bénéfice en cours = prix vendu − coût total (le bénéfice provisoire du §6.5, −coût total,
+reste inchangé ailleurs). Choix de Claude (*à relire*) : graphique mensuel inchangé (réalisé) ; la ligne n'apparaît
+que s'il y a des ventes en cours. Une vente finalisée passe du « en cours » (mois de vente) au réalisé (mois de
+finalisation). Cahier des charges §5.9, §6.6 et cas 34-35 de l'annexe §11 ajoutés avec l'accord de l'utilisateur.

@@ -7,11 +7,14 @@ import { calculerDetails } from "../calculs/benefice.js";
 import {
   analyser,
   cumuler,
+  cumulerEnCours,
   type DonneesIndicateurs,
   indicateursParMois,
   type Periode,
   rentabilite,
+  theorique,
   valeurStock,
+  ventesEnCoursParMois,
 } from "../calculs/indicateurs.js";
 import { chargerDonneesCalcul } from "../couts/service.js";
 
@@ -100,6 +103,7 @@ export async function tableauDeBord(base: Base, utilisateurId: string, annee: nu
   const d = await chargerDonnees(base, utilisateurId);
   const details = calculerDetails(d.calcul);
   const parMois = indicateursParMois(d, details);
+  const enCours = ventesEnCoursParMois(d, details);
   const cleMois = (m: number) => `${annee}-${String(m).padStart(2, "0")}`;
   const vide: Periode = { chiffreAffaires: 0, beneficeRealise: 0, tresorerie: 0, fraisGeneraux: 0 };
   const serie = Array.from({ length: 12 }, (_, i) => ({
@@ -120,11 +124,19 @@ export async function tableauDeBord(base: Base, utilisateurId: string, annee: nu
   const parSortie = rentabilite(d, details, "sortie");
   const parLieu = rentabilite(d, details, "lieu");
 
+  const duMois = parMois.get(cleMois(mois)) ?? vide;
+  const deLAnnee = cumuler(serie);
+  // Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85) : CA et bénéfice théoriques.
+  const enCoursDuMois = cumulerEnCours([enCours.get(cleMois(mois))]);
+  const enCoursDeLAnnee = cumulerEnCours(Array.from({ length: 12 }, (_, i) => enCours.get(cleMois(i + 1))));
+
   return {
     annee,
     mois: cleMois(mois),
-    duMois: parMois.get(cleMois(mois)) ?? vide,
-    deLAnnee: cumuler(serie),
+    duMois,
+    deLAnnee,
+    enCours: { duMois: enCoursDuMois, deLAnnee: enCoursDeLAnnee },
+    theorique: { duMois: theorique(duMois, enCoursDuMois), deLAnnee: theorique(deLAnnee, enCoursDeLAnnee) },
     serie,
     stock: valeurStock(d, details),
     rentabiliteSorties: {

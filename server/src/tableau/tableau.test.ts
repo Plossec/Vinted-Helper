@@ -7,6 +7,8 @@ interface Tableau {
   deLAnnee: { chiffreAffaires: number };
   serie: { mois: string; chiffreAffaires: number }[];
   stock: { coutTotal: number; prixAffiche: number; parStatut: Record<string, number> };
+  enCours: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { chiffreAffaires: number } };
+  theorique: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { benefice: number } };
   rentabiliteLieux: { classement: { libelle: string; realise: number }[] };
   analyse: { categories: { libelle: string; nombreVendus: number }[] };
 }
@@ -46,6 +48,12 @@ describe("tableau de bord", () => {
       await requete("POST", "/api/ventes", { articleIds: [id], montantCredite: 900, date: "2026-09-30T18:00:00Z" })
     ).json<{ id: string }>();
     await requete("POST", `/api/ventes/${vente.id}/envoi`, { date: "2026-10-01T09:00:00Z" });
+    // Envoyé, pas encore finalisé : vente en cours de septembre (date de vente), CA réalisé nul (issue #85).
+    const enCours = (await requete("GET", "/api/tableau-de-bord?annee=2026&mois=9")).json<Tableau>();
+    expect(enCours.duMois.chiffreAffaires).toBe(0);
+    expect(enCours.enCours.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
+    expect(enCours.theorique.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
+    expect(enCours.enCours.deLAnnee.chiffreAffaires).toBe(900);
     await requete("POST", `/api/ventes/${vente.id}/finalisation`, { date: "2026-10-04T09:00:00Z" });
 
     let tableau = (await requete("GET", "/api/tableau-de-bord?annee=2026&mois=10")).json<Tableau>();
@@ -62,6 +70,9 @@ describe("tableau de bord", () => {
     tableau = (await requete("GET", "/api/tableau-de-bord?annee=2026&mois=10")).json<Tableau>();
     expect(tableau.duMois).toMatchObject({ beneficeRealise: 392, tresorerie: 592 });
     expect(tableau.deLAnnee.chiffreAffaires).toBe(900);
+    // Finalisé : plus rien en cours ; théorique = réalisé.
+    expect(tableau.enCours.deLAnnee.chiffreAffaires).toBe(0);
+    expect(tableau.theorique.deLAnnee.benefice).toBe(392);
   });
 
   it("valeur du stock et nombre d'articles par statut", async () => {

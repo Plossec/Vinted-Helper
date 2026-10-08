@@ -36,11 +36,23 @@ interface Analyse {
   delaiAchatVente: number | null;
 }
 
+interface EnCours {
+  chiffreAffaires: number;
+  benefice: number;
+}
+
+/** Mesure en cours correspondant à une tuile (CA, bénéfice) ; la trésorerie n'en a pas. */
+const MESURE_EN_COURS = { chiffreAffaires: "chiffreAffaires", beneficeRealise: "benefice" } as const;
+
 interface Tableau {
   annee: number;
   mois: string;
   duMois: Periode;
   deLAnnee: Periode;
+  /** Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85). */
+  enCours: { duMois: EnCours; deLAnnee: EnCours };
+  /** Réalisé + en cours, calculé par le serveur. */
+  theorique: { duMois: EnCours; deLAnnee: EnCours };
   serie: (Periode & { mois: string })[];
   stock: { coutTotal: number; prixAffiche: number; parStatut: Partial<Record<Statut, number>> };
   rentabiliteSorties: { classement: Rentabilite[]; maison: Rentabilite | null };
@@ -68,6 +80,29 @@ const MESURES = {
   tresorerie: "Trésorerie",
 } as const;
 type Mesure = keyof typeof MESURES;
+
+const majuscule = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+/**
+ * « Théorique X € · dont en cours Y € » (issue #85) : réalisé + ventes À expédier ou Envoyé, pour le mois et
+ * l'année. Montants calculés par le serveur ; rien n'est affiché sans vente en cours.
+ */
+function LigneEnCours({ tableau, mesure }: { tableau: Tableau; mesure: keyof typeof MESURE_EN_COURS }) {
+  const cle = MESURE_EN_COURS[mesure];
+  const ligne = (periode: "duMois" | "deLAnnee", libelle: string) =>
+    tableau.enCours[periode][cle] === 0 ? null : (
+      <span className="tuile__detail">
+        {libelle} : théorique {formatEuros(tableau.theorique[periode][cle])} · dont en cours{" "}
+        {formatEuros(tableau.enCours[periode][cle])}
+      </span>
+    );
+  return (
+    <>
+      {ligne("duMois", majuscule(MOIS[Number(tableau.mois.slice(5, 7)) - 1] ?? ""))}
+      {ligne("deLAnnee", "Année")}
+    </>
+  );
+}
 
 const pourcentage = (taux: number | null) =>
   taux === null ? "—" : `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(taux * 100)} %`;
@@ -136,6 +171,7 @@ export function TableauDeBord() {
                 <span className="tuile__detail">
                   {MOIS[mois - 1]} · année {formatEuros(tableau.deLAnnee[m])}
                 </span>
+                {m !== "tresorerie" && <LigneEnCours tableau={tableau} mesure={m} />}
               </div>
             ))}
           </div>

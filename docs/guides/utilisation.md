@@ -63,6 +63,18 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
   un en-tête de colonne pour trier (une 2e fois pour inverser). Sur téléphone, faites glisser le tableau vers la
   gauche ; le bénéfice en *italique* est provisoire (article pas encore finalisé).
 
+## Tableau de bord
+
+- **Chiffre d'affaires** et **bénéfice réalisé** ne comptent que les ventes **Finalisées** (à la date de
+  finalisation) et les reventes hors Vinted. Le bénéfice du mois est diminué des **frais généraux** (frais divers,
+  essence des sorties sans achat).
+- Sous ces deux tuiles, la ligne **« théorique … · dont en cours … »** ajoute les ventes pas encore finalisées
+  (**À expédier**, **Envoyé**), comptées au mois de la **date de vente**. Elle n'apparaît que s'il y a des ventes en
+  cours. Une fois la vente finalisée, elle passe dans le réalisé (au mois de la finalisation).
+- **Trésorerie** : l'argent réellement entré et sorti, à la date de chaque mouvement.
+- L'essence d'une sortie est partagée entre tous ses articles, vendus ou non : celle des invendus est dans la
+  **valeur du stock**, pas dans le bénéfice.
+
 ## Nouvelle version
 
 Après une mise à jour (README, « Mettre à jour l'application »), le téléphone affiche « Nouvelle version disponible — Mettre à jour » : touchez

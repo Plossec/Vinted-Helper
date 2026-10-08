@@ -10,6 +10,7 @@ import {
   indicateursParMois,
   rentabilite,
   valeurStock,
+  ventesEnCoursParMois,
 } from "./indicateurs.js";
 
 interface SpecArticle {
@@ -311,5 +312,89 @@ describe("Annexe §11 — stock, rentabilité, analyse", () => {
     expect(analyser(d, details, "marque")).toEqual([
       expect.objectContaining({ nombreVendus: 2, margeMoyenne: 400, tauxMarge: null }),
     ]);
+  });
+});
+
+describe("Annexe §11 — ventes en cours et chiffres théoriques (issue #85)", () => {
+  it("cas 34 — vendu le 28/09 à 12,50 €, envoyé le 01/10, non finalisé → en cours en septembre ; réalisé inchangé", () => {
+    const spec: Spec = {
+      articles: [{ id: "A", statut: "envoye", prixAchat: 200, dateAchat: "2026-09-10" }],
+      ventes: [
+        {
+          id: "V",
+          montant: 1250,
+          emballage: 8,
+          lignes: [["A", 1250]],
+          vente: "2026-09-28T18:00:00Z",
+          envoi: "2026-10-01T09:00:00Z",
+        },
+      ],
+    };
+    const { d, details } = construire(spec);
+    const enCours = ventesEnCoursParMois(d, details);
+    expect(enCours.get("2026-09")).toEqual({ chiffreAffaires: 1250, benefice: 1042 });
+    expect(enCours.get("2026-10")).toBeUndefined();
+    expect(mois(spec, "2026-09")).toMatchObject({ chiffreAffaires: 0, beneficeRealise: 0 });
+  });
+
+  it("cas 35 — colis A + B, B renvoyé (9 € pour A) ; C finalisé (4 €), frais 1 € → en cours 9 € / 5,90 € ; théorique 8,90 €", () => {
+    const spec: Spec = {
+      articles: [
+        { id: "A", statut: "envoye", prixAchat: 300, dateAchat: "2026-09-01" },
+        { id: "B", statut: "a_recuperer", prixAchat: 200, dateAchat: "2026-09-01" },
+        { id: "C", statut: "finalise", prixAchat: 500, dateAchat: "2026-09-01" },
+      ],
+      ventes: [
+        {
+          id: "V",
+          montant: 900,
+          emballage: 10,
+          lignes: [
+            ["A", 1000],
+            ["B", 500, true],
+          ],
+          vente: "2026-10-02T18:00:00Z",
+          envoi: "2026-10-03T09:00:00Z",
+        },
+        {
+          id: "W",
+          montant: 900,
+          emballage: 0,
+          lignes: [["C", 900]],
+          vente: "2026-10-04T18:00:00Z",
+          envoi: "2026-10-05T09:00:00Z",
+          finalisation: "2026-10-06T09:00:00Z",
+        },
+      ],
+      frais: [{ date: "2026-10-10", montant: 100 }],
+    };
+    const { d, details } = construire(spec);
+    const enCours = ventesEnCoursParMois(d, details).get("2026-10");
+    expect(enCours).toEqual({ chiffreAffaires: 900, benefice: 590 });
+    const realise = mois(spec, "2026-10");
+    expect(realise).toMatchObject({ chiffreAffaires: 900, beneficeRealise: 300 });
+    expect((realise?.beneficeRealise ?? 0) + (enCours?.benefice ?? 0)).toBe(890);
+  });
+
+  it("une vente annulée ou un article Finalisé n'est jamais « en cours »", () => {
+    const spec: Spec = {
+      articles: [
+        { id: "A", statut: "en_ligne", prixAchat: 100 },
+        { id: "B", statut: "finalise", prixAchat: 100 },
+      ],
+      ventes: [
+        { id: "V", montant: 500, emballage: 0, lignes: [["A", 500]], vente: "2026-10-02T18:00:00Z", annulee: true },
+        {
+          id: "W",
+          montant: 500,
+          emballage: 0,
+          lignes: [["B", 500]],
+          vente: "2026-10-02T18:00:00Z",
+          finalisation: "2026-10-03T18:00:00Z",
+        },
+      ],
+    };
+    const { d, details } = construire(spec);
+    expect(ventesEnCoursParMois(d, details).size).toBe(0);
   });
 });
