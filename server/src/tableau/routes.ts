@@ -24,6 +24,7 @@ export function routesTableau(app: FastifyInstance, { base, maintenant, utilisat
       entier(q.annee, anneeActuelle ?? 2026, 2000, 2100, "Année"),
       entier(q.mois, moisActuel ?? 1, 1, 12, "Mois"),
       entier(q.niveau, 3, 1, 4, "Niveau de catégorie"),
+      anneeActuelle ?? 2026,
     );
   });
 }
