@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.3.0] — 08/10/2026
+
 ### Ajouté
 - Statut **« Erreur »** : une vraie publication Vinted en échec y fait passer l'article (pas en mode essai), avec le
   message de l'échec sur la fiche et une alerte sur l'écran Articles ; on en sort en redemandant la publication ou
