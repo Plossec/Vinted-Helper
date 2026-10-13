@@ -138,3 +138,16 @@ téléphone après mise en ligne.
   bas d'écran (choix de Claude, *à relire*) : le détail n'est disponible qu'une fois la sortie reçue par le serveur,
   alors que l'annulation doit rester possible sans réseau.
 - Formulaire d'achat : « Annuler » en haut à droite, « Valider » en bas.
+
+## 13/10/2026 — Fiche article organisée autour du statut (issue #98)
+
+**Décision (utilisateur)** : sections ouvertes **selon le statut** ; la création d'un article est **inchangée**.
+- En-tête : photo (première photo d'annonce, sinon terrain), badge, prix affiché, bénéfice (et attendu).
+- « Statut et prochaine étape » juste dessous, toujours ouvert : un conseil par statut (`etapeSuivante`,
+  `client/src/statuts.ts`) et le passage attendu en bouton plein, en premier ; les autres passages (retour en
+  arrière, sortie du stock) en boutons secondaires. Historique replié, du plus récent au plus ancien.
+- Avant la vente (Brouillon, À publier, Erreur) : Fiche, Photos, Annonce, Vinted ouverts ; Achat, Montants repliés.
+  Ensuite : Montants ouvert en tête, le reste (Fiche comprise) replié. Sections repliables avec `<details>` : une
+  saisie en cours n'est pas perdue en repliant (#99).
+- Points tranchés par Claude (*à relire*) : la photo de l'en-tête suffit pour « voir la photo à côté des champs » ;
+  sur PC la fiche reste à gauche et les blocs à droite (#106), sous « Statut et prochaine étape » en pleine largeur.
