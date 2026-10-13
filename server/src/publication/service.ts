@@ -2,8 +2,8 @@
 // Le serveur tient la file d'attente ; l'extension Chrome (outils/extension-vinted) vient chercher la demande
 // suivante avec un jeton personnel, publie, puis renvoie le résultat. Le serveur ne contacte jamais Vinted.
 import { createHash, randomBytes } from "node:crypto";
-import { and, asc, desc, eq, inArray, isNull, lt } from "drizzle-orm";
-import type { Base } from "../base/connexion.js";
+import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
+import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
 import { changerStatut } from "../articles/service.js";
 import { CATEGORIES } from "../catalogue/categories.js";
@@ -41,7 +41,7 @@ export async function utilisateurParJeton(base: Base, jeton: string) {
 
 type ArticleComplet = Awaited<ReturnType<typeof chargerArticles>>[number];
 
-async function chargerArticles(base: Base, utilisateurId: string, ids: string[]) {
+async function chargerArticles(base: Base | Transaction, utilisateurId: string, ids: string[]) {
   if (ids.length === 0) return [];
   return base
     .select({
@@ -190,7 +190,7 @@ export async function nombreEnAttente(base: Base, utilisateurId: string, mainten
  * Échec d'une vraie publication (pas d'un essai) : l'article À publier passe en Erreur (issue #72). Ce passage
  * n'est jamais proposé à l'utilisateur (absent du tableau du §4.2) : seule la publication le fait.
  */
-async function passerEnErreur(base: Base, utilisateurId: string, articleId: string, maintenant: Date) {
+async function passerEnErreur(base: Base | Transaction, utilisateurId: string, articleId: string, maintenant: Date) {
   const r = await base
     .update(article)
     .set({ statut: "erreur_publication", modifieLe: maintenant })
@@ -208,6 +208,15 @@ async function passerEnErreur(base: Base, utilisateurId: string, articleId: stri
  * risquer une annonce en double (l'utilisateur vérifie sur Vinted, puis la redemande si besoin).
  */
 export async function demandeSuivante(base: Base, utilisateurId: string, maintenant: Date) {
+  // Un seul appel à la fois par utilisateur (issue #121) : deux appels simultanés (alarme de l'extension et
+  // « Vérifier maintenant », nouvel essai réseau) ne peuvent pas prendre chacun une demande, ni la même.
+  return base.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`publication:${utilisateurId}`}))`);
+    return suivanteDansLaFile(tx, utilisateurId, maintenant);
+  });
+}
+
+async function suivanteDansLaFile(base: Transaction, utilisateurId: string, maintenant: Date) {
   await base.update(reglages).set({ programmeVuLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
   const interrompues = await base
     .update(publicationVinted)
@@ -230,49 +239,58 @@ export async function demandeSuivante(base: Base, utilisateurId: string, mainten
     .from(publicationVinted)
     .where(and(eq(publicationVinted.utilisateurId, utilisateurId), eq(publicationVinted.etat, "en_cours")));
   if (enCours) return null; // une seule publication à la fois
-  const [suivante] = await base
-    .select({ id: publicationVinted.id, articleId: publicationVinted.articleId, essai: publicationVinted.essai })
-    .from(publicationVinted)
-    .where(and(eq(publicationVinted.utilisateurId, utilisateurId), eq(publicationVinted.etat, "en_attente")))
-    .orderBy(asc(publicationVinted.demandeLe))
-    .limit(1);
-  if (!suivante) return null;
-  const [a] = await chargerArticles(base, utilisateurId, [suivante.articleId]);
-  const photos = ((await photosDesArticles(base, [suivante.articleId])).get(suivante.articleId) ?? []).filter(
-    (p) => p.type === "annonce",
-  );
-  if (!a || manques(a, photos.length).length > 0) {
-    await base
+  for (;;) {
+    const [suivante] = await base
+      .select({ id: publicationVinted.id, articleId: publicationVinted.articleId, essai: publicationVinted.essai })
+      .from(publicationVinted)
+      .where(and(eq(publicationVinted.utilisateurId, utilisateurId), eq(publicationVinted.etat, "en_attente")))
+      .orderBy(asc(publicationVinted.demandeLe))
+      .limit(1);
+    if (!suivante) return null;
+    const [a] = await chargerArticles(base, utilisateurId, [suivante.articleId]);
+    const photos = ((await photosDesArticles(base, [suivante.articleId])).get(suivante.articleId) ?? []).filter(
+      (p) => p.type === "annonce",
+    );
+    if (!a || manques(a, photos.length).length > 0) {
+      await base
+        .update(publicationVinted)
+        .set({
+          etat: "erreur",
+          finLe: maintenant,
+          message: "Article modifié depuis la demande : il n'est plus complet.",
+        })
+        .where(eq(publicationVinted.id, suivante.id));
+      if (!suivante.essai) await passerEnErreur(base, utilisateurId, suivante.articleId, maintenant);
+      continue; // demande suivante
+    }
+    // Revendication conditionnelle : la demande n'est prise que si elle est encore en attente.
+    const prise = await base
       .update(publicationVinted)
-      .set({ etat: "erreur", finLe: maintenant, message: "Article modifié depuis la demande : il n'est plus complet." })
-      .where(eq(publicationVinted.id, suivante.id));
-    if (!suivante.essai) await passerEnErreur(base, utilisateurId, suivante.articleId, maintenant);
-    return demandeSuivante(base, utilisateurId, maintenant);
+      .set({ etat: "en_cours", debutLe: maintenant })
+      .where(and(eq(publicationVinted.id, suivante.id), eq(publicationVinted.etat, "en_attente")))
+      .returning({ id: publicationVinted.id });
+    if (prise.length === 0) return null;
+    const { formatColisDefaut } = await lireReglages(base, utilisateurId);
+    const ordonnees = [...photos.filter((p) => p.estPrincipale), ...photos.filter((p) => !p.estPrincipale)];
+    return {
+      id: suivante.id,
+      essai: suivante.essai,
+      article: {
+        reference: a.reference,
+        titre: a.titre ?? "",
+        description: a.description ?? "",
+        /** Euros, tel que saisi sur Vinted (ex. « 12,50 »). */
+        prix: `${Math.floor((a.prixAffiche ?? 0) / 100)},${String((a.prixAffiche ?? 0) % 100).padStart(2, "0")}`,
+        categorie: CATEGORIES.find((c) => c.code === a.categorie)?.chemin ?? [],
+        marque: a.marque ?? "",
+        etat: ETATS.find((e) => e.code === a.etat)?.libelle ?? "",
+        taille: a.taille,
+        couleurs: a.couleurs.map(libelleCouleur),
+        formatColis: a.formatColis ?? formatColisDefaut,
+        photos: ordonnees.map((p) => `/api/photos/${p.id}`),
+      },
+    };
   }
-  await base
-    .update(publicationVinted)
-    .set({ etat: "en_cours", debutLe: maintenant })
-    .where(eq(publicationVinted.id, suivante.id));
-  const { formatColisDefaut } = await lireReglages(base, utilisateurId);
-  const ordonnees = [...photos.filter((p) => p.estPrincipale), ...photos.filter((p) => !p.estPrincipale)];
-  return {
-    id: suivante.id,
-    essai: suivante.essai,
-    article: {
-      reference: a.reference,
-      titre: a.titre ?? "",
-      description: a.description ?? "",
-      /** Euros, tel que saisi sur Vinted (ex. « 12,50 »). */
-      prix: `${Math.floor((a.prixAffiche ?? 0) / 100)},${String((a.prixAffiche ?? 0) % 100).padStart(2, "0")}`,
-      categorie: CATEGORIES.find((c) => c.code === a.categorie)?.chemin ?? [],
-      marque: a.marque ?? "",
-      etat: ETATS.find((e) => e.code === a.etat)?.libelle ?? "",
-      taille: a.taille,
-      couleurs: a.couleurs.map(libelleCouleur),
-      formatColis: a.formatColis ?? formatColisDefaut,
-      photos: ordonnees.map((p) => `/api/photos/${p.id}`),
-    },
-  };
 }
 
 export type ResultatProgramme =
@@ -289,30 +307,46 @@ export async function enregistrerResultat(
   r: ResultatProgramme,
   maintenant: Date,
 ) {
-  const [p] = await base
-    .select()
-    .from(publicationVinted)
-    .where(and(eq(publicationVinted.id, id), eq(publicationVinted.utilisateurId, utilisateurId)));
-  if (!p) throw introuvable("Publication");
-  if (p.etat !== "en_cours") throw conflit("Cette publication n'est pas en cours.");
-  if (r.resultat === "publie") {
-    await changerStatut(
-      base,
-      utilisateurId,
-      p.articleId,
-      { vers: "en_ligne", date: maintenant, prixAffiche: null },
-      maintenant,
-    );
-    await base.update(article).set({ urlVinted: r.url }).where(eq(article.id, p.articleId));
-  }
-  if (r.resultat === "erreur" && !p.essai) await passerEnErreur(base, utilisateurId, p.articleId, maintenant);
-  await base
-    .update(publicationVinted)
-    .set({
-      etat: r.resultat,
-      finLe: maintenant,
-      message:
-        r.resultat === "erreur" ? r.message : r.resultat === "essai" ? "Essai : formulaire rempli, rien publié." : null,
-    })
-    .where(eq(publicationVinted.id, id));
+  // Tout ou rien (issue #121) : la publication, le statut de l'article et son lien changent ensemble. La publication
+  // n'est terminée que si elle est encore en cours : un résultat envoyé deux fois est refusé.
+  await base.transaction(async (tx) => {
+    const [p] = await tx
+      .update(publicationVinted)
+      .set({
+        etat: r.resultat,
+        finLe: maintenant,
+        message:
+          r.resultat === "erreur"
+            ? r.message
+            : r.resultat === "essai"
+              ? "Essai : formulaire rempli, rien publié."
+              : null,
+      })
+      .where(
+        and(
+          eq(publicationVinted.id, id),
+          eq(publicationVinted.utilisateurId, utilisateurId),
+          eq(publicationVinted.etat, "en_cours"),
+        ),
+      )
+      .returning({ articleId: publicationVinted.articleId, essai: publicationVinted.essai });
+    if (!p) {
+      const [existe] = await tx
+        .select({ id: publicationVinted.id })
+        .from(publicationVinted)
+        .where(and(eq(publicationVinted.id, id), eq(publicationVinted.utilisateurId, utilisateurId)));
+      throw existe ? conflit("Cette publication n'est pas en cours.") : introuvable("Publication");
+    }
+    if (r.resultat === "publie") {
+      await changerStatut(
+        tx,
+        utilisateurId,
+        p.articleId,
+        { vers: "en_ligne", date: maintenant, prixAffiche: null },
+        maintenant,
+      );
+      await tx.update(article).set({ urlVinted: r.url }).where(eq(article.id, p.articleId));
+    }
+    if (r.resultat === "erreur" && !p.essai) await passerEnErreur(tx, utilisateurId, p.articleId, maintenant);
+  });
 }

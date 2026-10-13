@@ -163,9 +163,49 @@ describe("publication Vinted", () => {
       message: expect.stringMatching(/Interrompue/),
     });
     expect(
-      (await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url: "x" }))
-        .statusCode,
+      (
+        await programme("POST", `/api/programme/publications/${id}/resultat`, {
+          resultat: "publie",
+          url: "https://www.vinted.fr/items/1-jean",
+        })
+      ).statusCode,
     ).toBe(409);
+  });
+
+  it("#121 — deux appels simultanés à « suivante » : une seule demande prise", async () => {
+    const a = await article();
+    const b = await article();
+    await requete("POST", "/api/publications", { articleIds: [a.id, b.id], essai: false });
+    const reponses = await Promise.all([
+      programme("GET", "/api/programme/suivante"),
+      programme("GET", "/api/programme/suivante"),
+    ]);
+    const prises = reponses.map((r) => r.json<{ publication: { id: string } | null }>().publication);
+    expect(prises.filter((p) => p !== null)).toHaveLength(1);
+    const etats = (await requete("GET", "/api/publications")).json<{ publications: { etat: string }[] }>();
+    expect(etats.publications.map((p) => p.etat).sort()).toEqual(["en_attente", "en_cours"]);
+  });
+
+  it("#121 — résultat envoyé deux fois : le second est refusé, l'article passe une seule fois En ligne", async () => {
+    const a = await article();
+    const id = await prendre(a.id, false);
+    const url = "https://www.vinted.fr/items/123-jean";
+    const reponses = await Promise.all([
+      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+    ]);
+    expect(reponses.map((r) => r.statusCode).sort()).toEqual([200, 409]);
+    const lu = (await requete("GET", `/api/articles/${a.id}`)).json<{
+      statut: string;
+      historiqueStatuts: { vers: string }[];
+    }>();
+    expect(lu.statut).toBe("en_ligne");
+    expect(lu.historiqueStatuts.filter((h) => h.vers === "en_ligne")).toHaveLength(1);
+  });
+
+  it("#121 — résultat d'une publication inconnue : 404", async () => {
+    const r = await programme("POST", `/api/programme/publications/${randomUUID()}/resultat`, { resultat: "essai" });
+    expect(r.statusCode).toBe(404);
   });
 
   /** Demande une publication et la fait prendre par l'extension ; renvoie l'identifiant de la demande. */
