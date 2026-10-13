@@ -14,8 +14,8 @@ interface Tableau {
     parStatut: Record<string, number>;
     detail: Record<string, { nombre: number; coutTotal: number; prixAffiche: number }>;
   };
-  enCours: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { chiffreAffaires: number } };
-  theorique: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee: { benefice: number } };
+  enCours: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee?: unknown };
+  theorique: { duMois: { chiffreAffaires: number; benefice: number }; deLAnnee?: unknown };
   rentabiliteLieux: { classement: { libelle: string; realise: number }[] };
   analyse: { categories: { libelle: string; nombreVendus: number }[] };
 }
@@ -60,7 +60,8 @@ describe("tableau de bord", () => {
     expect(enCours.duMois.chiffreAffaires).toBe(0);
     expect(enCours.enCours.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
     expect(enCours.theorique.duMois).toEqual({ chiffreAffaires: 900, benefice: 692 });
-    expect(enCours.enCours.deLAnnee.chiffreAffaires).toBe(900);
+    // Plus de total d'année pour le théorique (issue #96).
+    expect(enCours.enCours.deLAnnee).toBeUndefined();
     // Graphique (issue #88) : complément théorique de septembre ; trésorerie + crédits attendus.
     const septembre = enCours.serie.find((m) => m.mois === "2026-09");
     expect(septembre?.theorique.chiffreAffaires).toBe(900);
@@ -93,8 +94,9 @@ describe("tableau de bord", () => {
     });
     expect(tableau.deLAnnee.chiffreAffaires).toBe(900);
     // Finalisé : plus rien en cours ; théorique = réalisé.
-    expect(tableau.enCours.deLAnnee.chiffreAffaires).toBe(0);
-    expect(tableau.theorique.deLAnnee.benefice).toBe(392);
+    expect(tableau.enCours.duMois.chiffreAffaires).toBe(0);
+    expect(tableau.theorique.duMois.benefice).toBe(392);
+    expect(tableau.theorique.deLAnnee).toBeUndefined();
   });
 
   it("valeur du stock et nombre d'articles par statut", async () => {

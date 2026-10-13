@@ -1,6 +1,7 @@
 // Graphique mensuel (§5.9) : une mesure à la fois (une seule échelle), barres depuis la ligne zéro,
 // info-bulle au survol et au clavier, tableau des valeurs accessible sans survol.
-// Issue #88 : barre « réalisé » + complément « théorique » empilé (ventes en cours), même teinte en plus clair.
+// Issues #88 et #91 : barre « réalisé » + « théorique » (ventes en cours) : partie claire quand le théorique dépasse
+// le réalisé vers le haut, et contour plein de 0 au théorique, lisible quel que soit le signe (contraste ≥ 3:1).
 import { useState } from "react";
 import { formatEuros } from "../outils/montants.js";
 
@@ -9,9 +10,7 @@ export interface PointMensuel {
   mois: string;
   /** Centimes : réalisé. */
   valeur: number;
-  /** Centimes : ventes en cours ajoutées au réalisé (théorique = valeur + complément). Dessiné s'il est positif. */
-  complement?: number;
-  /** Centimes : réalisé + complément, calculé par le serveur. */
+  /** Centimes : réalisé + ventes en cours, calculé par le serveur (absent : pas de théorique). */
   theorique?: number;
 }
 
@@ -23,17 +22,18 @@ const HAUTEUR = 180;
 const MARGE_HAUT = 12;
 const MARGE_BAS = 22;
 
-/** Hauteur visible du complément : seulement la partie positive. */
-const dessus = (p: PointMensuel) => Math.max(0, p.complement ?? 0);
+/** Le théorique est montré (dessin, bulle, lecteur d'écran, tableau) dès qu'il diffère du réalisé. */
+const aUnTheorique = (p: PointMensuel): p is PointMensuel & { theorique: number } =>
+  p.theorique !== undefined && p.theorique !== p.valeur;
 
 export function GraphiqueMensuel({ titre, points }: { titre: string; points: PointMensuel[] }) {
   const [actif, setActif] = useState<number | null>(null);
   const [tableau, setTableau] = useState(false);
-  const avecTheorique = points.some((p) => dessus(p) > 0);
-  // Échelle : le haut de la pile (réalisé + complément) ou le réalisé s'il dépasse (complément nul).
-  const hautPile = (p: PointMensuel) => (dessus(p) > 0 ? (p.theorique ?? p.valeur) : p.valeur);
-  const max = Math.max(0, ...points.map(hautPile));
-  const min = Math.min(0, ...points.map((p) => p.valeur));
+  const avecTheorique = points.some(aUnTheorique);
+  // Échelle commune au réalisé et au théorique, zéro toujours visible.
+  const valeurs = points.flatMap((p) => (aUnTheorique(p) ? [p.valeur, p.theorique] : [p.valeur]));
+  const max = Math.max(0, ...valeurs);
+  const min = Math.min(0, ...valeurs);
   const etendue = max - min || 1;
   const zone = HAUTEUR - MARGE_HAUT - MARGE_BAS;
   const y = (v: number) => MARGE_HAUT + ((max - v) / etendue) * zone;
@@ -41,6 +41,8 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
   const pas = LARGEUR / points.length;
   const largeurBarre = Math.max(4, pas - 8);
   const pointActif = actif === null ? null : points[actif];
+  /** Rectangle vertical entre deux valeurs (ordre indifférent). */
+  const entre = (a: number, b: number) => ({ y: Math.min(y(a), y(b)), hauteur: Math.abs(y(a) - y(b)) });
 
   return (
     <figure className="graphique">
@@ -48,19 +50,24 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
       {avecTheorique && (
         <p className="graphique__legende" aria-hidden="true">
           <span className="graphique__pastille" /> Réalisé{" "}
-          <span className="graphique__pastille graphique__pastille--theorique" /> Ventes en cours (théorique)
+          <span className="graphique__pastille graphique__pastille--theorique" /> Théorique (avec les ventes en cours)
         </p>
       )}
       <div className="graphique__zone">
         <svg viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} role="img" aria-label={`${titre} par mois`}>
           <line x1={0} x2={LARGEUR} y1={zero} y2={zero} className="graphique__zero" />
           {points.map((p, i) => {
-            const haut = Math.min(y(p.valeur), zero);
-            const hauteur = Math.abs(y(p.valeur) - zero);
-            // Le complément part du haut de la barre réalisée (ou de zéro si le réalisé est négatif).
-            const base = p.valeur > 0 ? p.valeur : 0;
-            const hautComplement = y(p.theorique !== undefined && p.valeur > 0 ? p.theorique : base + dessus(p));
-            const hauteurComplement = dessus(p) > 0 ? y(base) - hautComplement : 0;
+            const realise = entre(0, p.valeur);
+            // Partie claire : seulement là où le théorique dépasse le réalisé vers le haut.
+            const bas = Math.max(p.valeur, 0);
+            const clair = aUnTheorique(p) && p.theorique > bas ? entre(bas, p.theorique) : null;
+            // Théorique à l'intérieur de la barre réalisée (ex. trésorerie −500 € → théorique −400 €) : trait de la
+            // couleur du fond à son niveau ; sinon, contour plein de 0 au théorique.
+            const dedans =
+              aUnTheorique(p) &&
+              Math.sign(p.theorique) === Math.sign(p.valeur) &&
+              Math.abs(p.theorique) < Math.abs(p.valeur);
+            const contour = aUnTheorique(p) && !dedans ? entre(0, p.theorique) : null;
             const x = i * pas + (pas - largeurBarre) / 2;
             const classe = actif === i ? " est-actif" : "";
             return (
@@ -73,29 +80,46 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
                 onBlur={() => setActif(null)}
                 aria-label={
                   `${libelleMois(p.mois)} : réalisé ${formatEuros(p.valeur)}` +
-                  (p.theorique !== undefined && dessus(p) > 0 ? `, théorique ${formatEuros(p.theorique)}` : "")
+                  (aUnTheorique(p) ? `, théorique ${formatEuros(p.theorique)}` : "")
                 }
               >
                 {/* Zone de survol : toute la colonne du mois. */}
                 <rect x={i * pas} y={0} width={pas} height={HAUTEUR} fill="transparent" />
-                {hauteur > 0 && (
+                {clair && clair.hauteur > 0 && (
                   <rect
                     x={x}
-                    y={haut}
+                    y={clair.y}
                     width={largeurBarre}
-                    height={hauteur}
-                    rx={Math.min(4, hauteur / 2)}
+                    height={clair.hauteur}
+                    className="graphique__barre graphique__barre--theorique"
+                  />
+                )}
+                {realise.hauteur > 0 && (
+                  <rect
+                    x={x}
+                    y={realise.y}
+                    width={largeurBarre}
+                    height={realise.hauteur}
+                    rx={Math.min(4, realise.hauteur / 2)}
                     className={`graphique__barre${classe}`}
                   />
                 )}
-                {hauteurComplement > 0 && (
+                {dedans && (
+                  <line
+                    x1={x}
+                    x2={x + largeurBarre}
+                    y1={y(p.theorique ?? 0)}
+                    y2={y(p.theorique ?? 0)}
+                    className="graphique__repere"
+                  />
+                )}
+                {contour && contour.hauteur > 0 && (
                   <rect
-                    x={x}
-                    y={hautComplement}
-                    width={largeurBarre}
-                    height={hauteurComplement}
-                    rx={Math.min(4, hauteurComplement / 2)}
-                    className={`graphique__barre graphique__barre--theorique${classe}`}
+                    x={x + 0.75}
+                    y={contour.y + 0.75}
+                    width={largeurBarre - 1.5}
+                    height={Math.max(0, contour.hauteur - 1.5)}
+                    className="graphique__contour"
                   />
                 )}
                 <text x={i * pas + pas / 2} y={HAUTEUR - 6} textAnchor="middle" className="graphique__axe">
@@ -108,7 +132,7 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
         {pointActif && (
           <div className="graphique__bulle" role="status">
             <span>{libelleMois(pointActif.mois)}</span> <strong>{formatEuros(pointActif.valeur)}</strong>
-            {pointActif.theorique !== undefined && (pointActif.complement ?? 0) !== 0 && (
+            {aUnTheorique(pointActif) && (
               <>
                 {" "}
                 <span>· théorique</span> <strong>{formatEuros(pointActif.theorique)}</strong>
@@ -126,7 +150,7 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
             <tr>
               <th>Mois</th>
               <th>Réalisé</th>
-              {points.some((p) => p.theorique !== undefined) && <th>Théorique</th>}
+              {avecTheorique && <th>Théorique</th>}
             </tr>
           </thead>
           <tbody>
@@ -134,7 +158,7 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
               <tr key={p.mois}>
                 <td>{libelleMois(p.mois)}</td>
                 <td>{formatEuros(p.valeur)}</td>
-                {p.theorique !== undefined && <td>{formatEuros(p.theorique)}</td>}
+                {avecTheorique && <td>{formatEuros(p.theorique ?? p.valeur)}</td>}
               </tr>
             ))}
           </tbody>

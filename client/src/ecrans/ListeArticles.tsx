@@ -21,6 +21,7 @@ import {
   type Filtres,
   filtrerEtTrier,
   lireFiltres,
+  selectionVintedPossible,
   nombreFiltresActifs,
   type Tri,
 } from "../outils/recherche.js";
@@ -93,7 +94,7 @@ export function ListeArticles() {
   const [etat, setEtat] = useState<Etat>(lireEtat);
   const [filtresOuverts, setFiltresOuverts] = useState(false);
   const [mode, setMode] = useState<ModeAffichage>(lireModeAffichage);
-  /** Mode sélection (filtre « À publier ») : articles cochés pour la publication sur Vinted. */
+  /** Mode sélection (filtre « À publier » et/ou « Erreur », #95) : articles cochés pour la publication sur Vinted. */
   const [selection, setSelection] = useState<Set<string> | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
@@ -159,7 +160,7 @@ export function ListeArticles() {
 
   const filtrer = (modif: Partial<Filtres>) => setEtat((e) => ({ ...e, filtres: { ...e.filtres, ...modif } }));
   const nombreFiltres = nombreFiltresActifs(etat.filtres);
-  const selectionPossible = etat.filtres.statuts.length === 1 && etat.filtres.statuts[0] === "a_publier";
+  const selectionPossible = selectionVintedPossible(etat.filtres.statuts);
   const basculerStatut = (statut: Statut) =>
     filtrer({
       statuts: etat.filtres.statuts.includes(statut)

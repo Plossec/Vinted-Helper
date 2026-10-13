@@ -60,6 +60,14 @@ export const STATUTS_PAR_DEFAUT: Statut[] = [
 
 export const FILTRES_PAR_DEFAUT: Filtres = { ...FILTRES_VIDES, statuts: STATUTS_PAR_DEFAUT };
 
+/**
+ * Sélection pour Vinted proposée (issue #95) : seulement quand la liste est filtrée sur « À publier » et/ou « Erreur »,
+ * les deux statuts que la publication accepte.
+ */
+export function selectionVintedPossible(statuts: readonly Statut[]): boolean {
+  return statuts.length > 0 && statuts.every((s) => s === "a_publier" || s === "erreur_publication");
+}
+
 /** Les statuts sont-ils ceux par défaut (le compteur « Filtres (N) » ne les compte pas) ? */
 export function statutsParDefaut(statuts: readonly Statut[]): boolean {
   return statuts.length === STATUTS_PAR_DEFAUT.length && STATUTS_PAR_DEFAUT.every((s) => statuts.includes(s));
