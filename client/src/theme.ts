@@ -11,6 +11,10 @@ export const CHOIX_THEME: readonly { valeur: PreferenceTheme; libelle: string }[
 
 const CLE = "vh-theme";
 
+// Couleur de la barre d'état : celle du fond de page (--fond) dans chaque thème. index.html déclare les mêmes valeurs
+// pour le mode automatique ; un thème forcé les remplace.
+const FOND_BARRE_ETAT = { clair: "#f6f7fb", sombre: "#0a0c1a" } as const;
+
 /** Valeur inconnue ou absente : « auto ». */
 export function normaliserPreferenceTheme(valeur: unknown): PreferenceTheme {
   return valeur === "clair" || valeur === "sombre" ? valeur : "auto";
@@ -28,6 +32,11 @@ export function lirePreferenceTheme(): PreferenceTheme {
 export function appliquerPreferenceTheme(preference: PreferenceTheme): void {
   if (preference === "auto") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = preference;
+  const balises = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+  balises.forEach((balise) => {
+    const sombre = balise.media.includes("dark");
+    balise.content = FOND_BARRE_ETAT[preference === "auto" ? (sombre ? "sombre" : "clair") : preference];
+  });
 }
 
 export function enregistrerPreferenceTheme(preference: PreferenceTheme): void {

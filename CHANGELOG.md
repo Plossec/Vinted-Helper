@@ -8,7 +8,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ### Modifié
 - **Refonte de l'interface** (direction « Techno », indigo) : couleurs, rayons, espacements et tailles de texte
   regroupés en design tokens, boutons plein / contour / fantôme avec survol, focus et état désactivé, champs et messages
-  d'erreur avec icône ⚠, montants en police à chasse fixe, polices du système (#138).
+  d'erreur avec icône ⚠, montants en police à chasse fixe, polices du système ; nouvelle icône indigo et barre d'état
+  aux couleurs du fond de page (#138).
 
 ### Ajouté
 - Réglages : choix du thème Auto / Clair / Sombre, mémorisé sur l'appareil (#138).

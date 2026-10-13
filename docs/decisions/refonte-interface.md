@@ -58,8 +58,15 @@ Badges de statut (texte `--fond` dessus, tous ≥ 5,1:1) : brouillon `#5F6485` /
 - **Erreur** : couleur `--erreur` + icône ⚠ (jamais la couleur seule) ; champ `aria-invalid="true"` : bordure de 2 px
   + fond `--erreur-doux`.
 
+## Icône et barre d'état (13/10/2026)
+
+- **Icône** redessinée : tuile indigo `#4338CA` (coins 88/512), sac blanc plein avec le € découpé dans la couleur de la
+  tuile (lisible même à 48 px). Fichiers : `client/public/icone.svg` (source) et les PNG `icone-192`, `icone-512`,
+  `icone-masquable-512` (pleine page, glyphe dans la zone sûre) et `apple-touch-icon` (pleine page, sans transparence).
+- **Barre d'état** : couleur du fond de page — `#F6F7FB` en clair, `#0A0C1A` en sombre (deux balises `theme-color` selon
+  `prefers-color-scheme` ; un thème forcé dans les Réglages les remplace, voir `theme.ts`). Manifeste : `theme_color` et
+  `background_color` `#4338CA` (écran de lancement aux couleurs de l'icône).
+
 ## Hors périmètre de cette refonte
 
-- **Icône de l'application et couleurs du manifeste** (`#0B7A75`, vert-bleu) : inchangées. Les adapter à l'indigo
-  demande de redessiner et régénérer les icônes PNG : à décider séparément.
 - Aucune dépendance ajoutée ; aucune règle de calcul, de données ni d'API modifiée.
