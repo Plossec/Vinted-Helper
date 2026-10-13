@@ -50,8 +50,9 @@ calcul) est utilisé.
 
 ## 5. Publier
 
-- **Plusieurs articles** : Articles → Filtres → Statut « À publier » → **Sélectionner pour Vinted** → cochez →
-  **Publier sur Vinted (N)**.
+- **Plusieurs articles** : Articles → Filtres → Statut « À publier » et/ou « Erreur » (seulement ces statuts) →
+  **Sélectionner pour Vinted** → cochez → **Publier sur Vinted (N)**. Les articles en Erreur repassent À publier
+  (sauf en mode essai, qui ne change rien).
 - **Un article** : sur sa fiche, bouton **Publier sur Vinted**.
 - **Suivi** : Réglages → Publication Vinted : file d'attente, état de chaque article (en attente, en cours, publié,
   essai, erreur), bouton Annuler tant qu'il n'est pas commencé.
