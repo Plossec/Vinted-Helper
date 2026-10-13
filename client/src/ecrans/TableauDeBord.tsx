@@ -8,6 +8,7 @@ import { api } from "../api.js";
 import { GraphiqueMensuel } from "../composants/GraphiqueMensuel.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
+import { Montant } from "../composants/Montant.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 interface Periode {
@@ -179,15 +180,19 @@ export function TableauDeBord() {
                 <span className="tuile__titre">{MESURES[m]}</span>
                 {/* Le gros chiffre est le réalisé du mois : libellé au-dessus, sans le répéter dessous (#97). */}
                 <span className="tuile__detail">{libelleMoisMajuscule} réalisé</span>
-                <strong className="tuile__valeur">{formatEuros(tableau.duMois[m])}</strong>
+                <strong className="tuile__valeur">
+                  <Montant centimes={tableau.duMois[m]} />
+                </strong>
                 <span className="tuile__detail">
-                  {libelleMoisMajuscule} théorique : {formatEuros(tableau.theorique.duMois[MESURE_EN_COURS[m]])}
+                  {libelleMoisMajuscule} théorique : <Montant centimes={tableau.theorique.duMois[MESURE_EN_COURS[m]]} />
                 </span>
               </div>
             ))}
             <div className="tuile">
               <span className="tuile__titre">{MESURES.tresorerie}</span>
-              <strong className="tuile__valeur">{formatEuros(tableau.duMois.tresorerie)}</strong>
+              <strong className="tuile__valeur">
+                <Montant centimes={tableau.duMois.tresorerie} />
+              </strong>
               <span className="tuile__detail">{libelleMoisMajuscule} :</span>
               <table className="tuile__calcul">
                 <tbody>
@@ -373,7 +378,9 @@ export function TableauDeBord() {
                         <tr key={a.cle}>
                           <td>{a.libelle}</td>
                           <td>{a.nombreVendus}</td>
-                          <td>{formatEuros(a.margeMoyenne)}</td>
+                          <td>
+                            <Montant centimes={a.margeMoyenne} />
+                          </td>
                           <td>{pourcentage(a.tauxMarge)}</td>
                           <td>{jours(a.delaiMiseEnLigneVente)}</td>
                           <td>{jours(a.delaiAchatVente)}</td>
@@ -415,8 +422,12 @@ function TableRentabilite({ lignes, parSortie }: { lignes: Rentabilite[]; parSor
                   r.libelle
                 )}
               </td>
-              <td className={r.realise < 0 ? "negatif" : ""}>{formatEuros(r.realise)}</td>
-              <td className={r.provisoire < 0 ? "negatif" : ""}>{formatEuros(r.provisoire)}</td>
+              <td>
+                <Montant centimes={r.realise} />
+              </td>
+              <td>
+                <Montant centimes={r.provisoire} />
+              </td>
               <td>
                 {r.restants} / {r.nombreArticles}
               </td>

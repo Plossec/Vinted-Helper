@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router";
 import { type ResumeArticle, urlVignette } from "../api.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
+import { Montant } from "./Montant.js";
 import type { Tri } from "../outils/recherche.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 
@@ -253,7 +254,7 @@ function Tableau(props: Props) {
                 className={`nombre${a.beneficeRealise ? "" : " provisoire"}`}
                 title={a.beneficeRealise ? "Bénéfice réalisé" : "Bénéfice provisoire"}
               >
-                {a.benefice === null ? "—" : formatEuros(a.benefice)}
+                {a.benefice === null ? "—" : <Montant centimes={a.benefice} />}
               </td>
             </tr>
           ))}

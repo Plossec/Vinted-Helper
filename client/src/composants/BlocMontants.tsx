@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { api, type Article, LIBELLES_CANAL, LIBELLES_MOTIF } from "../api.js";
 import { aujourdhui, formatDate, formatDateHeure } from "../outils/dates.js";
 import { formatEuros, lireMontant } from "../outils/montants.js";
+import { Montant } from "./Montant.js";
 import { useSignalerModification } from "../outils/modifications.js";
 
 export function BlocMontants({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
@@ -71,8 +72,18 @@ export function BlocMontants({ article, onMiseAJour }: { article: Article; onMis
           )}
           <tr className="montants__total">
             <td>{c.realise ? "Bénéfice" : "Bénéfice provisoire"}</td>
-            <td className={c.benefice < 0 ? "negatif" : "positif"}>{formatEuros(c.benefice)}</td>
+            <td>
+              <Montant centimes={c.benefice} />
+            </td>
           </tr>
+          {c.beneficeAttendu !== null && (
+            <tr>
+              <td>Bénéfice attendu à la finalisation</td>
+              <td>
+                <Montant centimes={c.beneficeAttendu} signe />
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
 

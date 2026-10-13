@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.10.0] — 13/10/2026
+
+### Ajouté
+- Fiche d'un article vendu non finalisé : « Bénéfice attendu à la finalisation » (ex. +6,92 €) sous le bénéfice
+  provisoire, calculé par le serveur (#105).
+
+### Modifié
+- Statuts : neuf couleurs distinctes (« Envoyé » ≠ « À expédier », « Sortie du stock » ≠ « Brouillon ») ; montants
+  négatifs affichés partout avec le même signe « − » et en rouge (#105).
+
+### Corrigé
+- Affichage « Détaillé » : la colonne fixe du tableau ne passe plus par-dessus la barre de navigation (#105).
+
 ## [1.9.2] — 13/10/2026
 
 ### Modifié
