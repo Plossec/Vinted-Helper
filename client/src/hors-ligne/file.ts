@@ -2,6 +2,7 @@
 // puis envoyée au serveur dans l'ordre, avec renvoi automatique. Les identifiants sont générés sur le
 // téléphone (UUID) : un renvoi ne crée jamais de doublon côté serveur.
 // Ce fichier ne contient que la logique (testable sans navigateur) ; le stockage est fourni à part.
+import { messageErreur } from "../outils/erreurs.js";
 
 export interface CorpsSortie {
   id: string;
@@ -113,10 +114,7 @@ export async function interpreterReponse(reponse: Response): Promise<ResultatEnv
   // Serveur injoignable ou en redémarrage (mise à jour, relais HTTPS) : comme une coupure de réseau.
   if ([408, 429, 502, 503, 504].includes(reponse.status)) return { etat: "reseau" };
   const contenu: unknown = await reponse.json().catch(() => null);
-  const message =
-    typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
-      ? contenu.erreur
-      : `Erreur ${reponse.status}`;
+  const message = messageErreur(contenu, reponse.status);
   if (reponse.status >= 500) return { etat: "serveur", message };
   return { etat: "refuse", message };
 }

@@ -31,6 +31,7 @@ Développement local (PC Windows + Docker Desktop), puis hébergement sur un VPS
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` (automatique chaque jour : service `sauvegarde`, `sauvegardes/auto/`) |
 | Générer / appliquer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` / `npm run db:migrate` (aussi au démarrage) |
 | Réinitialiser le mot de passe | `docker compose exec -it app npm run reset-password -w server` |
+| Refaire l'annexe des catégories (après une modification de `catalogue/categories.ts`) | `npm run doc:categories -w server` |
 
 Restauration, serveur OVH et rapatriement des sauvegardes : voir `docs/guides/`. Garde ce tableau à jour si les
 commandes changent. Les tests n'utilisent jamais Docker ni la vraie base (PGlite en mémoire, `server/src/test/`).

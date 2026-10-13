@@ -4,12 +4,10 @@ import type { ContexteRoutes } from "../app.js";
 import { lireArticle } from "../articles/service.js";
 import { creerLimiteur } from "../compte/limiteur.js";
 import { ErreurMetier, erreurSaisie } from "../outils/erreurs.js";
-import { objet, texteFacultatif, uuidObligatoire } from "../outils/validation.js";
+import { idDe, objet, texteFacultatif } from "../outils/validation.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import type { ClientIA } from "./gemini.js";
 import { genererAnnonce, lireEtiquette, modifierAnnonce, promptAnnonce, PROMPTS_DEFAUT } from "./service.js";
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 /** Appels à Gemini par utilisateur et par heure (#135) : préserve le quota gratuit contre une rafale. */
 export const LIMITE_IA = { max: 30, fenetreMs: 60 * 60 * 1000 };

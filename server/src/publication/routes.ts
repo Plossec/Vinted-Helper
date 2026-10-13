@@ -2,7 +2,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
-import { lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
 import {
   annulerPublication,
   creerJeton,
@@ -13,8 +13,6 @@ import {
   nombreEnAttente,
   type ResultatProgramme,
 } from "./service.js";
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 export function routesPublication(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   // --- Interface ---

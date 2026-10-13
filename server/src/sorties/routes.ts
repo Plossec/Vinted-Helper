@@ -8,6 +8,7 @@ import {
   centimesFacultatif,
   centimesObligatoire,
   dateObligatoire,
+  idDe,
   objet,
   texteFacultatif,
   texteObligatoire,
@@ -32,8 +33,6 @@ function lireDonneesSortie(corps: unknown): DonneesSortie {
     notes: texteFacultatif(c.notes, "Notes", 2000),
   };
 }
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 export function routesSorties(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/sorties", async (requete) => listerSorties(base, utilisateurDe(requete).id));

@@ -106,3 +106,14 @@ réussie (droit `contents: write` limité à ce job ; pas de tag si le déploiem
   `.mjs`, `.yml`, `.html`.
 - Les fichiers protégés sont préparés par Claude et mis en place par l'utilisateur (branche poussée depuis le PC),
   Claude complétant la même branche.
+
+## 13/10/2026 — Qualité du code : doublons retirés (issue #133)
+
+**Décision (Claude, *à relire*)**, sans refonte :
+- un seul `messageErreur` côté client, un seul `idDe` pour les routes, un seul `centimesVersSaisie` côté serveur ;
+- `react`, `react-dom`, `react-router` passent en dépendances de développement (embarqués par Vite) : l'image
+  Docker de production ne les installe plus ;
+- `docs/categories-vinted.md` est **généré** depuis `catalogue/categories.ts` (`npm run doc:categories -w server`) ;
+  un test échoue si l'annexe n'est plus à jour.
+- **Non faits** : la réécriture de `annulerDernierChangement` en table (Q4), jugée sans gain réel (lisible, testée)
+  et risquée ; le découpage des gros fichiers (Q5), à faire seulement quand on y touche.

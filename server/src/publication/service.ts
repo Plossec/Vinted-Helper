@@ -12,6 +12,7 @@ import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
 import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
+import { centimesVersSaisie } from "../outils/format.js";
 
 /** Une demande « en cours » depuis plus longtemps est considérée comme interrompue (jamais relancée seule). */
 const DELAI_INTERRUPTION_MS = 15 * 60 * 1000;
@@ -280,7 +281,7 @@ async function suivanteDansLaFile(base: Transaction, utilisateurId: string, main
         titre: a.titre ?? "",
         description: a.description ?? "",
         /** Euros, tel que saisi sur Vinted (ex. « 12,50 »). */
-        prix: `${Math.floor((a.prixAffiche ?? 0) / 100)},${String((a.prixAffiche ?? 0) % 100).padStart(2, "0")}`,
+        prix: centimesVersSaisie(a.prixAffiche ?? 0),
         categorie: CATEGORIES.find((c) => c.code === a.categorie)?.chemin ?? [],
         marque: a.marque ?? "",
         etat: ETATS.find((e) => e.code === a.etat)?.libelle ?? "",

@@ -23,6 +23,7 @@ import {
   centimesObligatoire,
   dateObligatoire,
   horodatageFacultatif,
+  idDe,
   lienVintedFacultatif,
   objet,
   texteFacultatif,
@@ -49,8 +50,6 @@ function listeIds(valeur: unknown, champ: string): string[] {
   if (!Array.isArray(valeur)) throw erreurSaisie(`${champ} : liste attendue.`);
   return valeur.map((v: unknown) => uuidObligatoire(v, champ));
 }
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 function lireFrais(corps: unknown): DonneesFrais {
   const c = objet(corps);
