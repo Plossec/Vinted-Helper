@@ -6,6 +6,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Corrigé
+- Ventes : un même article ne peut plus être vendu deux fois (double tape, nouvel envoi) ; « Confirmer » est désactivé
+  pendant l'envoi (#120).
+- Publication Vinted : deux appels simultanés de l'extension ne peuvent plus prendre la même demande (risque
+  d'annonce en double), et le résultat est enregistré d'un seul bloc (#121).
+- Publication Vinted : le lien renvoyé par l'extension doit être une adresse https de Vinted ; l'extension (version
+  1.8.1) refuse une adresse d'application en `http://`, sauf localhost (#128).
 - Sécurité : une adresse encodée (`/%61pi/…`) ne contourne plus le contrôle de connexion ; un test vérifie que toute
   l'API exige la connexion (#118).
 - Sauvegarde automatique : une sauvegarde incomplète (échec de pg_dump, archive abîmée) n'est plus gardée comme

@@ -203,6 +203,24 @@ describe("publication Vinted", () => {
     expect(lu.historiqueStatuts.filter((h) => h.vers === "en_ligne")).toHaveLength(1);
   });
 
+  it("#128 — lien renvoyé par l'extension : seule une adresse https de Vinted est acceptée", async () => {
+    const a = await article();
+    const id = await prendre(a.id, false);
+    for (const url of ["https://hameconnage.example/items/1", "http://www.vinted.fr/items/1", "", "pas un lien"]) {
+      const r = await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url });
+      expect(r.statusCode, url).toBe(400);
+    }
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "a_publier",
+      urlVinted: null,
+    });
+    const ok = await programme("POST", `/api/programme/publications/${id}/resultat`, {
+      resultat: "publie",
+      url: "https://www.vinted.fr/items/123-jean",
+    });
+    expect(ok.statusCode).toBe(200);
+  });
+
   it("#121 — résultat d'une publication inconnue : 404", async () => {
     const r = await programme("POST", `/api/programme/publications/${randomUUID()}/resultat`, { resultat: "essai" });
     expect(r.statusCode).toBe(404);
