@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.10.1] — 13/10/2026
+
+### Modifié
+- Sur PC (à partir de 1024 px) : navigation à gauche, liste des articles en tableau détaillé par défaut, fiche
+  article sur deux colonnes ; rien ne change sur téléphone (#106).
+
 ## [1.10.0] — 13/10/2026
 
 ### Ajouté

@@ -106,3 +106,12 @@ qui reste inchangé (−coût total). Points tranchés par Claude (*à relire*) 
 - Montants : vrai signe moins (−) partout (`formatEuros`), négatif en rouge via le composant `Montant` ; les
   positifs ne sont plus en vert (une seule règle partout) ; « + » seulement devant le bénéfice attendu.
 - Au passage : la barre de navigation passe au-dessus des colonnes fixes du tableau « Détaillé ».
+
+## 13/10/2026 — Mise en page PC à partir de 1024 px (issue #106)
+
+**Décision (utilisateur)** : réalisée après les points mobiles (#100, #103, #105). À partir de 1024 px :
+- barre de navigation **à gauche** (13 rem, icône + libellé, pastille en bout de ligne) ;
+- liste des articles en **tableau détaillé par défaut** quand aucun affichage n'a été choisi sur l'appareil (le
+  choix mémorisé reste prioritaire) ;
+- fiche article sur **deux colonnes** : fiche à gauche ; achat, annonce, Vinted, photos, statut, montants à droite.
+Sous 1024 px, rien ne change. Bouton « + » et barre de sélection recalés sans barre du bas.

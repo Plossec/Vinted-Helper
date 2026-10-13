@@ -19,12 +19,21 @@ export const MODES_AFFICHAGE: { mode: ModeAffichage; icone: string; libelle: str
 
 const CLE_MODE = "vh-affichage-articles";
 
+/** Sans choix mémorisé : tableau détaillé sur PC (≥ 1024 px, #106), vignettes sur téléphone. */
+function modeParDefaut(): ModeAffichage {
+  try {
+    return window.matchMedia("(min-width: 1024px)").matches ? "detaille" : "vignettes";
+  } catch {
+    return "vignettes";
+  }
+}
+
 export function lireModeAffichage(): ModeAffichage {
   try {
     const mode = localStorage.getItem(CLE_MODE);
-    return MODES_AFFICHAGE.some((m) => m.mode === mode) ? (mode as ModeAffichage) : "vignettes";
+    return MODES_AFFICHAGE.some((m) => m.mode === mode) ? (mode as ModeAffichage) : modeParDefaut();
   } catch {
-    return "vignettes";
+    return modeParDefaut();
   }
 }
 

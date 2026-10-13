@@ -1657,3 +1657,89 @@ a {
 .lien-conversation {
   text-decoration: none;
 }
+
+/* --- Mise en page PC, à partir de 1024 px (#106) : navigation latérale, fiche article sur deux colonnes --- */
+@media (min-width: 1024px) {
+  .disposition {
+    padding-left: 13rem;
+  }
+
+  .disposition__contenu {
+    padding-bottom: var(--e-6);
+  }
+
+  .navigation {
+    inset: 0 auto 0 0;
+    width: 13rem;
+    flex-direction: column;
+    gap: var(--e-1);
+    padding: var(--e-6) var(--e-2);
+    border-top: none;
+    border-right: 1px solid var(--bordure);
+  }
+
+  .navigation__lien {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--e-3);
+    min-height: var(--hauteur-tactile);
+    padding: var(--e-2) var(--e-3);
+    border-radius: var(--rayon);
+  }
+
+  .navigation__libelle {
+    font-size: var(--t-corps);
+  }
+
+  /* Pastille d'alertes en bout de ligne, plus sur l'icône. */
+  .navigation__lien {
+    position: relative;
+  }
+
+  .navigation__icone {
+    position: static;
+  }
+
+  .navigation__icone .pastille {
+    top: 50%;
+    left: auto;
+    right: var(--e-3);
+    transform: translateY(-50%);
+    min-width: 1.5rem;
+    height: 1.5rem;
+    font-size: var(--t-petit);
+  }
+
+  .navigation__lien.active {
+    background: var(--accent-doux);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .bouton-flottant {
+    bottom: var(--e-6);
+    right: var(--e-6);
+  }
+
+  .selection-barre {
+    bottom: var(--e-4);
+  }
+
+  .page--fiche {
+    max-width: 76rem;
+  }
+
+  .fiche {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--e-8);
+    align-items: start;
+  }
+
+  /* Colonne de droite : le premier bloc n'a pas besoin du trait de séparation. */
+  .fiche__colonne + .fiche__colonne > .section:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+}
