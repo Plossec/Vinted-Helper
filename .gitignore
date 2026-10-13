@@ -17,3 +17,7 @@ sauvegardes/
 Thumbs.db
 *.log
 .claude/settings.local.json
+
+# Rapports des tests de l'extension (Playwright)
+playwright-report/
+test-results/

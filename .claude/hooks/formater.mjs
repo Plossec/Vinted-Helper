@@ -1,12 +1,13 @@
 // Hook PostToolUse (Edit, Write) : formate avec Prettier le fichier que Claude vient de modifier.
-// - Uniquement .ts, .tsx, .js, .json, .css, et uniquement dans le dossier du projet.
+// - Uniquement les fichiers que la CI vérifie (format:check) : .ts, .tsx, .js, .mjs, .cjs, .json, .css, .html, .yml,
+//   .yaml (issue #112), et uniquement dans le dossier du projet ; Prettier respecte .prettierignore (.md exclus…).
 // - Écrit en Node (pas de bash ni de jq) pour fonctionner pareil sous Windows et Linux.
 // - Non bloquant : quoi qu'il arrive (Prettier absent, erreur de syntaxe…), on sort avec le code 0.
 import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { extname, isAbsolute, join, relative, resolve } from "node:path";
 
-const EXTENSIONS = new Set([".ts", ".tsx", ".js", ".json", ".css"]);
+const EXTENSIONS = new Set([".ts", ".tsx", ".js", ".mjs", ".cjs", ".json", ".css", ".html", ".yml", ".yaml"]);
 
 let entree = "";
 process.stdin.setEncoding("utf8");

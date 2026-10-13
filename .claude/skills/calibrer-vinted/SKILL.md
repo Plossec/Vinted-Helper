@@ -51,7 +51,8 @@ l'application, en général le dernier chiffre) : le tag est créé par GitHub a
 
 ## 7. Livraison
 Commit en français à l'impératif, push, PR `#N — Corrige …` avec `Closes #N`. Fusionne quand les vérifications
-GitHub sont vertes (l'extension n'est pas déployée sur le serveur : elle se met à jour par `git pull` sur le PC).
+GitHub sont vertes (accord de l'utilisateur d'abord si la PR touche `.github/`, `.claude/`, `docker-compose*`, `Dockerfile`
+ou une migration) (l'extension n'est pas déployée sur le serveur : elle se met à jour par `git pull` sur le PC).
 
 ## 8. Message à l'utilisateur (court)
 Ce qui était en cause (une phrase), puis :

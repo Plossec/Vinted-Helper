@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.7.1] — 13/10/2026
+
+### Modifié
+- Sécurité du travail avec Claude : le fichier des secrets ne peut plus être lu par aucune commande, les règles
+  valent aussi sous PowerShell, l'envoi direct sur `main` est refusé, et Claude demande votre accord avant de
+  fusionner une modification sensible (base, Docker, déploiement, réglages de Claude) (#110, #111).
+- Sessions Claude dans le cloud : dépendances installées automatiquement au démarrage ; le contrôle des calculs ne
+  bloque plus à tort et ne relance pas des tests inchangés ; formatage étendu aux `.mjs`, `.yml`, `.html` (#112).
+- Guide « Protéger la branche main » (mise en ligne OVH) ; rapports des tests de l'extension ignorés par Git.
+
 ## [1.7.0] — 13/10/2026
 
 ### Ajouté

@@ -1,13 +1,18 @@
 // Hook Stop : en fin de tour, relance les tests du module de calcul s'il a été touché.
 // - Fichiers concernés : server/src/calculs/** modifiés non commités, non suivis,
-//   ou modifiés sur la branche par rapport à main (commits du lot).
+//   ou modifiés sur la branche par rapport à main (ou origin/main dans une session cloud).
+// - Ne relance pas si ces fichiers n'ont pas changé depuis le dernier passage réussi (empreinte en dossier temporaire).
+// - Dépendances absentes (vitest introuvable, ex. session cloud sans npm ci) : avertissement, jamais de blocage
+//   (issue #112).
 // - Lance UNIQUEMENT les tests du calcul (commande documentée dans CLAUDE.md), jamais toute la suite.
 // - Échec : code de sortie 2 + rapport sur stderr → Claude doit corriger avant de rendre la main.
 // - Anti-boucle : si stop_hook_active est vrai (Claude continue déjà à cause de ce hook), on ne bloque plus ;
 //   si les tests échouent encore, on affiche seulement un avertissement à l'utilisateur.
 // - Écrit en Node pour fonctionner pareil sous Windows et Linux.
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const DOSSIER_CALCULS = "server/src/calculs/";
@@ -33,9 +38,10 @@ function fichiersCalculsTouches(racine) {
     chemins.add(chemin);
   }
 
-  // 2. Fichiers modifiés sur la branche depuis main (commits faits pendant le lot).
-  if (git(["rev-parse", "--verify", "--quiet", "main"], racine) !== null) {
-    const diff = git(["diff", "--name-only", "main...HEAD"], racine) ?? "";
+  // 2. Fichiers modifiés sur la branche depuis main (ou origin/main : clone sans branche main locale).
+  const base = ["main", "origin/main"].find((b) => git(["rev-parse", "--verify", "--quiet", b], racine) !== null);
+  if (base !== undefined) {
+    const diff = git(["diff", "--name-only", `${base}...HEAD`], racine) ?? "";
     for (const chemin of diff.split("\n")) if (chemin) chemins.add(chemin);
   }
 
@@ -67,6 +73,36 @@ if (!existsSync(join(racine, "package.json")) || !existsSync(join(racine, "serve
 const touches = fichiersCalculsTouches(racine);
 if (touches.length === 0) process.exit(0);
 
+// Dépendances absentes : impossible de tester, mais ce n'est pas une erreur du code.
+if (!["server", "."].some((d) => existsSync(join(racine, d, "node_modules", ".bin", "vitest")))) {
+  process.stdout.write(
+    JSON.stringify({
+      systemMessage: `⚠️ Tests du calcul non lancés : dépendances absentes (lancez « npm ci »). Fichiers : ${touches.join(", ")}`,
+    }),
+  );
+  process.exit(0);
+}
+
+// Même contenu qu'au dernier passage réussi : inutile de relancer.
+const empreinte = createHash("sha256");
+for (const chemin of [...touches].sort()) {
+  empreinte.update(chemin);
+  if (existsSync(join(racine, chemin))) empreinte.update(readFileSync(join(racine, chemin)));
+}
+const valeur = empreinte.digest("hex");
+const fichierEmpreinte = join(
+  tmpdir(),
+  `vinted-helper-calculs-${createHash("sha256").update(racine).digest("hex").slice(0, 12)}.txt`,
+);
+const lireEmpreinte = () => {
+  try {
+    return readFileSync(fichierEmpreinte, "utf8");
+  } catch {
+    return null;
+  }
+};
+if (lireEmpreinte() === valeur) process.exit(0);
+
 const resultat = spawnSync(COMMANDE_TESTS, {
   cwd: racine,
   shell: true, // npm est un script .cmd sous Windows : il faut passer par le shell
@@ -75,7 +111,14 @@ const resultat = spawnSync(COMMANDE_TESTS, {
   env: { ...process.env, CI: "true", FORCE_COLOR: "0" },
 });
 
-if (resultat.status === 0) process.exit(0);
+if (resultat.status === 0) {
+  try {
+    writeFileSync(fichierEmpreinte, valeur);
+  } catch {
+    // Dossier temporaire inaccessible : les tests seront simplement relancés au prochain tour.
+  }
+  process.exit(0);
+}
 
 const sortie = `${resultat.stdout ?? ""}\n${resultat.stderr ?? ""}`.trim().split("\n");
 const extrait = sortie.slice(-LIGNES_RAPPORT).join("\n");
