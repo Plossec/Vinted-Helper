@@ -5,6 +5,17 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.8.0] — 13/10/2026
+
+### Ajouté
+- Réglages : choix du thème Auto / Clair / Sombre, mémorisé sur l'appareil (#138).
+
+### Modifié
+- **Refonte de l'interface** (direction « Techno », indigo) : couleurs, rayons, espacements et tailles de texte
+  regroupés en design tokens, boutons plein / contour / fantôme avec survol, focus et état désactivé, champs et messages
+  d'erreur avec icône ⚠, montants en police à chasse fixe, polices du système ; nouvelle icône indigo et barre d'état
+  aux couleurs du fond de page (#138).
+
 ## [1.7.1] — 13/10/2026
 
 ### Modifié
