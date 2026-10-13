@@ -1328,7 +1328,8 @@ a {
   padding: 0;
   margin: var(--e-4) 0 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, calc(50% - 0.3rem)), 1fr));
+  /* Au moins 2 colonnes sur téléphone : la moitié de la largeur moins la moitié de l'écart (#145). */
+  grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, calc(50% - var(--e-3) / 2)), 1fr));
   gap: var(--e-3);
 }
 
@@ -1375,10 +1376,24 @@ a {
   font-size: var(--t-petit);
 }
 
+/* Repère ↗ posé sur la photo, sous le badge de statut, hors de la ligne de texte (#145). */
+.mosaique__vinted {
+  position: absolute;
+  top: 2.25rem;
+  right: 0.4rem;
+}
+
+.mosaique__vinted .lien-vinted {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+}
+
 .mosaique__texte {
   display: flex;
   justify-content: space-between;
+  gap: var(--e-1);
   padding: 0 var(--e-2);
+  white-space: nowrap;
 }
 
 .mosaique__prix {
