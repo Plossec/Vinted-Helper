@@ -145,3 +145,12 @@ file), « Revenir à « À publier » », « Publié à la main : mettre en lign
 vers Erreur n'est jamais proposé à la main. Cahier des charges §4.1 et §4.2 complétés ; migration 0009 (nouvelle
 valeur `erreur_publication` du statut). Les filtres d'articles mémorisés avec les anciens statuts par défaut
 reçoivent automatiquement « Erreur ».
+
+## 13/10/2026 — Statut « Erreur » : précisions après la revue de code (#92, #93, #94)
+
+- Une demande en **mode essai** depuis Erreur ne change pas le statut (cohérent avec la décision du 08/10/2026 : un
+  essai ne change rien) ; une vraie demande repasse l'article À publier dans la même transaction que son ajout à la
+  file.
+- Coller le lien de l'annonce sur un article en Erreur (publiée à la main) le fait passer En ligne, comme pour un
+  article À publier.
+- Le message affiché sur la fiche est celui de la dernière **vraie** publication en échec.
