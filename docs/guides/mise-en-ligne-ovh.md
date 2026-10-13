@@ -176,6 +176,20 @@ Après une mise en production réussie, GitHub crée aussi le **tag de version**
 
 Pour désactiver : supprimez le secret `DEPLOIEMENT_CLE` sur GitHub.
 
+### Protéger la branche main (à faire une fois)
+
+Une fusion dans `main` part en production : GitHub peut refuser tout ce qui n'est pas passé par une PR vérifiée.
+
+1. Dépôt GitHub → **Settings** → **Branches** → **Add branch ruleset** (ou « Add classic branch protection rule »).
+2. Nom : `main` ; cible : **Default branch** (ou motif `main`).
+3. Cochez **Require a pull request before merging**, avec **0** approbation requise (vous êtes seul : une
+   approbation obligatoire vous bloquerait).
+4. Cochez **Require status checks to pass**, puis ajoutez le check
+   **« Vérifier (types, lint, format, tests, construction) »**.
+5. Cochez **Block force pushes** et laissez **Restrict deletions** coché. Enregistrez (**Create** / **Save**).
+
+Résultat : plus aucun envoi direct sur `main` ; une PR ne peut être fusionnée que si la vérification est verte.
+
 ## Mettre à jour l'application à la main
 
 Sans déploiement continu, ou pour forcer une mise à jour :
