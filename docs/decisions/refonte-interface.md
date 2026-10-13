@@ -70,3 +70,11 @@ Badges de statut (texte `--fond` dessus, tous ≥ 5,1:1) : brouillon `#5F6485` /
 ## Hors périmètre de cette refonte
 
 - Aucune dépendance ajoutée ; aucune règle de calcul, de données ni d'API modifiée.
+
+## 13/10/2026 — Fiche article : avertissement des saisies non enregistrées (issue #99)
+
+**Décision (utilisateur)** : les boutons d'enregistrement séparés restent ; seul un **avertissement** est ajouté
+(ni enregistrement automatique, ni bouton unique). Quitter la fiche (lien, navigation, retour), fermer ou recharger
+l'onglet, ou ouvrir un changement de statut avec une saisie non enregistrée demande confirmation, en nommant ce qui
+serait perdu : la fiche, l'annonce, les liens Vinted, le boost. Créer ou supprimer l'article quitte la fiche sans
+question. Boîte de confirmation du navigateur pour l'instant (boîtes accessibles : #132).

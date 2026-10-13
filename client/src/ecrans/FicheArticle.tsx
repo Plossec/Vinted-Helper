@@ -1,7 +1,7 @@
 // Fiche article (création et modification) — cahier des charges §5.2 : champs, photos, sortie, lot, coûts.
 // Catégorie (arbre Vinted), marque et état obligatoires ; gamme en texte libre (décisions du 05/10/2026).
-import { type ChangeEvent, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useBlocker, useNavigate, useParams } from "react-router";
 import { api, type Article, type DonneesArticle, envoyerImage, type Referentiels, type TypeListe } from "../api.js";
 import { BlocAnnonce } from "../composants/BlocAnnonce.js";
 import { BlocVinted } from "../composants/BlocVinted.js";
@@ -13,6 +13,7 @@ import { aujourdhui } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
 import { formatDate } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
+import { ContexteModifications, messageAbandon, type Modifications } from "../outils/modifications.js";
 
 interface Formulaire {
   nom: string;
@@ -92,19 +93,64 @@ export function FicheArticle() {
   const [refs, setRefs] = useState<Referentiels | null>(null);
   const [article, setArticle] = useState<Article | null>(null);
   const [form, setForm] = useState<Formulaire>(formulaireVide);
+  /** Dernier état enregistré (ou chargé) du formulaire, pour repérer une saisie non enregistrée (#99). */
+  const [formEnregistre, setFormEnregistre] = useState<Formulaire>(form);
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [lecture, setLecture] = useState(false);
   const etiquette = useRef<HTMLInputElement>(null);
 
+  // Saisies non enregistrées : la fiche et les blocs qui le signalent (annonce, liens Vinted, boost).
+  const [blocsModifies, setBlocsModifies] = useState<string[]>([]);
+  const ficheModifiee = refs !== null && JSON.stringify(form) !== JSON.stringify(formEnregistre);
+  const nonEnregistre = useMemo(
+    () => (ficheModifiee ? ["la fiche", ...blocsModifies] : blocsModifies),
+    [ficheModifiee, blocsModifies],
+  );
+  /** Navigation voulue par la fiche elle-même (article créé ou supprimé) : pas d'avertissement. */
+  const sansAvertissement = useRef(false);
+  const signaler = useCallback(
+    (bloc: string, modifie: boolean) =>
+      setBlocsModifies((b) =>
+        b.includes(bloc) === modifie ? b : modifie ? [...b, bloc] : b.filter((x) => x !== bloc),
+      ),
+    [],
+  );
+  const modifications = useMemo<Modifications>(
+    () => ({
+      signaler,
+      confirmerAbandon: (action) => nonEnregistre.length === 0 || window.confirm(messageAbandon(nonEnregistre, action)),
+    }),
+    [signaler, nonEnregistre],
+  );
+  const blocage = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      nonEnregistre.length > 0 && !sansAvertissement.current && currentLocation.pathname !== nextLocation.pathname,
+  );
+  useEffect(() => {
+    if (blocage.state !== "blocked") return;
+    if (window.confirm(messageAbandon(nonEnregistre, "quitter la fiche"))) blocage.proceed();
+    else blocage.reset();
+  }, [blocage, nonEnregistre]);
+  // Fermeture de l'onglet ou rechargement : avertissement du navigateur.
+  useEffect(() => {
+    if (nonEnregistre.length === 0) return;
+    const avertir = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", avertir);
+    return () => window.removeEventListener("beforeunload", avertir);
+  }, [nonEnregistre]);
+
   useEffect(() => {
     let actif = true;
+    sansAvertissement.current = false;
     Promise.all([api.get<Referentiels>("/api/referentiels"), id ? api.get<Article>(`/api/articles/${id}`) : null])
       .then(([r, a]) => {
         if (!actif) return;
+        const charge = a ? versFormulaire(a, r) : formulaireVide();
         setRefs(r);
         setArticle(a);
-        setForm(a ? versFormulaire(a, r) : formulaireVide());
+        setForm(charge);
+        setFormEnregistre(charge);
         setMessage(null);
       })
       .catch((e: unknown) => {
@@ -199,9 +245,11 @@ export function FicheArticle() {
       }
       if (article === null) {
         const cree = await api.post<Article>("/api/articles", donnees);
+        sansAvertissement.current = true;
         void naviguer(`/articles/${cree.id}`, { replace: true });
       } else {
         setArticle(await api.put<Article>(`/api/articles/${article.id}`, donnees));
+        setFormEnregistre(form);
         setMessage({ type: "ok", texte: "Fiche enregistrée." });
       }
     } catch (e) {
@@ -248,6 +296,7 @@ export function FicheArticle() {
   function apresChangementStatut(a: Article) {
     setArticle(a);
     setForm((f) => ({ ...f, prixAffiche: centimesVersSaisie(a.prixAffiche) }));
+    setFormEnregistre((f) => ({ ...f, prixAffiche: centimesVersSaisie(a.prixAffiche) }));
   }
 
   if (refs === null || options === null) {
@@ -259,201 +308,207 @@ export function FicheArticle() {
   }
 
   return (
-    <main className="page">
-      <Link to="/" className="lien-retour">
-        ← Articles
-      </Link>
-      <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
+    <ContexteModifications value={modifications}>
+      <main className="page">
+        <Link to="/" className="lien-retour">
+          ← Articles
+        </Link>
+        <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
 
-      <input
-        ref={etiquette}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        hidden
-        onChange={(e) => void lireEtiquette(e)}
-      />
-      <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
-        {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
-      </button>
-
-      <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
-        <label className="champ">
-          <span>Nom *</span>
-          <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
-        </label>
-        <ListeDeroulante
-          libelle="Catégorie"
-          obligatoire
-          placeholder="Tapez pour chercher (ex. jean slim)"
-          texte={form.categorieTexte}
-          onTexte={(texte) => setForm((f) => ({ ...f, categorieTexte: texte, categorie: "" }))}
-          options={options.categories}
-          onChoix={(o) =>
-            setForm((f) => ({
-              ...f,
-              categorie: o.cle,
-              categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
-            }))
-          }
+        <input
+          ref={etiquette}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          onChange={(e) => void lireEtiquette(e)}
         />
-        <ListeDeroulante
-          libelle="Marque"
-          obligatoire
-          ajout
-          texte={form.marque}
-          onTexte={modifier("marque")}
-          options={options.marques}
-          onChoix={(o) => modifier("marque")(o.libelle)}
-        />
-        <ListeDeroulante
-          libelle="État"
-          obligatoire
-          texte={form.etatTexte}
-          onTexte={(texte) => setForm((f) => ({ ...f, etatTexte: texte, etat: "" }))}
-          options={options.etats}
-          onChoix={(o) => setForm((f) => ({ ...f, etat: o.cle, etatTexte: o.libelle }))}
-        />
-        <label className="champ">
-          <span>Gamme</span>
-          <input
-            value={form.gamme}
-            onChange={(e) => modifier("gamme")(e.target.value)}
-            placeholder="Ex. Foot, Vintage…"
-          />
-        </label>
-        <div className="champs-ligne">
-          <label className="champ">
-            <span>Taille</span>
-            <input value={form.taille} onChange={(e) => modifier("taille")(e.target.value)} />
-          </label>
-          <label className="champ">
-            <span>Matière</span>
-            <input value={form.matiere} onChange={(e) => modifier("matiere")(e.target.value)} />
-          </label>
-        </div>
-        <ListeDeroulante
-          libelle="Lieu d'achat"
-          obligatoire
-          ajout
-          texte={form.lieu}
-          onTexte={changerLieu}
-          options={options.lieux}
-          onChoix={(o) => changerLieu(o.libelle)}
-        />
-        <div className="champs-ligne">
-          {article?.lot ? (
-            <label className="champ">
-              <span>Prix total du lot (€) *</span>
-              <input inputMode="decimal" value={form.prixLot} onChange={(e) => modifier("prixLot")(e.target.value)} />
-            </label>
-          ) : (
-            <label className="champ">
-              <span>Prix d'achat (€) *</span>
-              <input
-                inputMode="decimal"
-                value={form.prixAchat}
-                onChange={(e) => modifier("prixAchat")(e.target.value)}
-                placeholder="2,00"
-              />
-            </label>
-          )}
-          <label className="champ">
-            <span>Date d'achat *</span>
-            <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
-          </label>
-        </div>
-        <label className="champ">
-          <span>Prix affiché sur Vinted (€)</span>
-          <input
-            inputMode="decimal"
-            value={form.prixAffiche}
-            onChange={(e) => modifier("prixAffiche")(e.target.value)}
-            placeholder="12,00"
-          />
-        </label>
-        <div className="champs-ligne">
-          <label className="champ">
-            <span>Couleur</span>
-            <select value={form.couleur1} onChange={(e) => modifier("couleur1")(e.target.value)}>
-              <option value="">—</option>
-              {refs.couleurs.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.libelle}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="champ">
-            <span>2e couleur</span>
-            <select value={form.couleur2} onChange={(e) => modifier("couleur2")(e.target.value)}>
-              <option value="">—</option>
-              {refs.couleurs.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.libelle}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <label className="champ">
-          <span>Format du colis (Vinted)</span>
-          <select value={form.formatColis} onChange={(e) => modifier("formatColis")(e.target.value)}>
-            <option value="">Par défaut (Réglages)</option>
-            {refs.formatsColis.map((f) => (
-              <option key={f.code} value={f.code}>
-                {f.libelle}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="champ">
-          <span>Notes</span>
-          <textarea value={form.notes} onChange={(e) => modifier("notes")(e.target.value)} rows={3} />
-        </label>
-
-        {message && (
-          <p className={`message message--${message.type}`} role={message.type === "erreur" ? "alert" : "status"}>
-            {message.texte}
-          </p>
-        )}
-        <button className="bouton bouton--principal" type="submit" disabled={envoi}>
-          {envoi ? "Enregistrement…" : article ? "Enregistrer la fiche" : "Créer l'article"}
+        <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
+          {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
         </button>
-      </form>
 
-      {article && <InfosAchat article={article} />}
-      {article && <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />}
-      {article && (
-        <BlocVinted
-          key={`${article.id}:${article.urlVinted}:${article.urlConversation}`}
-          article={article}
-          onMiseAJour={apresChangementStatut}
-        />
-      )}
-      {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
-      {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
-      {article && <BlocMontants article={article} onMiseAJour={setArticle} />}
-      {article && (
-        <section className="section">
-          <button
-            type="button"
-            className="bouton bouton--danger"
-            onClick={() => {
-              if (!window.confirm("Mettre cet article à la corbeille ? Il sera restaurable pendant 30 jours.")) return;
-              void api
-                .delete(`/api/articles/${article.id}`)
-                .then(() => naviguer("/", { replace: true }))
-                .catch((e: unknown) =>
-                  setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Suppression impossible." }),
-                );
-            }}
-          >
-            Supprimer l'article
+        <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
+          <label className="champ">
+            <span>Nom *</span>
+            <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
+          </label>
+          <ListeDeroulante
+            libelle="Catégorie"
+            obligatoire
+            placeholder="Tapez pour chercher (ex. jean slim)"
+            texte={form.categorieTexte}
+            onTexte={(texte) => setForm((f) => ({ ...f, categorieTexte: texte, categorie: "" }))}
+            options={options.categories}
+            onChoix={(o) =>
+              setForm((f) => ({
+                ...f,
+                categorie: o.cle,
+                categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
+              }))
+            }
+          />
+          <ListeDeroulante
+            libelle="Marque"
+            obligatoire
+            ajout
+            texte={form.marque}
+            onTexte={modifier("marque")}
+            options={options.marques}
+            onChoix={(o) => modifier("marque")(o.libelle)}
+          />
+          <ListeDeroulante
+            libelle="État"
+            obligatoire
+            texte={form.etatTexte}
+            onTexte={(texte) => setForm((f) => ({ ...f, etatTexte: texte, etat: "" }))}
+            options={options.etats}
+            onChoix={(o) => setForm((f) => ({ ...f, etat: o.cle, etatTexte: o.libelle }))}
+          />
+          <label className="champ">
+            <span>Gamme</span>
+            <input
+              value={form.gamme}
+              onChange={(e) => modifier("gamme")(e.target.value)}
+              placeholder="Ex. Foot, Vintage…"
+            />
+          </label>
+          <div className="champs-ligne">
+            <label className="champ">
+              <span>Taille</span>
+              <input value={form.taille} onChange={(e) => modifier("taille")(e.target.value)} />
+            </label>
+            <label className="champ">
+              <span>Matière</span>
+              <input value={form.matiere} onChange={(e) => modifier("matiere")(e.target.value)} />
+            </label>
+          </div>
+          <ListeDeroulante
+            libelle="Lieu d'achat"
+            obligatoire
+            ajout
+            texte={form.lieu}
+            onTexte={changerLieu}
+            options={options.lieux}
+            onChoix={(o) => changerLieu(o.libelle)}
+          />
+          <div className="champs-ligne">
+            {article?.lot ? (
+              <label className="champ">
+                <span>Prix total du lot (€) *</span>
+                <input inputMode="decimal" value={form.prixLot} onChange={(e) => modifier("prixLot")(e.target.value)} />
+              </label>
+            ) : (
+              <label className="champ">
+                <span>Prix d'achat (€) *</span>
+                <input
+                  inputMode="decimal"
+                  value={form.prixAchat}
+                  onChange={(e) => modifier("prixAchat")(e.target.value)}
+                  placeholder="2,00"
+                />
+              </label>
+            )}
+            <label className="champ">
+              <span>Date d'achat *</span>
+              <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
+            </label>
+          </div>
+          <label className="champ">
+            <span>Prix affiché sur Vinted (€)</span>
+            <input
+              inputMode="decimal"
+              value={form.prixAffiche}
+              onChange={(e) => modifier("prixAffiche")(e.target.value)}
+              placeholder="12,00"
+            />
+          </label>
+          <div className="champs-ligne">
+            <label className="champ">
+              <span>Couleur</span>
+              <select value={form.couleur1} onChange={(e) => modifier("couleur1")(e.target.value)}>
+                <option value="">—</option>
+                {refs.couleurs.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.libelle}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="champ">
+              <span>2e couleur</span>
+              <select value={form.couleur2} onChange={(e) => modifier("couleur2")(e.target.value)}>
+                <option value="">—</option>
+                {refs.couleurs.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.libelle}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <label className="champ">
+            <span>Format du colis (Vinted)</span>
+            <select value={form.formatColis} onChange={(e) => modifier("formatColis")(e.target.value)}>
+              <option value="">Par défaut (Réglages)</option>
+              {refs.formatsColis.map((f) => (
+                <option key={f.code} value={f.code}>
+                  {f.libelle}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="champ">
+            <span>Notes</span>
+            <textarea value={form.notes} onChange={(e) => modifier("notes")(e.target.value)} rows={3} />
+          </label>
+
+          {message && (
+            <p className={`message message--${message.type}`} role={message.type === "erreur" ? "alert" : "status"}>
+              {message.texte}
+            </p>
+          )}
+          <button className="bouton bouton--principal" type="submit" disabled={envoi}>
+            {envoi ? "Enregistrement…" : article ? "Enregistrer la fiche" : "Créer l'article"}
           </button>
-        </section>
-      )}
-    </main>
+        </form>
+
+        {article && <InfosAchat article={article} />}
+        {article && <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />}
+        {article && (
+          <BlocVinted
+            key={`${article.id}:${article.urlVinted}:${article.urlConversation}`}
+            article={article}
+            onMiseAJour={apresChangementStatut}
+          />
+        )}
+        {article && <PhotosArticle article={article} onMiseAJour={setArticle} />}
+        {article && <BlocStatut article={article} onMiseAJour={apresChangementStatut} />}
+        {article && <BlocMontants article={article} onMiseAJour={setArticle} />}
+        {article && (
+          <section className="section">
+            <button
+              type="button"
+              className="bouton bouton--danger"
+              onClick={() => {
+                if (!window.confirm("Mettre cet article à la corbeille ? Il sera restaurable pendant 30 jours."))
+                  return;
+                void api
+                  .delete(`/api/articles/${article.id}`)
+                  .then(() => {
+                    sansAvertissement.current = true;
+                    return naviguer("/", { replace: true });
+                  })
+                  .catch((e: unknown) =>
+                    setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Suppression impossible." }),
+                  );
+              }}
+            >
+              Supprimer l'article
+            </button>
+          </section>
+        )}
+      </main>
+    </ContexteModifications>
   );
 }
 

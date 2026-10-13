@@ -15,6 +15,7 @@ import {
 } from "../api.js";
 import { depuisChampDateHeure, formatDateHeure, versChampDateHeure } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { useModifications } from "../outils/modifications.js";
 import { ACTIONS_STATUT, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 interface Props {
@@ -57,9 +58,12 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
   const [correction, setCorrection] = useState<{ id: string; date: string } | null>(null);
   /** Envoi en cours : « Confirmer » désactivé, pour qu'une double tape ne crée pas deux ventes (issue #120). */
   const [envoi, setEnvoi] = useState(false);
+  const { confirmerAbandon } = useModifications();
   const modifier = (m: Partial<Saisie>) => setSaisie((s) => (s === null ? s : { ...s, ...m }));
 
   async function preparer(vers: Statut) {
+    // Le changement de statut recharge la fiche : prévenir s'il reste une saisie non enregistrée (#99).
+    if (!confirmerAbandon("changer de statut")) return;
     setErreur(null);
     const base: Saisie = {
       date: versChampDateHeure(new Date()),

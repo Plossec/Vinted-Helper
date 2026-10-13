@@ -2,6 +2,7 @@
 // Secours si Gemini est indisponible : « Copier le prompt » pour une IA gratuite (Claude.ai, ChatGPT, Gemini).
 import { useState } from "react";
 import { api, type Article, ErreurApi } from "../api.js";
+import { useSignalerModification } from "../outils/modifications.js";
 
 async function copier(texte: string): Promise<boolean> {
   try {
@@ -18,6 +19,10 @@ export function BlocAnnonce({ article, onMiseAJour }: { article: Article; onMise
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
   const [secours, setSecours] = useState(false);
+  useSignalerModification(
+    "l'annonce",
+    titre !== (article.titreAnnonce ?? "") || description !== (article.descriptionAnnonce ?? ""),
+  );
 
   async function generer() {
     if ((titre || description) && !window.confirm("Remplacer le titre et la description actuels ?")) return;
