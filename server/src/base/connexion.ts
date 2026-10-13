@@ -13,7 +13,7 @@ export function creerConnexion() {
   // Connexion inactive coupée (redémarrage de la base…) : sans ce gestionnaire, Node arrête le serveur (issue #122).
   // Le pool ouvre une nouvelle connexion à la requête suivante.
   pool.on("error", (erreur) => {
-    console.error(\`Base de données : connexion inactive perdue (\${erreur.message}) ; reconnexion à la prochaine requête.\`);
+    console.error(`Base de données : connexion inactive perdue (${erreur.message}) ; reconnexion à la prochaine requête.`);
   });
   const db = drizzle(pool, { schema });
 
