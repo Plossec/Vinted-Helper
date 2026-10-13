@@ -16,6 +16,7 @@ import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
 import { TableauDeBord } from "./ecrans/TableauDeBord.js";
 import { Terrain } from "./ecrans/Terrain.js";
 import { enregistrerServiceWorker } from "./pwa.js";
+import { appliquerPreferenceTheme, lirePreferenceTheme } from "./theme.js";
 import "./styles.css";
 
 const routeur = createBrowserRouter([
@@ -50,6 +51,7 @@ const routeur = createBrowserRouter([
 const racine = document.getElementById("racine");
 if (racine === null) throw new Error("Élément #racine introuvable dans index.html");
 
+appliquerPreferenceTheme(lirePreferenceTheme());
 enregistrerServiceWorker();
 
 createRoot(racine).render(
