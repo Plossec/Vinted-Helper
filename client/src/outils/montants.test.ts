@@ -9,8 +9,15 @@ describe("formatEuros", () => {
     [333, "3,33 €"],
     [0, "0,00 €"],
     [120000, "1 200,00 €"],
+    [-808, "\u22128,08 €"],
   ])("%i centimes → %s", (centimes, attendu) => {
     expect(normaliser(formatEuros(centimes))).toBe(attendu);
+  });
+
+  it("avec signe : + devant un montant positif, − devant un négatif, rien pour zéro (#105)", () => {
+    expect(normaliser(formatEuros(692, { signe: true }))).toBe("+6,92 €");
+    expect(normaliser(formatEuros(-692, { signe: true }))).toBe("\u22126,92 €");
+    expect(normaliser(formatEuros(0, { signe: true }))).toBe("0,00 €");
   });
 });
 

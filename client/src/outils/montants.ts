@@ -1,10 +1,18 @@
 // Montants : centimes (entiers) côté données, euros au format français uniquement à l'affichage et à la saisie.
 
 const FORMAT_EUROS = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const FORMAT_EUROS_SIGNE = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  signDisplay: "exceptZero",
+});
 
-/** 333 → « 3,33 € ». */
-export function formatEuros(centimes: number): string {
-  return FORMAT_EUROS.format(centimes / 100);
+/**
+ * 333 → « 3,33 € » ; −808 → « −8,08 € » (vrai signe moins partout, #105). `signe` : « +6,92 € » pour un écart ou un
+ * bénéfice attendu.
+ */
+export function formatEuros(centimes: number, { signe = false }: { signe?: boolean } = {}): string {
+  return (signe ? FORMAT_EUROS_SIGNE : FORMAT_EUROS).format(centimes / 100).replace("-", "\u2212");
 }
 
 /** 350 → « 3,50 » (valeur d'un champ de saisie). */

@@ -224,9 +224,9 @@ export function ventesEnCoursParMois(d: DonneesIndicateurs, details: ReadonlyMap
     const cle = moisParis(date);
     const p = mois.get(cle) ?? { chiffreAffaires: 0, benefice: 0 };
     p.chiffreAffaires += detail.prixVendu;
-    // Le bénéfice provisoire (§6.5) vaut −coût total tant que la vente n'est pas finalisée : ici, on compte le prix
-    // vendu attendu.
-    p.benefice += detail.prixVendu - detail.coutTotal;
+    // Le bénéfice provisoire (§6.5) vaut −coût total tant que la vente n'est pas finalisée : ici, on compte le
+    // bénéfice attendu (prix vendu − coût total).
+    p.benefice += detail.beneficeAttendu ?? 0;
     mois.set(cle, p);
   }
   return mois;

@@ -67,6 +67,11 @@ export interface DetailArticle {
   /** Bénéfice réalisé (Finalisé, Sortie du stock) ou provisoire (tout autre statut). */
   benefice: number;
   realise: boolean;
+  /**
+   * Vendu mais pas encore finalisé (À expédier, Envoyé…) : bénéfice attendu = prix vendu − coût total (#105) ;
+   * sinon null. Le bénéfice provisoire (§6.5) reste −coût total.
+   */
+  beneficeAttendu: number | null;
 }
 
 /**
@@ -132,13 +137,15 @@ export function calculerDetails(d: DonneesCalcul): Map<string, DetailArticle> {
       benefice = (a.motifSortie === "revendu" ? (a.prixRevente ?? 0) : 0) - coutTotal;
       realise = true;
     }
+    const prixVendu = enSortieStock ? null : (vente?.prixVendu ?? null);
     resultat.set(a.id, {
       ...detail,
       coutTotal,
-      prixVendu: enSortieStock ? null : (vente?.prixVendu ?? null),
+      prixVendu,
       venteId: enSortieStock ? null : (vente?.venteId ?? null),
       benefice,
       realise,
+      beneficeAttendu: !realise && prixVendu !== null ? prixVendu - coutTotal : null,
     });
   }
   return resultat;

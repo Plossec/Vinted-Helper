@@ -33,6 +33,7 @@
   --badge-fin: light-dark(#12794a, #5bd79b);
   --badge-recuperer: light-dark(#b04a00, #ffa657);
   --badge-erreur: light-dark(#c11a33, #ff8d9c);
+  --badge-envoye: light-dark(#0e7490, #67e8f9);
   --graphique: var(--accent);
 
   /* Typographie : polices du système (aucune police embarquée). */
@@ -158,6 +159,8 @@ input[inputmode="decimal"] {
 .navigation {
   position: fixed;
   inset: auto 0 0 0;
+  /* Au-dessus des colonnes fixes du tableau « Détaillé » et du bouton flottant. */
+  z-index: 10;
   display: flex;
   background: var(--surface);
   border-top: 1px solid var(--bordure);
@@ -486,9 +489,19 @@ a.carte-article:hover,
   background: var(--badge-en-ligne);
 }
 
-.badge--a_expedier,
-.badge--envoye {
+/* Neuf statuts, neuf apparences (#105) : Sortie du stock en contour, pour ne pas ressembler à Brouillon. */
+.badge--a_expedier {
   background: var(--badge-vente);
+}
+
+.badge--envoye {
+  background: var(--badge-envoye);
+}
+
+.badge--sortie_stock {
+  background: transparent;
+  color: var(--texte-secondaire);
+  box-shadow: inset 0 0 0 1.5px var(--bordure-champ);
 }
 
 .badge--a_recuperer {

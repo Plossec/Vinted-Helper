@@ -295,6 +295,8 @@ export interface Couts {
   /** Réalisé (Finalisé, Sortie du stock) ou provisoire. */
   benefice: number;
   realise: boolean;
+  /** Vendu non finalisé : prix vendu − coût total, calculé par le serveur (#105) ; sinon null. */
+  beneficeAttendu: number | null;
 }
 
 export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu";
