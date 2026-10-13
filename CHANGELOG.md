@@ -5,14 +5,22 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-### Corrigé
-- Terrain hors réseau : un achat qui provoque une erreur du serveur est mis de côté après 3 essais (avec le message,
-  « Réessayer » ou « Abandonner ») au lieu de bloquer tous les suivants ; un serveur en redémarrage compte toujours
-  comme une coupure de réseau (#123).
+## [1.7.0] — 13/10/2026
 
 ### Ajouté
 - Mise en production : le serveur vérifie que l'application répond après chaque mise à jour ; sinon il remet
   automatiquement la version précédente et GitHub prévient par e-mail. Guide « Si une mise à jour échoue » (#119).
+
+### Modifié
+- Versions : chaque mise à jour reçoit son numéro de version, et le tag est créé automatiquement par GitHub après la
+  mise en production (plus rien à faire à la main) (#114).
+
+### Corrigé
+- Terrain hors réseau : un achat qui provoque une erreur du serveur est mis de côté après 3 essais (avec le message,
+  « Réessayer » ou « Abandonner ») au lieu de bloquer tous les suivants ; un serveur en redémarrage compte toujours
+  comme une coupure de réseau (#123).
+- Mise en production : le service de sauvegarde est redémarré quand son script change ; sans cela, le correctif des
+  sauvegardes de la 1.6.1 (#117) n'était pas encore actif sur le serveur (#114).
 
 ## [1.6.1] — 13/10/2026
 

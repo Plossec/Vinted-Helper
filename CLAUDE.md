@@ -106,7 +106,7 @@ l'utilisateur le fait.
   l'implémentation.
 - **Fin de lot** : `/verifier` entièrement vert ; sous-agent `relecteur` **uniquement à la demande de
   l'utilisateur** (lui transmettre le numéro du lot et `git diff --name-only main...HEAD`) ; mise à jour de
-  `README.md` ou du guide concerné, de `CHANGELOG.md` et de `docs/decisions/lot-N.md` ; `/version`.
+  `README.md` ou du guide concerné, de `CHANGELOG.md` et de `docs/decisions/lot-N.md` ; `/version` (dans chaque PR).
 - Messages de commit en français, à l'impératif (« Ajoute la saisie terrain »).
 - Hook `formater.mjs` (après Edit/Write) : Prettier sur les `.ts/.tsx/.js/.json/.css` du projet, non bloquant.
 - Hook `tests-calculs.mjs` (fin de tour) : si `server/src/calculs/` a changé, lance ses tests et **bloque la fin du
@@ -115,9 +115,12 @@ l'utilisateur le fait.
 ## Versions
 
 - SemVer, source unique : `version` du `package.json` racine, affichée dans les Réglages.
-- Lot 0 → `0.0.1` ; lot N validé → `0.N.0` ; correctifs → `0.N.1`… ; mise en ligne OVH validée → `1.0.0`.
-- Chaque version : tag Git `vX.Y.Z` + entrée dans `CHANGELOG.md` (Ajouté / Modifié / Corrigé) + mise à jour de
-  `docs/architecture.md` (schémas et ligne « À jour pour la version »).
+- **Chaque PR qui part en production porte sa version** (procédure `/version`, appliquée par `/lot` et
+  `/calibrer-vinted`) : un « Ajouté » → chiffre du milieu (1.6.1 → 1.7.0) ; seulement « Corrigé » / « Modifié » →
+  dernier chiffre (1.7.0 → 1.7.1) ; rupture → premier chiffre, avec l'accord de l'utilisateur.
+- Chaque version : section datée dans `CHANGELOG.md` (Ajouté / Modifié / Corrigé) + mise à jour de
+  `docs/architecture.md` (schémas et ligne « À jour pour la version »). Le tag `vX.Y.Z` est créé **par GitHub
+  Actions** après une mise en production réussie (jamais à la main).
 - La PWA affiche « Nouvelle version disponible — Mettre à jour » quand une nouvelle version est déployée.
 
 ## Profil de l'utilisateur

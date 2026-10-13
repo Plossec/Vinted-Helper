@@ -16,14 +16,31 @@ echo "Sauvegarde : $fichier"
 echo "==> Récupération de la nouvelle version"
 git pull --ff-only
 
-# ⚠️ Tout ce qui précède doit rester identique, octet pour octet : le script en cours (ancienne version) poursuit sa
-# lecture dans le nouveau fichier juste après « git pull --ff-only ». La suite est faite de fonctions, lues en entier
-# par bash avant d'être exécutées (dernière ligne).
+# ⚠️ « git pull » remplace ce fichier, mais le script déjà lancé continue avec l'ancienne version (constaté au
+# déploiement du 13/10/2026) : une modification de ce script ne s'applique qu'au déploiement suivant. La suite est
+# faite de fonctions appelées en dernière ligne (lues en entier avant d'être exécutées).
 # Issue #119 : la nouvelle version doit répondre (/api/sante, base connectée), sinon retour automatique à la dernière
 # version qui a répondu ; si ce retour échoue aussi : guide docs/guides/mise-en-ligne-ovh.md, « Si une mise à jour
 # échoue ». Code de sortie : 0 en ligne ; 1 nouvelle version refusée, ancienne remise en ligne ; 2 site à réparer.
 
 VERSION_SAINE=sauvegardes/avant-mise-a-jour/version-en-ligne
+SCRIPTS_SAUVEGARDE=sauvegardes/avant-mise-a-jour/scripts-sauvegarde
+
+# Le service « sauvegarde » garde en mémoire le script lu à son démarrage, et « docker compose up » ne le redémarre
+# pas quand seul scripts/sauvegarde/ change : il est redémarré quand le contenu de ce dossier a changé depuis son
+# dernier démarrage par ce script (première fois comprise).
+relancer_sauvegarde_si_besoin() {
+  local actuel
+  actuel="$(git rev-parse HEAD:scripts/sauvegarde)"
+  if [ "$(cat "$SCRIPTS_SAUVEGARDE" 2> /dev/null)" != "$actuel" ]; then
+    echo "==> Nouveau script de sauvegarde : redémarrage du service « sauvegarde »"
+    if docker compose restart sauvegarde; then
+      echo "$actuel" > "$SCRIPTS_SAUVEGARDE"
+    else
+      echo "!!! Redémarrage du service « sauvegarde » impossible : nouvel essai au prochain déploiement."
+    fi
+  fi
+}
 
 # L'application répond-elle, base connectée ? (vérifié dans le conteneur : marche aussi pour les anciennes versions)
 repond() {
@@ -56,6 +73,7 @@ mettre_en_ligne() {
   echo "==> Reconstruction et redémarrage"
   if reconstruire; then
     docker image prune -f > /dev/null
+    relancer_sauvegarde_si_besoin
     docker compose ps
     echo "$nouvelle" > "$VERSION_SAINE"
     echo "Version en ligne : $(grep '"version"' package.json | head -1 | cut -d'"' -f4)"

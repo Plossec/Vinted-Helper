@@ -171,6 +171,9 @@ Activation (une seule fois) :
 3. Test : onglet **Actions** → « Vérification et déploiement » → **Run workflow**. Résultat attendu : deux coches
    vertes ; sur le serveur, le journal `/var/log/vinted-helper-deploiement.log` se termine par `Version en ligne : …`.
 
+Après une mise en production réussie, GitHub crée aussi le **tag de version** (`v1.7.0`…), visible dans l'onglet
+**Tags** du dépôt : plus rien à faire à la main.
+
 Pour désactiver : supprimez le secret `DEPLOIEMENT_CLE` sur GitHub.
 
 ## Mettre à jour l'application à la main
