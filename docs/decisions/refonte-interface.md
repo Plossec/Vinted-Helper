@@ -128,3 +128,13 @@ Sous 1024 px, rien ne change. Bouton « + » et barre de sélection recalés san
 - Focus visible global déjà en place (`:focus-visible`) ; animations réduites si le téléphone le demande.
 - Textes alternatifs vérifiés : les vignettes des listes restent décoratives (`alt=""`, le nom de l'article est dans
   le lien) ; les photos de la fiche ont un texte.
+
+## 13/10/2026 — Terrain en sortie active (issue #104)
+
+**Décision (utilisateur)** : Claude simule une sortie sur la démo (pas de capture du téléphone) ; validation sur le
+téléphone après mise en ligne.
+- « + Achat » et « Sans photo » (vrai bouton) dans une barre fixée au-dessus de la barre de navigation.
+- « Annuler la sortie » ajouté au détail de la sortie ; sur Terrain, il reste dans un repli « Plus d'actions » en
+  bas d'écran (choix de Claude, *à relire*) : le détail n'est disponible qu'une fois la sortie reçue par le serveur,
+  alors que l'annulation doit rester possible sans réseau.
+- Formulaire d'achat : « Annuler » en haut à droite, « Valider » en bas.

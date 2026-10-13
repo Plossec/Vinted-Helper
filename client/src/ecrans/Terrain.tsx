@@ -303,13 +303,17 @@ function SortieActive({
         <p>
           <strong>{sortie.lieu}</strong> — {formatDate(sortie.date)}
         </p>
+        <Message message={message} />
+      </div>
+
+      {/* « + Achat » toujours sous le pouce, au-dessus de la barre de navigation (#104). */}
+      <div className="barre-achat">
         <button className="bouton bouton--achat" type="button" onClick={onAchat}>
           + Achat
         </button>
-        <button className="lien" type="button" onClick={onAchatSansPhoto}>
-          Achat sans photo
+        <button className="bouton" type="button" onClick={onAchatSansPhoto}>
+          Sans photo
         </button>
-        <Message message={message} />
       </div>
 
       <form className="formulaire section" onSubmit={(e) => void enregistrerEssence(e)} noValidate>
@@ -389,6 +393,10 @@ function SortieActive({
         >
           Terminer la sortie
         </button>
+      </div>
+      {/* Annulation rangée à l'écart (#104) ; aussi dans le détail de la sortie. Reste possible hors réseau. */}
+      <details className="section plus-actions">
+        <summary>Plus d'actions</summary>
         <button
           className="bouton bouton--danger"
           type="button"
@@ -409,7 +417,8 @@ function SortieActive({
         >
           Annuler la sortie
         </button>
-      </div>
+      </details>
+      <div className="barre-achat__espace" aria-hidden="true" />
     </>
   );
 }
@@ -437,7 +446,13 @@ function FormulaireAchat({
 }) {
   return (
     <form className="formulaire" onSubmit={onValider} noValidate>
-      <h2>{maison ? "Article de la maison" : "Nouvel achat"}</h2>
+      {/* « Annuler » en haut, loin de « Valider » en bas (#104). */}
+      <div className="formulaire__entete">
+        <h2>{maison ? "Article de la maison" : "Nouvel achat"}</h2>
+        <button className="lien" type="button" onClick={onAnnuler}>
+          Annuler
+        </button>
+      </div>
       {achat.apercu && <img className="apercu-photo" src={achat.apercu} alt="Photo de l'achat" />}
       {!maison && (
         <label className="champ">
@@ -464,9 +479,6 @@ function FormulaireAchat({
       <Message message={message?.type === "erreur" ? message : null} />
       <button className="bouton bouton--principal bouton--achat" type="submit">
         Valider
-      </button>
-      <button className="bouton" type="button" onClick={onAnnuler}>
-        Annuler
       </button>
     </form>
   );
