@@ -3,30 +3,42 @@
   "permissions": {
     "disableBypassPermissionsMode": "disable",
     "allow": [
-      "Bash(git status *)", "Bash(git diff *)", "Bash(git log *)", "Bash(git show *)",
+      "Bash(git status)", "Bash(git status *)", "Bash(git diff)", "Bash(git diff *)",
+      "Bash(git log)", "Bash(git log *)", "Bash(git show *)",
       "Bash(git add *)", "Bash(git commit *)", "Bash(git switch *)",
-      "Bash(npm test *)", "Bash(npm run *)", "Bash(npm ci)",
+      "Bash(git fetch)", "Bash(git fetch *)", "Bash(git pull --ff-only*)",
+      "Bash(gh issue view *)", "Bash(gh issue list *)", "Bash(gh issue create *)",
+      "Bash(gh pr view *)", "Bash(gh pr list *)", "Bash(gh pr create *)", "Bash(gh pr checks *)",
+      "Bash(npm test)", "Bash(npm test *)", "Bash(npm run *)", "Bash(npm ci)",
       "Bash(npx tsc *)", "Bash(npx vitest *)", "Bash(npx eslint *)", "Bash(npx prettier *)",
       "Bash(npx drizzle-kit generate *)",
-      "Bash(docker compose up *)", "Bash(docker compose ps *)", "Bash(docker compose logs *)",
-      "Bash(docker compose build *)", "Bash(docker compose restart *)", "Bash(docker compose stop *)"
+      "Bash(docker compose up *)", "Bash(docker compose ps)", "Bash(docker compose ps *)",
+      "Bash(docker compose logs *)", "Bash(docker compose build *)", "Bash(docker compose restart *)",
+      "Bash(docker compose stop *)"
     ],
     "ask": [
       "Bash(git push *)", "Bash(git merge *)", "Bash(git rebase *)", "Bash(git checkout *)",
       "Bash(git restore *)", "Bash(git stash *)", "Bash(git tag *)", "Bash(git revert *)",
-      "Bash(git commit*--amend*)", "Bash(gh *)",
+      "Bash(git commit*--amend*)",
+      "Bash(gh pr merge *)", "Bash(gh api *)", "Bash(gh release *)", "Bash(gh repo *)",
+      "Bash(gh secret *)", "Bash(gh workflow *)", "Bash(gh run *)",
       "Bash(npm install *)", "Bash(npm i *)", "Bash(npm uninstall *)", "Bash(npm update *)",
-      "Bash(npm run db*)",
+      "Bash(npm run db:migrate*)",
       "Bash(docker compose down *)", "Bash(docker compose exec *)", "Bash(docker compose run *)",
       "Bash(docker compose rm *)", "Bash(docker exec *)",
       "Bash(bash -c *)", "Bash(sh -c *)",
+      "PowerShell(git push *)", "PowerShell(git merge *)", "PowerShell(git rebase *)",
+      "PowerShell(git checkout *)", "PowerShell(git tag *)",
       "Edit(/server/drizzle/**)", "Edit(/server/src/calculs/annexe.test.ts)",
-      "Edit(/docker-compose.yml)", "Edit(/CLAUDE.md)", "Edit(/docs/cahier-des-charges.md)"
+      "Edit(/docker-compose.yml)", "Edit(/CLAUDE.md)", "Edit(/docs/cahier-des-charges.md)",
+      "mcp__github__update_pull_request_branch"
     ],
     "deny": [
       "Bash(git push*--force*)", "Bash(git push* -f*)", "Bash(git push*--delete*)",
       "Bash(git push*--no-verify*)", "Bash(git commit*--no-verify*)",
+      "Bash(git push* main*)", "Bash(git push*:main*)",
       "Bash(git reset*--hard*)", "Bash(git clean*)", "Bash(git checkout .)",
+      "Bash(git switch*--discard-changes*)", "Bash(git switch* -f*)",
       "Bash(git branch* -D*)", "Bash(git add* -f*)", "Bash(git add*--force*)",
       "Bash(git filter-branch*)", "Bash(git filter-repo*)", "Bash(git reflog expire*)",
       "Bash(git gc*--prune*)", "Bash(git stash clear*)", "Bash(git config --global*)",
@@ -49,22 +61,63 @@
       "Bash(rm -rf*)", "Bash(rm -fr*)", "Bash(sudo*)", "Bash(chmod -R*)",
       "Bash(curl*)", "Bash(wget*)",
 
-      "PowerShell(Remove-Item* -r*)", "PowerShell(Invoke-Expression*)",
-      "PowerShell(Invoke-WebRequest*)", "PowerShell(Set-ExecutionPolicy*)",
-      "PowerShell(git push*--force*)", "PowerShell(git push* -f*)", "PowerShell(git reset*--hard*)",
+      "PowerShell(git push*--force*)", "PowerShell(git push* -f*)", "PowerShell(git push*--delete*)",
+      "PowerShell(git push*--no-verify*)", "PowerShell(git commit*--no-verify*)",
+      "PowerShell(git push* main*)", "PowerShell(git push*:main*)",
+      "PowerShell(git reset*--hard*)", "PowerShell(git clean*)", "PowerShell(git checkout .)",
+      "PowerShell(git switch*--discard-changes*)", "PowerShell(git switch* -f*)",
+      "PowerShell(git branch* -D*)", "PowerShell(git add* -f*)", "PowerShell(git add*--force*)",
+      "PowerShell(git filter-branch*)", "PowerShell(git filter-repo*)",
+      "PowerShell(git config --global*)", "PowerShell(git -C *)", "PowerShell(git -c *)",
+      "PowerShell(npm publish*)", "PowerShell(npm * -g*)", "PowerShell(npm * --global*)",
+      "PowerShell(npx drizzle-kit push*)", "PowerShell(npx drizzle-kit drop*)",
       "PowerShell(docker compose down*-v*)", "PowerShell(docker volume rm*)",
       "PowerShell(docker volume prune*)", "PowerShell(docker system prune*)",
+      "PowerShell(docker image prune*)", "PowerShell(docker rmi*)",
+      "PowerShell(Remove-Item* -r*)", "PowerShell(rm * -r*)", "PowerShell(del * -r*)",
+      "PowerShell(Remove-Item*data*)", "PowerShell(rm *data*)", "PowerShell(del *data*)",
+      "PowerShell(Remove-Item*sauvegardes*)", "PowerShell(rm *sauvegardes*)", "PowerShell(del *sauvegardes*)",
+      "PowerShell(Remove-Item*.env*)", "PowerShell(rm *.env*)", "PowerShell(del *.env*)",
+      "PowerShell(Invoke-Expression*)", "PowerShell(iex*)", "PowerShell(*| iex*)",
+      "PowerShell(Invoke-WebRequest*)", "PowerShell(iwr*)", "PowerShell(Invoke-RestMethod*)", "PowerShell(irm*)",
+      "PowerShell(curl*)", "PowerShell(wget*)", "PowerShell(Start-BitsTransfer*)",
+      "PowerShell(Set-ExecutionPolicy*)",
 
-      "Read(.env)", "Read(.env.*)", "Read(!.env.example)",
+      "Read(**/.env)", "Read(**/.env.local)", "Read(**/.env.production)",
       "Read(**/*.key)", "Read(**/*-key.pem)",
       "Edit(/data/**)", "Edit(/.claude/settings.json)", "Edit(/.claude/settings.local.json)",
       "Edit(/.claude/hooks/**)",
+
+      "mcp__github__push_files", "mcp__github__create_or_update_file", "mcp__github__delete_file",
 
       "WebFetch(domain:vinted.fr)", "WebFetch(domain:*.vinted.fr)",
       "WebFetch(domain:vinted.com)", "WebFetch(domain:*.vinted.com)"
     ]
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/installer-dependances.mjs\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/proteger-env.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
