@@ -78,3 +78,11 @@ Badges de statut (texte `--fond` dessus, tous ≥ 5,1:1) : brouillon `#5F6485` /
 l'onglet, ou ouvrir un changement de statut avec une saisie non enregistrée demande confirmation, en nommant ce qui
 serait perdu : la fiche, l'annonce, les liens Vinted, le boost. Créer ou supprimer l'article quitte la fiche sans
 question. Boîte de confirmation du navigateur pour l'instant (boîtes accessibles : #132).
+
+## 13/10/2026 — Barre de navigation : icônes, pastille, onglet parent (issue #103)
+
+**Décision (utilisateur)** : l'onglet « Réglages » garde son nom (pas de « Plus ») ; icônes **SVG du projet**
+(`client/src/composants/Icones.tsx`, aucune dépendance) au-dessus de chaque libellé. La pastille d'alertes est
+accrochée à l'icône d'Articles. L'onglet parent reste actif sur les écrans secondaires (`client/src/navigation.ts`,
+choix de Claude, *à relire*) : fiche article et vente → Articles ; sorties → Terrain ; frais divers → Tableau ;
+listes, corbeille, publication Vinted → Réglages.

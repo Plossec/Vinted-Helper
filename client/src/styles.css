@@ -166,13 +166,29 @@ input[inputmode="decimal"] {
 
 .navigation__lien {
   flex: 1;
+  min-width: 0;
   min-height: 3.5rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.15rem;
+  padding: var(--e-1) var(--e-1) var(--e-2);
   color: var(--texte-secondaire);
   text-decoration: none;
   font-weight: 600;
+}
+
+/* Icône + libellé (#103) ; la pastille d'alertes est accrochée à l'icône d'Articles. */
+.navigation__icone {
+  position: relative;
+  display: flex;
+}
+
+.navigation__libelle {
+  font-size: var(--t-petit);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .navigation__lien:hover {
@@ -695,10 +711,6 @@ a.carte-article:hover,
   color: var(--erreur);
 }
 
-.navigation__lien--terrain {
-  font-size: var(--t-corps);
-}
-
 /* Photos d'une fiche article */
 .photos {
   display: grid;
@@ -1166,8 +1178,14 @@ a {
   font-weight: 700;
 }
 
-.navigation__lien .pastille {
-  margin-left: 0.35rem;
+.navigation__icone .pastille {
+  position: absolute;
+  top: -0.45rem;
+  left: 1rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  font-size: 0.7rem;
 }
 
 /* --- Publication Vinted --- */
