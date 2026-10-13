@@ -2,6 +2,7 @@
 import { Link } from "react-router";
 import { ESSAIS_SERVEUR_MAX } from "../hors-ligne/file.js";
 import { abandonner, envoyerMaintenant, reessayer, useFile } from "../hors-ligne/index.js";
+import { confirmer } from "./Dialogue.js";
 
 const LIBELLES = {
   sortie: "Sortie",
@@ -53,7 +54,11 @@ export function BandeauFile() {
             className="lien"
             type="button"
             onClick={() => {
-              if (window.confirm("Abandonner cet élément ? Il sera perdu.")) void abandonner(e);
+              void confirmer("Abandonner cet élément ? Il sera perdu.", { action: "Abandonner", danger: true }).then(
+                (ok) => {
+                  if (ok) void abandonner(e);
+                },
+              );
             }}
           >
             Abandonner

@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.10.2] — 13/10/2026
+
+### Modifié
+- Confirmations et saisie de montant dans des boîtes de dialogue de l'application (lisibles sur téléphone, aux
+  couleurs du thème, Échap pour annuler) à la place des fenêtres du navigateur ; titre d'onglet propre à chaque
+  écran et focus placé sur le titre pour les lecteurs d'écran ; animations réduites si le téléphone le demande
+  (#132).
+
 ## [1.10.1] — 13/10/2026
 
 ### Modifié

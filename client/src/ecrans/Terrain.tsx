@@ -15,6 +15,7 @@ import { ajouterALaFile, annulerSortie, useFile } from "../hors-ligne/index.js";
 import { aujourdhui, formatDate } from "../outils/dates.js";
 import { formatEuros, lireMontant } from "../outils/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 /** Achat en cours de saisie : photo prise (ou non), prix et nombre d'articles. */
 interface AchatEnSaisie {
@@ -379,8 +380,11 @@ function SortieActive({
           className="bouton"
           type="button"
           onClick={() => {
-            if (window.confirm("Terminer la sortie ? Vous pourrez toujours la modifier depuis « Sorties »."))
-              onTerminer();
+            void confirmer("Terminer la sortie ? Vous pourrez toujours la modifier depuis « Sorties ».", {
+              action: "Terminer",
+            }).then((ok) => {
+              if (ok) void onTerminer();
+            });
           }}
         >
           Terminer la sortie
@@ -395,12 +399,12 @@ function SortieActive({
               nombre === 0
                 ? ""
                 : ` Ses ${nombre} article${nombre > 1 ? "s" : ""} iront à la corbeille (restaurables 30 jours).`;
-            if (
-              window.confirm(
-                `Annuler la sortie « ${sortie.lieu} » du ${formatDate(sortie.date)} ?${achats} L'essence saisie sera effacée.`,
-              )
-            )
-              void onAnnuler();
+            void confirmer(
+              `Annuler la sortie « ${sortie.lieu} » du ${formatDate(sortie.date)} ?${achats} L'essence saisie sera effacée.`,
+              { action: "Annuler la sortie", danger: true },
+            ).then((ok) => {
+              if (ok) void onAnnuler();
+            });
           }}
         >
           Annuler la sortie

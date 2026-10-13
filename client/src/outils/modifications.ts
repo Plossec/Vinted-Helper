@@ -6,12 +6,12 @@ export interface Modifications {
   /** Le bloc `bloc` (libellé lisible, ex. « l'annonce ») a-t-il une saisie non enregistrée ? */
   signaler: (bloc: string, modifie: boolean) => void;
   /** Vrai s'il n'y a rien à perdre ou si l'utilisateur accepte de continuer (`action` : ex. « changer de statut »). */
-  confirmerAbandon: (action: string) => boolean;
+  confirmerAbandon: (action: string) => Promise<boolean>;
 }
 
 export const ContexteModifications = createContext<Modifications>({
   signaler: () => undefined,
-  confirmerAbandon: () => true,
+  confirmerAbandon: () => Promise.resolve(true),
 });
 
 export const useModifications = () => useContext(ContexteModifications);

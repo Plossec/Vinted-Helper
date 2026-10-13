@@ -14,6 +14,7 @@ import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants
 import { formatDate } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
 import { ContexteModifications, messageAbandon, type Modifications } from "../outils/modifications.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 interface Formulaire {
   nom: string;
@@ -122,7 +123,10 @@ export function FicheArticle() {
   const modifications = useMemo<Modifications>(
     () => ({
       signaler,
-      confirmerAbandon: (action) => nonEnregistre.length === 0 || window.confirm(messageAbandon(nonEnregistre, action)),
+      confirmerAbandon: (action) =>
+        nonEnregistre.length === 0
+          ? Promise.resolve(true)
+          : confirmer(messageAbandon(nonEnregistre, action), { action: "Continuer", danger: true }),
     }),
     [signaler, nonEnregistre],
   );
@@ -132,8 +136,18 @@ export function FicheArticle() {
   );
   useEffect(() => {
     if (blocage.state !== "blocked") return;
-    if (window.confirm(messageAbandon(nonEnregistre, "quitter la fiche"))) blocage.proceed();
-    else blocage.reset();
+    let actif = true;
+    void confirmer(messageAbandon(nonEnregistre, "quitter la fiche"), {
+      action: "Quitter",
+      danger: true,
+    }).then((ok) => {
+      if (!actif) return;
+      if (ok) blocage.proceed();
+      else blocage.reset();
+    });
+    return () => {
+      actif = false;
+    };
   }, [blocage, nonEnregistre]);
   // Fermeture de l'onglet ou rechargement : avertissement du navigateur.
   useEffect(() => {
@@ -514,13 +528,15 @@ export function FicheArticle() {
                   type="button"
                   className="bouton bouton--danger"
                   onClick={() => {
-                    if (!window.confirm("Mettre cet article à la corbeille ? Il sera restaurable pendant 30 jours."))
-                      return;
-                    void api
-                      .delete(`/api/articles/${article.id}`)
-                      .then(() => {
+                    void confirmer("Mettre cet article à la corbeille ? Il sera restaurable pendant 30 jours.", {
+                      action: "Mettre à la corbeille",
+                      danger: true,
+                    })
+                      .then(async (ok) => {
+                        if (!ok) return;
+                        await api.delete(`/api/articles/${article.id}`);
                         sansAvertissement.current = true;
-                        return naviguer("/", { replace: true });
+                        await naviguer("/", { replace: true });
                       })
                       .catch((e: unknown) =>
                         setMessage({

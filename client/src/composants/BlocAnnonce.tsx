@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { api, type Article, ErreurApi } from "../api.js";
 import { useSignalerModification } from "../outils/modifications.js";
+import { confirmer } from "./Dialogue.js";
 
 async function copier(texte: string): Promise<boolean> {
   try {
@@ -25,7 +26,11 @@ export function BlocAnnonce({ article, onMiseAJour }: { article: Article; onMise
   );
 
   async function generer() {
-    if ((titre || description) && !window.confirm("Remplacer le titre et la description actuels ?")) return;
+    if (
+      (titre || description) &&
+      !(await confirmer("Remplacer le titre et la description actuels ?", { action: "Remplacer" }))
+    )
+      return;
     setEnCours(true);
     setMessage(null);
     try {
