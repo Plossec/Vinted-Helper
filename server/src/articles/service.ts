@@ -39,6 +39,8 @@ export interface DonneesArticle {
   matiere: string | null;
   notes: string | null;
   prixAffiche: number | null;
+  /** Prix de vente minimum accepté : information, vide = pas de minimum (#146). */
+  prixVenteMinimum: number | null;
   /** Codes de couleur (2 au plus) et format du colis : nécessaires à la publication sur Vinted. */
   couleurs: string[];
   formatColis: FormatColis | null;
@@ -46,6 +48,13 @@ export interface DonneesArticle {
 
 /** Tolérance pour une date « dans le futur » (décalage d'horloge entre téléphone et serveur). */
 const TOLERANCE_FUTUR_MS = 5 * 60 * 1000;
+
+/** Le prix de vente minimum ne dépasse jamais le prix affiché (#146). */
+function verifierPrixMinimum(prixAffiche: number | null, prixVenteMinimum: number | null) {
+  if (prixAffiche !== null && prixVenteMinimum !== null && prixVenteMinimum > prixAffiche) {
+    throw erreurSaisie("Le prix vente minimum doit être inférieur ou égal au prix affiché.");
+  }
+}
 
 /** Vérifie que chaque valeur de liste choisie appartient bien à l'utilisateur. */
 async function verifierReferentiels(tx: Transaction, utilisateurId: string, d: DonneesArticle) {
@@ -81,6 +90,7 @@ export async function creerArticle(
   idPropose: string | null = null,
 ): Promise<string> {
   if (donnees.prixAchat === null) throw erreurSaisie("Prix d'achat : obligatoire.");
+  verifierPrixMinimum(donnees.prixAffiche, donnees.prixVenteMinimum);
   return base.transaction(async (tx) => {
     if (idPropose !== null) {
       // Renvoi d'une création déjà reçue (utile pour la file d'envoi du lot 2) : pas de doublon.
@@ -141,6 +151,7 @@ export async function modifierArticle(
     if (actuel.statut === "en_ligne" && donnees.prixAffiche === null) {
       throw erreurSaisie("Un article En ligne doit garder un prix affiché.");
     }
+    verifierPrixMinimum(donnees.prixAffiche, donnees.prixVenteMinimum);
     await verifierReferentiels(tx, utilisateurId, donnees);
     // Article de lot : le prix d'achat n'est pas modifié article par article (§6.1).
     const prixAchat = actuel.lotId === null ? donnees.prixAchat : null;
@@ -178,6 +189,7 @@ export async function changerStatut(
     let prixAffiche = actuel.prixAffiche;
     if (demande.prixAffiche !== null && demande.prixAffiche !== actuel.prixAffiche) {
       prixAffiche = demande.prixAffiche;
+      verifierPrixMinimum(prixAffiche, actuel.prixVenteMinimum);
       await tx.insert(historiquePrix).values({ utilisateurId, articleId: id, prix: prixAffiche, date });
     }
     const verification = verifierTransition(actuel.statut, demande.vers, { prixAffiche });
@@ -456,6 +468,7 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     dateAchat: a.dateAchat,
     statut: a.statut,
     prixAffiche: a.prixAffiche,
+    prixVenteMinimum: a.prixVenteMinimum,
     creeLe: a.creeLe,
     modifieLe: a.modifieLe,
     transitionsPossibles: transitionsProposees(a.statut),

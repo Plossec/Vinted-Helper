@@ -253,6 +253,49 @@ describe("articles", () => {
     });
   });
 
+  describe("prix vente minimum (#146)", () => {
+    const changer = (id: string, corps: object) => requete("POST", `/api/articles/${id}/statut`, corps);
+    const erreurMinimum = { erreur: "Le prix vente minimum doit être inférieur ou égal au prix affiché." };
+
+    it("facultatif, enregistré, modifiable et effaçable", async () => {
+      const cree = await creer();
+      expect(cree).toMatchObject({ prixVenteMinimum: null });
+      const modifie = await requete(
+        "PUT",
+        `/api/articles/${cree.id}`,
+        ficheMinimale(t.lieuId, { prixAffiche: 1200, prixVenteMinimum: 1200 }),
+      );
+      expect(modifie.json()).toMatchObject({ prixAffiche: 1200, prixVenteMinimum: 1200 });
+      const efface = await requete("PUT", `/api/articles/${cree.id}`, ficheMinimale(t.lieuId, { prixAffiche: 1200 }));
+      expect(efface.json()).toMatchObject({ prixVenteMinimum: null });
+    });
+
+    it("sans prix affiché, un minimum seul est accepté", async () => {
+      const reponse = await requete("POST", "/api/articles", ficheMinimale(t.lieuId, { prixVenteMinimum: 800 }));
+      expect(reponse.statusCode).toBe(201);
+      expect(reponse.json()).toMatchObject({ prixAffiche: null, prixVenteMinimum: 800 });
+    });
+
+    it("refusé s'il dépasse le prix affiché, à la création comme à la modification", async () => {
+      const trop = ficheMinimale(t.lieuId, { prixAffiche: 1000, prixVenteMinimum: 1001 });
+      const creation = await requete("POST", "/api/articles", trop);
+      expect(creation.statusCode).toBe(400);
+      expect(creation.json()).toEqual(erreurMinimum);
+      const cree = await creer();
+      const modification = await requete("PUT", `/api/articles/${cree.id}`, trop);
+      expect(modification.statusCode).toBe(400);
+      expect(modification.json()).toEqual(erreurMinimum);
+    });
+
+    it("refusé aussi quand le passage En ligne fixe un prix affiché plus bas que le minimum", async () => {
+      const cree = await creer({ prixVenteMinimum: 800 });
+      const reponse = await changer(cree.id, { vers: "en_ligne", prixAffiche: 700 });
+      expect(reponse.statusCode).toBe(400);
+      expect(reponse.json()).toEqual(erreurMinimum);
+      expect((await changer(cree.id, { vers: "en_ligne", prixAffiche: 800 })).statusCode).toBe(200);
+    });
+  });
+
   describe("historique du prix affiché (enregistré dès le lot 1)", () => {
     it("chaque saisie ou modification est datée", async () => {
       const cree = await creer({ prixAffiche: 1200 });

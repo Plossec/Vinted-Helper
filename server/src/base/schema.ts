@@ -150,6 +150,8 @@ export const article = pgTable(
     statut: statutArticle("statut").notNull().default("brouillon"),
     /** Centimes. Prix actuel de l'annonce ; l'historique est dans historique_prix. */
     prixAffiche: integer("prix_affiche"),
+    /** Centimes. Prix de vente minimum accepté (information, ≤ prix affiché ; #146). */
+    prixVenteMinimum: integer("prix_vente_minimum"),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
     modifieLe: horodatage("modifie_le").notNull().defaultNow(),
     /** Sortie du stock (§5.7) : motif, canal et prix de revente (centimes) si « revendu », date. */

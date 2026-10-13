@@ -1,0 +1,1 @@
+ALTER TABLE "article" ADD COLUMN "prix_vente_minimum" integer;

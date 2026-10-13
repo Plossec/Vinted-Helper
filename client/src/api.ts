@@ -259,6 +259,8 @@ export interface Article {
   dateAchat: string | null;
   statut: Statut;
   prixAffiche: number | null;
+  /** Prix de vente minimum accepté (information ; #146). */
+  prixVenteMinimum: number | null;
   transitionsPossibles: Statut[];
   historiqueStatuts: ChangementStatut[];
 }
@@ -277,6 +279,7 @@ export interface DonneesArticle {
   matiere: string | null;
   notes: string | null;
   prixAffiche: number | null;
+  prixVenteMinimum: number | null;
   couleurs: string[];
   formatColis: string | null;
 }
