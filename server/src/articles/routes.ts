@@ -69,6 +69,7 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
     matiere: texteFacultatif(c.matiere, "Matière", 100),
     notes: texteFacultatif(c.notes, "Notes", 2000),
     prixAffiche: centimesFacultatif(c.prixAffiche, "Prix affiché"),
+    prixVenteMinimum: centimesFacultatif(c.prixVenteMinimum, "Prix vente minimum"),
     couleurs: couleursFacultatives(c.couleurs),
     formatColis: formatColisFacultatif(c.formatColis),
   };

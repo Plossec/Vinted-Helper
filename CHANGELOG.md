@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.9.0] — 13/10/2026
+
+### Ajouté
+- Fiche article : champ facultatif « Prix vente minimum (€) » sous le prix affiché, refusé s'il dépasse le prix
+  affiché ; information seule pour l'instant, prévu pour les futures tâches de négociation (#146).
+
 ## [1.8.4] — 13/10/2026
 
 ### Corrigé

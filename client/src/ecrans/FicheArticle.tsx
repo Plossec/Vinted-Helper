@@ -33,6 +33,7 @@ interface Formulaire {
   prixLot: string;
   dateAchat: string;
   prixAffiche: string;
+  prixVenteMinimum: string;
   notes: string;
   couleur1: string;
   couleur2: string;
@@ -54,6 +55,7 @@ const formulaireVide = (): Formulaire => ({
   prixLot: "",
   dateAchat: aujourdhui(),
   prixAffiche: "",
+  prixVenteMinimum: "",
   notes: "",
   couleur1: "",
   couleur2: "",
@@ -80,6 +82,7 @@ function versFormulaire(a: Article, refs: Referentiels): Formulaire {
     prixLot: centimesVersSaisie(a.lot?.prixTotal ?? null),
     dateAchat: a.dateAchat ?? "",
     prixAffiche: centimesVersSaisie(a.prixAffiche),
+    prixVenteMinimum: centimesVersSaisie(a.prixVenteMinimum),
     notes: a.notes ?? "",
     couleur1: a.couleurs[0] ?? "",
     couleur2: a.couleurs[1] ?? "",
@@ -210,6 +213,7 @@ export function FicheArticle() {
     const prixAchat = enLot ? null : lireMontant(form.prixAchat);
     const prixLot = enLot ? lireMontant(form.prixLot) : null;
     const prixAffiche = lireMontant(form.prixAffiche);
+    const prixVenteMinimum = lireMontant(form.prixVenteMinimum);
     if (form.nom.trim() === "") return erreur("Le nom est obligatoire.");
     if (form.categorie === "") return erreur("Choisissez une catégorie dans la liste.");
     if (form.marque.trim() === "") return erreur("La marque est obligatoire (« Sans marque » si besoin).");
@@ -221,6 +225,9 @@ export function FicheArticle() {
     if (enLot && (prixLot === null || prixLot === "invalide")) return erreur("Prix total du lot invalide (ex. 15).");
     if (form.dateAchat === "") return erreur("La date d'achat est obligatoire.");
     if (prixAffiche === "invalide") return erreur("Prix affiché invalide (ex. 12,00).");
+    if (prixVenteMinimum === "invalide") return erreur("Prix vente minimum invalide (ex. 10,00).");
+    if (prixAffiche !== null && prixVenteMinimum !== null && prixVenteMinimum > prixAffiche)
+      return erreur("Le prix vente minimum doit être inférieur ou égal au prix affiché.");
 
     setEnvoi(true);
     try {
@@ -236,6 +243,7 @@ export function FicheArticle() {
         prixAchat,
         dateAchat: form.dateAchat,
         prixAffiche,
+        prixVenteMinimum,
         notes: form.notes.trim() || null,
         couleurs: [form.couleur1, form.couleur2].filter((c, i, t) => c !== "" && t.indexOf(c) === i),
         formatColis: form.formatColis || null,
@@ -420,6 +428,15 @@ export function FicheArticle() {
               value={form.prixAffiche}
               onChange={(e) => modifier("prixAffiche")(e.target.value)}
               placeholder="12,00"
+            />
+          </label>
+          <label className="champ">
+            <span>Prix vente minimum (€)</span>
+            <input
+              inputMode="decimal"
+              value={form.prixVenteMinimum}
+              onChange={(e) => modifier("prixVenteMinimum")(e.target.value)}
+              placeholder="Facultatif"
             />
           </label>
           <div className="champs-ligne">

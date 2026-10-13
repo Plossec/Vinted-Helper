@@ -51,3 +51,11 @@
 | Lieu d'achat | Inchangé (liste + ajout) ; écran de gestion et création automatique : [issue #7](https://github.com/Plossec/Vinted-Helper/issues/7). |
 | Migration 0001 | Écrite à la main dans un ordre sûr (copie des données avant suppression des anciennes tables) ; conversion testée. |
 | Résultats de recherche | Les options qui commencent par le texte tapé s'affichent en premier. |
+
+## 13/10/2026 — Prix vente minimum (issue #146)
+
+**Décision (utilisateur)** : champ facultatif « Prix vente minimum (€) » sur chaque article, sous « Prix affiché sur
+Vinted (€) », dans la fiche seulement. **Information seule pour l'instant** (aucun calcul) ; il servira aux tâches
+automatisées de négociation (#149, #150). Vide = pas de minimum. Refusé s'il dépasse le prix affiché, à
+l'enregistrement de la fiche comme au passage En ligne avec un nouveau prix. Colonne `prix_vente_minimum`
+(centimes), migration `0010_prix_vente_minimum` (ajout d'une colonne vide, sans effet sur les données existantes).
