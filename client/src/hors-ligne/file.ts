@@ -37,7 +37,12 @@ export interface ElementFile {
   operation: Operation;
   /** Message du serveur si l'envoi a été refusé (l'élément est alors mis de côté). */
   erreur: string | null;
+  /** Erreurs du serveur (500) d'affilée pour cet élément ; absent = aucune (éléments enregistrés avant #123). */
+  echecsServeur?: number;
 }
+
+/** Au 3ᵉ essai en erreur 500 d'affilée, l'élément est mis de côté pour ne plus bloquer les suivants (issue #123). */
+export const ESSAIS_SERVEUR_MAX = 3;
 
 /** Stockage persistant de la file (IndexedDB sur le téléphone, mémoire dans les tests). */
 export interface StockageFile {
@@ -53,6 +58,8 @@ export type ResultatEnvoi =
   | { etat: "reseau" }
   /** Session expirée : on garde tout et on attend la reconnexion. */
   | { etat: "connexion" }
+  /** Erreur interne du serveur (500) : réessayée, puis mise de côté au bout de ESSAIS_SERVEUR_MAX essais. */
+  | { etat: "serveur"; message: string }
   /** Refus du serveur (donnée invalide) : l'élément est mis de côté avec le message. */
   | { etat: "refuse"; message: string };
 
@@ -69,6 +76,8 @@ export async function listerDansLOrdre(stockage: StockageFile): Promise<ElementF
  * Envoie les éléments en attente, dans l'ordre. S'arrête au premier problème de réseau ou de connexion
  * (les suivants dépendent souvent du précédent : sortie avant achat, photo avant achat).
  * Les éléments refusés restent dans la file, marqués en erreur, et ne sont plus renvoyés automatiquement.
+ * Une erreur 500 arrête l'envoi comme une coupure de réseau ; au ESSAIS_SERVEUR_MAX-ième essai d'affilée, l'élément
+ * est mis de côté (en erreur) et les suivants partent.
  */
 export async function envoyerFile(stockage: StockageFile, envoyer: Envoyeur): Promise<BilanEnvoi> {
   for (const element of await listerDansLOrdre(stockage)) {
@@ -81,7 +90,18 @@ export async function envoyerFile(stockage: StockageFile, envoyer: Envoyeur): Pr
     }
     if (resultat.etat === "envoye") await stockage.supprimer(element.cle);
     else if (resultat.etat === "refuse") await stockage.ecrire({ ...element, erreur: resultat.message });
-    else return resultat.etat;
+    else if (resultat.etat === "serveur") {
+      const echecsServeur = (element.echecsServeur ?? 0) + 1;
+      if (echecsServeur < ESSAIS_SERVEUR_MAX) {
+        await stockage.ecrire({ ...element, echecsServeur });
+        return "reseau";
+      }
+      await stockage.ecrire({
+        ...element,
+        echecsServeur,
+        erreur: `Erreur du serveur après ${ESSAIS_SERVEUR_MAX} essais : ${resultat.message}`,
+      });
+    } else return resultat.etat;
   }
   return "termine";
 }
@@ -90,12 +110,14 @@ export async function envoyerFile(stockage: StockageFile, envoyer: Envoyeur): Pr
 export async function interpreterReponse(reponse: Response): Promise<ResultatEnvoi> {
   if (reponse.ok) return { etat: "envoye" };
   if (reponse.status === 401) return { etat: "connexion" };
-  if (reponse.status >= 500 || reponse.status === 408 || reponse.status === 429) return { etat: "reseau" };
+  // Serveur injoignable ou en redémarrage (mise à jour, relais HTTPS) : comme une coupure de réseau.
+  if ([408, 429, 502, 503, 504].includes(reponse.status)) return { etat: "reseau" };
   const contenu: unknown = await reponse.json().catch(() => null);
   const message =
     typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
       ? contenu.erreur
       : `Erreur ${reponse.status}`;
+  if (reponse.status >= 500) return { etat: "serveur", message };
   return { etat: "refuse", message };
 }
 

@@ -77,7 +77,7 @@ export async function annulerSortie(sortieId: string): Promise<void> {
 
 /** Remet un élément refusé dans la file (après correction côté serveur, par exemple). */
 export async function reessayer(element: ElementFile) {
-  await stockage.ecrire({ ...element, erreur: null });
+  await stockage.ecrire({ ...element, erreur: null, echecsServeur: 0 });
   await rafraichir();
   void envoyerMaintenant();
 }

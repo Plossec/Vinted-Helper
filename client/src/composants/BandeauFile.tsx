@@ -1,5 +1,6 @@
 // Compteur « N éléments en attente d'envoi » (§2.2) et éléments refusés par le serveur.
 import { Link } from "react-router";
+import { ESSAIS_SERVEUR_MAX } from "../hors-ligne/file.js";
 import { abandonner, envoyerMaintenant, reessayer, useFile } from "../hors-ligne/index.js";
 
 const LIBELLES = {
@@ -15,6 +16,8 @@ export function BandeauFile() {
   if (elements.length === 0) return null;
   const enAttente = elements.filter((e) => e.erreur === null);
   const refuses = elements.filter((e) => e.erreur !== null);
+  // Premier élément en attente déjà tombé sur une erreur du serveur (issue #123) : l'indiquer plutôt que « réseau ».
+  const echecsServeur = enAttente[0]?.echecsServeur ?? 0;
 
   return (
     <div className="bandeau" role="status">
@@ -27,9 +30,11 @@ export function BandeauFile() {
             ? " — envoi…"
             : bilan === "connexion"
               ? " — session expirée : "
-              : bilan === "reseau"
-                ? " — pas de réseau, nouvel essai automatique."
-                : ""}
+              : bilan === "reseau" && echecsServeur > 0
+                ? ` — erreur du serveur (essai ${echecsServeur} sur ${ESSAIS_SERVEUR_MAX}), nouvel essai automatique.`
+                : bilan === "reseau"
+                  ? " — pas de réseau, nouvel essai automatique."
+                  : ""}
           {bilan === "connexion" && !envoiEnCours && <Link to="/connexion">reconnectez-vous</Link>}
           {bilan === "reseau" && !envoiEnCours && (
             <button className="lien" type="button" onClick={() => void envoyerMaintenant()}>
