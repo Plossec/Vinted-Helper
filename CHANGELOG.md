@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.6.0] — 13/10/2026
+
 ### Ajouté
 - Liste des articles : sélection pour Vinted aussi avec le filtre « Erreur », pour republier plusieurs articles
   d'un coup (#95).
