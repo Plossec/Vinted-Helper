@@ -10,7 +10,7 @@ import { CATEGORIES } from "../catalogue/categories.js";
 import { libelleCouleur } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 
 /** Une demande « en cours » depuis plus longtemps est considérée comme interrompue (jamais relancée seule). */
@@ -116,7 +116,12 @@ export async function demanderPublication(
     // demande (#92). Un essai ne change jamais le statut : l'article reste en Erreur.
     await base.transaction(async (tx) => {
       if (a.statut === "erreur_publication" && !essai) {
-        await tx.update(article).set({ statut: "a_publier", modifieLe: maintenant }).where(eq(article.id, a.id));
+        const modifies = await tx
+          .update(article)
+          .set({ statut: "a_publier", modifieLe: maintenant })
+          .where(and(eq(article.id, a.id), eq(article.statut, "erreur_publication")))
+          .returning({ id: article.id });
+        if (modifies.length === 0) throw conflitStatutChange();
         await tx
           .insert(historiqueStatut)
           .values({ utilisateurId, articleId: a.id, de: "erreur_publication", vers: "a_publier", date: maintenant });

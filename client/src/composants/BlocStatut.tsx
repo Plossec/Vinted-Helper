@@ -55,6 +55,8 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
   const [vente, setVente] = useState<Vente | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [correction, setCorrection] = useState<{ id: string; date: string } | null>(null);
+  /** Envoi en cours : « Confirmer » désactivé, pour qu'une double tape ne crée pas deux ventes (issue #120). */
+  const [envoi, setEnvoi] = useState(false);
   const modifier = (m: Partial<Saisie>) => setSaisie((s) => (s === null ? s : { ...s, ...m }));
 
   async function preparer(vers: Statut) {
@@ -93,7 +95,16 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
   }
 
   async function confirmer() {
-    if (choix === null || saisie === null) return;
+    if (choix === null || saisie === null || envoi) return;
+    setEnvoi(true);
+    try {
+      await appliquer(choix, saisie);
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  async function appliquer(choix: Statut, saisie: Saisie) {
     const de = article.statut;
     const date = depuisChampDateHeure(saisie.date);
     if (date === null) return setErreur("Indiquez une date et une heure valides.");
@@ -387,8 +398,13 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
           )}
 
           <div className="actions">
-            <button type="button" className="bouton bouton--principal" onClick={() => void confirmer()}>
-              Confirmer
+            <button
+              type="button"
+              className="bouton bouton--principal"
+              onClick={() => void confirmer()}
+              disabled={envoi}
+            >
+              {envoi ? "Envoi…" : "Confirmer"}
             </button>
             <button
               type="button"
