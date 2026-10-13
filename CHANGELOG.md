@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.8.4] — 13/10/2026
+
+### Corrigé
+- Fiche article : quitter la fiche, fermer l'onglet ou changer de statut avec une saisie non enregistrée (fiche,
+  annonce, liens Vinted, boost) demande confirmation, pour ne plus perdre une modification (#99).
+
+### Modifié
+- Tableau de bord : les tuiles Chiffre d'affaires et Bénéfice n'affichent plus deux fois le même montant (libellé
+  « Octobre 2026 réalisé » au-dessus du chiffre) (#97).
+
 ## [1.8.3] — 13/10/2026
 
 ### Modifié

@@ -47,3 +47,8 @@ dessiné seulement s'il est positif (la bulle et le tableau donnent toujours le 
   d'écran affichent le théorique dès qu'il diffère du réalisé.
 - API : le total d'année du **réalisé** (`deLAnnee`) est gardé (§5.9, comparatif annuel envisagé) ; ceux du
   théorique et des ventes en cours, plus affichés depuis #88, sont retirés.
+
+## 13/10/2026 — Tuiles CA et bénéfice : montant affiché une seule fois (issue #97)
+
+**Décision (utilisateur)** : la ligne « Octobre 2026 réalisé : … » répétait le gros chiffre ; elle est retirée.
+Le libellé « Octobre 2026 réalisé » passe au-dessus du gros chiffre, la ligne « théorique » reste dessous.

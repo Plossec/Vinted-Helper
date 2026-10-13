@@ -5,6 +5,7 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article } from "../api.js";
 import { demanderPublication, lireModeEssai } from "../publication.js";
+import { useSignalerModification } from "../outils/modifications.js";
 
 interface ReponseLien {
   article: Article;
@@ -20,6 +21,10 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
     ["a_expedier", "envoye", "a_recuperer", "finalise"].includes(article.statut) || article.urlConversation !== null;
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  useSignalerModification(
+    "les liens Vinted",
+    lien.trim() !== (article.urlVinted ?? "") || conversation.trim() !== (article.urlConversation ?? ""),
+  );
 
   async function publier() {
     try {

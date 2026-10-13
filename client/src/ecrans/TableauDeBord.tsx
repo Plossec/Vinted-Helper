@@ -177,10 +177,9 @@ export function TableauDeBord() {
             {(["chiffreAffaires", "beneficeRealise"] as const).map((m) => (
               <div key={m} className="tuile">
                 <span className="tuile__titre">{MESURES[m]}</span>
+                {/* Le gros chiffre est le réalisé du mois : libellé au-dessus, sans le répéter dessous (#97). */}
+                <span className="tuile__detail">{libelleMoisMajuscule} réalisé</span>
                 <strong className="tuile__valeur">{formatEuros(tableau.duMois[m])}</strong>
-                <span className="tuile__detail">
-                  {libelleMoisMajuscule} réalisé : {formatEuros(tableau.duMois[m])}
-                </span>
                 <span className="tuile__detail">
                   {libelleMoisMajuscule} théorique : {formatEuros(tableau.theorique.duMois[MESURE_EN_COURS[m]])}
                 </span>

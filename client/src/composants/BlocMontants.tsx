@@ -5,11 +5,13 @@ import { Link } from "react-router";
 import { api, type Article, LIBELLES_CANAL, LIBELLES_MOTIF } from "../api.js";
 import { aujourdhui, formatDate, formatDateHeure } from "../outils/dates.js";
 import { formatEuros, lireMontant } from "../outils/montants.js";
+import { useSignalerModification } from "../outils/modifications.js";
 
 export function BlocMontants({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
   const c = article.couts;
   const [boost, setBoost] = useState({ montant: "", date: aujourdhui() });
   const [erreur, setErreur] = useState<string | null>(null);
+  useSignalerModification("le boost", boost.montant.trim() !== "");
 
   async function ajouterBoost(evenement: FormEvent) {
     evenement.preventDefault();
