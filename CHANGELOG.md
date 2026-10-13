@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Un **essai** de publication relancé depuis « Erreur » laisse l'article en Erreur ; le retour à « À publier »
+  d'une vraie demande et son ajout à la file se font d'un seul bloc (#92).
+- Coller le lien de l'annonce sur un article en Erreur (publiée à la main) le fait passer En ligne (#93).
+- La fiche d'un article en Erreur affiche le message de la vraie publication, pas celui d'un essai (#94).
+- Contours des champs plus visibles (au soleil) et pastille d'alerte plus lisible en thème sombre (#101).
+- Liens, boutons des photos, puces de filtre, tri et bouton ⓘ : zones à toucher d'au moins 48 px (#102).
+
 ## [1.5.0] — 08/10/2026
 
 ### Modifié

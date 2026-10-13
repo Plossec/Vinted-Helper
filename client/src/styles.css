@@ -4,6 +4,10 @@
   --texte: #1b1f23;
   --texte-secondaire: #57606a;
   --bordure: #d0d7de;
+  /* Contour des champs de saisie : contraste ≥ 3:1 sur le fond, lisible au soleil (issue #101). */
+  --bordure-champ: #8c959f;
+  /* Pastille d'alerte : texte blanc lisible (≥ 4,5:1) dans les deux thèmes (issue #101). */
+  --pastille: #cf222e;
   --carte: #f6f8fa;
   --accent: #0b7a75;
   --accent-texte: #ffffff;
@@ -32,6 +36,8 @@
     --texte: #e6edf3;
     --texte-secondaire: #9198a1;
     --bordure: #30363d;
+    --bordure-champ: #6e7681;
+    --pastille: #b62324;
     --carte: #161b22;
     --accent: #2bb3ab;
     --accent-texte: #0d1117;
@@ -148,7 +154,7 @@ textarea {
   font: inherit;
   color: inherit;
   background: var(--fond);
-  border: 1px solid var(--bordure);
+  border: 1px solid var(--bordure-champ);
   border-radius: 0.6rem;
   padding: 0.7rem 0.8rem;
   min-height: 3rem;
@@ -195,7 +201,8 @@ textarea:focus {
   border: none;
   color: var(--accent);
   padding: 0.5rem 0;
-  min-height: 2.75rem;
+  /* Zone tactile ≥ 48 px (issue #102). */
+  min-height: 3rem;
   cursor: pointer;
   text-decoration: underline;
 }
@@ -203,7 +210,7 @@ textarea:focus {
 .lien-retour {
   display: inline-flex;
   align-items: center;
-  min-height: 2.75rem;
+  min-height: 3rem;
   color: var(--accent);
   text-decoration: none;
   margin-bottom: 0.25rem;
@@ -577,7 +584,8 @@ textarea:focus {
 
 .photos__actions button {
   flex: 1;
-  min-height: 2.75rem;
+  min-height: 3rem;
+  min-width: 3rem;
   font: inherit;
   background: var(--carte);
   color: var(--texte);
@@ -597,7 +605,7 @@ select {
   font: inherit;
   color: inherit;
   background: var(--fond);
-  border: 1px solid var(--bordure);
+  border: 1px solid var(--bordure-champ);
   border-radius: 0.6rem;
   padding: 0.7rem 0.8rem;
   min-height: 3rem;
@@ -807,8 +815,8 @@ select {
 }
 
 .info {
-  min-width: 2rem;
-  min-height: 2rem;
+  min-width: 3rem;
+  min-height: 3rem;
   border: none;
   background: none;
   color: var(--accent);
@@ -984,7 +992,7 @@ a {
   height: 1.5rem;
   padding: 0 0.4rem;
   border-radius: 999px;
-  background: var(--erreur);
+  background: var(--pastille);
   color: #fff;
   font-size: 0.8rem;
   font-weight: 700;
@@ -1256,7 +1264,7 @@ a {
   font: inherit;
   font-weight: 600;
   width: 100%;
-  min-height: 2.75rem;
+  min-height: 3rem;
   padding: 0.5rem 0.6rem;
   border: none;
   background: none;
@@ -1324,7 +1332,7 @@ a {
 .puce {
   font: inherit;
   font-size: 0.95rem;
-  min-height: 2.5rem;
+  min-height: 3rem;
   padding: 0.3rem 0.8rem;
   border-radius: 999px;
   border: 1px solid var(--bordure);
