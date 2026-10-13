@@ -55,8 +55,9 @@ notepad .env
 Dans le Bloc-notes, remplacez au minimum :
 - `POSTGRES_PASSWORD` : un mot de passe long de votre choix (il protège la base) ;
 - `COMPTE_IDENTIFIANT` et `COMPTE_MOT_DE_PASSE_INITIAL` : votre identifiant et votre mot de passe de connexion
-  (8 caractères minimum). **Ils ne servent qu'au tout premier démarrage**, pour créer votre compte : ensuite, changez
-  le mot de passe dans l'application (Réglages) ; modifier le `.env` n'aura plus d'effet ;
+  (12 caractères minimum). **Ils ne servent qu'au tout premier démarrage**, pour créer votre compte : ensuite, changez
+  le mot de passe dans l'application (Réglages) et **effacez la valeur de `COMPTE_MOT_DE_PASSE_INITIAL`** dans le
+  `.env` (laissez `COMPTE_MOT_DE_PASSE_INITIAL=`) : il n'y sert plus et ne doit pas rester sur le disque ;
 - si un PostgreSQL est déjà installé sur votre PC : `POSTGRES_PORT=15432` (voir Dépannage).
 
 Enregistrez et fermez. **Ne partagez jamais ce fichier** : il n'est pas envoyé sur GitHub (c'est voulu).

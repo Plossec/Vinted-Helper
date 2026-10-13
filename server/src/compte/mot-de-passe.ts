@@ -4,7 +4,7 @@ import { randomBytes, scrypt, timingSafeEqual, type ScryptOptions } from "node:c
 
 const PARAMETRES = { N: 16384, r: 8, p: 1 } as const;
 const LONGUEUR_CLE = 64;
-export const LONGUEUR_MIN_MOT_DE_PASSE = 8;
+export const LONGUEUR_MIN_MOT_DE_PASSE = 12;
 
 function deriver(motDePasse: string, sel: Buffer, options: ScryptOptions): Promise<Buffer> {
   return new Promise((ok, echec) => {

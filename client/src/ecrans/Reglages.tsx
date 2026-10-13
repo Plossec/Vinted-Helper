@@ -125,13 +125,13 @@ export function Reglages() {
             />
           </label>
           <label className="champ">
-            <span>Nouveau mot de passe (8 caractères minimum)</span>
+            <span>Nouveau mot de passe (12 caractères minimum)</span>
             <input
               type="password"
               value={nouveau}
               onChange={(e) => setNouveau(e.target.value)}
               autoComplete="new-password"
-              minLength={8}
+              minLength={12}
               required
             />
           </label>
@@ -142,7 +142,7 @@ export function Reglages() {
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
               autoComplete="new-password"
-              minLength={8}
+              minLength={12}
               required
             />
           </label>

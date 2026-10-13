@@ -238,6 +238,27 @@ describe("IA par l'API", () => {
     expect(prompt).toContain("W32");
   });
 
+  it("#135 — 30 appels à l'IA par heure au plus, puis message clair ; de nouveau permis une heure après", async () => {
+    t.ia.repondre(iaIndisponible("Quota gratuit de Gemini atteint : réessayez plus tard."));
+    for (let i = 0; i < 30; i++) {
+      expect((await requete("POST", `/api/articles/${t.articleId}/annonce/generation`)).statusCode).not.toBe(429);
+    }
+    const refus = await requete("POST", `/api/articles/${t.articleId}/annonce/generation`);
+    expect(refus.statusCode).toBe(429);
+    expect(refus.json<{ erreur: string }>().erreur).toBe(
+      "Limite de 30 appels à l'IA par heure atteinte. Réessayez dans 60 min.",
+    );
+    const etiquette = await t.app.inject({
+      method: "POST",
+      url: "/api/etiquette",
+      headers: { cookie: t.cookie, "content-type": "image/png" },
+      payload: Buffer.from("x"),
+    });
+    expect(etiquette.statusCode).toBe(429);
+    t.horloge.avancer(60 * 60 * 1000);
+    expect((await requete("POST", `/api/articles/${t.articleId}/annonce/generation`)).statusCode).not.toBe(429);
+  });
+
   it("prompt personnalisé dans les Réglages", async () => {
     await requete("PUT", "/api/reglages", { promptAnnonce: "Annonce pour {nom} de taille {taille} ({matiere})" });
     const prompt = (await requete("GET", `/api/articles/${t.articleId}/annonce/prompt`)).json<{ prompt: string }>()

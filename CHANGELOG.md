@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.0] — 13/10/2026
+
+### Ajouté
+- Limite de 30 appels à l'IA (Gemini) par heure, avec un message indiquant quand réessayer (#135).
+- `SECURITY.md` : comment signaler une faille en privé (#135).
+
+### Modifié
+- Connexion : le blocage après 5 échecs vaut par adresse IP et par compte ; nouveaux mots de passe de 12 caractères
+  minimum ; documentation sur le mot de passe initial et la confidentialité des photos envoyées à Gemini (#135).
+
 ## [1.11.1] — 13/10/2026
 
 ### Modifié

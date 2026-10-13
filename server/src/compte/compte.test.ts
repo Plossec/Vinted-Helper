@@ -74,6 +74,18 @@ describe("compte et connexion", () => {
     expect((await essai(MOT_DE_PASSE_TEST)).statusCode).toBe(200);
   });
 
+  it("#135 — le blocage vaut aussi pour le compte : changer d'adresse IP ne permet pas de continuer", async () => {
+    const essai = (motDePasse: string, ip: string) =>
+      t.app.inject({
+        method: "POST",
+        url: "/api/connexion",
+        remoteAddress: ip,
+        payload: { identifiant: IDENTIFIANT_TEST, motDePasse },
+      });
+    for (let i = 0; i < 5; i++) expect((await essai("faux", `10.0.0.${i + 1}`)).statusCode).toBe(401);
+    expect((await essai(MOT_DE_PASSE_TEST, "10.0.0.99")).statusCode).toBe(429);
+  });
+
   it("la déconnexion ferme la session", async () => {
     const cookie = await seConnecter(t.app);
     await t.app.inject({ method: "POST", url: "/api/deconnexion", headers: { cookie } });

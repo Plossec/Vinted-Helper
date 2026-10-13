@@ -29,3 +29,10 @@ Utilisation, sur la fiche d'un article :
 - Si Gemini est indisponible (quota gratuit atteint, pas de clé…) : un message l'explique ; **Copier le prompt**
   permet de coller la demande dans Claude.ai, ChatGPT ou Gemini (ajoutez-y les photos), puis de recopier le résultat.
 - Les prompts sont modifiables dans **Réglages → IA (Gemini)**.
+- **Limite : 30 appels à l'IA par heure** (annonces et étiquettes confondues), pour ne pas épuiser le quota gratuit
+  par une rafale. Au-delà, un message indique dans combien de minutes réessayer ; « Copier le prompt » reste
+  disponible.
+
+**Confidentialité** : avec l'offre gratuite, Google peut utiliser les textes et les **photos** envoyés à Gemini pour
+améliorer ses services (conditions de Google AI Studio). N'envoyez pas de photo montrant des informations
+personnelles (adresse, visage, étiquette d'expédition). L'offre payante de Google n'a pas cet usage.
