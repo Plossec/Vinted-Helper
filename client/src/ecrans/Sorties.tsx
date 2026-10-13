@@ -1,9 +1,11 @@
 // Liste des sorties d'achat (§5.1) et fiche d'une sortie : date, lieu, essence, notes, articles.
 import { type FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { api, type Referentiels, type ResumeSortie, type Sortie, urlVignette } from "../api.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
-import { chargerReferentiels } from "../hors-ligne/cache.js";
+import { confirmer } from "../composants/Dialogue.js";
+import { chargerReferentiels, lireSortieEnCours, memoriserSortieEnCours } from "../hors-ligne/cache.js";
+import { annulerSortie } from "../hors-ligne/index.js";
 import { formatDate } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
@@ -49,6 +51,7 @@ export function ListeSorties() {
 
 export function FicheSortie() {
   const { id } = useParams();
+  const naviguer = useNavigate();
   const [sortie, setSortie] = useState<Sortie | null>(null);
   const [refs, setRefs] = useState<Referentiels | null>(null);
   const [form, setForm] = useState({ date: "", lieu: "", essence: "", notes: "" });
@@ -93,6 +96,21 @@ export function FicheSortie() {
     } catch (e) {
       setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Enregistrement impossible." });
     }
+  }
+
+  /** Annulation de la sortie (#104, déplacée ici depuis l'écran Terrain) : ses articles vont à la corbeille. */
+  async function annuler() {
+    if (sortie === null) return;
+    const n = sortie.articles.length;
+    const achats = n === 0 ? "" : ` Ses ${n} article${n > 1 ? "s" : ""} iront à la corbeille (restaurables 30 jours).`;
+    const ok = await confirmer(
+      `Annuler la sortie « ${sortie.lieu} » du ${formatDate(sortie.date)} ?${achats} L'essence saisie sera effacée.`,
+      { action: "Annuler la sortie", danger: true },
+    );
+    if (!ok) return;
+    await annulerSortie(sortie.id);
+    if (lireSortieEnCours()?.id === sortie.id) memoriserSortieEnCours(null);
+    await naviguer("/sorties", { replace: true });
   }
 
   return (
@@ -182,6 +200,12 @@ export function FicheSortie() {
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className="section">
+            <button className="bouton bouton--danger" type="button" onClick={() => void annuler()}>
+              Annuler la sortie
+            </button>
           </section>
         </>
       )}

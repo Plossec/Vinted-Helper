@@ -1721,6 +1721,11 @@ a {
     right: var(--e-6);
   }
 
+  .barre-achat {
+    left: 13rem;
+    bottom: 0;
+  }
+
   .selection-barre {
     bottom: var(--e-4);
   }
@@ -1742,6 +1747,70 @@ a {
     padding-top: 0;
     border-top: none;
   }
+}
+
+/* --- Terrain en sortie active (#104) : « + Achat » fixé au-dessus de la barre de navigation --- */
+.barre-achat {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  z-index: 9;
+  display: flex;
+  gap: var(--e-2);
+  padding: var(--e-3) var(--e-4);
+  background: var(--surface);
+  border-top: 1px solid var(--bordure);
+  box-shadow: var(--ombre-flottante);
+}
+
+.barre-achat .bouton--achat {
+  flex: 1;
+  width: auto;
+  min-height: 4rem;
+}
+
+.barre-achat > .bouton:not(.bouton--achat) {
+  flex: none;
+}
+
+/* Place réservée en bas de l'écran, pour que la barre ne cache pas les derniers achats. */
+.barre-achat__espace {
+  height: 5.5rem;
+}
+
+.plus-actions > summary {
+  min-height: var(--hauteur-tactile);
+  display: flex;
+  align-items: center;
+  color: var(--texte-secondaire);
+  cursor: pointer;
+}
+
+.plus-actions[open] > summary {
+  margin-bottom: var(--e-3);
+}
+
+.plus-actions > summary::before {
+  content: "▸";
+  content: "▸" / "";
+  margin-right: var(--e-2);
+}
+
+.plus-actions[open] > summary::before {
+  content: "▾";
+  content: "▾" / "";
+}
+
+.formulaire__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+}
+
+.formulaire__entete h2 {
+  margin: 0;
 }
 
 /* --- Boîtes de dialogue (#132) --- */

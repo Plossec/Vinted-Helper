@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.10.3] — 13/10/2026
+
+### Modifié
+- Terrain, sortie en cours : « + Achat » et « Sans photo » toujours en bas de l'écran, sous le pouce ; « Annuler la
+  sortie » rangé dans « Plus d'actions » et ajouté au détail de la sortie ; dans le formulaire d'achat, « Annuler »
+  passe en haut, loin de « Valider » (#104).
+
 ## [1.10.2] — 13/10/2026
 
 ### Modifié
