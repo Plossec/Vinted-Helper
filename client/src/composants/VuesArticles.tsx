@@ -140,11 +140,15 @@ export function VuesArticles(props: Props) {
             <Link to={`/articles/${a.id}`} className="mosaique__lien">
               <Vignette a={a} classe="mosaique__photo" />
               <span className={`badge badge--${a.statut} mosaique__badge`}>{LIBELLES_STATUT[a.statut]}</span>
+              {/* Repère ↗ sur la photo, hors de la ligne de texte : toutes les cartes gardent la même hauteur (#145). */}
+              {a.urlVinted && (
+                <span className="mosaique__vinted">
+                  <LienVinted a={a} />
+                </span>
+              )}
               <span className="mosaique__texte">
                 <span className="reference">{formatReference(a.reference)}</span>
-                <span className="mosaique__prix">
-                  <LienVinted a={a} /> {prixAffiche(a)}
-                </span>
+                <span className="mosaique__prix">{prixAffiche(a)}</span>
               </span>
               <span className="mosaique__nom">{a.nom ?? "(sans nom)"}</span>
             </Link>

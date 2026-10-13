@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.8.1] — 13/10/2026
+
+### Corrigé
+- Mosaïque des articles : toutes les cartes ont la même hauteur (le repère ↗ du lien Vinted est posé sur la photo,
+  sous le badge, et ne fait plus passer le prix à la ligne) ; de nouveau deux colonnes sur téléphone (#145).
+
 ## [1.8.0] — 13/10/2026
 
 ### Ajouté
