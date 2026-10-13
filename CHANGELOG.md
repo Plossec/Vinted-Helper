@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- **Refonte de l'interface** (direction « Techno », indigo) : couleurs, rayons, espacements et tailles de texte
+  regroupés en design tokens, boutons plein / contour / fantôme avec survol, focus et état désactivé, champs et messages
+  d'erreur avec icône ⚠, montants en police à chasse fixe, polices du système (#138).
+
+### Ajouté
+- Réglages : choix du thème Auto / Clair / Sombre, mémorisé sur l'appareil (#138).
+
 ### Corrigé
 - Sécurité : une adresse encodée (`/%61pi/…`) ne contourne plus le contrôle de connexion ; un test vérifie que toute
   l'API exige la connexion (#118).

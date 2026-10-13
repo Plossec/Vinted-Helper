@@ -21,6 +21,7 @@ Toute nouvelle décision va dans le fichier de son sujet (le fichier du lot conc
 | [publication-vinted.md](publication-vinted.md) | Publication automatique sur Vinted |
 | [import-tableur.md](import-tableur.md) | Import de l'ancien tableur dans la base du serveur |
 | [deploiement-continu.md](deploiement-continu.md) | Déploiement automatique sur le serveur à chaque fusion dans main |
+| [refonte-interface.md](refonte-interface.md) | Refonte de l'interface : design tokens « Techno », polices système, thème clair / sombre (#138) |
 
 ## À relire par l'utilisateur
 
