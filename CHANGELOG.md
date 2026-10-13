@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.6.1] — 13/10/2026
+
 ### Corrigé
 - Ventes : un même article ne peut plus être vendu deux fois (double tape, nouvel envoi) ; « Confirmer » est désactivé
   pendant l'envoi (#120).
