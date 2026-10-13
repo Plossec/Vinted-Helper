@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.9.1] — 13/10/2026
+
+### Modifié
+- Barre de navigation : une icône au-dessus de chaque libellé, pastille d'alertes collée à l'icône d'Articles,
+  onglet parent allumé sur les écrans secondaires (fiche, sorties, frais, corbeille…) (#103).
+
 ## [1.9.0] — 13/10/2026
 
 ### Ajouté

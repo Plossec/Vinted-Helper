@@ -1,14 +1,23 @@
 // Disposition commune une fois connecté : contenu + barre de navigation en bas (usage au pouce).
 // Sans réseau, l'application reste utilisable (saisie terrain mise en attente, §2.2).
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { type ComponentType, useEffect, useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { api, ErreurApi } from "../api.js";
 import { type AlertesServeur, nombreAlertes } from "../composants/Alertes.js";
 import { BandeauFile } from "../composants/BandeauFile.js";
+import { IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
 import { demarrerFile, envoyerMaintenant } from "../hors-ligne/index.js";
+import { type Onglet, ongletActif } from "../navigation.js";
 import { mettreAJour, useNouvelleVersion } from "../pwa.js";
 
 type Etat = "verification" | "connecte" | "hors-ligne";
+
+const ONGLETS: { onglet: Onglet; chemin: string; libelle: string; Icone: ComponentType }[] = [
+  { onglet: "articles", chemin: "/", libelle: "Articles", Icone: IconeArticles },
+  { onglet: "terrain", chemin: "/terrain", libelle: "Terrain", Icone: IconeTerrain },
+  { onglet: "tableau", chemin: "/tableau", libelle: "Tableau", Icone: IconeTableau },
+  { onglet: "reglages", chemin: "/reglages", libelle: "Réglages", Icone: IconeReglages },
+];
 
 export function Disposition() {
   const naviguer = useNavigate();
@@ -16,6 +25,7 @@ export function Disposition() {
   const nouvelleVersion = useNouvelleVersion();
   const { pathname } = useLocation();
   const [alertes, setAlertes] = useState(0);
+  const actif = ongletActif(pathname);
 
   // Pastille d'alertes sur l'onglet Articles, mise à jour à chaque changement d'écran.
   useEffect(() => {
@@ -78,23 +88,24 @@ export function Disposition() {
         <Outlet />
       </div>
       <nav className="navigation" aria-label="Navigation principale">
-        <NavLink to="/" end className="navigation__lien">
-          Articles
-          {alertes > 0 && (
-            <span className="pastille" aria-label={`${alertes} alertes`}>
-              {alertes}
+        {ONGLETS.map(({ onglet, chemin, libelle, Icone }) => (
+          <Link
+            key={onglet}
+            to={chemin}
+            className={`navigation__lien${actif === onglet ? " active" : ""}`}
+            aria-current={actif === onglet ? "page" : undefined}
+          >
+            <span className="navigation__icone">
+              <Icone />
+              {onglet === "articles" && alertes > 0 && (
+                <span className="pastille" aria-label={`${alertes} alertes`}>
+                  {alertes}
+                </span>
+              )}
             </span>
-          )}
-        </NavLink>
-        <NavLink to="/terrain" className="navigation__lien navigation__lien--terrain">
-          Terrain
-        </NavLink>
-        <NavLink to="/tableau" className="navigation__lien">
-          Tableau
-        </NavLink>
-        <NavLink to="/reglages" className="navigation__lien">
-          Réglages
-        </NavLink>
+            <span className="navigation__libelle">{libelle}</span>
+          </Link>
+        ))}
       </nav>
     </div>
   );
