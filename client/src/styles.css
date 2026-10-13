@@ -1,56 +1,82 @@
-/* Couleurs définies une seule fois ; clair / sombre automatique selon le réglage du téléphone. */
+/*
+ * Design tokens — direction « Techno » (indigo), issue #138.
+ * Chaque couleur est déclarée une seule fois : light-dark() suit le réglage du téléphone (clair / sombre automatique),
+ * sauf si l'utilisateur force un thème dans les Réglages (attribut data-theme sur <html>, voir theme.ts).
+ * Contrastes mesurés (WCAG) : voir docs/decisions/refonte-interface.md.
+ */
 :root {
-  --fond: #ffffff;
-  --texte: #1b1f23;
-  --texte-secondaire: #57606a;
-  --bordure: #d0d7de;
-  /* Contour des champs de saisie : contraste ≥ 3:1 sur le fond, lisible au soleil (issue #101). */
-  --bordure-champ: #8c959f;
-  /* Pastille d'alerte : texte blanc lisible (≥ 4,5:1) dans les deux thèmes (issue #101). */
-  --pastille: #cf222e;
-  --carte: #f6f8fa;
-  --accent: #0b7a75;
-  --accent-texte: #ffffff;
-  --ok: #1a7f37;
-  --erreur: #cf222e;
-  --badge-brouillon: #6e7781;
-  --badge-a-publier: #9a6700;
-  --badge-en-ligne: #0b7a75;
-  --badge-vente: #8250df;
-  --badge-fin: #1a7f37;
-  --badge-recuperer: #bc4c00;
-  --badge-erreur: #cf222e;
   color-scheme: light dark;
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+
+  /* Couleurs */
+  --fond: light-dark(#f6f7fb, #0a0c1a);
+  --surface: light-dark(#ffffff, #14172e);
+  --texte: light-dark(#10132a, #e9ebfa);
+  --texte-secondaire: light-dark(#4b5070, #a0a6cc);
+  --bordure: light-dark(#d8dbeb, #272b4d);
+  /* Contour des champs : contraste ≥ 3:1 sur le fond, lisible au soleil. */
+  --bordure-champ: light-dark(#7c82a8, #5c6392);
+  --accent: light-dark(#4338ca, #9aa2ff);
+  --accent-survol: light-dark(#3730a3, #b7bcff);
+  --accent-doux: light-dark(#e8e7fb, #20244a);
+  --accent-texte: light-dark(#ffffff, #0b0d26);
+  --erreur: light-dark(#c11a33, #ff8d9c);
+  --erreur-doux: light-dark(#fde7ea, #3c1220);
+  --ok: light-dark(#12794a, #5bd79b);
+  /* Pastille d'alerte : texte blanc lisible (≥ 4,5:1) dans les deux thèmes. */
+  --pastille: light-dark(#c11a33, #b01b33);
+  --pastille-texte: #ffffff;
+  /* Badges de statut : texte --fond dessus (≥ 4,5:1). */
+  --badge-brouillon: light-dark(#5f6485, #a0a6cc);
+  --badge-a-publier: light-dark(#8a5a00, #e3b341);
+  --badge-en-ligne: light-dark(#4338ca, #9aa2ff);
+  --badge-vente: light-dark(#8e2fa8, #d58bff);
+  --badge-fin: light-dark(#12794a, #5bd79b);
+  --badge-recuperer: light-dark(#b04a00, #ffa657);
+  --badge-erreur: light-dark(#c11a33, #ff8d9c);
+  --graphique: var(--accent);
+
+  /* Typographie : polices du système (aucune police embarquée). */
+  --police-texte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --police-titre: var(--police-texte);
+  --police-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, "Roboto Mono", monospace;
+  /* Échelle de tailles (6) */
+  --t-petit: 0.8rem;
+  --t-secondaire: 0.9rem;
+  --t-corps: 1rem;
+  --t-h2: 1.2rem;
+  --t-h1: 1.6rem;
+  --t-chiffre: 2rem;
+
+  /* Rayons */
+  --rayon: 6px; /* boutons, champs, vignettes */
+  --rayon-carte: 8px; /* cartes, encadrés */
+  --rayon-badge: 4px;
+  --rayon-rond: 999px; /* pastille du compteur seulement */
+
+  /* Ombre : réservée aux éléments flottants (listes déroulantes, bulles, barre de sélection) */
+  --ombre-flottante: 0 4px 16px rgb(0 0 0 / 0.18);
+
+  /* Espacements (échelle de 4 px) */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-6: 24px;
+  --e-8: 32px;
+
+  --hauteur-tactile: 48px;
+
+  font-family: var(--police-texte);
   font-size: 17px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #0d1117;
-    --texte: #e6edf3;
-    --texte-secondaire: #9198a1;
-    --bordure: #30363d;
-    --bordure-champ: #6e7681;
-    --pastille: #b62324;
-    --carte: #161b22;
-    --accent: #2bb3ab;
-    --accent-texte: #0d1117;
-    --ok: #3fb950;
-    --erreur: #f85149;
-    --badge-brouillon: #8b949e;
-    --badge-a-publier: #d29922;
-    --badge-en-ligne: #2bb3ab;
-    --badge-vente: #a371f7;
-    --badge-fin: #3fb950;
-    --badge-recuperer: #f0883e;
-    --badge-erreur: #f85149;
-  }
+/* Thème forcé depuis les Réglages ; sans attribut, le téléphone décide. */
+:root[data-theme="clair"] {
+  color-scheme: light;
+}
+
+:root[data-theme="sombre"] {
+  color-scheme: dark;
 }
 
 * {
@@ -61,37 +87,67 @@ body {
   margin: 0;
   background: var(--fond);
   color: var(--texte);
+  line-height: 1.45;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Mobile d'abord : une colonne, marges confortables, aucun défilement horizontal. */
 .page {
   max-width: 40rem;
   margin: 0 auto;
-  padding: 1.25rem 1rem;
+  padding: var(--e-6) var(--e-4);
 }
 
 .page--connexion {
   padding-top: 3rem;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--police-titre);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 h1 {
-  font-size: 1.6rem;
-  margin: 0 0 1rem;
+  font-size: var(--t-h1);
+  margin: 0 0 var(--e-4);
   overflow-wrap: anywhere;
 }
 
 h2 {
-  font-size: 1.2rem;
-  margin: 0 0 0.75rem;
+  font-size: var(--t-h2);
+  margin: 0 0 var(--e-3);
 }
 
 h3 {
-  font-size: 1rem;
-  margin: 1.25rem 0 0.5rem;
+  font-size: var(--t-corps);
+  margin: var(--e-6) 0 var(--e-2);
 }
 
 .secondaire {
   color: var(--texte-secondaire);
+}
+
+/* Montants, références et quantités : police à chasse fixe, chiffres alignés. */
+.reference,
+.nombre,
+.montants td:last-child,
+.tuile__valeur,
+.tuile__calcul td:last-child,
+.tableau td:not(:first-child),
+.ligne-article__prix,
+.mosaique__prix,
+.carte-article__prix,
+.graphique__bulle,
+input[inputmode="decimal"] {
+  font-family: var(--police-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Disposition et navigation (barre en bas, accessible au pouce) --- */
@@ -103,7 +159,7 @@ h3 {
   position: fixed;
   inset: auto 0 0 0;
   display: flex;
-  background: var(--carte);
+  background: var(--surface);
   border-top: 1px solid var(--bordure);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -119,6 +175,10 @@ h3 {
   font-weight: 600;
 }
 
+.navigation__lien:hover {
+  background: var(--accent-doux);
+}
+
 .navigation__lien.active {
   color: var(--accent);
   box-shadow: inset 0 3px 0 var(--accent);
@@ -128,60 +188,98 @@ h3 {
 .formulaire {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: var(--e-4);
 }
 
 .champ {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--e-1);
   flex: 1;
   min-width: 0;
 }
 
 .champ > span {
-  font-size: 0.9rem;
+  font-size: var(--t-secondaire);
+  font-weight: 600;
   color: var(--texte-secondaire);
 }
 
 .champs-ligne {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--e-3);
 }
 
 input,
 textarea {
   font: inherit;
   color: inherit;
-  background: var(--fond);
+  background: var(--surface);
   border: 1px solid var(--bordure-champ);
-  border-radius: 0.6rem;
-  padding: 0.7rem 0.8rem;
-  min-height: 3rem;
+  border-radius: var(--rayon);
+  padding: var(--e-3);
+  min-height: var(--hauteur-tactile);
   width: 100%;
+}
+
+input:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--texte-secondaire);
 }
 
 input:focus,
 textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 0;
+  border-color: var(--accent);
 }
 
-/* --- Boutons (zone tactile ≥ 48 px) --- */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  cursor: not-allowed;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--texte) 25%, var(--fond));
+  background: color-mix(in srgb, var(--texte) 6%, var(--fond));
+  color: color-mix(in srgb, var(--texte) 50%, var(--fond));
+}
+
+/* Champ en erreur : bordure épaisse + fond teinté (jamais la couleur seule : le message porte une icône ⚠). */
+input[aria-invalid="true"],
+textarea[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border: 2px solid var(--erreur);
+  background: var(--erreur-doux);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--accent);
+}
+
+/* --- Boutons (zone tactile ≥ 48 px) : contour par défaut, plein = principal, fantôme = sans bordure --- */
 .bouton {
   font: inherit;
   font-weight: 600;
-  min-height: 3rem;
-  padding: 0.6rem 1rem;
-  border-radius: 0.6rem;
-  border: 1px solid var(--bordure);
-  background: var(--carte);
-  color: var(--texte);
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-4);
+  border-radius: var(--rayon);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  transition:
+    background 0.12s,
+    border-color 0.12s,
+    color 0.12s;
+}
+
+.bouton:hover:not(:disabled) {
+  background: var(--accent-doux);
 }
 
 .bouton--principal {
@@ -191,8 +289,42 @@ textarea:focus {
   width: 100%;
 }
 
+.bouton--principal:hover:not(:disabled) {
+  background: var(--accent-survol);
+  border-color: var(--accent-survol);
+}
+
+.bouton--fantome {
+  border-color: transparent;
+}
+
+/* Erreur / action destructive : couleur d'erreur + icône ⚠ (texte alternatif vide pour les lecteurs d'écran). */
+.bouton--danger {
+  color: var(--erreur);
+  border-color: var(--erreur);
+}
+
+.bouton--danger:hover:not(:disabled) {
+  background: var(--erreur-doux);
+}
+
+.bouton--danger::before {
+  content: "⚠";
+  content: "⚠" / "";
+  margin-right: var(--e-2);
+}
+
+/* Désactivé : couleurs grisées (pas une simple opacité), curseur interdit. */
 .bouton:disabled {
-  opacity: 0.6;
+  cursor: not-allowed;
+  background: transparent;
+  border-color: color-mix(in srgb, var(--texte) 25%, var(--fond));
+  color: color-mix(in srgb, var(--texte) 48%, var(--fond));
+}
+
+.bouton--principal:disabled {
+  background: color-mix(in srgb, var(--texte) 11%, var(--fond));
+  border-color: transparent;
 }
 
 .lien {
@@ -200,9 +332,9 @@ textarea:focus {
   background: none;
   border: none;
   color: var(--accent);
-  padding: 0.5rem 0;
+  padding: var(--e-2) 0;
   /* Zone tactile ≥ 48 px (issue #102). */
-  min-height: 3rem;
+  min-height: var(--hauteur-tactile);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -210,16 +342,16 @@ textarea:focus {
 .lien-retour {
   display: inline-flex;
   align-items: center;
-  min-height: 3rem;
+  min-height: var(--hauteur-tactile);
   color: var(--accent);
   text-decoration: none;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--e-1);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--e-2);
 }
 
 .actions .bouton {
@@ -229,13 +361,22 @@ textarea:focus {
 /* --- Messages --- */
 .message {
   margin: 0;
-  padding: 0.75rem 0.9rem;
-  border-radius: 0.6rem;
-  background: var(--carte);
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--rayon);
+  background: var(--surface);
+  border: 1px solid var(--bordure);
 }
 
 .message--erreur {
   color: var(--erreur);
+  background: var(--erreur-doux);
+  border-color: var(--erreur);
+  font-weight: 600;
+}
+
+.message--erreur::before {
+  content: "⚠ ";
+  content: "⚠ " / "";
 }
 
 .message--ok {
@@ -243,9 +384,10 @@ textarea:focus {
 }
 
 .statut {
-  background: var(--carte);
-  border-radius: 0.75rem;
-  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-carte);
+  padding: var(--e-4);
   margin: 0;
 }
 
@@ -256,36 +398,41 @@ textarea:focus {
 .vide {
   color: var(--texte-secondaire);
   text-align: center;
-  padding: 2rem 0;
+  padding: var(--e-8) 0;
 }
 
 /* --- Liste des articles --- */
 .liste {
   list-style: none;
   padding: 0;
-  margin: 1rem 0 0;
+  margin: var(--e-4) 0 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: var(--e-3);
 }
 
 .carte-article {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.9rem 1rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-1);
+  padding: var(--e-4) var(--e-4);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   color: inherit;
   text-decoration: none;
+}
+
+a.carte-article:hover,
+.mosaique__lien:hover {
+  border-color: var(--accent);
 }
 
 .carte-article__ligne {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--e-2);
 }
 
 .carte-article__nom {
@@ -295,7 +442,7 @@ textarea:focus {
 
 .carte-article__prix {
   color: var(--texte-secondaire);
-  font-size: 0.95rem;
+  font-size: var(--t-secondaire);
 }
 
 .reference {
@@ -306,9 +453,9 @@ textarea:focus {
 /* --- Badges de statut --- */
 .badge {
   display: inline-block;
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
+  padding: 2px var(--e-2);
+  border-radius: var(--rayon-badge);
+  font-size: var(--t-petit);
   font-weight: 600;
   color: var(--fond);
   background: var(--badge-brouillon);
@@ -342,22 +489,22 @@ textarea:focus {
 
 /* --- Sections, encadrés, historique --- */
 .section {
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
+  margin-top: var(--e-6);
+  padding-top: var(--e-6);
   border-top: 1px solid var(--bordure);
 }
 
 .section p {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--e-2);
 }
 
 .encadre {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-3);
+  padding: var(--e-4);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -376,15 +523,15 @@ textarea:focus {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 0.25rem 0.75rem;
-  padding: 0.4rem 0;
+  gap: var(--e-1) var(--e-3);
+  padding: var(--e-2) 0;
   border-bottom: 1px solid var(--bordure);
 }
 
 .historique__correction {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--e-2);
   width: 100%;
 }
 
@@ -394,7 +541,7 @@ textarea:focus {
 
 /* --- Liste déroulante avec recherche (aussi large que le champ, couleurs du site) --- */
 .champ > label {
-  font-size: 0.9rem;
+  font-size: var(--t-secondaire);
   color: var(--texte-secondaire);
 }
 
@@ -415,7 +562,7 @@ textarea:focus {
   border: none;
   background: none;
   color: var(--texte-secondaire);
-  font-size: 1.1rem;
+  font-size: var(--t-corps);
   cursor: pointer;
 }
 
@@ -428,12 +575,12 @@ textarea:focus {
   max-height: min(18rem, 50vh);
   overflow-y: auto;
   margin: 0;
-  padding: 0.25rem;
+  padding: var(--e-1);
   list-style: none;
-  background: var(--fond);
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: 0.6rem;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre-flottante);
 }
 
 .liste-deroulante__option {
@@ -441,14 +588,14 @@ textarea:focus {
   flex-direction: column;
   justify-content: center;
   gap: 0.1rem;
-  min-height: 3rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.45rem;
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-3);
+  border-radius: var(--rayon-badge);
   cursor: pointer;
 }
 
 .liste-deroulante__option.est-actif {
-  background: var(--carte);
+  background: var(--accent-doux);
   box-shadow: inset 3px 0 0 var(--accent);
 }
 
@@ -457,7 +604,7 @@ textarea:focus {
 }
 
 .liste-deroulante__secondaire {
-  font-size: 0.85rem;
+  font-size: var(--t-secondaire);
   color: var(--texte-secondaire);
 }
 
@@ -467,7 +614,7 @@ textarea:focus {
 }
 
 .liste-deroulante__vide {
-  padding: 0.75rem;
+  padding: var(--e-3);
   color: var(--texte-secondaire);
 }
 
@@ -475,13 +622,13 @@ textarea:focus {
 .carte-article--photo {
   flex-direction: row;
   align-items: center;
-  gap: 0.8rem;
+  gap: var(--e-3);
 }
 
 .carte-article__texte {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: var(--e-1);
   flex: 1;
   min-width: 0;
 }
@@ -490,22 +637,27 @@ textarea:focus {
   flex: none;
   width: 4rem;
   height: 4rem;
-  border-radius: 0.5rem;
+  border-radius: var(--rayon);
   object-fit: cover;
   background: var(--bordure);
 }
 
 .bouton--achat {
   min-height: 5rem;
-  font-size: 1.5rem;
+  font-size: var(--t-h1);
   width: 100%;
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-texte);
 }
 
+.bouton--achat:hover:not(:disabled) {
+  background: var(--accent-survol);
+  border-color: var(--accent-survol);
+}
+
 .champ-grand {
-  font-size: 1.6rem;
+  font-size: var(--t-h1);
   min-height: 3.75rem;
 }
 
@@ -517,16 +669,16 @@ textarea:focus {
   width: 100%;
   max-height: 40vh;
   object-fit: contain;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
 }
 
 .bandeau {
   margin: 0;
-  padding: 0.6rem 1rem;
-  background: var(--carte);
+  padding: var(--e-3) var(--e-4);
+  background: var(--surface);
   border-bottom: 1px solid var(--bordure);
-  font-size: 0.95rem;
+  font-size: var(--t-secondaire);
 }
 
 .bandeau p {
@@ -535,7 +687,7 @@ textarea:focus {
 
 .bandeau .lien {
   min-height: 0;
-  padding: 0 0.25rem;
+  padding: 0 var(--e-1);
 }
 
 .bandeau--hors-ligne,
@@ -544,31 +696,31 @@ textarea:focus {
 }
 
 .navigation__lien--terrain {
-  font-size: 1.1rem;
+  font-size: var(--t-corps);
 }
 
 /* Photos d'une fiche article */
 .photos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-  gap: 0.6rem;
+  gap: var(--e-3);
   list-style: none;
   padding: 0;
-  margin: 0 0 0.75rem;
+  margin: 0 0 var(--e-3);
 }
 
 .photos li {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--e-1);
 }
 
 .photos img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
-  border-radius: 0.5rem;
-  background: var(--carte);
+  border-radius: var(--rayon);
+  background: var(--surface);
   transition: transform 0.2s ease;
 }
 
@@ -579,36 +731,46 @@ textarea:focus {
 .photos__actions {
   display: flex;
   justify-content: space-between;
-  gap: 0.25rem;
+  gap: var(--e-1);
 }
 
 .photos__actions button {
   flex: 1;
-  min-height: 3rem;
-  min-width: 3rem;
+  min-height: var(--hauteur-tactile);
+  min-width: var(--hauteur-tactile);
   font: inherit;
-  background: var(--carte);
+  background: var(--surface);
   color: var(--texte);
   border: 1px solid var(--bordure);
-  border-radius: 0.4rem;
+  border-radius: var(--rayon);
   cursor: pointer;
 }
 
 .photos__legende {
-  font-size: 0.8rem;
+  font-size: var(--t-petit);
   color: var(--texte-secondaire);
   text-align: center;
 }
 
 /* --- Lot 3 : montants, cases à cocher, listes de choix --- */
+select:hover:not(:disabled) {
+  border-color: var(--texte-secondaire);
+}
+
+select:focus {
+  outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
 select {
   font: inherit;
   color: inherit;
-  background: var(--fond);
+  background: var(--surface);
   border: 1px solid var(--bordure-champ);
-  border-radius: 0.6rem;
-  padding: 0.7rem 0.8rem;
-  min-height: 3rem;
+  border-radius: var(--rayon);
+  padding: var(--e-3) var(--e-3);
+  min-height: var(--hauteur-tactile);
   width: 100%;
 }
 
@@ -618,14 +780,14 @@ select {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--e-1);
 }
 
 .cases label {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  min-height: 3rem;
+  gap: var(--e-3);
+  min-height: var(--hauteur-tactile);
 }
 
 .cases input {
@@ -638,11 +800,11 @@ select {
 .montants {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--e-3);
 }
 
 .montants td {
-  padding: 0.4rem 0;
+  padding: var(--e-2) 0;
   border-bottom: 1px solid var(--bordure);
 }
 
@@ -668,49 +830,35 @@ select {
 .recherche {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  margin: 1rem 0 0.5rem;
+  gap: var(--e-3);
+  margin: var(--e-4) 0 var(--e-2);
 }
 
 .champs-ligne--bas .bouton {
   flex: none;
 }
 
-.bouton--danger {
-  color: var(--erreur);
-}
-
 /* --- Lot 5 : tableau de bord --- */
-:root {
-  --graphique: #00897b;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --graphique: #2bb3ab;
-  }
-}
-
 .tuiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 0.6rem;
-  margin: 1rem 0 0.5rem;
+  gap: var(--e-3);
+  margin: var(--e-4) 0 var(--e-2);
 }
 
 .tuile {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.8rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-1);
+  padding: var(--e-3);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
 .tuile__titre,
 .tuile__detail {
-  font-size: 0.85rem;
+  font-size: var(--t-secondaire);
   color: var(--texte-secondaire);
 }
 
@@ -720,17 +868,20 @@ select {
 }
 
 .tuile__valeur {
-  font-size: 1.35rem;
-  font-variant-numeric: tabular-nums;
+  font-size: var(--t-h2);
+}
+
+.tuiles--larges .tuile__valeur {
+  font-size: var(--t-chiffre);
 }
 
 .graphique {
-  margin: 1rem 0 0;
+  margin: var(--e-4) 0 0;
 }
 
 .graphique__titre {
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--e-2);
 }
 
 .graphique__zone {
@@ -759,17 +910,17 @@ select {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem 0.8rem;
-  font-size: 0.85rem;
+  gap: var(--e-1) var(--e-3);
+  font-size: var(--t-secondaire);
   color: var(--texte-secondaire);
-  margin: 0 0 0.4rem;
+  margin: 0 0 var(--e-2);
 }
 
 .graphique__pastille {
   display: inline-block;
   width: 0.8rem;
   height: 0.8rem;
-  border-radius: 0.2rem;
+  border-radius: var(--rayon-badge);
   background: var(--graphique);
   margin-right: -0.4rem;
   vertical-align: -0.1rem;
@@ -797,14 +948,14 @@ select {
 }
 
 .graphique .bouton {
-  margin-top: 0.5rem;
+  margin-top: var(--e-2);
 }
 
 /* Tableau de bord (issue #88) : calcul de la trésorerie sous la tuile, frais généraux et info-bulle. */
 .tuile__calcul {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: var(--t-petit);
   color: var(--texte-secondaire);
   font-variant-numeric: tabular-nums;
 }
@@ -816,15 +967,15 @@ select {
 .tuile__calcul td:last-child {
   text-align: right;
   white-space: nowrap;
-  padding-left: 0.5rem;
+  padding-left: var(--e-2);
 }
 
 .frais-generaux {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.4rem;
-  margin: 0.5rem 0 0;
+  gap: var(--e-2);
+  margin: var(--e-2) 0 0;
 }
 
 .frais-generaux p {
@@ -832,21 +983,21 @@ select {
 }
 
 .info {
-  min-width: 3rem;
-  min-height: 3rem;
+  min-width: var(--hauteur-tactile);
+  min-height: var(--hauteur-tactile);
   border: none;
   background: none;
   color: var(--accent);
-  font-size: 1.05rem;
+  font-size: var(--t-corps);
   cursor: pointer;
   padding: 0;
 }
 
 .info__texte {
-  font-size: 0.85rem;
+  font-size: var(--t-secondaire);
   color: var(--texte-secondaire);
   border-left: 3px solid var(--bordure);
-  padding-left: 0.6rem;
+  padding-left: var(--e-3);
 }
 
 .graphique__barre.est-actif {
@@ -869,12 +1020,12 @@ select {
   position: absolute;
   top: 0;
   right: 0;
-  padding: 0.3rem 0.6rem;
-  border-radius: 0.5rem;
-  background: var(--fond);
+  padding: var(--e-1) var(--e-3);
+  border-radius: var(--rayon);
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
-  font-size: 0.9rem;
+  box-shadow: var(--ombre-flottante);
+  font-size: var(--t-secondaire);
 }
 
 .graphique__bulle span {
@@ -888,12 +1039,12 @@ select {
 .tableau {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: var(--t-secondaire);
 }
 
 .tableau th,
 .tableau td {
-  padding: 0.45rem 0.4rem;
+  padding: var(--e-2) var(--e-2);
   border-bottom: 1px solid var(--bordure);
   text-align: right;
   white-space: nowrap;
@@ -908,12 +1059,12 @@ select {
 
 /* Stock par statut (issue #88) : 4 colonnes lisibles à 360 px sans défilement. */
 .tableau--serre {
-  font-size: 0.82rem;
+  font-size: var(--t-petit);
 }
 
 .tableau--serre th,
 .tableau--serre td {
-  padding: 0.4rem 0.2rem;
+  padding: var(--e-2) var(--e-1);
 }
 
 .tableau th {
@@ -928,21 +1079,21 @@ a {
 /* Choix exclusif compact (une seule ligne). */
 .segments {
   display: flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-1);
+  padding: var(--e-1);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--e-3);
 }
 
 .segments .bouton {
   flex: 1 1 0;
   min-width: 0;
-  padding: 0.5rem 0.25rem;
+  padding: var(--e-2) var(--e-1);
   border: none;
   background: transparent;
-  font-size: 0.9rem;
+  font-size: var(--t-secondaire);
 }
 
 .segments .bouton--principal {
@@ -954,15 +1105,15 @@ a {
 .alertes {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: var(--e-2);
+  margin-bottom: var(--e-4);
 }
 
 .alerte {
-  border-radius: 0.75rem;
+  border-radius: var(--rayon-carte);
   border: 1px solid var(--bordure);
   border-left: 4px solid var(--badge-a-publier);
-  background: var(--carte);
+  background: var(--surface);
 }
 
 .alerte--aExpedier {
@@ -980,11 +1131,11 @@ a {
   background: none;
   border: none;
   width: 100%;
-  min-height: 3rem;
-  padding: 0.5rem 0.9rem;
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-4);
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: var(--e-3);
   cursor: pointer;
   text-align: left;
 }
@@ -995,10 +1146,10 @@ a {
 
 .alerte ul {
   margin: 0;
-  padding: 0 0.9rem 0.75rem 1.9rem;
+  padding: 0 var(--e-4) var(--e-3) 1.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--e-2);
 }
 
 .pastille {
@@ -1007,11 +1158,11 @@ a {
   justify-content: center;
   min-width: 1.5rem;
   height: 1.5rem;
-  padding: 0 0.4rem;
-  border-radius: 999px;
+  padding: 0 var(--e-2);
+  border-radius: var(--rayon-rond);
   background: var(--pastille);
-  color: #fff;
-  font-size: 0.8rem;
+  color: var(--pastille-texte);
+  font-size: var(--t-petit);
   font-weight: 700;
 }
 
@@ -1023,8 +1174,8 @@ a {
 .case {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  min-height: 3rem;
+  gap: var(--e-3);
+  min-height: var(--hauteur-tactile);
 }
 
 .case input {
@@ -1035,11 +1186,11 @@ a {
 }
 
 .etiquette-publication {
-  font-size: 0.85rem;
+  font-size: var(--t-petit);
   font-weight: 600;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: var(--carte);
+  padding: 2px var(--e-2);
+  border-radius: var(--rayon-badge);
+  background: var(--surface);
   border: 1px solid var(--bordure);
 }
 
@@ -1065,13 +1216,13 @@ a {
   position: sticky;
   bottom: 4.5rem;
   display: flex;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  margin-top: 0.75rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-2);
+  padding: var(--e-3);
+  margin-top: var(--e-3);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 0.15);
+  box-shadow: var(--ombre-flottante);
 }
 
 .selection-barre .bouton {
@@ -1081,7 +1232,7 @@ a {
 .carte-selection {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--e-2);
 }
 
 .carte-selection > input {
@@ -1105,8 +1256,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: var(--e-2);
+  margin-top: var(--e-2);
 }
 
 .selecteur-affichage {
@@ -1114,17 +1265,17 @@ a {
 }
 
 .selecteur-affichage .bouton {
-  min-width: 3rem;
+  min-width: var(--hauteur-tactile);
   border-radius: 0;
-  font-size: 1.2rem;
+  font-size: var(--t-h2);
 }
 
 .selecteur-affichage .bouton:first-child {
-  border-radius: 0.6rem 0 0 0.6rem;
+  border-radius: var(--rayon) 0 0 var(--rayon);
 }
 
 .selecteur-affichage .bouton:last-child {
-  border-radius: 0 0.6rem 0.6rem 0;
+  border-radius: 0 var(--rayon) var(--rayon) 0;
 }
 
 .selecteur-affichage .bouton + .bouton {
@@ -1149,9 +1300,9 @@ a {
 .ligne-article {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  min-height: 3rem;
-  padding: 0.4rem 0.25rem;
+  gap: var(--e-3);
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-1);
   color: inherit;
   text-decoration: none;
 }
@@ -1175,10 +1326,10 @@ a {
 .mosaique {
   list-style: none;
   padding: 0;
-  margin: 1rem 0 0;
+  margin: var(--e-4) 0 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(9.5rem, calc(50% - 0.3rem)), 1fr));
-  gap: 0.6rem;
+  gap: var(--e-3);
 }
 
 .mosaique__case {
@@ -1199,10 +1350,10 @@ a {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding-bottom: 0.4rem;
-  border-radius: 0.75rem;
-  background: var(--carte);
+  gap: var(--e-1);
+  padding-bottom: var(--e-2);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
   border: 1px solid var(--bordure);
   overflow: hidden;
   color: inherit;
@@ -1221,13 +1372,13 @@ a {
   position: absolute;
   top: 0.4rem;
   right: 0.4rem;
-  font-size: 0.75rem;
+  font-size: var(--t-petit);
 }
 
 .mosaique__texte {
   display: flex;
   justify-content: space-between;
-  padding: 0 0.5rem;
+  padding: 0 var(--e-2);
 }
 
 .mosaique__prix {
@@ -1235,8 +1386,8 @@ a {
 }
 
 .mosaique__nom {
-  padding: 0 0.5rem;
-  font-size: 0.9rem;
+  padding: 0 var(--e-2);
+  font-size: var(--t-secondaire);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1244,21 +1395,22 @@ a {
 
 /* Détaillé : tableau, colonne « Article » fixe et défilement horizontal sur téléphone. */
 .tableau-articles {
-  margin-top: 1rem;
+  margin-top: var(--e-4);
   overflow-x: auto;
+  background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: 0.75rem;
+  border-radius: var(--rayon-carte);
 }
 
 .tableau-articles table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 0.92rem;
+  font-size: var(--t-secondaire);
 }
 
 .tableau-articles th,
 .tableau-articles td {
-  padding: 0.5rem 0.6rem;
+  padding: var(--e-2) var(--e-3);
   text-align: left;
   white-space: nowrap;
   border-bottom: 1px solid var(--bordure);
@@ -1269,11 +1421,11 @@ a {
 }
 
 .tableau-articles tbody tr:hover > * {
-  background: var(--carte);
+  background: var(--accent-doux);
 }
 
 .tableau-articles thead th {
-  background: var(--carte);
+  background: var(--surface);
   padding: 0;
 }
 
@@ -1281,8 +1433,8 @@ a {
   font: inherit;
   font-weight: 600;
   width: 100%;
-  min-height: 3rem;
-  padding: 0.5rem 0.6rem;
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-3);
   border: none;
   background: none;
   color: inherit;
@@ -1304,7 +1456,7 @@ a {
   position: sticky;
   left: 0;
   z-index: 1;
-  background: var(--fond);
+  background: var(--surface);
   max-width: 14rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1312,14 +1464,14 @@ a {
 }
 
 .tableau-articles thead .tableau-articles__fixe {
-  background: var(--carte);
+  background: var(--surface);
   z-index: 2;
 }
 
 .tableau-articles__article {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: var(--e-2);
 }
 
 .tableau-articles__article a {
@@ -1339,23 +1491,27 @@ a {
 /* --- Filtres à choix multiples (issue #30) : puces --- */
 .puces {
   list-style: none;
-  margin: 0.4rem 0 0;
+  margin: var(--e-2) 0 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: var(--e-2);
 }
 
 .puce {
   font: inherit;
-  font-size: 0.95rem;
-  min-height: 3rem;
-  padding: 0.3rem 0.8rem;
-  border-radius: 999px;
+  font-size: var(--t-secondaire);
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-1) var(--e-3);
+  border-radius: var(--rayon);
   border: 1px solid var(--bordure);
-  background: var(--fond);
+  background: var(--surface);
   color: var(--texte);
   cursor: pointer;
+}
+
+.puce:hover:not(.puce--active) {
+  background: var(--accent-doux);
 }
 
 .puce--active {
@@ -1376,7 +1532,7 @@ a {
   justify-content: center;
   min-width: 2rem;
   min-height: 2rem;
-  border-radius: 999px;
+  border-radius: var(--rayon);
   color: var(--accent);
   font-weight: 700;
   cursor: pointer;
@@ -1384,13 +1540,13 @@ a {
 
 .lien-vinted:hover,
 .lien-vinted:focus-visible {
-  background: var(--bordure);
+  background: var(--accent-doux);
 }
 
 .carte-article__reperes {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--e-1);
 }
 
 .ligne-article .lien-vinted {
