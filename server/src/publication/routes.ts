@@ -2,7 +2,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
-import { objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
 import {
   annulerPublication,
   creerJeton,
@@ -46,8 +46,12 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
   app.post("/api/programme/publications/:id/resultat", async (requete) => {
     const c = objet(requete.body);
     let r: ResultatProgramme;
-    if (c.resultat === "publie") r = { resultat: "publie", url: texteObligatoire(c.url, "Lien de l'annonce", 500) };
-    else if (c.resultat === "essai") r = { resultat: "essai" };
+    if (c.resultat === "publie") {
+      // Même contrôle que le lien saisi à la main (issue #128) : uniquement une adresse https de Vinted.
+      const url = lienVintedFacultatif(c.url, "Lien de l'annonce");
+      if (url === null) throw erreurSaisie("Lien de l'annonce : obligatoire.");
+      r = { resultat: "publie", url };
+    } else if (c.resultat === "essai") r = { resultat: "essai" };
     else if (c.resultat === "erreur") r = { resultat: "erreur", message: texteObligatoire(c.message, "Message", 1000) };
     else throw erreurSaisie("Résultat inconnu.");
     await enregistrerResultat(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());

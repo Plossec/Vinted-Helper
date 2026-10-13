@@ -20,7 +20,7 @@ import type { FormatColis } from "../catalogue/couleurs.js";
 import type { CodeEtat } from "../catalogue/etats.js";
 import { estTransitionSimple, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
 import { calculer } from "../couts/service.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 
 /** Champs modifiables d'une fiche article (montants en centimes). */
@@ -187,10 +187,13 @@ export async function changerStatut(
         "Ce passage se fait par son action dédiée : « Vendu », envoi, finalisation, annulation, retour ou sortie du stock.",
       );
     }
-    await tx
+    // Mise à jour conditionnelle (issue #120) : statut changé entre-temps par une autre requête → tout est annulé.
+    const modifies = await tx
       .update(article)
       .set({ statut: demande.vers, prixAffiche, modifieLe: maintenant })
-      .where(eq(article.id, id));
+      .where(and(eq(article.id, id), eq(article.statut, actuel.statut)))
+      .returning({ id: article.id });
+    if (modifies.length === 0) throw conflitStatutChange();
     await tx
       .insert(historiqueStatut)
       .values({ utilisateurId, articleId: id, de: actuel.statut, vers: demande.vers, date });
