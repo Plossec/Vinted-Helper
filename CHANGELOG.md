@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.8.3] — 13/10/2026
+
+### Modifié
+- Vérifications automatiques de GitHub complétées : audit des dépendances, construction de l'image Docker avant
+  fusion, tests de l'extension quand elle change, analyse de sécurité CodeQL et propositions de mises à jour par
+  Dependabot (#124).
+
 ## [1.8.2] — 13/10/2026
 
 ### Corrigé
