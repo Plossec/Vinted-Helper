@@ -31,3 +31,11 @@
 | CodeQL | Analyse de sécurité GitHub (gratuite, dépôt public) à chaque PR, à chaque fusion et chaque lundi ; alertes dans l'onglet « Security ». |
 | Dependabot | Une PR par semaine et par écosystème npm (mineures et correctives regroupées), actions et images Docker chaque mois ; rien n'est fusionné automatiquement. |
 | Non fait | Images Docker et actions épinglées à une version exacte : Dependabot suffit pour être prévenu, sans risque de casser la mise en production par une étiquette inexistante. Secret scanning : réglage GitHub à activer par l'utilisateur. |
+
+## 13/10/2026 — Dependabot : TypeScript 7 ignoré pour l'instant (issue #169)
+
+**Décision (utilisateur)** : la PR Dependabot #162 (TypeScript 7) est fermée, `typescript-eslint` 8.x n'acceptant
+que `typescript < 6.1`. Dependabot ignore les versions majeures de TypeScript jusqu'à ce que typescript-eslint suive
+(règle à retirer alors). Mises à jour Dependabot : les **mineures** sont fusionnées quand la CI est verte ; les
+**majeures** (Node 26 dans l'image Docker, `@types/node` 26) attendent d'être faites ensemble, avec un essai sur le
+serveur. Une PR qui touche `.github/` ou le `Dockerfile` reste soumise à l'accord de l'utilisateur.
