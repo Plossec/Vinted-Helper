@@ -112,17 +112,17 @@ export async function demanderPublication(
       refuses.push({ reference: a.reference, nom: a.nom, manques: m });
       continue;
     }
-    // Nouvelle demande depuis Erreur (#72) : l'article repasse d'abord À publier.
-    if (a.statut === "erreur_publication") {
-      await changerStatut(
-        base,
-        utilisateurId,
-        a.id,
-        { vers: "a_publier", date: maintenant, prixAffiche: null },
-        maintenant,
-      );
-    }
-    await base.insert(publicationVinted).values({ utilisateurId, articleId: a.id, essai, demandeLe: maintenant });
+    // Nouvelle vraie demande depuis Erreur (#72) : l'article repasse À publier, dans la même transaction que la
+    // demande (#92). Un essai ne change jamais le statut : l'article reste en Erreur.
+    await base.transaction(async (tx) => {
+      if (a.statut === "erreur_publication" && !essai) {
+        await tx.update(article).set({ statut: "a_publier", modifieLe: maintenant }).where(eq(article.id, a.id));
+        await tx
+          .insert(historiqueStatut)
+          .values({ utilisateurId, articleId: a.id, de: "erreur_publication", vers: "a_publier", date: maintenant });
+      }
+      await tx.insert(publicationVinted).values({ utilisateurId, articleId: a.id, essai, demandeLe: maintenant });
+    });
     acceptes.push(a.reference);
   }
   return { acceptes, refuses };

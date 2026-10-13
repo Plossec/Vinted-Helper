@@ -238,6 +238,34 @@ describe("publication Vinted", () => {
     });
   });
 
+  it("statut Erreur (#92, #94) : un essai relancé depuis Erreur laisse l'article en Erreur, avec le message de la vraie publication", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false), "Message de la vraie publication.");
+    // Essai demandé depuis Erreur : accepté, mais l'article ne change pas de statut.
+    const r = (await requete("POST", "/api/publications", { articleIds: [a.id], essai: true })).json<{
+      acceptes: number[];
+    }>();
+    expect(r.acceptes).toEqual([a.reference]);
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({ statut: "erreur_publication" });
+    // L'essai échoue avec un autre message : la fiche garde celui de la vraie publication.
+    const essai = (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>()
+      .publication.id;
+    await erreur(essai, "Message de l'essai.");
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "erreur_publication",
+      erreurPublication: "Message de la vraie publication.",
+    });
+  });
+
+  it("statut Erreur (#93) : coller le lien de l'annonce publiée à la main fait passer l'article En ligne", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false));
+    const r = (
+      await requete("PUT", `/api/articles/${a.id}/lien-vinted`, { url: "https://www.vinted.fr/items/42-jean" })
+    ).json<{ passeEnLigne: boolean; article: { statut: string } }>();
+    expect(r).toMatchObject({ passeEnLigne: true, article: { statut: "en_ligne" } });
+  });
+
   it("couleurs : 2 au plus, codes connus", async () => {
     const refs = (await requete("GET", "/api/referentiels")).json<{
       lieux: { id: string }[];

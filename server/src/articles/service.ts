@@ -199,7 +199,7 @@ export async function changerStatut(
 
 /**
  * Lien de l'annonce Vinted saisi à la main (issue #46) : simple lien enregistré, l'application n'interroge jamais
- * Vinted. Un article Brouillon ou À publier qui a un prix affiché passe alors En ligne (choix de l'utilisateur).
+ * Vinted. Un article Brouillon, À publier ou en Erreur (#93) qui a un prix affiché passe alors En ligne.
  */
 export async function enregistrerLienVinted(
   base: Base,
@@ -210,7 +210,9 @@ export async function enregistrerLienVinted(
 ): Promise<{ passeEnLigne: boolean; prixManquant: boolean }> {
   const actuel = await chargerArticle(base, utilisateurId, id);
   await base.update(article).set({ urlVinted: url, modifieLe: maintenant }).where(eq(article.id, id));
-  const avantLigne = actuel.statut === "brouillon" || actuel.statut === "a_publier";
+  // Erreur (#93) : l'annonce a été publiée à la main après un échec de l'extension.
+  const avantLigne =
+    actuel.statut === "brouillon" || actuel.statut === "a_publier" || actuel.statut === "erreur_publication";
   if (url === null || !avantLigne) return { passeEnLigne: false, prixManquant: false };
   if (actuel.prixAffiche === null) return { passeEnLigne: false, prixManquant: true };
   await changerStatut(base, utilisateurId, id, { vers: "en_ligne", date: maintenant, prixAffiche: null }, maintenant);
@@ -403,7 +405,14 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
       ? await base
           .select({ message: publicationVinted.message })
           .from(publicationVinted)
-          .where(and(eq(publicationVinted.articleId, id), eq(publicationVinted.etat, "erreur")))
+          // Vraies publications seulement : un essai raté n'est pas la cause de l'Erreur (#94).
+          .where(
+            and(
+              eq(publicationVinted.articleId, id),
+              eq(publicationVinted.etat, "erreur"),
+              eq(publicationVinted.essai, false),
+            ),
+          )
           .orderBy(desc(publicationVinted.finLe))
           .limit(1)
       : [];
