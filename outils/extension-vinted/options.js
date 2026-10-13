@@ -12,7 +12,7 @@ $("formulaire").addEventListener("submit", async (e) => {
   try {
     adresse = new URL($("adresse").value.trim()).origin;
   } catch {
-    return message("Adresse invalide (exemple : https://vps-6b2cf0b2.vps.ovh.net).", false);
+    return message("Adresse invalide (exemple : https://vps-1234abcd.vps.ovh.net).", false);
   }
   const jeton = $("jeton").value.trim();
   if (!jeton) return message("Jeton manquant.", false);

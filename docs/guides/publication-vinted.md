@@ -29,7 +29,8 @@ puis clique « Ajouter ». L'article passe ensuite **En ligne** et le lien de l'
 1. Dans l'application en ligne : **Réglages → Publication Vinted → Créer un jeton** (ou « Remplacer le jeton »).
    Copiez le jeton (`vh_…`) : il n'est affiché qu'une fois.
 2. Cliquez l'icône de l'extension → **Réglages**. Saisissez :
-   - **Adresse de l'application** : `https://vps-6b2cf0b2.vps.ovh.net` ;
+   - **Adresse de l'application** : celle de votre serveur, celle que vous ouvrez sur le téléphone (exemple :
+     `https://vps-1234abcd.vps.ovh.net`) ;
    - **Jeton** : celui copié à l'étape 1.
 3. Cliquez **Enregistrer et tester**. Chrome demande l'autorisation d'accéder à l'adresse : acceptez.
 4. Résultat attendu : « Connexion réussie : N annonce(s) en attente. » L'écran Publication Vinted de l'application
