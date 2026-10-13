@@ -11,6 +11,11 @@ updates:
     groups:
       mineures:
         update-types: [minor, patch]
+    # TypeScript 7 : typescript-eslint 8.x exige encore typescript < 6.1 (issue #169). À retirer quand une version de
+    # typescript-eslint accepte TypeScript 7.
+    ignore:
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /outils/extension-vinted
     schedule:

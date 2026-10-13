@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.11.1] — 13/10/2026
+
+### Modifié
+- Dependabot ne propose plus TypeScript 7, pas encore pris en charge par l'outil de vérification du code
+  (typescript-eslint) (#169).
+
 ## [1.11.0] — 13/10/2026
 
 ### Ajouté
