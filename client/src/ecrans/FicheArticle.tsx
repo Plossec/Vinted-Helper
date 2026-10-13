@@ -1,8 +1,27 @@
 // Fiche article (création et modification) — cahier des charges §5.2 : champs, photos, sortie, lot, coûts.
 // Catégorie (arbre Vinted), marque et état obligatoires ; gamme en texte libre (décisions du 05/10/2026).
-import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link, useBlocker, useNavigate, useParams } from "react-router";
-import { api, type Article, type DonneesArticle, envoyerImage, type Referentiels, type TypeListe } from "../api.js";
+import {
+  api,
+  type Article,
+  type DonneesArticle,
+  envoyerImage,
+  type Referentiels,
+  type TypeListe,
+  urlVignette,
+} from "../api.js";
+import { Montant } from "../composants/Montant.js";
+import { Repli } from "../composants/Repli.js";
 import { BlocAnnonce } from "../composants/BlocAnnonce.js";
 import { BlocVinted } from "../composants/BlocVinted.js";
 import { BlocMontants } from "../composants/BlocMontants.js";
@@ -12,7 +31,7 @@ import { ListeDeroulante, normaliser, type OptionListe } from "../composants/Lis
 import { aujourdhui } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
 import { formatDate } from "../outils/dates.js";
-import { formatReference } from "../statuts.js";
+import { AVANT_VENTE, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
 import { ContexteModifications, messageAbandon, type Modifications } from "../outils/modifications.js";
 import { confirmer } from "../composants/Dialogue.js";
 
@@ -103,6 +122,7 @@ export function FicheArticle() {
   const [envoi, setEnvoi] = useState(false);
   const [lecture, setLecture] = useState(false);
   const etiquette = useRef<HTMLInputElement>(null);
+  const avantVente = article === null || AVANT_VENTE.has(article.statut);
 
   // Saisies non enregistrées : la fiche et les blocs qui le signalent (annonce, liens Vinted, boost).
   const [blocsModifies, setBlocsModifies] = useState<string[]>([]);
@@ -336,193 +356,208 @@ export function FicheArticle() {
           ← Articles
         </Link>
         <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
+        {article && <EnteteArticle article={article} />}
+        {article && (
+          <Repli titre="Statut et prochaine étape" ouvert>
+            <BlocStatut article={article} onMiseAJour={apresChangementStatut} />
+          </Repli>
+        )}
 
-        {/* PC (≥ 1024 px, #106) : fiche à gauche, blocs (annonce, Vinted, photos, statut, montants) à droite. */}
-        <div className="fiche">
-          <div className="fiche__colonne">
-            <input
-              ref={etiquette}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              hidden
-              onChange={(e) => void lireEtiquette(e)}
-            />
-            <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
-              {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
-            </button>
-
-            <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
-              <label className="champ">
-                <span>Nom *</span>
-                <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
-              </label>
-              <ListeDeroulante
-                libelle="Catégorie"
-                obligatoire
-                placeholder="Tapez pour chercher (ex. jean slim)"
-                texte={form.categorieTexte}
-                onTexte={(texte) => setForm((f) => ({ ...f, categorieTexte: texte, categorie: "" }))}
-                options={options.categories}
-                onChoix={(o) =>
-                  setForm((f) => ({
-                    ...f,
-                    categorie: o.cle,
-                    categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
-                  }))
-                }
+        {/* PC (≥ 1024 px, #106) : fiche à gauche, blocs (annonce, Vinted, photos, statut, montants) à droite.
+            Téléphone (#98) : avant la vente, la fiche d'abord ; ensuite, statut et montants d'abord, fiche repliée. */}
+        <div className={article && !avantVente ? "fiche fiche--vendu" : "fiche"}>
+          <div className="fiche__colonne fiche__colonne--formulaire">
+            <Facultatif repli={article !== null} titre="Fiche" ouvert={avantVente}>
+              <input
+                ref={etiquette}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                hidden
+                onChange={(e) => void lireEtiquette(e)}
               />
-              <ListeDeroulante
-                libelle="Marque"
-                obligatoire
-                ajout
-                texte={form.marque}
-                onTexte={modifier("marque")}
-                options={options.marques}
-                onChoix={(o) => modifier("marque")(o.libelle)}
-              />
-              <ListeDeroulante
-                libelle="État"
-                obligatoire
-                texte={form.etatTexte}
-                onTexte={(texte) => setForm((f) => ({ ...f, etatTexte: texte, etat: "" }))}
-                options={options.etats}
-                onChoix={(o) => setForm((f) => ({ ...f, etat: o.cle, etatTexte: o.libelle }))}
-              />
-              <label className="champ">
-                <span>Gamme</span>
-                <input
-                  value={form.gamme}
-                  onChange={(e) => modifier("gamme")(e.target.value)}
-                  placeholder="Ex. Foot, Vintage…"
-                />
-              </label>
-              <div className="champs-ligne">
-                <label className="champ">
-                  <span>Taille</span>
-                  <input value={form.taille} onChange={(e) => modifier("taille")(e.target.value)} />
-                </label>
-                <label className="champ">
-                  <span>Matière</span>
-                  <input value={form.matiere} onChange={(e) => modifier("matiere")(e.target.value)} />
-                </label>
-              </div>
-              <ListeDeroulante
-                libelle="Lieu d'achat"
-                obligatoire
-                ajout
-                texte={form.lieu}
-                onTexte={changerLieu}
-                options={options.lieux}
-                onChoix={(o) => changerLieu(o.libelle)}
-              />
-              <div className="champs-ligne">
-                {article?.lot ? (
-                  <label className="champ">
-                    <span>Prix total du lot (€) *</span>
-                    <input
-                      inputMode="decimal"
-                      value={form.prixLot}
-                      onChange={(e) => modifier("prixLot")(e.target.value)}
-                    />
-                  </label>
-                ) : (
-                  <label className="champ">
-                    <span>Prix d'achat (€) *</span>
-                    <input
-                      inputMode="decimal"
-                      value={form.prixAchat}
-                      onChange={(e) => modifier("prixAchat")(e.target.value)}
-                      placeholder="2,00"
-                    />
-                  </label>
-                )}
-                <label className="champ">
-                  <span>Date d'achat *</span>
-                  <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
-                </label>
-              </div>
-              <label className="champ">
-                <span>Prix affiché sur Vinted (€)</span>
-                <input
-                  inputMode="decimal"
-                  value={form.prixAffiche}
-                  onChange={(e) => modifier("prixAffiche")(e.target.value)}
-                  placeholder="12,00"
-                />
-              </label>
-              <label className="champ">
-                <span>Prix vente minimum (€)</span>
-                <input
-                  inputMode="decimal"
-                  value={form.prixVenteMinimum}
-                  onChange={(e) => modifier("prixVenteMinimum")(e.target.value)}
-                  placeholder="Facultatif"
-                />
-              </label>
-              <div className="champs-ligne">
-                <label className="champ">
-                  <span>Couleur</span>
-                  <select value={form.couleur1} onChange={(e) => modifier("couleur1")(e.target.value)}>
-                    <option value="">—</option>
-                    {refs.couleurs.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.libelle}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="champ">
-                  <span>2e couleur</span>
-                  <select value={form.couleur2} onChange={(e) => modifier("couleur2")(e.target.value)}>
-                    <option value="">—</option>
-                    {refs.couleurs.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.libelle}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <label className="champ">
-                <span>Format du colis (Vinted)</span>
-                <select value={form.formatColis} onChange={(e) => modifier("formatColis")(e.target.value)}>
-                  <option value="">Par défaut (Réglages)</option>
-                  {refs.formatsColis.map((f) => (
-                    <option key={f.code} value={f.code}>
-                      {f.libelle}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="champ">
-                <span>Notes</span>
-                <textarea value={form.notes} onChange={(e) => modifier("notes")(e.target.value)} rows={3} />
-              </label>
-
-              {message && (
-                <p className={`message message--${message.type}`} role={message.type === "erreur" ? "alert" : "status"}>
-                  {message.texte}
-                </p>
-              )}
-              <button className="bouton bouton--principal" type="submit" disabled={envoi}>
-                {envoi ? "Enregistrement…" : article ? "Enregistrer la fiche" : "Créer l'article"}
+              <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
+                {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
               </button>
-            </form>
+
+              <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
+                <label className="champ">
+                  <span>Nom *</span>
+                  <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
+                </label>
+                <ListeDeroulante
+                  libelle="Catégorie"
+                  obligatoire
+                  placeholder="Tapez pour chercher (ex. jean slim)"
+                  texte={form.categorieTexte}
+                  onTexte={(texte) => setForm((f) => ({ ...f, categorieTexte: texte, categorie: "" }))}
+                  options={options.categories}
+                  onChoix={(o) =>
+                    setForm((f) => ({
+                      ...f,
+                      categorie: o.cle,
+                      categorieTexte: [o.secondaire, o.libelle].filter(Boolean).join(SEPARATEUR),
+                    }))
+                  }
+                />
+                <ListeDeroulante
+                  libelle="Marque"
+                  obligatoire
+                  ajout
+                  texte={form.marque}
+                  onTexte={modifier("marque")}
+                  options={options.marques}
+                  onChoix={(o) => modifier("marque")(o.libelle)}
+                />
+                <ListeDeroulante
+                  libelle="État"
+                  obligatoire
+                  texte={form.etatTexte}
+                  onTexte={(texte) => setForm((f) => ({ ...f, etatTexte: texte, etat: "" }))}
+                  options={options.etats}
+                  onChoix={(o) => setForm((f) => ({ ...f, etat: o.cle, etatTexte: o.libelle }))}
+                />
+                <label className="champ">
+                  <span>Gamme</span>
+                  <input
+                    value={form.gamme}
+                    onChange={(e) => modifier("gamme")(e.target.value)}
+                    placeholder="Ex. Foot, Vintage…"
+                  />
+                </label>
+                <div className="champs-ligne">
+                  <label className="champ">
+                    <span>Taille</span>
+                    <input value={form.taille} onChange={(e) => modifier("taille")(e.target.value)} />
+                  </label>
+                  <label className="champ">
+                    <span>Matière</span>
+                    <input value={form.matiere} onChange={(e) => modifier("matiere")(e.target.value)} />
+                  </label>
+                </div>
+                <ListeDeroulante
+                  libelle="Lieu d'achat"
+                  obligatoire
+                  ajout
+                  texte={form.lieu}
+                  onTexte={changerLieu}
+                  options={options.lieux}
+                  onChoix={(o) => changerLieu(o.libelle)}
+                />
+                <div className="champs-ligne">
+                  {article?.lot ? (
+                    <label className="champ">
+                      <span>Prix total du lot (€) *</span>
+                      <input
+                        inputMode="decimal"
+                        value={form.prixLot}
+                        onChange={(e) => modifier("prixLot")(e.target.value)}
+                      />
+                    </label>
+                  ) : (
+                    <label className="champ">
+                      <span>Prix d'achat (€) *</span>
+                      <input
+                        inputMode="decimal"
+                        value={form.prixAchat}
+                        onChange={(e) => modifier("prixAchat")(e.target.value)}
+                        placeholder="2,00"
+                      />
+                    </label>
+                  )}
+                  <label className="champ">
+                    <span>Date d'achat *</span>
+                    <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
+                  </label>
+                </div>
+                <label className="champ">
+                  <span>Prix affiché sur Vinted (€)</span>
+                  <input
+                    inputMode="decimal"
+                    value={form.prixAffiche}
+                    onChange={(e) => modifier("prixAffiche")(e.target.value)}
+                    placeholder="12,00"
+                  />
+                </label>
+                <label className="champ">
+                  <span>Prix vente minimum (€)</span>
+                  <input
+                    inputMode="decimal"
+                    value={form.prixVenteMinimum}
+                    onChange={(e) => modifier("prixVenteMinimum")(e.target.value)}
+                    placeholder="Facultatif"
+                  />
+                </label>
+                <div className="champs-ligne">
+                  <label className="champ">
+                    <span>Couleur</span>
+                    <select value={form.couleur1} onChange={(e) => modifier("couleur1")(e.target.value)}>
+                      <option value="">—</option>
+                      {refs.couleurs.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.libelle}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="champ">
+                    <span>2e couleur</span>
+                    <select value={form.couleur2} onChange={(e) => modifier("couleur2")(e.target.value)}>
+                      <option value="">—</option>
+                      {refs.couleurs.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.libelle}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <label className="champ">
+                  <span>Format du colis (Vinted)</span>
+                  <select value={form.formatColis} onChange={(e) => modifier("formatColis")(e.target.value)}>
+                    <option value="">Par défaut (Réglages)</option>
+                    {refs.formatsColis.map((f) => (
+                      <option key={f.code} value={f.code}>
+                        {f.libelle}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="champ">
+                  <span>Notes</span>
+                  <textarea value={form.notes} onChange={(e) => modifier("notes")(e.target.value)} rows={3} />
+                </label>
+
+                {message && (
+                  <p
+                    className={`message message--${message.type}`}
+                    role={message.type === "erreur" ? "alert" : "status"}
+                  >
+                    {message.texte}
+                  </p>
+                )}
+                <button className="bouton bouton--principal" type="submit" disabled={envoi}>
+                  {envoi ? "Enregistrement…" : article ? "Enregistrer la fiche" : "Créer l'article"}
+                </button>
+              </form>
+            </Facultatif>
           </div>
 
           {article && (
             <div className="fiche__colonne">
-              <InfosAchat article={article} />
-              <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />
-              <BlocVinted
-                key={`${article.id}:${article.urlVinted}:${article.urlConversation}`}
-                article={article}
-                onMiseAJour={apresChangementStatut}
-              />
-              <PhotosArticle article={article} onMiseAJour={setArticle} />
-              <BlocStatut article={article} onMiseAJour={apresChangementStatut} />
-              <BlocMontants article={article} onMiseAJour={setArticle} />
+              {blocsDansLOrdre(article.statut, {
+                montants: <BlocMontants article={article} onMiseAJour={setArticle} />,
+                photos: <PhotosArticle article={article} onMiseAJour={setArticle} />,
+                annonce: <BlocAnnonce key={article.id} article={article} onMiseAJour={setArticle} />,
+                vinted: (
+                  <BlocVinted
+                    key={`${article.id}:${article.urlVinted}:${article.urlConversation}`}
+                    article={article}
+                    onMiseAJour={apresChangementStatut}
+                  />
+                ),
+                achat: <InfosAchat article={article} />,
+              })}
               <section className="section">
                 <button
                   type="button"
@@ -554,6 +589,91 @@ export function FicheArticle() {
         </div>
       </main>
     </ContexteModifications>
+  );
+}
+
+type Bloc = "montants" | "photos" | "annonce" | "vinted" | "achat";
+
+const TITRES_BLOCS: Record<Bloc, string> = {
+  montants: "Montants",
+  photos: "Photos",
+  annonce: "Annonce",
+  vinted: "Vinted",
+  achat: "Achat",
+};
+
+/**
+ * Ordre et ouverture des sections selon le statut (#98), sous « Statut et prochaine étape » (toujours ouvert, en
+ * tête). Avant la vente : photos, annonce, Vinted ouverts ; achat et montants repliés. Ensuite : montants ouverts
+ * en tête, le reste replié.
+ */
+function blocsDansLOrdre(statut: Statut, blocs: Record<Bloc, ReactNode>) {
+  const avant = AVANT_VENTE.has(statut);
+  const ordre: Bloc[] = avant
+    ? ["photos", "annonce", "vinted", "achat", "montants"]
+    : ["montants", "vinted", "annonce", "photos", "achat"];
+  const ouverts = new Set<Bloc>(avant ? ["photos", "annonce", "vinted"] : ["montants"]);
+  return ordre.map((b) => (
+    <Repli key={b} titre={TITRES_BLOCS[b]} ouvert={ouverts.has(b)}>
+      {blocs[b]}
+    </Repli>
+  ));
+}
+
+/** Repliable sur la fiche d'un article existant ; tel quel pour un nouvel article (création inchangée, #98). */
+function Facultatif({
+  repli,
+  titre,
+  ouvert,
+  children,
+}: {
+  repli: boolean;
+  titre: string;
+  ouvert: boolean;
+  children: ReactNode;
+}) {
+  return repli ? (
+    <Repli titre={titre} ouvert={ouvert}>
+      {children}
+    </Repli>
+  ) : (
+    <>{children}</>
+  );
+}
+
+/** En-tête de la fiche (#98) : photo, statut, prix affiché et bénéfice, visibles sans défiler. */
+function EnteteArticle({ article }: { article: Article }) {
+  const photo =
+    [...article.photos].sort(
+      (a, b) => Number(b.type === "annonce") - Number(a.type === "annonce") || a.ordre - b.ordre,
+    )[0] ?? null;
+  const c = article.couts;
+  return (
+    <div className="entete-article">
+      {photo ? (
+        <img className="entete-article__photo" src={urlVignette(photo.id)} alt="" />
+      ) : (
+        <span className="entete-article__photo" />
+      )}
+      <div className="entete-article__infos">
+        <span className={`badge badge--${article.statut}`}>{LIBELLES_STATUT[article.statut]}</span>
+        <span>
+          Prix affiché : <strong>{article.prixAffiche === null ? "—" : formatEuros(article.prixAffiche)}</strong>
+        </span>
+        <span>
+          {c.realise ? "Bénéfice" : "Bénéfice provisoire"} :{" "}
+          <strong>
+            <Montant centimes={c.benefice} />
+          </strong>
+          {c.beneficeAttendu !== null && (
+            <span className="secondaire">
+              {" "}
+              (attendu <Montant centimes={c.beneficeAttendu} signe />)
+            </span>
+          )}
+        </span>
+      </div>
+    </div>
   );
 }
 

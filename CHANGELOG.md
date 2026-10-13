@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.11.0] — 13/10/2026
+
+### Ajouté
+- Fiche article : en-tête (photo, statut, prix affiché, bénéfice) et bloc « Statut et prochaine étape » en haut,
+  avec le passage attendu en bouton plein (#98).
+
+### Modifié
+- Fiche article : sections repliables, ouvertes selon le statut (fiche, photos et annonce avant la vente ; montants
+  ensuite) ; historique des statuts replié, du plus récent au plus ancien (#98).
+
 ## [1.10.3] — 13/10/2026
 
 ### Modifié

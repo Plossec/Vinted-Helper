@@ -1813,6 +1813,108 @@ a {
   margin: 0;
 }
 
+/* --- Fiche article organisée autour du statut (#98) --- */
+.entete-article {
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  margin-bottom: var(--e-2);
+}
+
+.entete-article__photo {
+  flex: none;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: var(--rayon-carte);
+  object-fit: cover;
+  background: var(--bordure);
+}
+
+.entete-article__infos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--e-1);
+  min-width: 0;
+}
+
+.prochaine-etape {
+  margin: 0 0 var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--rayon);
+  background: var(--accent-doux);
+}
+
+/* Téléphone : une fois vendu, la fiche (formulaire) passe après les montants. */
+@media (max-width: 1023.98px) {
+  .fiche {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fiche--vendu > .fiche__colonne--formulaire {
+    order: 1;
+  }
+}
+
+.repli {
+  border-top: 1px solid var(--bordure);
+}
+
+.repli__titre {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-3) 0;
+  cursor: pointer;
+}
+
+.repli__titre::-webkit-details-marker {
+  display: none;
+}
+
+.repli__titre h2 {
+  margin: 0;
+}
+
+.repli__titre::after {
+  content: "▾";
+  content: "▾" / "";
+  color: var(--texte-secondaire);
+  transition: transform 0.15s;
+}
+
+.repli:not([open]) > .repli__titre::after {
+  transform: rotate(-90deg);
+}
+
+.repli__contenu {
+  padding-bottom: var(--e-4);
+}
+
+/* Le titre du bloc est déjà celui de la section repliable. */
+.repli__contenu > .section,
+.repli__contenu > .formulaire.section {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.repli__contenu > .section > h2:first-child {
+  display: none;
+}
+
+.repli-historique > summary {
+  min-height: var(--hauteur-tactile);
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* --- Boîtes de dialogue (#132) --- */
 .dialogue {
   width: min(28rem, calc(100vw - 2 * var(--e-4)));

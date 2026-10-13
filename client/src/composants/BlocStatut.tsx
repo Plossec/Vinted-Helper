@@ -16,7 +16,7 @@ import {
 import { depuisChampDateHeure, formatDateHeure, versChampDateHeure } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
 import { useModifications } from "../outils/modifications.js";
-import { ACTIONS_STATUT, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
+import { ACTIONS_STATUT, etapeSuivante, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
 import { confirmer as demanderConfirmation, demanderMontant } from "./Dialogue.js";
 
 interface Props {
@@ -60,6 +60,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
   /** Envoi en cours : « Confirmer » désactivé, pour qu'une double tape ne crée pas deux ventes (issue #120). */
   const [envoi, setEnvoi] = useState(false);
   const { confirmerAbandon } = useModifications();
+  const etape = etapeSuivante(article.statut);
   const modifier = (m: Partial<Saisie>) => setSaisie((s) => (s === null ? s : { ...s, ...m }));
 
   async function preparer(vers: Statut) {
@@ -239,14 +240,25 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
       <h2>
         Statut : <span className={`badge badge--${article.statut}`}>{LIBELLES_STATUT[article.statut]}</span>
       </h2>
+      {/* Prochaine étape (#98) : conseil, puis le passage attendu en bouton plein, les autres en secondaire. */}
+      <p className="prochaine-etape">
+        <strong>Prochaine étape :</strong> {etape.conseil}
+      </p>
 
       {choix === null || saisie === null ? (
         <div className="actions">
-          {article.transitionsPossibles.map((vers) => (
-            <button key={vers} type="button" className="bouton" onClick={() => void preparer(vers)}>
-              {libelleAction(article.statut, vers)}
-            </button>
-          ))}
+          {[...article.transitionsPossibles]
+            .sort((a, b) => Number(b === etape.vers) - Number(a === etape.vers))
+            .map((vers) => (
+              <button
+                key={vers}
+                type="button"
+                className={vers === etape.vers ? "bouton bouton--principal" : "bouton"}
+                onClick={() => void preparer(vers)}
+              >
+                {libelleAction(article.statut, vers)}
+              </button>
+            ))}
           {article.transitionsPossibles.length === 0 && <p className="secondaire">Aucun changement possible.</p>}
         </div>
       ) : (
@@ -428,47 +440,60 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
         </p>
       )}
 
-      <h3>Historique</h3>
-      <ul className="historique">
-        {[...article.historiqueStatuts].reverse().map((h, i) => (
-          <li key={h.id}>
-            {correction?.id === h.id ? (
-              <span className="historique__correction">
-                <input
-                  type="datetime-local"
-                  value={correction.date}
-                  onChange={(e) => setCorrection({ id: h.id, date: e.target.value })}
-                />
-                <button type="button" className="bouton bouton--principal" onClick={() => void enregistrerCorrection()}>
-                  OK
-                </button>
-                <button type="button" className="bouton" onClick={() => setCorrection(null)}>
-                  Annuler
-                </button>
-              </span>
-            ) : (
-              <>
-                <span>
-                  {h.de === null ? "Création" : `${LIBELLES_STATUT[h.de]} → ${LIBELLES_STATUT[h.vers]}`}
-                  <span className="secondaire"> — {formatDateHeure(h.date)}</span>
-                </span>
-                <button
-                  type="button"
-                  className="lien"
-                  onClick={() => setCorrection({ id: h.id, date: versChampDateHeure(new Date(h.date)) })}
-                >
-                  Corriger la date
-                </button>
-                {i === 0 && h.de !== null && (
-                  <button type="button" className="lien" onClick={() => void supprimerDernier(h.de ?? h.vers, h.vers)}>
-                    Supprimer
-                  </button>
+      {/* Historique compact, replié, du plus récent au plus ancien (#98) ; « Supprimer » sur le dernier enregistré. */}
+      <details className="repli-historique">
+        <summary>Historique ({article.historiqueStatuts.length})</summary>
+        <ul className="historique">
+          {[...article.historiqueStatuts]
+            .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+            .map((h) => (
+              <li key={h.id}>
+                {correction?.id === h.id ? (
+                  <span className="historique__correction">
+                    <input
+                      type="datetime-local"
+                      value={correction.date}
+                      onChange={(e) => setCorrection({ id: h.id, date: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      className="bouton bouton--principal"
+                      onClick={() => void enregistrerCorrection()}
+                    >
+                      OK
+                    </button>
+                    <button type="button" className="bouton" onClick={() => setCorrection(null)}>
+                      Annuler
+                    </button>
+                  </span>
+                ) : (
+                  <>
+                    <span>
+                      {h.de === null ? "Création" : `${LIBELLES_STATUT[h.de]} → ${LIBELLES_STATUT[h.vers]}`}
+                      <span className="secondaire"> — {formatDateHeure(h.date)}</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="lien"
+                      onClick={() => setCorrection({ id: h.id, date: versChampDateHeure(new Date(h.date)) })}
+                    >
+                      Corriger la date
+                    </button>
+                    {h.id === article.historiqueStatuts.at(-1)?.id && h.de !== null && (
+                      <button
+                        type="button"
+                        className="lien"
+                        onClick={() => void supprimerDernier(h.de ?? h.vers, h.vers)}
+                      >
+                        Supprimer
+                      </button>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+              </li>
+            ))}
+        </ul>
+      </details>
     </section>
   );
 }
