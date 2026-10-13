@@ -19,6 +19,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 - Terrain hors réseau : un achat qui provoque une erreur du serveur est mis de côté après 3 essais (avec le message,
   « Réessayer » ou « Abandonner ») au lieu de bloquer tous les suivants ; un serveur en redémarrage compte toujours
   comme une coupure de réseau (#123).
+- Mise en production : le service de sauvegarde est redémarré quand son script change ; sans cela, le correctif des
+  sauvegardes de la 1.6.1 (#117) n'était pas encore actif sur le serveur (#114).
 
 ## [1.6.1] — 13/10/2026
 
