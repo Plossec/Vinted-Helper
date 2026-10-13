@@ -1,0 +1,27 @@
+# Analyse de sécurité du code par GitHub (CodeQL, gratuit sur un dépôt public), issue #124 : à chaque pull request,
+# à chaque fusion dans main et chaque lundi. Les alertes apparaissent dans l'onglet « Security » du dépôt.
+name: CodeQL
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyser:
+    name: Analyse CodeQL (JavaScript / TypeScript)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3

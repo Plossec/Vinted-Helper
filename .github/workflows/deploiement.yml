@@ -30,6 +30,18 @@ jobs:
       - run: npm run format:check
       - run: npm test
       - run: npm run build
+      # Vulnérabilités connues des dépendances embarquées en production (issue #124).
+      - run: npm audit --omit=dev
+
+  # Construction de l'image Docker, comme sur le serveur, sur chaque pull request (issue #124) : une image qui ne se
+  # construit plus est vue avant la fusion, pas pendant la mise en production.
+  image-docker:
+    name: Construire l'image Docker
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag vinted-helper-verification .
 
   deployer:
     name: Déployer sur le serveur

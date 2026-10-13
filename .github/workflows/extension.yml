@@ -1,0 +1,36 @@
+# Tests de l'extension Chrome de publication (outils/extension-vinted) sur la fausse page Vinted, seulement quand
+# l'extension change (issue #124). Chromium « pour les tests » : Chrome du commerce n'accepte plus --load-extension.
+name: Extension Vinted
+
+on:
+  pull_request:
+    paths: ["outils/extension-vinted/**", ".github/workflows/extension.yml"]
+  push:
+    branches: [main]
+    paths: ["outils/extension-vinted/**", ".github/workflows/extension.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests de l'extension (fausse page Vinted)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: outils/extension-vinted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: outils/extension-vinted/package-lock.json
+      - run: npm ci
+      - run: npm audit --omit=dev
+      - name: Chromium de test
+        run: |
+          npx playwright-core install --with-deps chromium
+          echo "VH_CHROME_TEST=$(ls -d ~/.cache/ms-playwright/chromium-*/chrome-linux*/chrome | head -n 1)" >> "$GITHUB_ENV"
+      - run: npm test
