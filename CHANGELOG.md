@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.9.2] — 13/10/2026
+
+### Modifié
+- Liste des articles : haut d'écran allégé — alertes en puces dépliables, recherche et filtres sur une ligne (tri
+  dans les filtres), « + » flottant pour un nouvel article ; trois articles visibles sans défiler sur téléphone
+  (#100).
+
 ## [1.9.1] — 13/10/2026
 
 ### Modifié
