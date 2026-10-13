@@ -1,9 +1,10 @@
-// Réglages : version, changement du mot de passe, déconnexion.
+// Réglages : version, affichage (thème), changement du mot de passe, déconnexion.
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api, type Sante } from "../api.js";
 import { ParametresCalcul } from "../composants/ParametresCalcul.js";
 import { PromptsIA } from "../composants/PromptsIA.js";
+import { CHOIX_THEME, enregistrerPreferenceTheme, lirePreferenceTheme, type PreferenceTheme } from "../theme.js";
 
 export function Reglages() {
   const naviguer = useNavigate();
@@ -13,6 +14,7 @@ export function Reglages() {
   const [nouveau, setNouveau] = useState("");
   const [confirmation, setConfirmation] = useState("");
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
+  const [theme, setTheme] = useState<PreferenceTheme>(lirePreferenceTheme);
 
   useEffect(() => {
     let actif = true;
@@ -44,6 +46,11 @@ export function Reglages() {
     } catch (e) {
       setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Modification impossible." });
     }
+  }
+
+  function choisirTheme(preference: PreferenceTheme) {
+    enregistrerPreferenceTheme(preference);
+    setTheme(preference);
   }
 
   async function seDeconnecter() {
@@ -80,6 +87,24 @@ export function Reglages() {
           <Link to="/publication" className="bouton">
             Publication Vinted
           </Link>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Affichage</h2>
+        <p className="secondaire">Auto suit le réglage clair / sombre du téléphone.</p>
+        <div className="segments" role="group" aria-label="Thème">
+          {CHOIX_THEME.map((choix) => (
+            <button
+              key={choix.valeur}
+              type="button"
+              className={choix.valeur === theme ? "bouton bouton--principal" : "bouton"}
+              aria-pressed={choix.valeur === theme}
+              onClick={() => choisirTheme(choix.valeur)}
+            >
+              {choix.libelle}
+            </button>
+          ))}
         </div>
       </section>
 
