@@ -51,7 +51,7 @@
   --rayon: 6px; /* boutons, champs, vignettes */
   --rayon-carte: 8px; /* cartes, encadrés */
   --rayon-badge: 4px;
-  --rayon-rond: 999px; /* pastille du compteur seulement */
+  --rayon-rond: 999px; /* pastilles et bouton flottant */
 
   /* Ombre : réservée aux éléments flottants (listes déroulantes, bulles, barre de sélection) */
   --ombre-flottante: 0 4px 16px rgb(0 0 0 / 0.18);
@@ -850,6 +850,45 @@ select {
   flex: none;
 }
 
+.recherche__ligne {
+  display: flex;
+  gap: var(--e-2);
+}
+
+.recherche__ligne input {
+  flex: 1;
+  min-width: 0;
+}
+
+.recherche__ligne .bouton {
+  flex: none;
+}
+
+/* « + Nouvel article » flottant, au-dessus de la barre de navigation, au pouce (#100). */
+.bouton-flottant {
+  position: fixed;
+  right: max(var(--e-4), env(safe-area-inset-right));
+  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  z-index: 5;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rayon-rond);
+  background: var(--accent);
+  color: var(--accent-texte);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  box-shadow: var(--ombre-flottante);
+}
+
+.bouton-flottant:hover {
+  filter: brightness(1.1);
+}
+
 /* --- Lot 5 : tableau de bord --- */
 .tuiles {
   display: grid;
@@ -1121,6 +1160,36 @@ a {
   margin-bottom: var(--e-4);
 }
 
+.alertes__puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+}
+
+/* Puce d'alerte (#100) : compteur + libellé court, la couleur du groupe en bordure gauche. */
+.alerte-puce {
+  font: inherit;
+  font-size: var(--t-secondaire);
+  font-weight: 600;
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-1) var(--e-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-1);
+  white-space: nowrap;
+  border-radius: var(--rayon);
+  border: 1px solid var(--bordure);
+  border-left: 4px solid var(--badge-a-publier);
+  background: var(--surface);
+  color: var(--texte);
+  cursor: pointer;
+}
+
+.alerte-puce[aria-expanded="true"] {
+  background: var(--accent-doux);
+  border-color: var(--accent);
+}
+
 .alerte {
   border-radius: var(--rayon-carte);
   border: 1px solid var(--bordure);
@@ -1137,23 +1206,9 @@ a {
 }
 
 .alerte__titre {
-  font: inherit;
-  font-weight: 600;
-  color: inherit;
-  background: none;
-  border: none;
-  width: 100%;
-  min-height: var(--hauteur-tactile);
-  padding: var(--e-2) var(--e-4);
-  display: flex;
-  align-items: center;
-  gap: var(--e-3);
-  cursor: pointer;
-  text-align: left;
-}
-
-.alerte__titre > span:last-child {
-  margin-left: auto;
+  font-size: var(--t-corps);
+  margin: 0;
+  padding: var(--e-3) var(--e-4) var(--e-2);
 }
 
 .alerte ul {
@@ -1273,7 +1328,7 @@ a {
 .ligne-affichage {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--e-2);
   margin-top: var(--e-2);
 }

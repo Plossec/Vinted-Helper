@@ -196,37 +196,16 @@ export function ListeArticles() {
     <main className={mode === "detaille" || mode === "mosaique" ? "page page--large" : "page"}>
       <h1>Articles</h1>
       <Alertes />
-      <Link to="/articles/nouveau" className="bouton bouton--principal">
-        + Nouvel article
-      </Link>
-
+      {/* Haut d'écran allégé (#100) : recherche + filtres sur une ligne, tri dans les filtres, « + » flottant. */}
       <div className="recherche">
-        <input
-          type="search"
-          aria-label="Rechercher"
-          placeholder="Rechercher (nom, marque, n° de référence…)"
-          value={etat.filtres.texte}
-          onChange={(e) => filtrer({ texte: e.target.value })}
-        />
-        <div className="champs-ligne champs-ligne--bas">
-          <label className="champ">
-            <span>Trier par</span>
-            <select value={etat.tri} onChange={(e) => setEtat((s) => ({ ...s, tri: e.target.value as Tri }))}>
-              {Object.entries(TRIS).map(([code, libelle]) => (
-                <option key={code} value={code}>
-                  {libelle}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="bouton"
-            aria-label={etat.croissant ? "Ordre croissant" : "Ordre décroissant"}
-            onClick={() => setEtat((s) => ({ ...s, croissant: !s.croissant }))}
-          >
-            {etat.croissant ? "↑" : "↓"}
-          </button>
+        <div className="recherche__ligne">
+          <input
+            type="search"
+            aria-label="Rechercher"
+            placeholder="Nom, marque, n°…"
+            value={etat.filtres.texte}
+            onChange={(e) => filtrer({ texte: e.target.value })}
+          />
           <button
             type="button"
             className="bouton"
@@ -236,19 +215,29 @@ export function ListeArticles() {
             Filtres{nombreFiltres > 0 ? ` (${nombreFiltres})` : ""}
           </button>
         </div>
-        <div className="ligne-affichage">
-          <span className="secondaire">Affichage</span>
-          <SelecteurAffichage
-            mode={mode}
-            onChange={(m) => {
-              setMode(m);
-              ecrireModeAffichage(m);
-            }}
-          />
-        </div>
 
         {filtresOuverts && options && refs && (
           <div className="encadre">
+            <div className="champs-ligne champs-ligne--bas">
+              <label className="champ">
+                <span>Trier par</span>
+                <select value={etat.tri} onChange={(e) => setEtat((s) => ({ ...s, tri: e.target.value as Tri }))}>
+                  {Object.entries(TRIS).map(([code, libelle]) => (
+                    <option key={code} value={code}>
+                      {libelle}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="bouton"
+                aria-label={etat.croissant ? "Ordre croissant" : "Ordre décroissant"}
+                onClick={() => setEtat((s) => ({ ...s, croissant: !s.croissant }))}
+              >
+                {etat.croissant ? "↑" : "↓"}
+              </button>
+            </div>
             <div className="champ">
               <span id="filtre-statuts">Statut {etat.filtres.statuts.length === 0 ? "(tous)" : ""}</span>
               <div className="puces" role="group" aria-labelledby="filtre-statuts">
@@ -334,12 +323,21 @@ export function ListeArticles() {
           </Link>
         </p>
       )}
-      {resultats && (
-        <p className="secondaire">
-          {resultats.length} article{resultats.length > 1 ? "s" : ""}
-          {articles && resultats.length !== articles.length ? ` sur ${articles.length}` : ""}
-        </p>
-      )}
+      <div className="ligne-affichage">
+        <span className="secondaire">
+          {resultats &&
+            `${resultats.length} article${resultats.length > 1 ? "s" : ""}${
+              articles && resultats.length !== articles.length ? ` sur ${articles.length}` : ""
+            }`}
+        </span>
+        <SelecteurAffichage
+          mode={mode}
+          onChange={(m) => {
+            setMode(m);
+            ecrireModeAffichage(m);
+          }}
+        />
+      </div>
       {resultats && (
         <VuesArticles
           articles={resultats}
@@ -367,6 +365,11 @@ export function ListeArticles() {
             Annuler
           </button>
         </div>
+      )}
+      {!selectionActive && (
+        <Link to="/articles/nouveau" className="bouton-flottant" aria-label="Nouvel article" title="Nouvel article">
+          <span aria-hidden="true">+</span>
+        </Link>
       )}
       <p className="section">
         <Link to="/corbeille" className="lien">

@@ -86,3 +86,12 @@ question. Boîte de confirmation du navigateur pour l'instant (boîtes accessibl
 accrochée à l'icône d'Articles. L'onglet parent reste actif sur les écrans secondaires (`client/src/navigation.ts`,
 choix de Claude, *à relire*) : fiche article et vente → Articles ; sorties → Terrain ; frais divers → Tableau ;
 listes, corbeille, publication Vinted → Réglages.
+
+## 13/10/2026 — Liste des articles : haut d'écran allégé (issue #100)
+
+**Décision (utilisateur)** : le choix d'affichage (vignettes, liste, mosaïque, détaillé) reste visible en
+permanence, sur la ligne du nombre d'articles. Alertes en **rangée de puces** (compteur + libellé court) : la puce
+touchée déplie sa liste dessous. Recherche et bouton « Filtres » sur une ligne ; le tri passe en tête du panneau des
+filtres (choix de Claude, *à relire*). « + Nouvel article » devient un bouton rond flottant au-dessus de la barre,
+masqué pendant la sélection pour Vinted. Mesuré à 360 px : premier article à 325 px du haut (≈ 660 avant), trois
+articles visibles sans défiler.
