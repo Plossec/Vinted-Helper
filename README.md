@@ -1,11 +1,11 @@
 # Vinted Helper
 
 Application web (installable sur téléphone) pour gérer les achats en vide-grenier, le stock, les ventes Vinted et la
-rentabilité. Usage personnel, en local sur votre PC, puis plus tard sur un serveur OVH.
+rentabilité. Usage personnel, sur un serveur OVH (accessible partout) ou en local sur votre PC.
 
-> Toutes les fonctionnalités du cahier des charges sont livrées (version 0.7.0). Prochaine étape : la mise en ligne
-> sur OVH ([guide](docs/guides/mise-en-ligne-ovh.md)). Ce README couvre l'installation sur le PC ; les autres guides
-> sont listés à la fin (« Documentation »).
+> Version en cours : voir `CHANGELOG.md` (affichée aussi dans les Réglages). L'application est en ligne sur le serveur
+> OVH ([guide](docs/guides/mise-en-ligne-ovh.md)) ; chaque fusion dans `main` y est déployée automatiquement. Ce
+> README couvre l'installation sur le PC ; les autres guides sont listés à la fin (« Documentation »).
 
 ---
 

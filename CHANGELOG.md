@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Sécurité : une adresse encodée (`/%61pi/…`) ne contourne plus le contrôle de connexion ; un test vérifie que toute
+  l'API exige la connexion (#118).
+- Sauvegarde automatique : une sauvegarde incomplète (échec de pg_dump, archive abîmée) n'est plus gardée comme
+  réussie ; nouvel essai 10 minutes plus tard, anciennes sauvegardes conservées (#117).
+- Le serveur ne s'arrête plus quand la base coupe une connexion inactive (#122).
+- Un écran qui plante affiche un message et un bouton « Recharger » au lieu d'une page blanche ; adresse inconnue :
+  « Page introuvable » (#126).
+- README à jour ; nom réel du serveur retiré du dépôt public, remplacé par un exemple (#129).
+
 ## [1.6.0] — 13/10/2026
 
 ### Ajouté
@@ -110,7 +120,7 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [1.0.0] — 06/10/2026
 
-Mise en ligne sur le serveur OVH validée : l'application est utilisable partout (`https://vps-6b2cf0b2.vps.ovh.net`),
+Mise en ligne sur le serveur OVH validée : l'application est utilisable partout (adresse du type `https://vps-1234abcd.vps.ovh.net`),
 sauvegardée chaque nuit et rapatriée sur le PC.
 
 > Publication automatique sur Vinted **en pause** : Vinted a bloqué la session au premier essai (activité
