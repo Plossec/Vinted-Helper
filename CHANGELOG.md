@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Terrain hors réseau : un achat qui provoque une erreur du serveur est mis de côté après 3 essais (avec le message,
+  « Réessayer » ou « Abandonner ») au lieu de bloquer tous les suivants ; un serveur en redémarrage compte toujours
+  comme une coupure de réseau (#123).
+
+### Ajouté
+- Mise en production : le serveur vérifie que l'application répond après chaque mise à jour ; sinon il remet
+  automatiquement la version précédente et GitHub prévient par e-mail. Guide « Si une mise à jour échoue » (#119).
+
 ## [1.6.1] — 13/10/2026
 
 ### Corrigé
