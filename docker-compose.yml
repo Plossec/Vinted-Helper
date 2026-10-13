@@ -40,6 +40,17 @@ services:
     volumes:
       # Photos des articles : dossier « data/photos » du projet, visible depuis Windows.
       - ./data/photos:/app/data/photos
+    # État affiché par « docker compose ps » : l'application répond et la base est connectée (issue #119).
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/sante').then(async (r) => process.exit(r.ok && (await r.json()).base === 'connectée' ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # Accès HTTPS depuis le téléphone sur le Wi-Fi de la maison (issue #3, docs/guides/telephone-https.md).
   https:

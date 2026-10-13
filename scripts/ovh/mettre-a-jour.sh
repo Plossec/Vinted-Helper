@@ -16,8 +16,70 @@ echo "Sauvegarde : $fichier"
 echo "==> Récupération de la nouvelle version"
 git pull --ff-only
 
-echo "==> Reconstruction et redémarrage"
-docker compose up -d --build
-docker image prune -f > /dev/null
-docker compose ps
-echo "Version en ligne : $(grep '"version"' package.json | head -1 | cut -d'"' -f4)"
+# ⚠️ Tout ce qui précède doit rester identique, octet pour octet : le script en cours (ancienne version) poursuit sa
+# lecture dans le nouveau fichier juste après « git pull --ff-only ». La suite est faite de fonctions, lues en entier
+# par bash avant d'être exécutées (dernière ligne).
+# Issue #119 : la nouvelle version doit répondre (/api/sante, base connectée), sinon retour automatique à la dernière
+# version qui a répondu ; si ce retour échoue aussi : guide docs/guides/mise-en-ligne-ovh.md, « Si une mise à jour
+# échoue ». Code de sortie : 0 en ligne ; 1 nouvelle version refusée, ancienne remise en ligne ; 2 site à réparer.
+
+VERSION_SAINE=sauvegardes/avant-mise-a-jour/version-en-ligne
+
+# L'application répond-elle, base connectée ? (vérifié dans le conteneur : marche aussi pour les anciennes versions)
+repond() {
+  docker compose exec -T app node -e "fetch('http://127.0.0.1:3000/api/sante').then(async (r) => process.exit(r.ok && (await r.json()).base === 'connectée' ? 0 : 1)).catch(() => process.exit(1))" > /dev/null 2>&1
+}
+
+# Attend une réponse pendant 3 minutes au plus, puis la confirme 15 s plus tard (pas de redémarrage en boucle).
+attendre_reponse() {
+  local essai
+  for essai in $(seq 36); do # 36 × 5 s
+    if repond; then
+      sleep 15
+      repond && return 0
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+reconstruire() {
+  docker compose up -d --build && attendre_reponse
+}
+
+mettre_en_ligne() {
+  local nouvelle saine
+  nouvelle="$(git rev-parse HEAD)"
+  # Dernière version qui a répondu ; à défaut (premier passage), celle d'avant « git pull ».
+  saine="$(cat "$VERSION_SAINE" 2> /dev/null || git rev-parse 'HEAD@{1}')"
+
+  echo "==> Reconstruction et redémarrage"
+  if reconstruire; then
+    docker image prune -f > /dev/null
+    docker compose ps
+    echo "$nouvelle" > "$VERSION_SAINE"
+    echo "Version en ligne : $(grep '"version"' package.json | head -1 | cut -d'"' -f4)"
+    return 0
+  fi
+
+  echo "!!! La nouvelle version ne répond pas. Derniers journaux de l'application :"
+  docker compose logs --tail 40 app || true
+  if [ "$saine" = "$nouvelle" ]; then
+    echo "!!! Aucune version précédente connue : voir docs/guides/mise-en-ligne-ovh.md, « Si une mise à jour échoue »."
+    return 2
+  fi
+  echo "==> Retour automatique à la version précédente (${saine:0:7})"
+  git reset --hard "$saine"
+  if reconstruire; then
+    docker compose ps
+    echo "$saine" > "$VERSION_SAINE"
+    echo "Retour effectué : la version précédente est en ligne. La nouvelle (${nouvelle:0:7}) n'est PAS en ligne :"
+    echo "corrigez-la, puis fusionnez le correctif (nouveau déploiement)."
+    return 1
+  fi
+  echo "!!! Le retour automatique a échoué : le site ne répond pas."
+  echo "!!! Suivez docs/guides/mise-en-ligne-ovh.md, « Si une mise à jour échoue » (sauvegarde : $fichier)."
+  return 2
+}
+
+mettre_en_ligne

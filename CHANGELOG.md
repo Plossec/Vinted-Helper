@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Mise en production : le serveur vérifie que l'application répond après chaque mise à jour ; sinon il remet
+  automatiquement la version précédente et GitHub prévient par e-mail. Guide « Si une mise à jour échoue » (#119).
+
 ## [1.6.1] — 13/10/2026
 
 ### Corrigé
