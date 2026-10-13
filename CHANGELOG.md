@@ -5,7 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Liste des articles : sélection pour Vinted aussi avec le filtre « Erreur », pour republier plusieurs articles
+  d'un coup (#95).
+
 ### Corrigé
+- Graphique du tableau de bord : théorique juste quand le réalisé est négatif (trésorerie), contour lisible (contraste)
+  et mêmes informations dans la bulle, le tableau et pour les lecteurs d'écran (#91).
+- Tableau de bord : nettoyage interne de l'API, sans effet visible (#96).
 - Un **essai** de publication relancé depuis « Erreur » laisse l'article en Erreur ; le retour à « À publier »
   d'une vraie demande et son ajout à la file se font d'un seul bloc (#92).
 - Coller le lien de l'annonce sur un article en Erreur (publiée à la main) le fait passer En ligne (#93).

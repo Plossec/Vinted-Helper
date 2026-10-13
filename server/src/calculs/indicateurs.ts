@@ -88,7 +88,8 @@ export interface PostesTresorerie {
   fraisDivers: number;
 }
 
-const postesVides = (): PostesTresorerie => ({
+/** Postes d'un mois sans mouvement (aussi utilisé par le service du tableau de bord, issue #96). */
+export const postesVides = (): PostesTresorerie => ({
   encaisse: 0,
   achats: 0,
   essence: 0,

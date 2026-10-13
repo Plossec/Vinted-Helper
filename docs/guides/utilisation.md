@@ -73,8 +73,10 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
   fois la vente finalisée, elle passe dans le réalisé (au mois de la finalisation).
 - **Trésorerie** : l'argent réellement entré et sorti, à la date de chaque mouvement ; son calcul est détaillé dans
   la tuile (encaissé, achats, essence, emballages, boosts, frais divers).
-- **Graphique** : barre foncée = réalisé, partie claire au-dessus = ventes en cours (théorique). Pour la trésorerie,
-  la partie claire est l'argent que Vinted doit encore verser. « Voir le tableau » donne les montants mois par mois.
+- **Graphique** : barre foncée = réalisé ; le **théorique** (avec les ventes en cours) est entouré d'un contour, la
+  partie qui dépasse au-dessus est claire. Quand le théorique est à l'intérieur de la barre (ex. trésorerie négative
+  qui remonte grâce aux ventes en cours), un trait pointillé marque son niveau. Pour la trésorerie, le théorique
+  ajoute l'argent que Vinted doit encore verser. « Voir le tableau » donne les montants mois par mois.
 - **Stock** : par statut, le coût total, le prix affiché et le nombre d'articles. Seules les années où il y a de
   l'activité sont proposées.
 - L'essence d'une sortie est partagée entre tous ses articles, vendus ou non : celle des invendus est dans la
