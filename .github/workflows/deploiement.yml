@@ -57,3 +57,30 @@ jobs:
           hote="$(printf '%s' "$HOTE_CONNU" | head -n 1 | cut -d' ' -f1)"
           # La clé ne peut que lancer la mise à jour (commande imposée par le serveur) : aucune commande n'est envoyée.
           ssh -i ~/.ssh/deploiement -o BatchMode=yes -o IdentitiesOnly=yes "deploiement@$hote"
+
+  # Tag de version (issue #114) : après une mise en production réussie, crée « vX.Y.Z » d'après le package.json racine
+  # s'il n'existe pas encore. Pas de tag si le déploiement a échoué ou a été annulé (retour automatique, #119).
+  etiqueter:
+    name: Créer le tag de version
+    needs: deployer
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # seulement ce job : pousser le tag
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag vX.Y.Z
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          tag="v$version"
+          if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
+            echo "Le tag $tag existe déjà : rien à faire."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Version $version" "$GITHUB_SHA"
+          git push origin "$tag"
+          echo "Tag $tag créé sur ${GITHUB_SHA:0:7}."

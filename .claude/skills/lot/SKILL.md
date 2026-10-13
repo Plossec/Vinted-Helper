@@ -53,6 +53,8 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
 - Documentation, selon le cas :
   - guide utilisateur concerné (`docs/guides/`) ;
   - `CHANGELOG.md`, section `[Non publié]`, en langage simple, avec le numéro de l'issue ;
+  - **version de la PR** : procédure `/version` (numéro selon la règle 1.x, CHANGELOG daté, `package.json`,
+    architecture), en dernier commit de la PR ;
   - décision datée dans le fichier du sujet (`docs/decisions/`) ou `00-outillage-et-methode.md` pour la méthode ;
   - cahier des charges, **avec l'accord de l'utilisateur** ;
   - `docs/architecture.md` si une table, un module, un service ou un outil externe change.
@@ -62,6 +64,6 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
 - Push, puis PR **`#N — <Verbe> …`** avec `Closes #N` (une PR pour plusieurs issues : `#A, #B — …`, un `Closes`
   par issue).
 - Surveille la PR ; CI rouge → corrige et repousse. **Fusionne** quand la CI est verte.
-- Message court à l'utilisateur : ce qui change, ce qu'il doit faire (mettre à jour l'application, `git pull`,
-  recharger l'extension…), étapes pas à pas.
-- Une version (`/version`) n'est faite que sur demande.
+- Message court à l'utilisateur : ce qui change, la version (le tag `vX.Y.Z` est créé par GitHub après la mise en
+  production), ce qu'il doit faire (mettre à jour l'application, `git pull`, recharger l'extension…), étapes pas à
+  pas.
