@@ -12,7 +12,12 @@ $("formulaire").addEventListener("submit", async (e) => {
   try {
     adresse = new URL($("adresse").value.trim()).origin;
   } catch {
-    return message("Adresse invalide (exemple : https://vps-6b2cf0b2.vps.ovh.net).", false);
+    return message("Adresse invalide (exemple : https://vps-1234abcd.vps.ovh.net).", false);
+  }
+  // Le jeton et les photos ne circulent jamais en clair (issue #128) : http seulement pour l'application sur ce PC.
+  const { protocol, hostname } = new URL(adresse);
+  if (protocol !== "https:" && !(protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1"))) {
+    return message("L'adresse doit commencer par https:// (http:// accepté seulement pour localhost).", false);
   }
   const jeton = $("jeton").value.trim();
   if (!jeton) return message("Jeton manquant.", false);

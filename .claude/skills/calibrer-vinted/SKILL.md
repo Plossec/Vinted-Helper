@@ -46,7 +46,8 @@ relevée (fragment proposé par le sous-agent : `data-testid`, `role`, textes, v
 Augmente la version dans `outils/extension-vinted/manifest.json` **et** `outils/extension-vinted/package.json`
 (même numéro ; correctif → dernier chiffre, comportement nouveau → chiffre du milieu). Sans cela, Chrome affiche
 l'ancienne version et l'utilisateur ne sait pas si la mise à jour est prise. Ajoute une ligne à la section
-`[Non publié]` de `CHANGELOG.md` (Corrigé), en langage simple.
+`[Non publié]` de `CHANGELOG.md` (Corrigé), en langage simple, puis applique `/version` (version de
+l'application, en général le dernier chiffre) : le tag est créé par GitHub après la fusion.
 
 ## 7. Livraison
 Commit en français à l'impératif, push, PR `#N — Corrige …` avec `Closes #N`. Fusionne quand les vérifications

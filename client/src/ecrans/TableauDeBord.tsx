@@ -72,12 +72,11 @@ interface Tableau {
   duMois: Periode;
   deLAnnee: Periode;
   /** Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85). */
-  enCours: { duMois: EnCours; deLAnnee: EnCours };
+  enCours: { duMois: EnCours };
   /** Réalisé + en cours, calculé par le serveur. */
-  theorique: { duMois: EnCours; deLAnnee: EnCours };
+  theorique: { duMois: EnCours };
   serie: (Periode & {
     mois: string;
-    enCours: EnCours;
     theorique: { chiffreAffaires: number; beneficeRealise: number; tresorerie: number };
   })[];
   stock: {
@@ -247,8 +246,6 @@ export function TableauDeBord() {
               points={tableau.serie.map((p) => ({
                 mois: p.mois,
                 valeur: p[mesure],
-                // Complément : ventes en cours (bénéfice en cours ; crédits attendus = CA en cours pour la trésorerie).
-                complement: mesure === "beneficeRealise" ? p.enCours.benefice : p.enCours.chiffreAffaires,
                 theorique: p.theorique[mesure],
               }))}
             />

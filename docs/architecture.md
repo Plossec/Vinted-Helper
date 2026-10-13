@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.5.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.7.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -25,7 +25,7 @@ flowchart LR
 
   gemini["Google Gemini<br/>(annonces, étiquettes)"]
   vinted["vinted.fr"]
-  gh["GitHub Actions<br/>vérification + déploiement"]
+  gh["GitHub Actions<br/>vérification, déploiement,<br/>tag de version"]
 
   tel -- HTTPS --> caddy
   pc -- HTTPS --> caddy

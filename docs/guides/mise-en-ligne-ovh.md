@@ -151,8 +151,9 @@ sudo docker compose start app
 
 Une fois activé, **chaque fusion dans `main`** met le serveur à jour toute seule : GitHub vérifie d'abord le code
 (types, lint, tests, construction) ; si tout est vert, il lance sur le serveur le script de mise à jour ci-dessous
-(sauvegarde de la base, nouvelle version, redémarrage). Suivi : onglet **Actions** du dépôt GitHub ; en cas d'échec,
-GitHub envoie un e-mail et l'ancienne version reste en ligne.
+(sauvegarde de la base, nouvelle version, redémarrage), puis vérifie que l'application répond. Suivi : onglet
+**Actions** du dépôt GitHub. Si la nouvelle version ne répond pas, le serveur **remet tout seul la version
+précédente** en ligne et GitHub envoie un e-mail d'échec : voir « Si une mise à jour échoue » ci-dessous.
 
 Activation (une seule fois) :
 
@@ -170,6 +171,9 @@ Activation (une seule fois) :
 3. Test : onglet **Actions** → « Vérification et déploiement » → **Run workflow**. Résultat attendu : deux coches
    vertes ; sur le serveur, le journal `/var/log/vinted-helper-deploiement.log` se termine par `Version en ligne : …`.
 
+Après une mise en production réussie, GitHub crée aussi le **tag de version** (`v1.7.0`…), visible dans l'onglet
+**Tags** du dépôt : plus rien à faire à la main.
+
 Pour désactiver : supprimez le secret `DEPLOIEMENT_CLE` sur GitHub.
 
 ## Mettre à jour l'application à la main
@@ -182,9 +186,38 @@ cd /opt/vinted-helper
 sudo bash scripts/ovh/mettre-a-jour.sh
 ```
 
-Le script sauvegarde la base, récupère la nouvelle version, reconstruit et redémarre (quelques minutes). Résultat
-attendu : `Version en ligne : X.Y.Z`. Sur le téléphone, le bandeau « Nouvelle version disponible — Mettre à jour »
+Le script sauvegarde la base, récupère la nouvelle version, reconstruit, redémarre et vérifie que l'application
+répond (quelques minutes). Résultat attendu : `Version en ligne : X.Y.Z`. Sur le téléphone, le bandeau « Nouvelle version disponible — Mettre à jour »
 apparaît : touchez « Mettre à jour ».
+
+## Si une mise à jour échoue
+
+Après chaque mise à jour, le script vérifie pendant 3 minutes que l'application répond (base connectée).
+
+- **Elle répond** : `Version en ligne : X.Y.Z`, rien à faire.
+- **Elle ne répond pas** : le script remet **automatiquement la dernière version qui marchait**, puis s'arrête en
+  échec (e-mail de GitHub). Le message se termine par `Retour effectué : la version précédente est en ligne`.
+  Le site fonctionne ; la nouvelle version n'est pas en ligne tant qu'un correctif n'est pas fusionné (demandez-le
+  à Claude en lui donnant le journal : onglet **Actions** → le déploiement en échec → « Mise à jour du serveur »).
+- **Le retour automatique a échoué aussi** (message `Le retour automatique a échoué`) : le site ne répond pas.
+  Réparation à la main, dans l'ordre (sur le serveur, `ssh ubuntu@vps-1234abcd.vps.ovh.net`, puis
+  `cd /opt/vinted-helper`) :
+  1. Voir pourquoi : `sudo docker compose logs --tail 100 app` (copiez le résultat pour Claude).
+  2. Lister les versions : `git log --oneline -10`, et revenir à une version qui marchait (par exemple la ligne
+     « Version 1.6.1 ») : `sudo git reset --hard <les 7 caractères de la ligne>`, puis
+     `sudo docker compose up -d --build`.
+  3. Si l'application ne répond toujours pas (une migration de la base peut en être la cause), restaurez la base
+     d'avant la mise à jour ; le nom du fichier est donné dans le message d'échec (sinon :
+     `ls sauvegardes/avant-mise-a-jour/`, le plus récent) :
+
+     ```bash
+     sudo docker compose stop app
+     gunzip -c sauvegardes/avant-mise-a-jour/AAAA-MM-JJ_HH-MM-SS.sql.gz | sudo docker compose exec -T sauvegarde psql --quiet -v ON_ERROR_STOP=1
+     sudo docker compose start app
+     ```
+  4. Vérifiez : `sudo docker compose ps` doit afficher `healthy` pour `app`.
+
+  ⚠️ La restauration de la base n'est jamais automatique : elle effacerait les saisies faites depuis la sauvegarde.
 
 ## Autres opérations
 

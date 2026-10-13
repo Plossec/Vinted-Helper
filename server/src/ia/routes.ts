@@ -51,5 +51,8 @@ export function routesIA(
     return lireEtiquette(base, ia, utilisateurDe(requete).id, requete.body);
   });
 
-  app.get("/api/prompts/defaut", async () => PROMPTS_DEFAUT);
+  app.get("/api/prompts/defaut", async (requete) => {
+    utilisateurDe(requete);
+    return PROMPTS_DEFAUT;
+  });
 }

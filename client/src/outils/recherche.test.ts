@@ -6,6 +6,7 @@ import {
   filtrerEtTrier,
   lireFiltres,
   nombreFiltresActifs,
+  selectionVintedPossible,
   STATUTS_PAR_DEFAUT,
 } from "./recherche.js";
 
@@ -104,6 +105,14 @@ describe("filtres", () => {
     const anciens = STATUTS_PAR_DEFAUT.filter((s) => s !== "erreur_publication");
     expect(lireFiltres({ ...FILTRES_VIDES, statuts: anciens }).statuts).toEqual(STATUTS_PAR_DEFAUT);
     expect(lireFiltres({ ...FILTRES_VIDES, statuts: ["en_ligne"] }).statuts).toEqual(["en_ligne"]);
+  });
+
+  it("sélection pour Vinted : filtre « À publier » et/ou « Erreur » seulement (#95)", () => {
+    expect(selectionVintedPossible(["a_publier"])).toBe(true);
+    expect(selectionVintedPossible(["erreur_publication"])).toBe(true);
+    expect(selectionVintedPossible(["a_publier", "erreur_publication"])).toBe(true);
+    expect(selectionVintedPossible(["a_publier", "en_ligne"])).toBe(false);
+    expect(selectionVintedPossible([])).toBe(false);
   });
 
   it("relit les filtres mémorisés, et revient au défaut pour l'ancien format", () => {

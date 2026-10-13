@@ -29,7 +29,8 @@ puis clique « Ajouter ». L'article passe ensuite **En ligne** et le lien de l'
 1. Dans l'application en ligne : **Réglages → Publication Vinted → Créer un jeton** (ou « Remplacer le jeton »).
    Copiez le jeton (`vh_…`) : il n'est affiché qu'une fois.
 2. Cliquez l'icône de l'extension → **Réglages**. Saisissez :
-   - **Adresse de l'application** : `https://vps-6b2cf0b2.vps.ovh.net` ;
+   - **Adresse de l'application** : celle de votre serveur, celle que vous ouvrez sur le téléphone (exemple :
+     `https://vps-1234abcd.vps.ovh.net`) ;
    - **Jeton** : celui copié à l'étape 1.
 3. Cliquez **Enregistrer et tester**. Chrome demande l'autorisation d'accéder à l'adresse : acceptez.
 4. Résultat attendu : « Connexion réussie : N annonce(s) en attente. » L'écran Publication Vinted de l'application
@@ -50,8 +51,9 @@ calcul) est utilisé.
 
 ## 5. Publier
 
-- **Plusieurs articles** : Articles → Filtres → Statut « À publier » → **Sélectionner pour Vinted** → cochez →
-  **Publier sur Vinted (N)**.
+- **Plusieurs articles** : Articles → Filtres → Statut « À publier » et/ou « Erreur » (seulement ces statuts) →
+  **Sélectionner pour Vinted** → cochez → **Publier sur Vinted (N)**. Les articles en Erreur repassent À publier
+  (sauf en mode essai, qui ne change rien).
 - **Un article** : sur sa fiche, bouton **Publier sur Vinted**.
 - **Suivi** : Réglages → Publication Vinted : file d'attente, état de chaque article (en attente, en cours, publié,
   essai, erreur), bouton Annuler tant qu'il n'est pas commencé.

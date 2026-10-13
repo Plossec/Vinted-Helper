@@ -38,3 +38,12 @@ ne changent pas. Décisions (utilisateur) :
 - stock par statut : colonnes coût total et prix affiché avant la quantité.
 Choix de Claude (*à relire*) : sur téléphone, les tuiles du haut prennent toute la largeur ; complément de bénéfice
 dessiné seulement s'il est positif (la bulle et le tableau donnent toujours le théorique).
+
+## 13/10/2026 — Graphique et API du tableau de bord après la revue de code (#91, #96)
+
+- Graphique : le théorique est dessiné par un **contour plein** de 0 à sa valeur (contraste ≥ 3:1), avec une partie
+  claire seulement là où il dépasse le réalisé vers le haut ; s'il tombe à l'intérieur de la barre réalisée
+  (trésorerie négative qui remonte), un trait pointillé couleur du fond marque son niveau. Bulle, tableau et lecteur
+  d'écran affichent le théorique dès qu'il diffère du réalisé.
+- API : le total d'année du **réalisé** (`deLAnnee`) est gardé (§5.9, comparatif annuel envisagé) ; ceux du
+  théorique et des ventes en cours, plus affichés depuis #88, sont retirés.

@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { Connexion } from "./ecrans/Connexion.js";
 import { Disposition } from "./ecrans/Disposition.js";
+import { ErreurAffichage } from "./ecrans/ErreurAffichage.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
@@ -18,23 +19,30 @@ import { enregistrerServiceWorker } from "./pwa.js";
 import "./styles.css";
 
 const routeur = createBrowserRouter([
-  { path: "/connexion", element: <Connexion /> },
+  { path: "/connexion", element: <Connexion />, errorElement: <ErreurAffichage /> },
   {
     element: <Disposition />,
+    errorElement: <ErreurAffichage />,
     children: [
-      { index: true, element: <ListeArticles /> },
-      { path: "articles/nouveau", element: <FicheArticle /> },
-      { path: "articles/:id", element: <FicheArticle /> },
-      { path: "terrain", element: <Terrain /> },
-      { path: "tableau", element: <TableauDeBord /> },
-      { path: "sorties", element: <ListeSorties /> },
-      { path: "sorties/:id", element: <FicheSortie /> },
-      { path: "ventes/:id", element: <FicheVente /> },
-      { path: "frais", element: <FraisDivers /> },
-      { path: "corbeille", element: <Corbeille /> },
-      { path: "listes", element: <Listes /> },
-      { path: "publication", element: <PublicationVinted /> },
-      { path: "reglages", element: <Reglages /> },
+      {
+        // Erreur dans un écran : message à la place de l'écran, la navigation reste disponible.
+        errorElement: <ErreurAffichage />,
+        children: [
+          { index: true, element: <ListeArticles /> },
+          { path: "articles/nouveau", element: <FicheArticle /> },
+          { path: "articles/:id", element: <FicheArticle /> },
+          { path: "terrain", element: <Terrain /> },
+          { path: "tableau", element: <TableauDeBord /> },
+          { path: "sorties", element: <ListeSorties /> },
+          { path: "sorties/:id", element: <FicheSortie /> },
+          { path: "ventes/:id", element: <FicheVente /> },
+          { path: "frais", element: <FraisDivers /> },
+          { path: "corbeille", element: <Corbeille /> },
+          { path: "listes", element: <Listes /> },
+          { path: "publication", element: <PublicationVinted /> },
+          { path: "reglages", element: <Reglages /> },
+        ],
+      },
     ],
   },
 ]);

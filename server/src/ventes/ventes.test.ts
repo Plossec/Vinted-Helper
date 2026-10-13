@@ -1,6 +1,10 @@
 // Ventes, colis, retours, sorties du stock, boosts, frais divers et réglages (lot 3) — critères du §8.
+import { eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { Base } from "../base/connexion.js";
+import { article, utilisateur, vente } from "../base/schema.js";
 import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { creerVente } from "./service.js";
 
 interface ArticleLu {
   id: string;
@@ -189,6 +193,45 @@ describe("ventes et calculs", () => {
       date: "2030-01-01T00:00:00Z",
     });
     expect(futur.statusCode).toBe(400);
+  });
+
+  it("#120 — statut changé par une autre requête entre la lecture et l'écriture : vente refusée, rien d'enregistré", async () => {
+    const a = await enLigne(900);
+    const [u] = await t.base.select({ id: utilisateur.id }).from(utilisateur);
+    // Simule une requête concurrente (double tape) : l'article a été lu En ligne, puis une autre requête le vend
+    // avant notre écriture. PGlite n'ayant qu'une connexion, la course est reproduite en glissant cette écriture
+    // concurrente au moment où la vente est insérée (les requêtes passent dans l'ordre d'envoi).
+    const concurrente = new Proxy(t.base, {
+      get(cible, cle, recepteur) {
+        if (cle !== "transaction") return Reflect.get(cible, cle, recepteur);
+        return (fn: (tx: Base) => Promise<unknown>) =>
+          cible.transaction((tx) => {
+            const inserer = tx.insert.bind(tx);
+            const espion = new Proxy(tx, {
+              get(c, k, r) {
+                if (k !== "insert") return Reflect.get(c, k, r);
+                return (table: Parameters<typeof inserer>[0]) => {
+                  if (table === vente)
+                    void c.execute(sql`update article set statut = 'a_expedier' where id = ${a}`).then();
+                  return inserer(table);
+                };
+              },
+            });
+            return fn(espion);
+          });
+      },
+    });
+    await expect(
+      creerVente(
+        concurrente,
+        u?.id ?? "",
+        { articleIds: [a], montantCredite: 900, emballage: null, dateVente: t.horloge.maintenant() },
+        t.horloge.maintenant(),
+      ),
+    ).rejects.toThrow("vient de changer de statut");
+    expect(await t.base.select().from(vente)).toHaveLength(0);
+    const [lu] = await t.base.select({ statut: article.statut }).from(article).where(eq(article.id, a));
+    expect(lu?.statut).toBe("en_ligne");
   });
 
   it("emballage par défaut modifiable dans les Réglages et dans la vente", async () => {

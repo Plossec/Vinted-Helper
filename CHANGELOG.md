@@ -5,6 +5,58 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.7.0] — 13/10/2026
+
+### Ajouté
+- Mise en production : le serveur vérifie que l'application répond après chaque mise à jour ; sinon il remet
+  automatiquement la version précédente et GitHub prévient par e-mail. Guide « Si une mise à jour échoue » (#119).
+
+### Modifié
+- Versions : chaque mise à jour reçoit son numéro de version, et le tag est créé automatiquement par GitHub après la
+  mise en production (plus rien à faire à la main) (#114).
+
+### Corrigé
+- Terrain hors réseau : un achat qui provoque une erreur du serveur est mis de côté après 3 essais (avec le message,
+  « Réessayer » ou « Abandonner ») au lieu de bloquer tous les suivants ; un serveur en redémarrage compte toujours
+  comme une coupure de réseau (#123).
+- Mise en production : le service de sauvegarde est redémarré quand son script change ; sans cela, le correctif des
+  sauvegardes de la 1.6.1 (#117) n'était pas encore actif sur le serveur (#114).
+
+## [1.6.1] — 13/10/2026
+
+### Corrigé
+- Ventes : un même article ne peut plus être vendu deux fois (double tape, nouvel envoi) ; « Confirmer » est désactivé
+  pendant l'envoi (#120).
+- Publication Vinted : deux appels simultanés de l'extension ne peuvent plus prendre la même demande (risque
+  d'annonce en double), et le résultat est enregistré d'un seul bloc (#121).
+- Publication Vinted : le lien renvoyé par l'extension doit être une adresse https de Vinted ; l'extension (version
+  1.8.1) refuse une adresse d'application en `http://`, sauf localhost (#128).
+- Sécurité : une adresse encodée (`/%61pi/…`) ne contourne plus le contrôle de connexion ; un test vérifie que toute
+  l'API exige la connexion (#118).
+- Sauvegarde automatique : une sauvegarde incomplète (échec de pg_dump, archive abîmée) n'est plus gardée comme
+  réussie ; nouvel essai 10 minutes plus tard, anciennes sauvegardes conservées (#117).
+- Le serveur ne s'arrête plus quand la base coupe une connexion inactive (#122).
+- Un écran qui plante affiche un message et un bouton « Recharger » au lieu d'une page blanche ; adresse inconnue :
+  « Page introuvable » (#126).
+- README à jour ; nom réel du serveur retiré du dépôt public, remplacé par un exemple (#129).
+
+## [1.6.0] — 13/10/2026
+
+### Ajouté
+- Liste des articles : sélection pour Vinted aussi avec le filtre « Erreur », pour republier plusieurs articles
+  d'un coup (#95).
+
+### Corrigé
+- Graphique du tableau de bord : théorique juste quand le réalisé est négatif (trésorerie), contour lisible (contraste)
+  et mêmes informations dans la bulle, le tableau et pour les lecteurs d'écran (#91).
+- Tableau de bord : nettoyage interne de l'API, sans effet visible (#96).
+- Un **essai** de publication relancé depuis « Erreur » laisse l'article en Erreur ; le retour à « À publier »
+  d'une vraie demande et son ajout à la file se font d'un seul bloc (#92).
+- Coller le lien de l'annonce sur un article en Erreur (publiée à la main) le fait passer En ligne (#93).
+- La fiche d'un article en Erreur affiche le message de la vraie publication, pas celui d'un essai (#94).
+- Contours des champs plus visibles (au soleil) et pastille d'alerte plus lisible en thème sombre (#101).
+- Liens, boutons des photos, puces de filtre, tri et bouton ⓘ : zones à toucher d'au moins 48 px (#102).
+
 ## [1.5.0] — 08/10/2026
 
 ### Modifié
@@ -93,7 +145,7 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [1.0.0] — 06/10/2026
 
-Mise en ligne sur le serveur OVH validée : l'application est utilisable partout (`https://vps-6b2cf0b2.vps.ovh.net`),
+Mise en ligne sur le serveur OVH validée : l'application est utilisable partout (adresse du type `https://vps-1234abcd.vps.ovh.net`),
 sauvegardée chaque nuit et rapatriée sur le PC.
 
 > Publication automatique sur Vinted **en pause** : Vinted a bloqué la session au premier essai (activité

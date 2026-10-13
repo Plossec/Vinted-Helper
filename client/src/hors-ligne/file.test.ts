@@ -83,6 +83,36 @@ describe("file d'attente hors réseau", () => {
     await envoyerFile(stockage, ensuite.envoyer);
     expect(ensuite.envois).toEqual([]);
   });
+
+  it("#123 — erreur 500 répétée : 3 essais, puis mis de côté avec le message ; les suivants partent", async () => {
+    const stockage = await fileAvec(element("a", 1), element("b", 2));
+    const cinqCents: ResultatEnvoi = { etat: "serveur", message: "Erreur interne du serveur." };
+    // Essais 1 et 2 : on s'arrête (comme sans réseau), rien n'est mis de côté.
+    for (const essai of [1, 2]) {
+      const { envoyer, envois } = envoyeurSimule(cinqCents);
+      expect(await envoyerFile(stockage, envoyer)).toBe("reseau");
+      expect(envois).toEqual(["a"]);
+      const [a] = await listerDansLOrdre(stockage);
+      expect([a?.erreur, a?.echecsServeur]).toEqual([null, essai]);
+    }
+    // 3ᵉ essai : « a » est mis de côté, « b » part.
+    const troisieme = envoyeurSimule(cinqCents);
+    expect(await envoyerFile(stockage, troisieme.envoyer)).toBe("termine");
+    expect(troisieme.envois).toEqual(["a", "b"]);
+    const restants = await listerDansLOrdre(stockage);
+    expect(restants.map((e) => [e.cle, e.erreur])).toEqual([
+      ["a", "Erreur du serveur après 3 essais : Erreur interne du serveur."],
+    ]);
+  });
+
+  it("#123 — une coupure de réseau entre deux erreurs 500 ne remet pas le compteur à zéro, un envoi réussi l'efface", async () => {
+    const stockage = await fileAvec(element("a", 1));
+    await envoyerFile(stockage, envoyeurSimule({ etat: "serveur", message: "x" }).envoyer);
+    await envoyerFile(stockage, envoyeurSimule({ etat: "reseau" }).envoyer);
+    expect((await listerDansLOrdre(stockage))[0]?.echecsServeur).toBe(1);
+    expect(await envoyerFile(stockage, envoyeurSimule().envoyer)).toBe("termine");
+    expect(await stockage.lister()).toEqual([]);
+  });
 });
 
 describe("interpreterReponse", () => {
@@ -93,6 +123,11 @@ describe("interpreterReponse", () => {
     expect(await interpreterReponse(reponse(201))).toEqual({ etat: "envoye" });
     expect(await interpreterReponse(reponse(401))).toEqual({ etat: "connexion" });
     expect(await interpreterReponse(reponse(502))).toEqual({ etat: "reseau" });
+    expect(await interpreterReponse(reponse(503))).toEqual({ etat: "reseau" });
+    expect(await interpreterReponse(reponse(500, { erreur: "Erreur interne du serveur." }))).toEqual({
+      etat: "serveur",
+      message: "Erreur interne du serveur.",
+    });
     expect(await interpreterReponse(reponse(400, { erreur: "Prix : obligatoire." }))).toEqual({
       etat: "refuse",
       message: "Prix : obligatoire.",

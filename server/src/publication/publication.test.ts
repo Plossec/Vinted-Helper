@@ -163,9 +163,67 @@ describe("publication Vinted", () => {
       message: expect.stringMatching(/Interrompue/),
     });
     expect(
-      (await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url: "x" }))
-        .statusCode,
+      (
+        await programme("POST", `/api/programme/publications/${id}/resultat`, {
+          resultat: "publie",
+          url: "https://www.vinted.fr/items/1-jean",
+        })
+      ).statusCode,
     ).toBe(409);
+  });
+
+  it("#121 — deux appels simultanés à « suivante » : une seule demande prise", async () => {
+    const a = await article();
+    const b = await article();
+    await requete("POST", "/api/publications", { articleIds: [a.id, b.id], essai: false });
+    const reponses = await Promise.all([
+      programme("GET", "/api/programme/suivante"),
+      programme("GET", "/api/programme/suivante"),
+    ]);
+    const prises = reponses.map((r) => r.json<{ publication: { id: string } | null }>().publication);
+    expect(prises.filter((p) => p !== null)).toHaveLength(1);
+    const etats = (await requete("GET", "/api/publications")).json<{ publications: { etat: string }[] }>();
+    expect(etats.publications.map((p) => p.etat).sort()).toEqual(["en_attente", "en_cours"]);
+  });
+
+  it("#121 — résultat envoyé deux fois : le second est refusé, l'article passe une seule fois En ligne", async () => {
+    const a = await article();
+    const id = await prendre(a.id, false);
+    const url = "https://www.vinted.fr/items/123-jean";
+    const reponses = await Promise.all([
+      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+    ]);
+    expect(reponses.map((r) => r.statusCode).sort()).toEqual([200, 409]);
+    const lu = (await requete("GET", `/api/articles/${a.id}`)).json<{
+      statut: string;
+      historiqueStatuts: { vers: string }[];
+    }>();
+    expect(lu.statut).toBe("en_ligne");
+    expect(lu.historiqueStatuts.filter((h) => h.vers === "en_ligne")).toHaveLength(1);
+  });
+
+  it("#128 — lien renvoyé par l'extension : seule une adresse https de Vinted est acceptée", async () => {
+    const a = await article();
+    const id = await prendre(a.id, false);
+    for (const url of ["https://hameconnage.example/items/1", "http://www.vinted.fr/items/1", "", "pas un lien"]) {
+      const r = await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url });
+      expect(r.statusCode, url).toBe(400);
+    }
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "a_publier",
+      urlVinted: null,
+    });
+    const ok = await programme("POST", `/api/programme/publications/${id}/resultat`, {
+      resultat: "publie",
+      url: "https://www.vinted.fr/items/123-jean",
+    });
+    expect(ok.statusCode).toBe(200);
+  });
+
+  it("#121 — résultat d'une publication inconnue : 404", async () => {
+    const r = await programme("POST", `/api/programme/publications/${randomUUID()}/resultat`, { resultat: "essai" });
+    expect(r.statusCode).toBe(404);
   });
 
   /** Demande une publication et la fait prendre par l'extension ; renvoie l'identifiant de la demande. */
@@ -236,6 +294,34 @@ describe("publication Vinted", () => {
       statut: "erreur_publication",
       erreurPublication: expect.stringMatching(/Interrompue/),
     });
+  });
+
+  it("statut Erreur (#92, #94) : un essai relancé depuis Erreur laisse l'article en Erreur, avec le message de la vraie publication", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false), "Message de la vraie publication.");
+    // Essai demandé depuis Erreur : accepté, mais l'article ne change pas de statut.
+    const r = (await requete("POST", "/api/publications", { articleIds: [a.id], essai: true })).json<{
+      acceptes: number[];
+    }>();
+    expect(r.acceptes).toEqual([a.reference]);
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({ statut: "erreur_publication" });
+    // L'essai échoue avec un autre message : la fiche garde celui de la vraie publication.
+    const essai = (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>()
+      .publication.id;
+    await erreur(essai, "Message de l'essai.");
+    expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
+      statut: "erreur_publication",
+      erreurPublication: "Message de la vraie publication.",
+    });
+  });
+
+  it("statut Erreur (#93) : coller le lien de l'annonce publiée à la main fait passer l'article En ligne", async () => {
+    const a = await article();
+    await erreur(await prendre(a.id, false));
+    const r = (
+      await requete("PUT", `/api/articles/${a.id}/lien-vinted`, { url: "https://www.vinted.fr/items/42-jean" })
+    ).json<{ passeEnLigne: boolean; article: { statut: string } }>();
+    expect(r).toMatchObject({ passeEnLigne: true, article: { statut: "en_ligne" } });
   });
 
   it("couleurs : 2 au plus, codes connus", async () => {

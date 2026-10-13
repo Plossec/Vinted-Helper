@@ -7,7 +7,7 @@ import { chargerArticle, verifierDate } from "../articles/service.js";
 import { calculer } from "../couts/service.js";
 import type { MotifSortie } from "../calculs/benefice.js";
 import { estTransitionSimple, STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 
 /** Emballage par défaut d'un colis : 0,08 € (§5.6), modifiable dans les Réglages. */
 export const EMBALLAGE_DEFAUT = 8;
@@ -33,10 +33,14 @@ async function passer(
   for (const a of articles) {
     const verification = verifierTransition(a.statut, vers, a);
     if (!verification.ok) throw conflit(verification.raison);
-    await tx
+    // Mise à jour conditionnelle (issue #120) : si une autre requête a changé le statut entre-temps (double tape,
+    // nouvel envoi), aucune ligne ne correspond et toute l'opération est annulée.
+    const modifies = await tx
       .update(article)
       .set({ statut: vers, modifieLe: maintenant, ...autres })
-      .where(eq(article.id, a.id));
+      .where(and(eq(article.id, a.id), eq(article.statut, a.statut)))
+      .returning({ id: article.id });
+    if (modifies.length === 0) throw conflitStatutChange();
     await tx.insert(historiqueStatut).values({ utilisateurId, articleId: a.id, de: a.statut, vers, date });
   }
 }
@@ -307,10 +311,12 @@ export async function annulerDernierChangement(
           throw conflit("Un autre article du colis a changé de statut depuis : annulez d'abord ce changement.");
         }
         await tx.delete(historiqueStatut).where(eq(historiqueStatut.id, d2.id));
-        await tx
+        const modifies = await tx
           .update(article)
           .set({ statut: d2.de, modifieLe: maintenant, ...autres })
-          .where(eq(article.id, id));
+          .where(and(eq(article.id, id), eq(article.statut, d2.vers)))
+          .returning({ id: article.id });
+        if (modifies.length === 0) throw conflitStatutChange();
       }
     };
 

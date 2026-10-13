@@ -11,7 +11,7 @@ import {
   type DonneesIndicateurs,
   indicateursEtTresorerieParMois,
   jourParis,
-  type PostesTresorerie,
+  postesVides,
   type Periode,
   rentabilite,
   stockParStatut,
@@ -138,21 +138,8 @@ export async function tableauDeBord(
     // Complément théorique du graphique (issue #88) : ventes en cours du mois ; pour la trésorerie, crédits attendus
     // (= CA en cours).
     const enCoursMois = cumulerEnCours([enCours.get(cleMois(i + 1))]);
-    return {
-      mois: cleMois(i + 1),
-      ...periode,
-      enCours: enCoursMois,
-      theorique: theoriqueDesMesures(periode, enCoursMois),
-    };
+    return { mois: cleMois(i + 1), ...periode, theorique: theoriqueDesMesures(periode, enCoursMois) };
   });
-  const postesVides: PostesTresorerie = {
-    encaisse: 0,
-    achats: 0,
-    essence: 0,
-    emballages: 0,
-    boosts: 0,
-    fraisDivers: 0,
-  };
 
   const [sorties, lieux] = await Promise.all([
     base
@@ -170,8 +157,9 @@ export async function tableauDeBord(
   const duMois = parMois.get(cleMois(mois)) ?? vide;
   const deLAnnee = cumuler(serie);
   // Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85) : CA et bénéfice théoriques.
+  // Le total de l'année reste fourni pour le réalisé (§5.9, comparatif annuel envisagé), pas pour le théorique
+  // (issue #96).
   const enCoursDuMois = cumulerEnCours([enCours.get(cleMois(mois))]);
-  const enCoursDeLAnnee = cumulerEnCours(Array.from({ length: 12 }, (_, i) => enCours.get(cleMois(i + 1))));
 
   return {
     annee,
@@ -179,10 +167,10 @@ export async function tableauDeBord(
     mois: cleMois(mois),
     duMois,
     /** Calcul de la trésorerie du mois, affiché sous la tuile (issue #88). */
-    tresorerieDuMois: postes.get(cleMois(mois)) ?? postesVides,
+    tresorerieDuMois: postes.get(cleMois(mois)) ?? postesVides(),
     deLAnnee,
-    enCours: { duMois: enCoursDuMois, deLAnnee: enCoursDeLAnnee },
-    theorique: { duMois: theorique(duMois, enCoursDuMois), deLAnnee: theorique(deLAnnee, enCoursDeLAnnee) },
+    enCours: { duMois: enCoursDuMois },
+    theorique: { duMois: theorique(duMois, enCoursDuMois) },
     serie,
     stock: { ...valeurStock(d, details), detail: stockParStatut(d, details) },
     rentabiliteSorties: {

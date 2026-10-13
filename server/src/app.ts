@@ -2,7 +2,7 @@
 import { existsSync } from "node:fs";
 import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
-import Fastify, { type FastifyRequest } from "fastify";
+import Fastify, { type FastifyRequest, type RouteOptions } from "fastify";
 import { routesAlertes } from "./alertes/routes.js";
 import { routesArticles } from "./articles/routes.js";
 import { routesCorbeille } from "./corbeille/routes.js";
@@ -35,6 +35,8 @@ export interface DependancesApp {
   /** Dossier de l'interface compilée ; absent en développement (Vite sert l'interface). */
   dossierClient?: string;
   journaliser?: boolean;
+  /** Appelé pour chaque route déclarée (les tests vérifient ainsi que toute l'API exige la connexion). */
+  surRoute?: (route: RouteOptions) => void;
 }
 
 export interface ReponseSante {
@@ -52,7 +54,22 @@ export interface ContexteRoutes {
 }
 
 /** Adresses de l'API accessibles sans être connecté. */
-const ROUTES_PUBLIQUES = new Set(["/api/sante", "/api/connexion", "/api/deconnexion"]);
+export const ROUTES_PUBLIQUES = new Set(["/api/sante", "/api/connexion", "/api/deconnexion"]);
+
+/**
+ * Chemin sur lequel porte le contrôle de connexion : la route trouvée par Fastify (adresse déjà décodée), sinon
+ * l'adresse décodée. Jamais l'adresse brute : « /%61pi/… » mène à une route « /api/… » (issue #118).
+ */
+function cheminControle(requete: FastifyRequest): string {
+  const route = requete.routeOptions.url;
+  if (route !== undefined) return route;
+  const brut = requete.url.split("?")[0] ?? "";
+  try {
+    return decodeURIComponent(brut);
+  } catch {
+    return brut;
+  }
+}
 
 export async function creerApp({
   version,
@@ -69,10 +86,12 @@ export async function creerApp({
   ),
   dossierClient,
   journaliser = false,
+  surRoute,
 }: DependancesApp) {
   // trustProxy : derrière le relais HTTPS (Caddy), le protocole d'origine sert au cookie « secure ».
   const app = Fastify({ logger: journaliser, trustProxy: true });
   await app.register(fastifyCookie);
+  if (surRoute) app.addHook("onRoute", surRoute);
 
   const utilisateurs = new WeakMap<FastifyRequest, UtilisateurConnecte>();
   const utilisateurDe = (requete: FastifyRequest) => {
@@ -83,7 +102,7 @@ export async function creerApp({
 
   // Contrôle de connexion pour toute l'API (sauf les routes publiques).
   app.addHook("onRequest", async (requete, reponse) => {
-    const chemin = requete.url.split("?")[0] ?? "";
+    const chemin = cheminControle(requete);
     if (!chemin.startsWith("/api/")) return;
     // Programme de publication du PC : jeton personnel, limité à ses routes et à la lecture des photos.
     const autorisation = requete.headers.authorization;
