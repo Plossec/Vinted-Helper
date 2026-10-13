@@ -68,10 +68,13 @@ export function dateObligatoire(valeur: unknown, champ: string): string {
   return valeur;
 }
 
-/** Date et heure (format ISO, ex. 2026-10-05T14:30:00.000Z). */
+/** Format ISO accepté : « AAAA-MM-JJ », ou date et heure avec fuseau (ex. 2026-10-05T14:30:00.000Z). */
+const HORODATAGE_ISO = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+
+/** Date et heure (format ISO, ex. 2026-10-05T14:30:00.000Z) ; « 2026 » ou « 5 oct. » sont refusés (issue #134). */
 export function horodatageFacultatif(valeur: unknown, champ: string): Date | null {
   if (valeur === undefined || valeur === null || valeur === "") return null;
-  if (typeof valeur !== "string") throw erreurSaisie(`${champ} : date invalide.`);
+  if (typeof valeur !== "string" || !HORODATAGE_ISO.test(valeur)) throw erreurSaisie(`${champ} : date invalide.`);
   const date = new Date(valeur);
   if (Number.isNaN(date.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
   return date;

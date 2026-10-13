@@ -115,7 +115,8 @@ function anneesActivite(d: DonneesIndicateurs, anneeActuelle: number): number[] 
     ...d.boosts.map((b) => b.date),
     ...d.frais.map((f) => f.date),
   ].filter((x): x is string => x !== null);
-  const premiere = Math.min(anneeActuelle, ...dates.map((x) => Number(jourParis(x).slice(0, 4))));
+  // Boucle plutôt que Math.min(...dates) : pas de limite de pile avec beaucoup de dates (issue #134).
+  const premiere = dates.reduce((min, x) => Math.min(min, Number(jourParis(x).slice(0, 4))), anneeActuelle);
   return Array.from({ length: anneeActuelle - premiere + 1 }, (_, i) => anneeActuelle - i);
 }
 

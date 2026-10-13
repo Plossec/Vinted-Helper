@@ -30,7 +30,13 @@ export async function enregistrerPhoto(
     return;
   }
   const fichier = await stockage.enregistrer(utilisateurId, id, contenu);
-  await base.insert(photo).values({ id, utilisateurId, type, fichier, creeLe: maintenant }).onConflictDoNothing();
+  try {
+    await base.insert(photo).values({ id, utilisateurId, type, fichier, creeLe: maintenant }).onConflictDoNothing();
+  } catch (erreur) {
+    // Insertion impossible : pas de fichier orphelin sur le disque (issue #134).
+    await stockage.supprimer(utilisateurId, id, fichier);
+    throw erreur;
+  }
 }
 
 export async function lirePhoto(base: Base, utilisateurId: string, id: string) {
@@ -53,6 +59,7 @@ export async function pivoterPhoto(
   const { fichier } = await lirePhoto(base, utilisateurId, id);
   const nouveau = await stockage.pivoter(utilisateurId, id, fichier, angle);
   if (nouveau !== fichier) await base.update(photo).set({ fichier: nouveau }).where(eq(photo.id, id));
+  await stockage.retirerAncien(utilisateurId, fichier, nouveau);
 }
 
 export async function verifierPhoto(tx: Base | Transaction, utilisateurId: string, photoId: string) {

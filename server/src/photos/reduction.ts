@@ -51,6 +51,7 @@ export async function reduirePhotosArticle(
     if (!utilisateurs.every((u) => FINAUX.has(u.statut))) continue;
     const nouveau = await stockage.reduire(utilisateurId, p.id, ligne.fichier);
     await base.update(photo).set({ fichier: nouveau, estReduite: true }).where(eq(photo.id, p.id));
+    await stockage.retirerAncien(utilisateurId, ligne.fichier, nouveau);
   }
 }
 

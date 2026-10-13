@@ -50,7 +50,6 @@ export function creerStockagePhotos(dossier: string) {
         .toBuffer();
       const nouveau = `${photoId}.jpg`;
       await writeFile(chemin(utilisateurId, nouveau), reduite);
-      if (nouveau !== fichier) await rm(chemin(utilisateurId, fichier), { force: true });
       return nouveau;
     },
 
@@ -69,9 +68,16 @@ export function creerStockagePhotos(dossier: string) {
       ]);
       const nouveau = `${photoId}.jpg`;
       await writeFile(chemin(utilisateurId, nouveau), photoTournee);
-      if (nouveau !== fichier) await rm(chemin(utilisateurId, fichier), { force: true });
       await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
       return nouveau;
+    },
+
+    /**
+     * Supprime l'ancien fichier d'une photo réécrite (réduite, tournée, convertie en .jpg) : à appeler **après** la
+     * mise à jour de la base, pour que la base ne désigne jamais un fichier déjà effacé (issue #134).
+     */
+    async retirerAncien(utilisateurId: string, ancien: string, nouveau: string): Promise<void> {
+      if (ancien !== nouveau) await rm(chemin(utilisateurId, ancien), { force: true });
     },
 
     /** Supprime le fichier et sa vignette (photo qui n'est plus utilisée par aucun article). */

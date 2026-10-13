@@ -5,6 +5,16 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.8.2] — 13/10/2026
+
+### Corrigé
+- Photos : une photo tournée ou réduite ne peut plus désigner un fichier déjà effacé (la base est mise à jour avant
+  la suppression de l'ancien fichier), et une photo reçue mais non enregistrée ne laisse plus de fichier orphelin
+  (#134).
+- Dates : une date imprécise envoyée à l'application (ex. « 2026 ») est refusée au lieu d'être interprétée (#134).
+- Les sessions de connexion expirées sont supprimées chaque jour ; le tableau de bord reste fiable avec un très grand
+  nombre de dates (#134).
+
 ## [1.8.1] — 13/10/2026
 
 ### Corrigé

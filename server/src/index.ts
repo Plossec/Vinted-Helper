@@ -4,6 +4,7 @@ import { amorcerCompte } from "./base/amorcage.js";
 import { creerConnexion } from "./base/connexion.js";
 import { appliquerMigrations } from "./base/migrer.js";
 import { config } from "./config.js";
+import { purgerSessionsExpirees } from "./compte/sessions.js";
 import { purgerCorbeille } from "./corbeille/service.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 
@@ -47,6 +48,7 @@ async function purger(): Promise<void> {
   try {
     const nombre = await purgerCorbeille(connexion.db, stockagePhotos, new Date());
     if (nombre > 0) console.info(`Corbeille : ${nombre} article(s) supprimé(s) définitivement.`);
+    await purgerSessionsExpirees(connexion.db, new Date());
   } catch (erreur) {
     console.error("Purge de la corbeille impossible :", erreur instanceof Error ? erreur.message : erreur);
   }

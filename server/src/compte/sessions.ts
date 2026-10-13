@@ -1,7 +1,7 @@
 // Sessions de connexion : jeton aléatoire dans un cookie, seule son empreinte est stockée en base.
 // Durée : 30 jours sans utilisation, prolongée à chaque usage (décision du 05/10/2026).
 import { createHash, randomBytes } from "node:crypto";
-import { and, eq, ne } from "drizzle-orm";
+import { and, eq, lte, ne } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { session, utilisateur } from "../base/schema.js";
 
@@ -62,4 +62,10 @@ export async function supprimerSessionsUtilisateur(base: Base, utilisateurId: st
       ? eq(session.utilisateurId, utilisateurId)
       : and(eq(session.utilisateurId, utilisateurId), ne(session.id, empreinte(saufJeton)));
   await base.delete(session).where(condition);
+}
+
+/** Supprime les sessions expirées jamais réutilisées (purge quotidienne, issue #134). Renvoie leur nombre. */
+export async function purgerSessionsExpirees(base: Base, maintenant: Date): Promise<number> {
+  const supprimees = await base.delete(session).where(lte(session.expireLe, maintenant)).returning({ id: session.id });
+  return supprimees.length;
 }
