@@ -5,6 +5,7 @@ import { api, type EtatPublication, type Publication } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { ecrireModeEssai, lireModeEssai } from "../publication.js";
 import { formatReference } from "../statuts.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 const LIBELLES: Record<EtatPublication, string> = {
   en_attente: "En attente",
@@ -47,7 +48,11 @@ export function PublicationVinted() {
   }, [charger]);
 
   async function creerJeton() {
-    if (suivi?.jetonCree && !window.confirm("Remplacer le jeton actuel ? L'extension devra être reconfigurée.")) return;
+    if (
+      suivi?.jetonCree &&
+      !(await confirmer("Remplacer le jeton actuel ? L'extension devra être reconfigurée.", { action: "Remplacer" }))
+    )
+      return;
     setJeton((await api.post<{ jeton: string }>("/api/publication/jeton")).jeton);
     void charger();
   }

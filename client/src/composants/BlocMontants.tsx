@@ -7,6 +7,7 @@ import { aujourdhui, formatDate, formatDateHeure } from "../outils/dates.js";
 import { formatEuros, lireMontant } from "../outils/montants.js";
 import { Montant } from "./Montant.js";
 import { useSignalerModification } from "../outils/modifications.js";
+import { confirmer } from "./Dialogue.js";
 
 export function BlocMontants({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
   const c = article.couts;
@@ -28,7 +29,7 @@ export function BlocMontants({ article, onMiseAJour }: { article: Article; onMis
   }
 
   async function supprimerBoost(id: string) {
-    if (!window.confirm("Supprimer ce boost ?")) return;
+    if (!(await confirmer("Supprimer ce boost ?", { action: "Supprimer", danger: true }))) return;
     await api.delete(`/api/boosts/${id}`);
     onMiseAJour(await api.get<Article>(`/api/articles/${article.id}`));
   }

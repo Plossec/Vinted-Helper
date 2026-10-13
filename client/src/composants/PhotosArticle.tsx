@@ -2,6 +2,7 @@
 // ou l'appareil photo, réordonnables, une photo principale.
 import { type ChangeEvent, useRef, useState } from "react";
 import { api, type Article, envoyerPhoto, urlPhoto, urlVignette } from "../api.js";
+import { confirmer } from "./Dialogue.js";
 
 export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
   const galerie = useRef<HTMLInputElement>(null);
@@ -96,12 +97,13 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
     </>
   );
 
-  function retirer(id: string, type: string) {
+  async function retirer(id: string, type: string) {
     const texte =
       type === "terrain" && article.lot
         ? "Retirer la photo terrain de cet article ? Elle reste sur les autres articles du lot."
         : "Supprimer cette photo ?";
-    if (window.confirm(texte)) void action(api.delete(`/api/articles/${article.id}/photos/${id}`));
+    if (await confirmer(texte, { action: type === "terrain" && article.lot ? "Retirer" : "Supprimer", danger: true }))
+      void action(api.delete(`/api/articles/${article.id}/photos/${id}`));
   }
 
   return (

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type TypeListe } from "../api.js";
 import { normaliser } from "../outils/recherche.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 interface Valeur {
   id: string;
@@ -51,9 +52,10 @@ export function Listes() {
         const cible = valeurs?.find((v) => v.id === action.cibleId);
         if (!cible) return setMessage({ type: "erreur", texte: "Choisissez la valeur à conserver." });
         if (
-          !window.confirm(
+          !(await confirmer(
             `Fusionner « ${action.valeur.nom} » dans « ${cible.nom} » ? Les articles passeront sur « ${cible.nom} ».`,
-          )
+            { action: "Fusionner" },
+          ))
         )
           return;
         await api.post(`/api/referentiels/${type}/${action.valeur.id}/fusion`, { cibleId: cible.id });

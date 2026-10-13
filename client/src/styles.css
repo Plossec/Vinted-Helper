@@ -1743,3 +1743,66 @@ a {
     border-top: none;
   }
 }
+
+/* --- Boîtes de dialogue (#132) --- */
+.dialogue {
+  width: min(28rem, calc(100vw - 2 * var(--e-4)));
+  padding: 0;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
+  color: var(--texte);
+  box-shadow: var(--ombre-flottante);
+}
+
+.dialogue::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.dialogue__corps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+  padding: var(--e-6) var(--e-4) var(--e-4);
+}
+
+.dialogue__texte {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* « Annuler » à gauche, action à droite, chacun sur la moitié : pas de tape par erreur sur le mauvais. */
+.dialogue__actions {
+  display: flex;
+  gap: var(--e-3);
+}
+
+.dialogue__actions .bouton {
+  flex: 1;
+}
+
+.bouton--danger-plein {
+  background: var(--erreur);
+  border-color: var(--erreur);
+  color: var(--surface);
+}
+
+.bouton--danger-plein:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+/* Titre d'écran qui reçoit le focus au changement d'écran (#132) : pas de cadre. */
+h1[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* Animations réduites si le téléphone le demande (#132). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

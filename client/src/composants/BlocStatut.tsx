@@ -17,6 +17,7 @@ import { depuisChampDateHeure, formatDateHeure, versChampDateHeure } from "../ou
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
 import { useModifications } from "../outils/modifications.js";
 import { ACTIONS_STATUT, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
+import { confirmer as demanderConfirmation, demanderMontant } from "./Dialogue.js";
 
 interface Props {
   article: Article;
@@ -63,7 +64,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
 
   async function preparer(vers: Statut) {
     // Le changement de statut recharge la fiche : prévenir s'il reste une saisie non enregistrée (#99).
-    if (!confirmerAbandon("changer de statut")) return;
+    if (!(await confirmerAbandon("changer de statut"))) return;
     setErreur(null);
     const base: Saisie = {
       date: versChampDateHeure(new Date()),
@@ -202,14 +203,11 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
     ) {
       texte += ` Tous les articles du colis (${tailleColis}) sont concernés.`;
     }
-    if (!window.confirm(texte)) return;
+    if (!(await demanderConfirmation(texte, { action: "Supprimer", danger: true }))) return;
     let montantCredite: number | null = null;
     if (passage === "en_ligne>a_expedier" && colis) {
-      const saisi = window.prompt("Nouveau montant crédité pour les autres articles du colis (€) :");
-      if (saisi === null) return;
-      const montant = lireMontant(saisi);
-      if (montant === null || montant === "invalide") return setErreur("Montant invalide (ex. 12,00).");
-      montantCredite = montant;
+      montantCredite = await demanderMontant("Nouveau montant crédité pour les autres articles du colis :");
+      if (montantCredite === null) return;
     }
     try {
       onMiseAJour(await api.post<Article>(`/api/articles/${article.id}/annulation-statut`, { montantCredite }));

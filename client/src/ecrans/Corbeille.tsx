@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { api, urlVignette } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 interface ArticleSupprime {
   id: string;
@@ -75,9 +76,12 @@ export function Corbeille() {
                   type="button"
                   className="bouton bouton--danger"
                   onClick={() => {
-                    if (window.confirm("Supprimer définitivement cet article et ses photos ? C'est irréversible.")) {
-                      void agir(api.delete(`/api/corbeille/${a.id}`));
-                    }
+                    void confirmer("Supprimer définitivement cet article et ses photos ? C'est irréversible.", {
+                      action: "Supprimer définitivement",
+                      danger: true,
+                    }).then((ok) => {
+                      if (ok) void agir(api.delete(`/api/corbeille/${a.id}`));
+                    });
                   }}
                 >
                   Supprimer définitivement

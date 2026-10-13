@@ -1,13 +1,15 @@
 // Disposition commune une fois connecté : contenu + barre de navigation en bas (usage au pouce).
 // Sans réseau, l'application reste utilisable (saisie terrain mise en attente, §2.2).
-import { type ComponentType, useEffect, useState } from "react";
+import { type ComponentType, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { api, ErreurApi } from "../api.js";
 import { type AlertesServeur, nombreAlertes } from "../composants/Alertes.js";
 import { BandeauFile } from "../composants/BandeauFile.js";
+import { FenetreDialogue } from "../composants/Dialogue.js";
 import { IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
 import { demarrerFile, envoyerMaintenant } from "../hors-ligne/index.js";
 import { type Onglet, ongletActif } from "../navigation.js";
+import { useTitreEtFocus } from "../outils/titrePage.js";
 import { mettreAJour, useNouvelleVersion } from "../pwa.js";
 
 type Etat = "verification" | "connecte" | "hors-ligne";
@@ -26,6 +28,7 @@ export function Disposition() {
   const { pathname } = useLocation();
   const [alertes, setAlertes] = useState(0);
   const actif = ongletActif(pathname);
+  const contenu = useRef<HTMLDivElement>(null);
 
   // Pastille d'alertes sur l'onglet Articles, mise à jour à chaque changement d'écran.
   useEffect(() => {
@@ -66,6 +69,8 @@ export function Disposition() {
     };
   }, [naviguer]);
 
+  useTitreEtFocus(contenu, etat === "verification" ? null : pathname);
+
   if (etat === "verification") return <p className="page statut">Chargement…</p>;
 
   return (
@@ -84,9 +89,10 @@ export function Disposition() {
         </p>
       )}
       <BandeauFile />
-      <div className="disposition__contenu">
+      <div className="disposition__contenu" ref={contenu}>
         <Outlet />
       </div>
+      <FenetreDialogue />
       <nav className="navigation" aria-label="Navigation principale">
         {ONGLETS.map(({ onglet, chemin, libelle, Icone }) => (
           <Link

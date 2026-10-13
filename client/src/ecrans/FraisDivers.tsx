@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { api, type FraisDivers as Frais } from "../api.js";
 import { aujourdhui, formatDate } from "../outils/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { confirmer } from "../composants/Dialogue.js";
 
 const vide = () => ({ id: null as string | null, date: aujourdhui(), montant: "", libelle: "" });
 
@@ -40,7 +41,7 @@ export function FraisDivers() {
   }
 
   async function supprimer(id: string) {
-    if (!window.confirm("Supprimer ce frais ?")) return;
+    if (!(await confirmer("Supprimer ce frais ?", { action: "Supprimer", danger: true }))) return;
     await api.delete(`/api/frais/${id}`);
     await charger();
   }
