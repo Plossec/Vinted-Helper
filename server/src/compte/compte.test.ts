@@ -2,10 +2,10 @@
 import { count } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { amorcerCompte, VALEURS_INITIALES } from "../base/amorcage.js";
-import { lieu, marque, utilisateur } from "../base/schema.js";
+import { lieu, marque, session, utilisateur } from "../base/schema.js";
 import { creerAppDeTest, IDENTIFIANT_TEST, MOT_DE_PASSE_TEST, seConnecter } from "../test/outils.js";
 import { hacherMotDePasse, verifierMotDePasse } from "./mot-de-passe.js";
-import { DUREE_SESSION_MS } from "./sessions.js";
+import { DUREE_SESSION_MS, purgerSessionsExpirees } from "./sessions.js";
 
 describe("mot de passe (scrypt)", () => {
   it("le bon mot de passe est accepté, un mauvais est refusé", async () => {
@@ -107,5 +107,17 @@ describe("compte et connexion", () => {
     expect((await t.app.inject({ method: "GET", url: "/api/moi", headers: { cookie } })).statusCode).toBe(200);
     await expect(seConnecter(t.app)).rejects.toThrow(/401/);
     await expect(seConnecter(t.app, "nouveau-mot-de-passe")).resolves.toContain("vh_session=");
+  });
+
+  it("#134 — les sessions expirées jamais réutilisées sont purgées, les autres restent", async () => {
+    await seConnecter(t.app);
+    await seConnecter(t.app);
+    const [avant] = await t.base.select({ total: count() }).from(session);
+    expect(avant?.total).toBe(2);
+    expect(await purgerSessionsExpirees(t.base, t.horloge.maintenant())).toBe(0);
+    t.horloge.avancer(DUREE_SESSION_MS + 1000);
+    expect(await purgerSessionsExpirees(t.base, t.horloge.maintenant())).toBe(2);
+    const [apres] = await t.base.select({ total: count() }).from(session);
+    expect(apres?.total).toBe(0);
   });
 });
