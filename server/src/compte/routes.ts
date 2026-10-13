@@ -44,16 +44,17 @@ export function routesCompte(app: FastifyInstance, { base, maintenant, utilisate
     const identifiant = texteBrut(corps.identifiant, "Identifiant").trim();
     const motDePasse = texteBrut(corps.motDePasse, "Mot de passe");
     const instant = maintenant().getTime();
-    const cle = requete.ip;
-    if (limiteur.estBloque(cle, instant)) {
+    // Par adresse IP et par identifiant (#135) : changer d'adresse ne permet pas d'essayer sans fin un même compte.
+    const cles = [`ip:${requete.ip}`, `compte:${identifiant.toLowerCase()}`];
+    if (cles.some((cle) => limiteur.estBloque(cle, instant))) {
       throw new ErreurMetier(429, "Trop de tentatives. Réessayez dans 15 minutes.");
     }
     const [compte] = await base.select().from(utilisateur).where(eq(utilisateur.identifiant, identifiant));
     if (!compte || !(await verifierMotDePasse(motDePasse, compte.motDePasseHache))) {
-      limiteur.noterEchec(cle, instant);
+      for (const cle of cles) limiteur.noterEchec(cle, instant);
       throw new ErreurMetier(401, MESSAGE_REFUS);
     }
-    limiteur.effacer(cle);
+    for (const cle of cles) limiteur.effacer(cle);
     poserCookie(requete, reponse, await creerSession(base, compte.id, maintenant()));
     return { identifiant: compte.identifiant };
   });

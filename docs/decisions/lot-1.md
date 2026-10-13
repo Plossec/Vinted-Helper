@@ -59,3 +59,16 @@ Vinted (€) », dans la fiche seulement. **Information seule pour l'instant** (
 automatisées de négociation (#149, #150). Vide = pas de minimum. Refusé s'il dépasse le prix affiché, à
 l'enregistrement de la fiche comme au passage En ligne avec un nouveau prix. Colonne `prix_vente_minimum`
 (centimes), migration `0010_prix_vente_minimum` (ajout d'une colonne vide, sans effet sur les données existantes).
+
+## 13/10/2026 — Sécurité : connexion, mot de passe, quota de l'IA (issue #135)
+
+**Décision (utilisateur)** :
+- mot de passe : **12 caractères minimum** pour tout nouveau mot de passe (Réglages, réinitialisation, premier
+  démarrage) ; le mot de passe actuel reste valable ;
+- appels à Gemini (annonce, étiquette) : **30 par heure** et par utilisateur, message « Réessayez dans N min » ;
+- connexion : le blocage (5 échecs en 15 minutes) compte par adresse IP **et** par identifiant ; les entrées
+  expirées du limiteur sont purgées ;
+- documentation : effacer `COMPTE_MOT_DE_PASSE_INITIAL` après le premier démarrage (README), confidentialité des
+  photos envoyées à Gemini (offre gratuite, guide IA), `SECURITY.md` (signalement privé GitHub).
+Point tranché par Claude (*à relire*) : pas de relecture de sécurité automatique des PR (C7), jugée superflue pour un
+projet à un seul utilisateur déjà couvert par CodeQL et l'audit des dépendances.
