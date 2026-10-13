@@ -19,8 +19,8 @@ jobs:
     name: Vérifier (types, lint, format, tests, construction)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -40,7 +40,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build --tag vinted-helper-verification .
 
   deployer:
@@ -80,7 +80,7 @@ jobs:
     permissions:
       contents: write # seulement ce job : pousser le tag
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Tag vX.Y.Z
