@@ -99,6 +99,13 @@
       "when": 1791983679517,
       "tag": "0013_motif_a_vendre",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791992293606,
+      "tag": "0014_statut_en_stock",
+      "breakpoints": true
     }
   ]
 }

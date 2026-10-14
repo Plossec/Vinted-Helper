@@ -1,0 +1,1 @@
+ALTER TYPE "public"."statut_article" ADD VALUE 'en_stock' BEFORE 'a_publier';

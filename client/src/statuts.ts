@@ -1,6 +1,7 @@
 // Libellés des statuts (§4.1). Les transitions possibles sont fournies par le serveur (source unique).
 export type Statut =
   | "brouillon"
+  | "en_stock"
   | "a_publier"
   | "erreur_publication"
   | "en_ligne"
@@ -12,6 +13,7 @@ export type Statut =
 
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",
+  en_stock: "En stock",
   a_publier: "À publier",
   erreur_publication: "Erreur",
   en_ligne: "En ligne",
@@ -25,6 +27,7 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
 /** Libellé du bouton qui fait passer un article à ce statut. */
 export const ACTIONS_STATUT: Record<Statut, string> = {
   brouillon: "Repasser en brouillon",
+  en_stock: "Garder en stock",
   a_publier: "Marquer « À publier »",
   // Jamais proposé : seule une publication Vinted en échec fait passer l'article en Erreur (#72).
   erreur_publication: "Erreur de publication",
@@ -47,6 +50,11 @@ export const AVANT_VENTE: ReadonlySet<Statut> = new Set<Statut>(["brouillon", "a
  */
 export function etapeSuivante(statut: Statut): { conseil: string; vers: Statut | null } {
   switch (statut) {
+    case "en_stock":
+      return {
+        conseil: "Gardé en stock, hors vente : à remettre « À publier » le jour où il doit être vendu.",
+        vers: null,
+      };
     case "brouillon":
       return {
         conseil: "Compléter la fiche, les photos et l'annonce, puis la marquer « À publier ».",

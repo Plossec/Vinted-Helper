@@ -196,6 +196,19 @@ describe("articles", () => {
       expect(accepte.json()).toMatchObject({ statut: "en_ligne", prixAffiche: 900 });
     });
 
+    it("En stock (#183) : depuis Brouillon, aucune alerte, retour vers À publier", async () => {
+      const cree = await creer();
+      const fiche = await changer(cree.id, { vers: "en_stock", date: "2026-09-01T10:00:00.000Z" });
+      expect(fiche.json()).toMatchObject({
+        statut: "en_stock",
+        transitionsPossibles: ["brouillon", "a_publier", "sortie_stock"],
+      });
+      const alertes = (await requete("GET", "/api/alertes")).json<{ brouillons: { id: string }[] }>();
+      expect(alertes.brouillons.map((a) => a.id)).not.toContain(cree.id);
+      expect((await changer(cree.id, { vers: "en_ligne", prixAffiche: 900 })).statusCode).toBe(409);
+      expect((await changer(cree.id, { vers: "a_publier" })).json()).toMatchObject({ statut: "a_publier" });
+    });
+
     it("§8 — une date modifiée est enregistrée dans l'historique, et corrigeable ensuite", async () => {
       const cree = await creer();
       const veille = "2026-10-04T18:30:00.000Z";
@@ -238,7 +251,7 @@ describe("articles", () => {
 
     it("les transitions proposées à l'interface sont celles du §4.2", async () => {
       const cree = await creer();
-      expect(cree.transitionsPossibles).toEqual(["a_publier", "en_ligne", "sortie_stock"]);
+      expect(cree.transitionsPossibles).toEqual(["a_publier", "en_ligne", "en_stock", "sortie_stock"]);
       const enLigne = (await changer(cree.id, { vers: "en_ligne", prixAffiche: 900 })).json<{
         transitionsPossibles: string[];
       }>();
