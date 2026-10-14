@@ -11,7 +11,13 @@
     </style>
   </head>
   <body>
-    <h1>Diagnostic du formulaire Vinted</h1>
+    <header class="entete">
+      <img src="icone-48.png" alt="" />
+      <div>
+        <h1>Diagnostic du formulaire Vinted</h1>
+        <span class="version" data-version></span>
+      </div>
+    </header>
     <p id="resume" role="status"></p>
     <ul id="champs"></ul>
     <div class="actions">
@@ -21,6 +27,7 @@
       Envoyez le fichier téléchargé à Claude : il contient la structure du formulaire (balises, repères, libellés), pas
       vos saisies. Rien n'a été publié.
     </p>
+    <script src="entete.js"></script>
     <script src="diagnostic.js"></script>
   </body>
 </html>

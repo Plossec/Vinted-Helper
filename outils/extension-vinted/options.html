@@ -11,7 +11,13 @@
     </style>
   </head>
   <body>
-    <h1>Réglages de l'extension</h1>
+    <header class="entete">
+      <img src="icone-48.png" alt="" />
+      <div>
+        <h1>Réglages de l'extension</h1>
+        <span class="version" data-version></span>
+      </div>
+    </header>
     <form id="formulaire">
       <label>
         <span>Adresse de l'application</span>
@@ -30,6 +36,7 @@
       L'extension n'utilise que votre session Vinted habituelle. Elle se met en pause d'elle-même si Vinted affiche une
       vérification, une page de blocage, ou si vous n'êtes pas connecté.
     </p>
+    <script src="entete.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

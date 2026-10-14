@@ -6,23 +6,32 @@
     <link rel="stylesheet" href="style.css" />
     <style>
       body {
-        width: 340px;
+        width: 360px;
       }
     </style>
   </head>
   <body>
-    <h1>Publication Vinted</h1>
+    <header class="entete">
+      <img src="icone-48.png" alt="" />
+      <div>
+        <h1>Publication Vinted</h1>
+        <span class="version" data-version></span>
+      </div>
+    </header>
     <p id="etat" role="status"></p>
-    <div class="actions">
+    <div class="actions actions--principales">
       <button id="reprendre" class="principal" type="button" hidden>Reprendre</button>
+      <button id="maintenant" class="principal" type="button" hidden>Vérifier maintenant</button>
       <button id="pause" type="button" hidden>Mettre en pause</button>
-      <button id="maintenant" type="button" hidden>Vérifier maintenant</button>
-      <button id="diagnostic" type="button">Diagnostic</button>
-      <button id="releve" type="button">Dernier relevé</button>
-      <button id="options" type="button">Réglages</button>
     </div>
-    <h2 class="secondaire">Journal</h2>
+    <h2>Journal</h2>
     <ul id="journal"></ul>
+    <div class="actions actions--outils">
+      <button id="diagnostic" class="discret" type="button">Diagnostic</button>
+      <button id="releve" class="discret" type="button">Dernier relevé</button>
+      <button id="options" class="discret" type="button">Réglages</button>
+    </div>
+    <script src="entete.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

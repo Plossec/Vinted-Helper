@@ -116,6 +116,9 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   à l'égalité d'abord (« Bon état » ≠ « Très bon état ») ; le contrôle avant envoi exige l'état exact.
 - 07/10/2026 (#63, demande de l'utilisateur) : pause entre deux étapes ramenée à **5 secondes fixes** (au lieu de 15 à
   20 s). L'attente de 10 minutes entre deux annonces publiées est inchangée.
+- 14/10/2026 (#179, demande de l'utilisateur) : l'extension reprend le logo de l'application (sac « € » indigo,
+  icônes générées depuis `client/public/icone.svg`) et ses couleurs ; ses trois fenêtres partagent `style.css`, avec
+  un en-tête affichant la version. Aucun changement de comportement.
 - Essais du 14/10/2026 (#176) :
   - prix : « NaN € » lu sur Vinted pour « 9,00 » saisi. Vinted reformate désormais le champ (« 9.00 € ») et ne lit
     pas la virgule. Le prix est saisi avec un point, puis relu à l'étape prix. Un contrôle avant envoi en échec joint

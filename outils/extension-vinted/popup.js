@@ -26,7 +26,10 @@ async function afficher() {
   liste.replaceChildren(
     ...(etat.journal ?? []).slice(0, 10).map((l) => {
       const li = document.createElement("li");
-      li.textContent = `${heure(l.date)} — ${l.texte}`;
+      const quand = document.createElement("time");
+      quand.dateTime = l.date;
+      quand.textContent = heure(l.date);
+      li.append(quand, l.texte);
       return li;
     }),
   );
