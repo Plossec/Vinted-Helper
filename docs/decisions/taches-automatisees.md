@@ -58,14 +58,21 @@ dans l'application. La saisie des ventes, l'envoi et les retours restent manuels
 | Rythme | *TBD* (#190). |
 | Alertes | Les nouvelles alertes (à rattacher, montant corrigé) iront dans l'écran d'accueil « À faire » proposé par l'utilisateur : #191. |
 
-## 14/10/2026 — #149 Négociation favoris (*à préciser*)
+## 14/10/2026 — #149 Négociation favoris
 
-**Piste retenue au cadrage** : envoyer une **offre réduite** aux personnes ayant mis l'article en favori — après N
-jours, remise de X %, jamais sous le prix vente minimum (#146), une seule fois par personne. **La plus risquée**
-(seul envoi de messages vers des tiers, ce que Vinted surveille le plus) : à réaliser **en dernier**, d'abord en mode
-« proposer puis l'utilisateur valide ».
+**Décision (utilisateur)** : la tâche envoie une **offre réduite** aux personnes qui ont mis un article en favori sans
+l'acheter. La plus risquée vis-à-vis de Vinted (envoi vers des tiers) : réalisée en dernier.
 
-Reste à trancher : délai, remise, message libre ou rédigé par Gemini.
+| Sujet | Décision |
+|---|---|
+| Déclencheur | **N jours après le favori** sans achat (N réglable dans les réglages du compte). |
+| Remise | **Règle de baisse de #147** : % ou montant (réglage de l'article, sinon du compte ; « ne pas baisser » → pas d'offre), arrondi vers le haut au 0,50 €, jamais sous le prix vente minimum. |
+| Sans prix vente minimum | **Pas d'offre.** |
+| Message | **Aucun** : l'offre seule (pas de texte répétitif). |
+| Répétition | **Une seule offre** par personne et par article, jamais de relance. |
+| Mode | **Automatique ou manuel**, au réglage du compte ; manuel = liste des offres prévues à valider. |
+| Offre acceptée | Traitée par **#150** (pas par cette tâche). |
+| Rythme | *TBD* (#190). |
 
 ## 14/10/2026 — #150 Validée prix proposé (*à préciser*)
 
