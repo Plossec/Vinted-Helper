@@ -5,7 +5,7 @@
 | [`cahier-des-charges.md`](cahier-des-charges.md) | tous | Le besoin complet : **fait foi**. Statuts, fonctionnalités, règles de calcul, critères d'acceptation, cas chiffrés |
 | [`architecture.md`](architecture.md) | tous | Schémas : vue d'ensemble (application, API, base, extension, serveur), découpage du code, modèle de données |
 | [`categories-vinted.md`](categories-vinted.md) | tous | Annexe : l'arbre des catégories recopié de Vinted, **générée** depuis `server/src/catalogue/categories.ts` (`npm run doc:categories -w server`) |
-| [`decisions/`](decisions/README.md) | tous | Décisions prises en cours de route, **un fichier par lot**, et la liste des points « à relire » |
+| [`decisions/`](decisions/README.md) | tous | Décisions prises en cours de route : **un fichier numéroté par décision** (ADR), index avec statut et points « à relire » |
 | [`guides/`](#guides) | utilisateur | Modes d'emploi pas à pas |
 
 ## Guides
@@ -24,8 +24,8 @@ nouveautés de chaque version dans le [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Où écrire quoi
 
-- Une **décision** (choix, compromis, règle précisée) → le fichier de son sujet dans `decisions/` (anciennement
-  `lot-N.md` du lot en cours), datée.
+- Une **décision** (choix, compromis, règle précisée) → un nouvel ADR `decisions/NNNN-titre.md` (modèle
+  `decisions/0000-modele.md`), ajouté à l'index `decisions/README.md`.
 - Un **changement d'architecture** (table, module, service, outil externe) → `architecture.md`, relu à chaque
   nouvelle version.
 - Une **procédure pour l'utilisateur** → un guide dans `guides/`, lié depuis ce sommaire.

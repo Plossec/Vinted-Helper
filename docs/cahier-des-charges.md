@@ -186,10 +186,10 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - **« Lire l'étiquette »** : à partir d'une photo d'étiquette, pré-remplit marque, taille, catégorie, matière ; l'utilisateur vérifie avant d'enregistrer.
 - **Prompts modifiables** dans les Réglages.
 - **Secours** : bouton **« Copier le prompt »** (texte prêt à coller dans une IA gratuite : Claude.ai, ChatGPT, Gemini) si le quota est dépassé ou le service indisponible.
-- Pas d'API publique Vinted. **Exception décidée le 06/10/2026** (`docs/decisions/publication-vinted.md`) : publication
+- Pas d'API publique Vinted. **Exception décidée le 06/10/2026** (`docs/decisions/`, ADR 0020 et 0034) : publication
   des annonces depuis le PC par un programme qui pilote le navigateur, risques acceptés par l'utilisateur (CGU de
   Vinted : suspension possible du compte). La limite « aucune autre automatisation de Vinted » a été retirée le
-  14/10/2026 à la demande de l'utilisateur (#185, `docs/decisions/publication-vinted.md`).
+  14/10/2026 à la demande de l'utilisateur (#185, `docs/decisions/`, ADR 0068 et 0082).
 
 ### 5.6 Ventes
 - Passage **En ligne → À expédier** : création d'une **vente** (= un colis) avec 1 ou plusieurs articles, montant crédité, date de vente.
@@ -446,7 +446,7 @@ vinted-helper/
 │  ├─ cahier-des-charges.md  ce document = source de vérité
 │  ├─ README.md              sommaire de la documentation
 │  ├─ categories-vinted.md   annexe : arbre des catégories
-│  ├─ decisions/             décisions prises en cours de développement (un fichier par lot)
+│  ├─ decisions/             décisions numérotées (ADR), un fichier par décision
 │  └─ guides/                modes d'emploi de l'utilisateur (téléphone, sauvegardes, IA, OVH…)
 ├─ .claude/
 │  ├─ settings.json          permissions + formatage automatique
