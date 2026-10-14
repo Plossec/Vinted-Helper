@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.14.2**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.15.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -106,6 +106,7 @@ erDiagram
   vente ||--o{ vente_article : comprend
   article ||--o{ vente_article : "vendu dans"
   article ||--o{ publication_vinted : "publié via"
+  article ||--o{ signalement_vu : "alerte vue"
   utilisateur ||--o{ frais_general : paie
 ```
 
@@ -119,4 +120,5 @@ erDiagram
 | `vente`, `vente_article` | Une vente (simple ou groupée), retours compris |
 | `frais_general` | Frais divers hors articles |
 | `publication_vinted` | File d'attente de l'extension et résultat de chaque publication (échec d'une vraie publication → article au statut Erreur) |
+| `signalement_vu` | Alertes « Pour info » de l'écran « À faire » marquées « Vu » (#191), avec leur date de départ |
 | `reglages`, `session`, `marque` | Paramètres de calcul, connexions, marques |
