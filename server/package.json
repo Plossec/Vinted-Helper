@@ -1,6 +1,6 @@
 {
   "name": "@vinted-helper/server",
-  "version": "1.12.1",
+  "version": "1.12.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "test": "vitest run",
+    "test:couverture": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts",

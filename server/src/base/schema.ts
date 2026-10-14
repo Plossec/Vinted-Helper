@@ -184,18 +184,22 @@ export const article = pgTable(
 );
 
 /** Photo : fichier dans data/photos/<utilisateur>/ ; une photo terrain peut être partagée par les articles d'un lot. */
-export const photo = pgTable("photo", {
-  id: uuid("id").primaryKey(),
-  utilisateurId: uuid("utilisateur_id")
-    .notNull()
-    .references(() => utilisateur.id, { onDelete: "cascade" }),
-  type: typePhoto("type").notNull(),
-  /** Nom du fichier (sans dossier), ex. « 3f2a….jpg ». */
-  fichier: text("fichier").notNull(),
-  /** Réduite à ~1600 px (lot 7, §5.10). */
-  estReduite: boolean("est_reduite").notNull().default(false),
-  creeLe: horodatage("cree_le").notNull().defaultNow(),
-});
+export const photo = pgTable(
+  "photo",
+  {
+    id: uuid("id").primaryKey(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    type: typePhoto("type").notNull(),
+    /** Nom du fichier (sans dossier), ex. « 3f2a….jpg ». */
+    fichier: text("fichier").notNull(),
+    /** Réduite à ~1600 px (lot 7, §5.10). */
+    estReduite: boolean("est_reduite").notNull().default(false),
+    creeLe: horodatage("cree_le").notNull().defaultNow(),
+  },
+  (t) => [index("photo_utilisateur_idx").on(t.utilisateurId)],
+);
 
 export const articlePhoto = pgTable(
   "article_photo",
@@ -264,26 +268,30 @@ export const boost = pgTable(
     montant: integer("montant").notNull(),
     date: date("date", { mode: "string" }).notNull(),
   },
-  (t) => [index("boost_article_idx").on(t.articleId)],
+  (t) => [index("boost_article_idx").on(t.articleId), index("boost_utilisateur_idx").on(t.utilisateurId)],
 );
 
 /** Vente (= un colis, §3) : 1 article (vente simple) ou plusieurs (vente groupée). */
-export const vente = pgTable("vente", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  utilisateurId: uuid("utilisateur_id")
-    .notNull()
-    .references(() => utilisateur.id, { onDelete: "cascade" }),
-  /** Centimes : montant réellement crédité (nouveau montant après un retour partiel). */
-  montantCredite: integer("montant_credite").notNull(),
-  /** Centimes : emballage du colis (§6.3). */
-  emballage: integer("emballage").notNull(),
-  dateVente: horodatage("date_vente").notNull(),
-  dateEnvoi: horodatage("date_envoi"),
-  dateFinalisation: horodatage("date_finalisation"),
-  /** Annulation par l'acheteur ou retour du colis entier : exclue de tous les calculs (§4.4). */
-  annulee: boolean("annulee").notNull().default(false),
-  creeLe: horodatage("cree_le").notNull().defaultNow(),
-});
+export const vente = pgTable(
+  "vente",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    /** Centimes : montant réellement crédité (nouveau montant après un retour partiel). */
+    montantCredite: integer("montant_credite").notNull(),
+    /** Centimes : emballage du colis (§6.3). */
+    emballage: integer("emballage").notNull(),
+    dateVente: horodatage("date_vente").notNull(),
+    dateEnvoi: horodatage("date_envoi"),
+    dateFinalisation: horodatage("date_finalisation"),
+    /** Annulation par l'acheteur ou retour du colis entier : exclue de tous les calculs (§4.4). */
+    annulee: boolean("annulee").notNull().default(false),
+    creeLe: horodatage("cree_le").notNull().defaultNow(),
+  },
+  (t) => [index("vente_utilisateur_idx").on(t.utilisateurId)],
+);
 
 export const venteArticle = pgTable(
   "vente_article",
@@ -303,38 +311,47 @@ export const venteArticle = pgTable(
 );
 
 /** Frais divers saisis à la main (§5.12) : frais généraux du mois de leur date. */
-export const fraisGeneral = pgTable("frais_general", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  utilisateurId: uuid("utilisateur_id")
-    .notNull()
-    .references(() => utilisateur.id, { onDelete: "cascade" }),
-  date: date("date", { mode: "string" }).notNull(),
-  /** Centimes. */
-  montant: integer("montant").notNull(),
-  libelle: text("libelle").notNull(),
-});
+export const fraisGeneral = pgTable(
+  "frais_general",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    date: date("date", { mode: "string" }).notNull(),
+    /** Centimes. */
+    montant: integer("montant").notNull(),
+    libelle: text("libelle").notNull(),
+  },
+  (t) => [index("frais_general_utilisateur_date_idx").on(t.utilisateurId, t.date)],
+);
 
 /** Réglages de l'utilisateur (§7) ; une ligne par utilisateur, créée à la première modification. */
-export const reglages = pgTable("reglages", {
-  utilisateurId: uuid("utilisateur_id")
-    .primaryKey()
-    .references(() => utilisateur.id, { onDelete: "cascade" }),
-  /** Centimes : emballage par défaut d'un colis (0,08 €). */
-  emballageDefaut: integer("emballage_defaut").notNull().default(8),
-  /** Jours : alerte « brouillon trop ancien » (§5.8). */
-  delaiBrouillon: integer("delai_brouillon").notNull().default(3),
-  /** Jours : alerte « article dormant » (§5.8). */
-  delaiDormant: integer("delai_dormant").notNull().default(7),
-  /** Prompts IA modifiables (lot 6) ; null = prompt par défaut. */
-  promptAnnonce: text("prompt_annonce"),
-  promptEtiquette: text("prompt_etiquette"),
-  /** Publication Vinted : format de colis proposé par défaut. */
-  formatColisDefaut: formatColis("format_colis_defaut").notNull().default("petit"),
-  /** Empreinte SHA-256 du jeton du programme de publication (le jeton lui-même n'est jamais stocké). */
-  jetonPublication: text("jeton_publication"),
-  /** Dernier contact du programme de publication. */
-  programmeVuLe: horodatage("programme_vu_le"),
-});
+export const reglages = pgTable(
+  "reglages",
+  {
+    utilisateurId: uuid("utilisateur_id")
+      .primaryKey()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    /** Centimes : emballage par défaut d'un colis (0,08 €). */
+    emballageDefaut: integer("emballage_defaut").notNull().default(8),
+    /** Jours : alerte « brouillon trop ancien » (§5.8). */
+    delaiBrouillon: integer("delai_brouillon").notNull().default(3),
+    /** Jours : alerte « article dormant » (§5.8). */
+    delaiDormant: integer("delai_dormant").notNull().default(7),
+    /** Prompts IA modifiables (lot 6) ; null = prompt par défaut. */
+    promptAnnonce: text("prompt_annonce"),
+    promptEtiquette: text("prompt_etiquette"),
+    /** Publication Vinted : format de colis proposé par défaut. */
+    formatColisDefaut: formatColis("format_colis_defaut").notNull().default("petit"),
+    /** Empreinte SHA-256 du jeton du programme de publication (le jeton lui-même n'est jamais stocké). */
+    jetonPublication: text("jeton_publication"),
+    /** Dernier contact du programme de publication. */
+    programmeVuLe: horodatage("programme_vu_le"),
+  },
+  // Le programme du PC s'identifie par son jeton à chaque appel (#131).
+  (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
+);
 
 /** File de publication sur Vinted : une demande par article, traitée par le programme du PC. */
 export const publicationVinted = pgTable(
@@ -355,5 +372,8 @@ export const publicationVinted = pgTable(
     debutLe: horodatage("debut_le"),
     finLe: horodatage("fin_le"),
   },
-  (t) => [index("publication_vinted_utilisateur_idx").on(t.utilisateurId, t.etat)],
+  (t) => [
+    index("publication_vinted_utilisateur_idx").on(t.utilisateurId, t.etat),
+    index("publication_vinted_article_idx").on(t.articleId),
+  ],
 );

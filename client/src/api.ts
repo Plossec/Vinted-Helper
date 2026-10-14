@@ -12,6 +12,13 @@ export class ErreurApi extends Error {
   }
 }
 
+/** Abonnés prévenus après chaque modification réussie (ex. cache des alertes, #131). */
+const apresModification = new Set<() => void>();
+export function surModification(abonne: () => void): () => void {
+  apresModification.add(abonne);
+  return () => apresModification.delete(abonne);
+}
+
 async function appeler<T>(methode: string, chemin: string, corps?: unknown): Promise<T> {
   let reponse: Response;
   try {
@@ -31,6 +38,7 @@ async function appeler<T>(methode: string, chemin: string, corps?: unknown): Pro
     }
     throw new ErreurApi(reponse.status, messageErreur(contenu, reponse.status));
   }
+  if (methode !== "GET") apresModification.forEach((f) => f());
   return contenu as T;
 }
 

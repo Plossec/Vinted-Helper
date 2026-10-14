@@ -1,5 +1,6 @@
 // Construction de l'application web (routes de l'API + interface compilée).
 import { existsSync } from "node:fs";
+import { sep } from "node:path";
 import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
 import Fastify, { type FastifyRequest, type RouteOptions } from "fastify";
@@ -160,7 +161,14 @@ export async function creerApp({
   routesIA(app, contexte, stockage, ia);
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {
-    await app.register(fastifyStatic, { root: dossierClient });
+    await app.register(fastifyStatic, {
+      root: dossierClient,
+      // Fichiers construits nommés d'après leur contenu (/assets/…-abc123.js) : gardés un an par le navigateur (#131).
+      setHeaders: (reponse, chemin) => {
+        if (chemin.includes(`${sep}assets${sep}`))
+          reponse.header("Cache-Control", "public, max-age=31536000, immutable");
+      },
+    });
     // Application d'une seule page : toute adresse inconnue hors /api renvoie l'interface.
     app.setNotFoundHandler((requete, reponse) => {
       if (requete.url.startsWith("/api/")) {

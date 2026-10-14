@@ -27,6 +27,7 @@ Développement local (PC Windows + Docker Desktop), puis hébergement sur un VPS
 | Développement (hors Docker, base Docker démarrée) | `npm run dev:server` + `npm run dev:client` (http://localhost:5173) |
 | Construire client + serveur | `npm run build` |
 | Tests / calculs seuls | `npm test` / `npm test -w server -- calculs` |
+| Couverture des tests (rapport dans `server/coverage/`, `client/coverage/`) | `npm run test:couverture` |
 | Types / lint / formatage | `npm run typecheck` / `npm run lint` / `npm run format` (`format:check` pour vérifier) |
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` (automatique chaque jour : service `sauvegarde`, `sauvegardes/auto/`) |
 | Générer / appliquer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` / `npm run db:migrate` (aussi au démarrage) |

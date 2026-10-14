@@ -3,7 +3,8 @@
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { api, ErreurApi } from "../api.js";
-import { type AlertesServeur, nombreAlertes } from "../composants/Alertes.js";
+import { nombreAlertes } from "../composants/Alertes.js";
+import { chargerAlertes } from "../outils/alertesCache.js";
 import { BandeauFile } from "../composants/BandeauFile.js";
 import { FenetreDialogue } from "../composants/Dialogue.js";
 import { IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
@@ -33,8 +34,7 @@ export function Disposition() {
   // Pastille d'alertes sur l'onglet Articles, mise à jour à chaque changement d'écran.
   useEffect(() => {
     let actif = true;
-    api
-      .get<AlertesServeur>("/api/alertes")
+    chargerAlertes()
       .then((a) => actif && setAlertes(nombreAlertes(a)))
       .catch(() => undefined);
     return () => {

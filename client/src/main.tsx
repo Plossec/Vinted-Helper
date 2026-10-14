@@ -9,11 +9,9 @@ import { ListeArticles } from "./ecrans/ListeArticles.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
 import { FicheVente } from "./ecrans/FicheVente.js";
 import { Listes } from "./ecrans/Listes.js";
-import { PublicationVinted } from "./ecrans/PublicationVinted.js";
 import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
-import { TableauDeBord } from "./ecrans/TableauDeBord.js";
 import { Terrain } from "./ecrans/Terrain.js";
 import { enregistrerServiceWorker } from "./pwa.js";
 import { appliquerPreferenceTheme, lirePreferenceTheme } from "./theme.js";
@@ -33,14 +31,21 @@ const routeur = createBrowserRouter([
           { path: "articles/nouveau", element: <FicheArticle /> },
           { path: "articles/:id", element: <FicheArticle /> },
           { path: "terrain", element: <Terrain /> },
-          { path: "tableau", element: <TableauDeBord /> },
+          // Écrans plus lourds chargés à la demande (#131) ; gardés sur le téléphone par le service worker.
+          {
+            path: "tableau",
+            lazy: async () => ({ Component: (await import("./ecrans/TableauDeBord.js")).TableauDeBord }),
+          },
           { path: "sorties", element: <ListeSorties /> },
           { path: "sorties/:id", element: <FicheSortie /> },
           { path: "ventes/:id", element: <FicheVente /> },
           { path: "frais", element: <FraisDivers /> },
           { path: "corbeille", element: <Corbeille /> },
           { path: "listes", element: <Listes /> },
-          { path: "publication", element: <PublicationVinted /> },
+          {
+            path: "publication",
+            lazy: async () => ({ Component: (await import("./ecrans/PublicationVinted.js")).PublicationVinted }),
+          },
           { path: "reglages", element: <Reglages /> },
         ],
       },

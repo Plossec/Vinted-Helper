@@ -55,14 +55,19 @@ export async function chargerDonneesCalcul(base: Base | Transaction, utilisateur
   ]);
   // Un article à la corbeille ne compte plus dans la vente (ses parts vont aux articles restants).
   const vivants = new Set(articles.map((a) => a.id));
+  // Lignes regroupées par vente en un seul passage (#131), au lieu d'un filtre par vente.
+  const lignesParVente = new Map<string, typeof lignes>();
+  for (const l of lignes) {
+    if (!vivants.has(l.articleId)) continue;
+    const liste = lignesParVente.get(l.venteId);
+    if (liste) liste.push(l);
+    else lignesParVente.set(l.venteId, [l]);
+  }
   return {
     articles,
     lots,
     sorties,
-    ventes: ventes.map((v) => ({
-      ...v,
-      lignes: lignes.filter((l) => l.venteId === v.id && vivants.has(l.articleId)),
-    })),
+    ventes: ventes.map((v) => ({ ...v, lignes: lignesParVente.get(v.id) ?? [] })),
     boosts: boosts.filter((b) => vivants.has(b.articleId)),
   };
 }
