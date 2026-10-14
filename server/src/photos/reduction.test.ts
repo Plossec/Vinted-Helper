@@ -75,7 +75,7 @@ describe("réduction des photos", () => {
     expect(readdirSync(t.dossier).some((f) => f.startsWith(p2))).toBe(false);
   });
 
-  it("sortie « À vendre hors Vinted » (#180) : photos gardées telles quelles", async () => {
+  it("« À vendre hors Vinted » (#180) : photos gardées, puis réduites une fois revendu (#194)", async () => {
     const terrain = await envoyer("terrain");
     const articleId = randomUUID();
     await requete("POST", "/api/achats", {
@@ -93,6 +93,22 @@ describe("réduction des photos", () => {
     expect(r.statusCode, r.body).toBe(200);
     expect(r.json<{ photos: { id: string }[] }>().photos).toHaveLength(3);
     expect(await largeur(p2)).toBe(3000);
+
+    const revente = await requete("POST", `/api/articles/${articleId}/sortie-stock`, {
+      motif: "revendu",
+      canal: "leboncoin",
+      prixRevente: 500,
+    });
+    expect(revente.statusCode, revente.body).toBe(200);
+    expect(
+      revente
+        .json<{ photos: { id: string }[] }>()
+        .photos.map((p) => p.id)
+        .sort(),
+    ).toEqual([terrain, p1].sort());
+    expect(await largeur(p1)).toBe(1600);
+    expect(await largeur(terrain)).toBe(1600);
+    expect((await requete("GET", `/api/photos/${p2}`)).statusCode).toBe(404);
   });
 
   it("photo terrain partagée : réduite seulement quand tous les articles du lot sont finalisés ou sortis", async () => {

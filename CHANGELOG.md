@@ -18,6 +18,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 - La liste des articles a son propre onglet « Articles » (adresse `/articles`) ; les alertes du haut de la liste sont
   passées dans « À faire » (#191).
 
+## [1.14.3] — 14/10/2026
+
+### Modifié
+- Photos : celles d'un article « À vendre hors Vinted » sont réduites dès qu'il est revendu (ou sorti pour un
+  autre motif), comme pour une vente Vinted finalisée. C'était déjà le cas ; la règle est maintenant écrite et
+  vérifiée par un test (#194).
+
 ## [1.14.2] — 14/10/2026
 
 ### Modifié
