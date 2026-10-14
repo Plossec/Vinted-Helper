@@ -12,7 +12,7 @@ possible du compte) valent pour chacune.
 |---|---|
 | Qui agit sur Vinted | **L'extension Chrome** seule, déjà connectée au compte Vinted de l'utilisateur. Le serveur OVH ne se connecte jamais à Vinted (aucun mot de passe Vinted stocké). |
 | Quand | Pendant les passages réguliers de l'extension (alarme existante), donc **seulement quand Chrome est ouvert** ; rattrapage au démarrage suivant. |
-| Rythme | **Propre à chaque tâche, à définir** (*TBD*) à la fin de #147 à #151 : issue #190. Tâche déjà réalisée, la **publication** : une annonce à la fois, 10 minutes entre deux annonces publiées, 5 secondes entre deux étapes (#63). Toute tâche s'arrête sur captcha ou erreur d'accès. |
+| Rythme | Voir « Rythme des tâches (#190) » ci-dessous. Publication inchangée : une annonce à la fois, 10 minutes entre deux annonces publiées, 5 secondes entre deux étapes (#63). Toute tâche s'arrête sur captcha ou erreur d'accès. |
 | Résultats | Remontés au serveur par les routes du programme (jeton), comme la publication ; journal visible dans l'application. |
 | Ordre de réalisation | À fixer une fois les 5 issues définies (définies le 14/10/2026). Dépendances : #149 → #150 (offre acceptée), #150 → #151 (ventes créées), alertes → #191 ; #147 est la plus simple. |
 | Développement | **Aucun développement tant que les 5 issues ne sont pas toutes définies** (demande de l'utilisateur, 14/10/2026). |
@@ -37,7 +37,7 @@ republie** l'annonce une fois au prix minimum.
 | Ordre de la republication | **Supprimer l'ancienne annonce, puis créer la nouvelle** (choix de l'utilisateur, en connaissance du risque) ; si la création échoue, l'article passe *Erreur de publication* avec une alerte et se republie d'un clic. Nouveau lien enregistré sur l'article. |
 | Mode | **Automatique** ou **manuel**, au choix dans les réglages du compte. Manuel : les baisses et republications prévues apparaissent dans une **liste à valider** ; l'utilisateur coche puis « Appliquer », l'extension les exécute. |
 | Compte des jours | Une baisse et une republication relancent le délai dormant. |
-| Rythme | *TBD* (#190). |
+| Rythme | Voir « Rythme des tâches (#190) ». |
 | Journal | L'écran « Publication Vinted » affiche aussi ces actions (« Baisse 11 € → 9,50 € », « Republiée ») et leur résultat ; chaque baisse entre dans l'historique des prix. |
 | Calibrage | Les pages Vinted « Modifier l'annonce » et « Supprimer » sont relevées par le **Diagnostic** de l'extension ; première version en **mode essai** (rien d'enregistré) jusqu'au relevé de l'utilisateur. |
 | Livraison | PR 1 : réglages (migration), calcul, file d'actions, journal, extension en mode essai, relevé au Diagnostic. PR 2 : calibrage d'après le relevé, passage au mode réel. |
@@ -56,7 +56,7 @@ dans l'application. La saisie des ventes, l'envoi et les retours restent manuels
 | Date | **Date de fin de la commande lue sur Vinted** (le CA réalisé tombe dans le bon mois même si la tâche passe plus tard). |
 | Montant | Si le montant crédité par Vinted diffère de celui de l'application : **le montant Vinted remplace** le montant crédité de la vente (réparti au prorata pour une vente groupée, §6.4) **et une alerte le signale** avec les deux montants. |
 | Mode | **Automatique ou manuel**, au réglage du compte (comme #147) ; manuel = liste « changements détectés sur Vinted » à valider. |
-| Rythme | *TBD* (#190). |
+| Rythme | Voir « Rythme des tâches (#190) ». |
 | Alertes | Les nouvelles alertes (à rattacher, montant corrigé) iront dans l'écran d'accueil « À faire » proposé par l'utilisateur : #191. |
 
 ## 14/10/2026 — #149 Négociation favoris
@@ -73,7 +73,7 @@ l'acheter. La plus risquée vis-à-vis de Vinted (envoi vers des tiers) : réali
 | Répétition | **Une seule offre** par personne et par article, jamais de relance. |
 | Mode | **Automatique ou manuel**, au réglage du compte ; manuel = liste des offres prévues à valider. |
 | Offre acceptée | Traitée par **#150** (pas par cette tâche). |
-| Rythme | *TBD* (#190). |
+| Rythme | Voir « Rythme des tâches (#190) ». |
 
 ## 14/10/2026 — #150 Validée prix proposé
 
@@ -87,7 +87,7 @@ l'acheter. La plus risquée vis-à-vis de Vinted (envoi vers des tiers) : réali
 | Sans prix vente minimum | **Rien sur Vinted**, l'offre est **signalée dans l'application** (écran « À faire », #191). |
 | Offre acceptée et payée | **La vente est créée** : article *À expédier*, prix vendu = prix accepté, date de vente = date du paiement lue sur Vinted, lien de la conversation enregistré. Offre groupée (plusieurs articles) → vente groupée, montant réparti au prorata (§6.4). Vaut aussi pour les offres envoyées par #149. |
 | Mode | **Automatique ou manuel**, au réglage du compte ; manuel = liste des réponses prévues (accepter, contre-offre) à valider. |
-| Rythme | *TBD* (#190). |
+| Rythme | Voir « Rythme des tâches (#190) ». |
 
 ## 14/10/2026 — #151 Récupération du bon de livraison
 
@@ -101,4 +101,25 @@ tâche récupère sur Vinted de quoi expédier le colis.
 | Usage | **Les deux** : impression groupée sur le PC (tous les bordereaux des *À expédier* en un seul PDF) et affichage du bordereau ou du QR code sur la fiche de la vente, au téléphone. |
 | Date limite | Alerte dans l'écran « À faire » (#191) quand elle approche. |
 | Mode | **Automatique ou manuel**, au réglage du compte. |
-| Rythme | *TBD* (#190). |
+| Rythme | Voir « Rythme des tâches (#190) ». |
+
+## 14/10/2026 — Rythme des tâches (#190)
+
+**Décision (utilisateur)** : fréquence, pause et plafond sont **réglables tâche par tâche** dans les réglages du
+compte, dans des **limites imposées** contre le spam (valeurs par défaut et limites proposées par Claude, fréquence
+fixée par l'utilisateur).
+
+| Tâche | Fréquence | Pause entre deux actions | Plafond par jour |
+|---|---|---|---|
+| #150 Offres reçues | 1 fois par jour (au plus toutes les 6 h) | 2 min (min. 1 min) | 30 réponses (max. 50) |
+| #151 Bordereaux | 1 fois par jour (au plus toutes les 6 h) | 1 min (min. 30 s) | 30 (max. 50) |
+| #148 Finalisation | 1 fois par jour (au plus toutes les 6 h) | 1 min (min. 30 s) | 50 (max. 100) |
+| #147 Dormants | 1 fois par jour (au plus toutes les 6 h) | baisse 2 min (min. 1 min) ; republication 10 min (min. 10 min) | 20 baisses (max. 40) ; 10 republications (max. 20) |
+| #149 Favoris | 1 fois par jour (au plus toutes les 6 h) | 5 min (min. 3 min) | 10 offres (max. 20) |
+
+| Sujet | Décision |
+|---|---|
+| Enchaînement | **Une seule action à la fois** sur Vinted, par priorité : offres (#150) > bordereaux (#151) > publication > finalisation (#148) > dormants (#147) > favoris (#149). |
+| Horaires | **8 h – 22 h** (heure de Paris), plage réglable. |
+| Publication | Rythme inchangé (10 min entre deux annonces). |
+| Piste (hors périmètre, §10) | Réglages avancés du rythme en **option payante** si l'application devient publique un jour. |
