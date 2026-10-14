@@ -14,9 +14,10 @@ possible du compte) valent pour chacune.
 | Quand | Pendant les passages réguliers de l'extension (alarme existante), donc **seulement quand Chrome est ouvert** ; rattrapage au démarrage suivant. |
 | Rythme | **Propre à chaque tâche, à définir** (*TBD*) à la fin de #147 à #151 : issue #190. Tâche déjà réalisée, la **publication** : une annonce à la fois, 10 minutes entre deux annonces publiées, 5 secondes entre deux étapes (#63). Toute tâche s'arrête sur captcha ou erreur d'accès. |
 | Résultats | Remontés au serveur par les routes du programme (jeton), comme la publication ; journal visible dans l'application. |
-| Ordre de réalisation proposé | Socle + #148, puis #151, #150, #147, #149. **L'utilisateur choisit de commencer par #147** (la plus simple). |
+| Ordre de réalisation | À fixer une fois les 5 issues définies (définies le 14/10/2026). Dépendances : #149 → #150 (offre acceptée), #150 → #151 (ventes créées), alertes → #191 ; #147 est la plus simple. |
 | Développement | **Aucun développement tant que les 5 issues ne sont pas toutes définies** (demande de l'utilisateur, 14/10/2026). |
-| Démarrage | Chaque tâche pourra démarrer en mode « proposer puis l'utilisateur valide » ; #147 est directement **automatique** (choix de l'utilisateur). |
+| Mode | **Chaque tâche : automatique ou manuel, au choix dans les réglages du compte** ; manuel = liste des actions prévues à valider (cocher puis « Appliquer »). |
+| Signalements | Centralisés dans un écran d'accueil « À faire » : #191. |
 
 ## 14/10/2026 — #147 Articles dormants
 
@@ -88,10 +89,16 @@ l'acheter. La plus risquée vis-à-vis de Vinted (envoi vers des tiers) : réali
 | Mode | **Automatique ou manuel**, au réglage du compte ; manuel = liste des réponses prévues (accepter, contre-offre) à valider. |
 | Rythme | *TBD* (#190). |
 
-## 14/10/2026 — #151 Récupération du bon de livraison (*à préciser*)
+## 14/10/2026 — #151 Récupération du bon de livraison
 
-**Piste retenue au cadrage** : dès qu'une vente est détectée (#148, prérequis), l'extension télécharge le **bordereau
-d'envoi (PDF)** et le rattache à la vente ; impression depuis l'application (plusieurs d'un coup) ; numéro de suivi
-enregistré.
+**Décision (utilisateur)** : pour chaque article **« À expédier »** (vente saisie à la main ou créée par #150), la
+tâche récupère sur Vinted de quoi expédier le colis.
 
-Reste à trancher : impression depuis le PC ou le téléphone.
+| Sujet | Décision |
+|---|---|
+| Déclencheur | Article *À expédier* dans l'application, quelle que soit l'origine de la vente (#148 ne crée pas de vente). |
+| Récupéré | **Bordereau (PDF)**, **QR code / code de dépôt** (transporteurs sans impression), **numéro de suivi** (avec le transporteur), **date limite d'envoi**. |
+| Usage | **Les deux** : impression groupée sur le PC (tous les bordereaux des *À expédier* en un seul PDF) et affichage du bordereau ou du QR code sur la fiche de la vente, au téléphone. |
+| Date limite | Alerte dans l'écran « À faire » (#191) quand elle approche. |
+| Mode | **Automatique ou manuel**, au réglage du compte. |
+| Rythme | *TBD* (#190). |
