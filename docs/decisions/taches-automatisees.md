@@ -1,4 +1,4 @@
-# Tâches automatisées sur Vinted (#147 à #151)
+# Tâches automatisées sur Vinted (#147 à #151, #190, #191)
 
 Décisions sur les tâches que l'extension exécute seule sur le compte Vinted de l'utilisateur. Possibles depuis la
 suppression de la règle n° 4 (#185, `publication-vinted.md`) ; les risques déjà acceptés (CGU de Vinted : suspension
@@ -123,3 +123,16 @@ fixée par l'utilisateur).
 | Horaires | **8 h – 22 h** (heure de Paris), plage réglable. |
 | Publication | Rythme inchangé (10 min entre deux annonces). |
 | Piste (hors périmètre, §10) | Réglages avancés du rythme en **option payante** si l'application devient publique un jour. |
+
+## 14/10/2026 — Écran d'accueil « À faire » (#191)
+
+**Décision (utilisateur)** : un écran unique regroupe tout ce qui demande l'attention de l'utilisateur, les
+alertes actuelles (§5.8) comme les signalements des tâches automatisées.
+
+| Sujet | Décision |
+|---|---|
+| Place | **Nouvel onglet d'accueil « À faire »**, 1er onglet, ouvert au démarrage, avec la **pastille** du nombre de choses à faire (elle quitte l'onglet Articles). Articles devient le 2e onglet (5 onglets en bas). Les puces d'alertes du haut de la liste Articles y sont reprises. |
+| Organisation | **Par urgence** : « Urgent » (date limite d'envoi proche #151, publications en erreur, offres sans prix minimum #150) ; « À traiter » (à expédier, à récupérer, ventes à rattacher #148, actions à valider en mode manuel #147 à #151) ; « Pour info » (montants corrigés #148, invendus #147, dormants, brouillons anciens). |
+| Actions | **Les deux** : boutons sur la ligne (Valider / Appliquer en mode manuel, Rattacher, Imprimer le bordereau, Ouvrir la conversation, Marquer envoyé…) **et** lien vers la fiche de l'article ou de la vente. |
+| Disparition | Les choses à faire disparaissent seules une fois faites ; les signalements d'information se ferment par un bouton **« Vu »**. |
+| Notifications | Aucune sur le téléphone (§10) : tout reste dans l'application. |
