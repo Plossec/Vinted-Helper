@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.15.1] — 15/10/2026
+
+### Modifié
+- Documentation : les 22 décisions qui attendaient une relecture (choix faits par Claude) sont validées par
+  l'utilisateur et passent « Acceptées » ; plus aucune décision « à relire » (#203).
+
 ## [1.15.0] — 14/10/2026
 
 ### Ajouté
