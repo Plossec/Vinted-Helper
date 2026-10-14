@@ -1,11 +1,9 @@
 // Routes de la corbeille.
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { objet, uuidObligatoire } from "../outils/validation.js";
+import { idDe } from "../outils/validation.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import { listerCorbeille, mettreALaCorbeille, restaurer, viderArticle } from "./service.js";
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 export function routesCorbeille(
   app: FastifyInstance,

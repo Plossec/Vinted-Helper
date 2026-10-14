@@ -1,5 +1,6 @@
 // Appels à l'API du serveur (même adresse que l'interface, cookie de session envoyé automatiquement).
 import type { Statut } from "./statuts.js";
+import { messageErreur } from "./outils/erreurs.js";
 
 export class ErreurApi extends Error {
   constructor(
@@ -28,11 +29,7 @@ async function appeler<T>(methode: string, chemin: string, corps?: unknown): Pro
     if (reponse.status === 401 && chemin !== "/api/connexion" && window.location.pathname !== "/connexion") {
       window.location.assign("/connexion"); // session expirée : retour à l'écran de connexion
     }
-    const message =
-      typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
-        ? contenu.erreur
-        : `Erreur ${reponse.status}`;
-    throw new ErreurApi(reponse.status, message);
+    throw new ErreurApi(reponse.status, messageErreur(contenu, reponse.status));
   }
   return contenu as T;
 }
@@ -60,11 +57,7 @@ export async function envoyerPhoto(image: Blob, type: "terrain" | "annonce"): Pr
   }
   if (!reponse.ok) {
     const contenu: unknown = await reponse.json().catch(() => null);
-    const message =
-      typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
-        ? contenu.erreur
-        : `Erreur ${reponse.status}`;
-    throw new ErreurApi(reponse.status, message);
+    throw new ErreurApi(reponse.status, messageErreur(contenu, reponse.status));
   }
   return id;
 }
@@ -84,11 +77,7 @@ export async function envoyerImage<T>(chemin: string, image: Blob): Promise<T> {
   }
   const contenu: unknown = await reponse.json().catch(() => null);
   if (!reponse.ok) {
-    const message =
-      typeof contenu === "object" && contenu !== null && "erreur" in contenu && typeof contenu.erreur === "string"
-        ? contenu.erreur
-        : `Erreur ${reponse.status}`;
-    throw new ErreurApi(reponse.status, message);
+    throw new ErreurApi(reponse.status, messageErreur(contenu, reponse.status));
   }
   return contenu as T;
 }

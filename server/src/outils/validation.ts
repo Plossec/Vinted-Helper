@@ -95,3 +95,6 @@ export function lienVintedFacultatif(valeur: unknown, champ: string): string | n
   }
   return url.toString();
 }
+
+/** Identifiant `:id` d'une adresse de l'API (#133 : une seule définition pour toutes les routes). */
+export const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");

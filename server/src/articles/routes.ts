@@ -9,6 +9,7 @@ import {
   centimesFacultatif,
   dateObligatoire,
   horodatageFacultatif,
+  idDe,
   lienVintedFacultatif,
   objet,
   texteFacultatif,
@@ -74,8 +75,6 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
     formatColis: formatColisFacultatif(c.formatColis),
   };
 }
-
-const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
 
 export function routesArticles(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/articles", async (requete) => listerArticles(base, utilisateurDe(requete).id));

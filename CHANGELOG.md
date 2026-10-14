@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.1] — 13/10/2026
+
+### Modifié
+- Qualité du code : doublons retirés (messages d'erreur, identifiants des routes, format des prix), React compté
+  comme outil de construction (image Docker plus légère), annexe des catégories générée automatiquement (#133).
+
 ## [1.12.0] — 13/10/2026
 
 ### Ajouté
