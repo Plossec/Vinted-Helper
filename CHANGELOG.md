@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.6] — 14/10/2026
+
+### Corrigé
+- Extension Vinted 1.8.3 : prix saisi avec un point et relu tout de suite (Vinted affichait « NaN € ») ; relevé de la
+  page joint quand le contrôle avant envoi échoue (#176).
+- Catégories Hommes › Vêtements › Sweats et pulls alignées sur les libellés de Vinted (« Sweats à col V »,
+  « Cardigans »…) ; les articles déjà classés sont repris automatiquement (#176).
+
 ## [1.12.5] — 14/10/2026
 
 ### Modifié

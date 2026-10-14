@@ -236,9 +236,22 @@ export const ARBRE_CATEGORIES: NoeudCategorie[] = [
         f("T-shirts", "T-shirts à manches longues", "Chemises", "Polos", "Débardeurs", "Autres hauts"),
       ),
       n("Costumes et blazers", f("Blazers", "Costumes", "Pantalons de costume", "Gilets de costume", "Autres")),
+      // Relevé Vinted du 14/10/2026 (#176) : liste exacte proposée par Vinted (anciens libellés repris par la migration 0012).
       n(
         "Sweats et pulls",
-        f("Sweats", "Sweats à capuche", "Sweats zippés", "Pulls", "Pulls col roulé", "Pulls col V", "Gilets", "Autres"),
+        f(
+          "Sweats",
+          "Pulls et pulls à capuche",
+          "Pulls à capuche avec zip",
+          "Cardigans",
+          "Pulls ras de cou",
+          "Sweats à col V",
+          "Pulls à col roulé",
+          "Sweats longs",
+          "Pulls d'hiver",
+          "Vestes",
+          "Autres",
+        ),
       ),
       n(
         "Pantalons",

@@ -1,6 +1,6 @@
 // Migration 0001 : conversion des articles saisis avant l'arbre des catégories et les états Vinted.
 // On applique la migration 0000, on insère des articles « à l'ancienne », puis on applique la 0001.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -99,5 +99,41 @@ describe("migration 0002 — marques de départ ajoutées aux comptes existants"
     expect(lignes.filter((n) => n.toLowerCase() === "levi's")).toEqual(["LEVI'S"]);
     expect(lignes).toContain("Sans marque");
     expect(lignes).toContain("Tape à l'œil");
+  });
+});
+
+describe("migration 0012 — Hommes › Sweats et pulls aligné sur Vinted (#176)", () => {
+  const client = new PGlite();
+  afterAll(() => client.close());
+
+  it("reprend les articles classés sous un ancien libellé, sans toucher aux autres", async () => {
+    const fichiers = readdirSync(dossier)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    for (const fichier of fichiers.filter((f) => f < "0012")) await appliquer(client, fichier);
+    const prefixe = "hommes/vetements/sweats-et-pulls/";
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES ('00000000-0000-4000-8000-000000000001', 'u', 'x');
+      INSERT INTO article (utilisateur_id, reference, categorie) VALUES
+        ('00000000-0000-4000-8000-000000000001', 1, '${prefixe}pulls-col-v'),
+        ('00000000-0000-4000-8000-000000000001', 2, '${prefixe}gilets'),
+        ('00000000-0000-4000-8000-000000000001', 3, '${prefixe}sweats'),
+        ('00000000-0000-4000-8000-000000000001', 4, 'femmes/vetements/pulls-et-gilets/pulls-col-v');
+    `);
+    await appliquer(client, "0012_categories_sweats_hommes.sql");
+    const lignes = (await client.query<{ categorie: string }>("SELECT categorie FROM article ORDER BY reference")).rows;
+    expect(lignes.map((l) => l.categorie)).toEqual([
+      `${prefixe}sweats-a-col-v`,
+      `${prefixe}cardigans`,
+      `${prefixe}sweats`,
+      "femmes/vetements/pulls-et-gilets/pulls-col-v",
+    ]);
+    // Chaque code d'arrivée existe dans l'arbre des catégories.
+    const { CATEGORIES } = await import("../catalogue/categories.js");
+    const codes = new Set(CATEGORIES.map((c) => c.code));
+    for (const code of readFileSync(resolve(dossier, "0012_categories_sweats_hommes.sql"), "utf8").matchAll(
+      /SET "categorie" = '([^']+)'/g,
+    ))
+      expect(codes.has(code[1] ?? "")).toBe(true);
   });
 });

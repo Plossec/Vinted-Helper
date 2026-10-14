@@ -116,6 +116,15 @@ la fois, avec des délais, et s'arrêtent sur captcha ou erreur d'accès.
   à l'égalité d'abord (« Bon état » ≠ « Très bon état ») ; le contrôle avant envoi exige l'état exact.
 - 07/10/2026 (#63, demande de l'utilisateur) : pause entre deux étapes ramenée à **5 secondes fixes** (au lieu de 15 à
   20 s). L'attente de 10 minutes entre deux annonces publiées est inchangée.
+- Essais du 14/10/2026 (#176) :
+  - prix : « NaN € » lu sur Vinted pour « 9,00 » saisi. Vinted reformate désormais le champ (« 9.00 € ») et ne lit
+    pas la virgule. Le prix est saisi avec un point, puis relu à l'étape prix. Un contrôle avant envoi en échec joint
+    maintenant un relevé.
+  - catégorie : « Pulls col V » n'existe pas sur Vinted. Hommes › Vêtements › Sweats et pulls reprend la liste exacte
+    de Vinted (journal d'erreur). Les articles déjà classés sont repris par la migration 0012 (Sweats à capuche →
+    Pulls et pulls à capuche, Sweats zippés → Pulls à capuche avec zip, Pulls → Pulls ras de cou, Pulls col roulé →
+    Pulls à col roulé, Pulls col V → Sweats à col V, Gilets → Cardigans). Les autres rayons seront rapprochés de
+    Vinted à partir de relevés (#177).
 - 14/10/2026 (#136, revue A6) : relecture des délais au regard de la règle n° 4. Ils servent à **espacer les
   publications** et à **laisser les pages se charger**, jamais à paraître humain ; tout tirage aléatoire est retiré.
   Inventaire (`service-worker.js`, `contenu.js`) :
