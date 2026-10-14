@@ -2,10 +2,9 @@
 
 - **Date** : 08/10/2026
 - **Statut** : Accepté · graphique et tuiles précisés par [ADR-0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) et [ADR-0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md)
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #88
 - **Thème** : Tableau de bord
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

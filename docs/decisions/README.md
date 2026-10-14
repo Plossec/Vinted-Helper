@@ -24,16 +24,16 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0006](0006-lot-1-decisions-de-cadrage.md) | 05/10/2026 | Lot 1 : décisions de cadrage | Socle | Accepté · « À publier » sans contrôle : voir l'issue #196 |  |
 | [0007](0007-lot-1-choix-pendant-le-developpement.md) | 05/10/2026 | Lot 1 : choix pendant le développement | Socle | Accepté |  |
 | [0008](0008-lot-1-categories-marques-etats-et-listes-deroulantes.md) | 05/10/2026 | Lot 1 : catégories, marques, états et listes déroulantes | Socle | Accepté · catégories remplacées par [ADR-0065](0065-categories-recopiees-de-vinted.md) |  |
-| [0009](0009-https-local-pour-le-telephone.md) | 05/10/2026 | HTTPS local pour le téléphone | Serveur | Proposé | oui |
-| [0010](0010-lot-2-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 2 : choix pris en autonomie | Saisie terrain | Proposé · ligne « Sortie » remplacée par [ADR-0011](0011-lieu-de-la-sortie-en-saisie-libre.md) | oui |
+| [0009](0009-https-local-pour-le-telephone.md) | 05/10/2026 | HTTPS local pour le téléphone | Serveur | Accepté |  |
+| [0010](0010-lot-2-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 2 : choix pris en autonomie | Saisie terrain | Accepté · ligne « Sortie » remplacée par [ADR-0011](0011-lieu-de-la-sortie-en-saisie-libre.md) |  |
 | [0011](0011-lieu-de-la-sortie-en-saisie-libre.md) | 06/10/2026 | Lieu de la sortie en saisie libre | Saisie terrain | Accepté |  |
 | [0012](0012-annuler-la-sortie.md) | 06/10/2026 | Annuler la sortie | Saisie terrain | Accepté |  |
-| [0013](0013-lot-3-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 3 : choix pris en autonomie | Ventes | Proposé · sortie du stock dans un colis en cours : voir l'issue #192 | oui |
-| [0014](0014-lot-4-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 4 : choix pris en autonomie | Liste | Proposé | oui |
-| [0015](0015-lot-5-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 5 : choix pris en autonomie | Tableau de bord | Proposé · arrondi de la marge précisé par [ADR-0084](0084-marge-moyenne-arrondie-vers.md) | oui |
-| [0016](0016-lot-6-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 6 : choix pris en autonomie | IA Gemini | Proposé | oui |
-| [0017](0017-lot-7-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 7 : choix pris en autonomie | Photos et sauvegardes | Proposé · sauvegardes remplacées par [ADR-0018](0018-mise-en-ligne-ovh.md) et [ADR-0019](0019-rapatriement-automatique-des-sauvegardes.md) | oui |
-| [0018](0018-mise-en-ligne-ovh.md) | 06/10/2026 | Mise en ligne OVH | Serveur | Accepté · connexion SSH remplacée par [ADR-0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | oui |
+| [0013](0013-lot-3-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 3 : choix pris en autonomie | Ventes | Accepté · sortie du stock dans un colis en cours : voir l'issue #192 |  |
+| [0014](0014-lot-4-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 4 : choix pris en autonomie | Liste | Accepté |  |
+| [0015](0015-lot-5-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 5 : choix pris en autonomie | Tableau de bord | Accepté · arrondi de la marge précisé par [ADR-0084](0084-marge-moyenne-arrondie-vers.md) |  |
+| [0016](0016-lot-6-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 6 : choix pris en autonomie | IA Gemini | Accepté |  |
+| [0017](0017-lot-7-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 7 : choix pris en autonomie | Photos et sauvegardes | Accepté · sauvegardes remplacées par [ADR-0018](0018-mise-en-ligne-ovh.md) et [ADR-0019](0019-rapatriement-automatique-des-sauvegardes.md) |  |
+| [0018](0018-mise-en-ligne-ovh.md) | 06/10/2026 | Mise en ligne OVH | Serveur | Accepté · connexion SSH remplacée par [ADR-0087](0087-serveur-ovh-connexion-ssh-par-cle.md) |  |
 | [0019](0019-rapatriement-automatique-des-sauvegardes.md) | 06/10/2026 | Rapatriement automatique des sauvegardes | Serveur | Accepté |  |
 | [0020](0020-publication-des-annonces-par-un-programme-sur-le-pc.md) | 06/10/2026 | Publication des annonces par un programme sur le PC | Publication Vinted | Remplacé par [ADR-0034](0034-publication-par-une-extension-chrome.md) et [ADR-0036](0036-extension-validee-ancien-programme-retire.md) |  |
 | [0021](0021-blocage-par-vinted-publication-en-pause.md) | 06/10/2026 | Blocage par Vinted : publication en pause | Publication Vinted | Remplacé par [ADR-0034](0034-publication-par-une-extension-chrome.md) |  |
@@ -53,33 +53,33 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0035](0035-premiers-essais-et-calibrage-de-l-extension.md) | 07/10/2026 | Premiers essais et calibrage de l'extension | Publication Vinted | Accepté · délais remplacés par [ADR-0071](0071-delais-de-l-extension.md) |  |
 | [0036](0036-extension-validee-ancien-programme-retire.md) | 08/10/2026 | Extension validée, ancien programme retiré | Publication Vinted | Accepté |  |
 | [0037](0037-statut-erreur-de-publication.md) | 08/10/2026 | Statut « Erreur » de publication | Publication Vinted | Accepté · précisé par [ADR-0052](0052-statut-erreur-precisions-apres-la-revue-de-code.md) |  |
-| [0038](0038-calibrage-de-l-extension-sous-agent-et-skill.md) | 08/10/2026 | Calibrage de l'extension : sous-agent et skill | Méthode | Accepté | oui |
+| [0038](0038-calibrage-de-l-extension-sous-agent-et-skill.md) | 08/10/2026 | Calibrage de l'extension : sous-agent et skill | Méthode | Accepté |  |
 | [0039](0039-lot-en-mode-issues-pr.md) | 08/10/2026 | `/lot` en mode issues / PR | Méthode | Accepté |  |
-| [0040](0040-ca-et-benefice-theoriques-ventes-en-cours.md) | 08/10/2026 | CA et bénéfice théoriques (ventes en cours) | Tableau de bord | Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » : voir l'issue #193 | oui |
-| [0041](0041-affichage-du-tableau-de-bord-revu.md) | 08/10/2026 | Affichage du tableau de bord revu | Tableau de bord | Accepté · graphique et tuiles précisés par [ADR-0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) et [ADR-0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md) | oui |
+| [0040](0040-ca-et-benefice-theoriques-ventes-en-cours.md) | 08/10/2026 | CA et bénéfice théoriques (ventes en cours) | Tableau de bord | Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » : voir l'issue #193 |  |
+| [0041](0041-affichage-du-tableau-de-bord-revu.md) | 08/10/2026 | Affichage du tableau de bord revu | Tableau de bord | Accepté · graphique et tuiles précisés par [ADR-0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) et [ADR-0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md) |  |
 | [0042](0042-verification-apres-deploiement-et-retour-automatique.md) | 13/10/2026 | Vérification après déploiement et retour automatique | Serveur | Accepté |  |
 | [0043](0043-ci-completee.md) | 13/10/2026 | CI complétée | Serveur | Accepté |  |
 | [0044](0044-dependabot-typescript-7-ignore-pour-l-instant.md) | 13/10/2026 | Dependabot : TypeScript 7 ignoré pour l'instant | Serveur | Accepté |  |
 | [0045](0045-une-version-par-pr-tag-automatique.md) | 13/10/2026 | Une version par PR, tag automatique | Méthode | Accepté |  |
 | [0046](0046-securite-du-depot-reglages-hooks-fusions.md) | 13/10/2026 | Sécurité du dépôt : réglages, hooks, fusions | Méthode | Accepté · fusions précisées par [ADR-0081](0081-fusions-dans-main-par-claude-et-dependabot.md) |  |
-| [0047](0047-qualite-du-code-doublons-retires.md) | 13/10/2026 | Qualité du code : doublons retirés | Méthode | Proposé | oui |
+| [0047](0047-qualite-du-code-doublons-retires.md) | 13/10/2026 | Qualité du code : doublons retirés | Méthode | Accepté |  |
 | [0048](0048-prix-vente-minimum.md) | 13/10/2026 | Prix vente minimum | Socle | Accepté · contrôle à chaque baisse : voir l'issue #195 |  |
-| [0049](0049-securite-connexion-mot-de-passe-quota-de-l-ia.md) | 13/10/2026 | Sécurité : connexion, mot de passe, quota de l'IA | Socle | Accepté | oui |
+| [0049](0049-securite-connexion-mot-de-passe-quota-de-l-ia.md) | 13/10/2026 | Sécurité : connexion, mot de passe, quota de l'IA | Socle | Accepté |  |
 | [0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) | 13/10/2026 | Graphique et API du tableau de bord après la revue de code | Tableau de bord | Accepté |  |
 | [0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md) | 13/10/2026 | Tuiles CA et bénéfice : montant affiché une seule fois | Tableau de bord | Accepté |  |
 | [0052](0052-statut-erreur-precisions-apres-la-revue-de-code.md) | 13/10/2026 | Statut « Erreur » : précisions après la revue de code | Publication Vinted | Accepté |  |
 | [0053](0053-refonte-de-l-interface-design-tokens-techno.md) | 13/10/2026 | Refonte de l'interface : design tokens « Techno » | Interface | Accepté · couleurs des badges complétées par [ADR-0086](0086-couleurs-des-badges-de-statut.md) |  |
 | [0054](0054-fiche-article-avertissement-des-saisies-non-enregistrees.md) | 13/10/2026 | Fiche article : avertissement des saisies non enregistrées | Interface | Accepté |  |
-| [0055](0055-barre-de-navigation-icones-pastille-onglet-parent.md) | 13/10/2026 | Barre de navigation : icônes, pastille, onglet parent | Interface | Accepté | oui |
-| [0056](0056-liste-des-articles-haut-d-ecran-allege.md) | 13/10/2026 | Liste des articles : haut d'écran allégé | Interface | Accepté | oui |
-| [0057](0057-statuts-distincts-montants-homogenes-benefice-attendu.md) | 13/10/2026 | Statuts distincts, montants homogènes, bénéfice attendu | Interface | Accepté · couleurs détaillées par [ADR-0086](0086-couleurs-des-badges-de-statut.md) | oui |
+| [0055](0055-barre-de-navigation-icones-pastille-onglet-parent.md) | 13/10/2026 | Barre de navigation : icônes, pastille, onglet parent | Interface | Accepté |  |
+| [0056](0056-liste-des-articles-haut-d-ecran-allege.md) | 13/10/2026 | Liste des articles : haut d'écran allégé | Interface | Accepté |  |
+| [0057](0057-statuts-distincts-montants-homogenes-benefice-attendu.md) | 13/10/2026 | Statuts distincts, montants homogènes, bénéfice attendu | Interface | Accepté · couleurs détaillées par [ADR-0086](0086-couleurs-des-badges-de-statut.md) |  |
 | [0058](0058-mise-en-page-pc-a-partir-de-1024-px.md) | 13/10/2026 | Mise en page PC à partir de 1024 px | Interface | Accepté |  |
-| [0059](0059-boites-de-dialogue-titre-d-onglet-et-focus.md) | 13/10/2026 | Boîtes de dialogue, titre d'onglet et focus | Interface | Accepté | oui |
-| [0060](0060-terrain-en-sortie-active.md) | 13/10/2026 | Terrain en sortie active | Interface | Accepté | oui |
-| [0061](0061-fiche-article-organisee-autour-du-statut.md) | 13/10/2026 | Fiche article organisée autour du statut | Interface | Accepté | oui |
-| [0062](0062-tests-couverture-base-de-test-plus-rapide.md) | 14/10/2026 | Tests : couverture, base de test plus rapide | Méthode | Accepté | oui |
-| [0063](0063-outillage-claude-allege-et-verification-unique.md) | 14/10/2026 | Outillage Claude allégé et vérification unique | Méthode | Accepté | oui |
-| [0064](0064-performance.md) | 14/10/2026 | Performance | Tableau de bord | Accepté | oui |
+| [0059](0059-boites-de-dialogue-titre-d-onglet-et-focus.md) | 13/10/2026 | Boîtes de dialogue, titre d'onglet et focus | Interface | Accepté |  |
+| [0060](0060-terrain-en-sortie-active.md) | 13/10/2026 | Terrain en sortie active | Interface | Accepté |  |
+| [0061](0061-fiche-article-organisee-autour-du-statut.md) | 13/10/2026 | Fiche article organisée autour du statut | Interface | Accepté |  |
+| [0062](0062-tests-couverture-base-de-test-plus-rapide.md) | 14/10/2026 | Tests : couverture, base de test plus rapide | Méthode | Accepté |  |
+| [0063](0063-outillage-claude-allege-et-verification-unique.md) | 14/10/2026 | Outillage Claude allégé et vérification unique | Méthode | Accepté |  |
+| [0064](0064-performance.md) | 14/10/2026 | Performance | Tableau de bord | Accepté |  |
 | [0065](0065-categories-recopiees-de-vinted.md) | 14/10/2026 | Catégories recopiées de Vinted | Socle | Accepté · construction des codes confirmée par [ADR-0085](0085-code-de-categorie-construit-sur-le-chemin.md) |  |
 | [0066](0066-motif-de-sortie-a-vendre-hors-vinted.md) | 14/10/2026 | Motif de sortie « À vendre hors Vinted » | Ventes | Accepté |  |
 | [0067](0067-statut-en-stock.md) | 14/10/2026 | Statut « En stock » | Ventes | Accepté |  |

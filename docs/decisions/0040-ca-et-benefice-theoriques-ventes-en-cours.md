@@ -2,10 +2,9 @@
 
 - **Date** : 08/10/2026
 - **Statut** : Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » : voir l'issue #193
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #85
 - **Thème** : Tableau de bord
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

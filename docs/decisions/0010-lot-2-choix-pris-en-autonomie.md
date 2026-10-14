@@ -1,11 +1,10 @@
 # ADR-0010 — Lot 2 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Proposé · ligne « Sortie » remplacée par [ADR-0011](0011-lieu-de-la-sortie-en-saisie-libre.md)
-- **Décideurs** : Claude
+- **Statut** : Accepté · ligne « Sortie » remplacée par [ADR-0011](0011-lieu-de-la-sortie-en-saisie-libre.md)
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : Saisie terrain
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

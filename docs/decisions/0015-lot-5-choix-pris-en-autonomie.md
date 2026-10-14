@@ -1,11 +1,10 @@
 # ADR-0015 — Lot 5 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Proposé · arrondi de la marge précisé par [ADR-0084](0084-marge-moyenne-arrondie-vers.md)
-- **Décideurs** : Claude
+- **Statut** : Accepté · arrondi de la marge précisé par [ADR-0084](0084-marge-moyenne-arrondie-vers.md)
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : Tableau de bord
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 
