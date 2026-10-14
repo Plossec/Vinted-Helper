@@ -2,7 +2,7 @@
 // brouillons trop anciens, articles dormants. Une rangée de puces ; la puce touchée déplie sa liste (#100).
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api } from "../api.js";
+import { chargerAlertes } from "../outils/alertesCache.js";
 import { formatDate } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
 
@@ -73,8 +73,7 @@ export function Alertes() {
   const [ouvert, setOuvert] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .get<AlertesServeur>("/api/alertes")
+    chargerAlertes()
       .then(setAlertes)
       .catch(() => undefined);
   }, []);

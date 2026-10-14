@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.2] — 14/10/2026
+
+### Modifié
+- Performance : calcul des montants plus léger, alertes demandées au plus toutes les 30 secondes, index de base de
+  données ajoutés, tableau de bord et publication chargés à la demande, fichiers de l'interface gardés en cache
+  par le navigateur (#131).
+
 ## [1.12.1] — 13/10/2026
 
 ### Modifié

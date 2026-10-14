@@ -52,3 +52,17 @@ dessiné seulement s'il est positif (la bulle et le tableau donnent toujours le 
 
 **Décision (utilisateur)** : la ligne « Octobre 2026 réalisé : … » répétait le gros chiffre ; elle est retirée.
 Le libellé « Octobre 2026 réalisé » passe au-dessus du gros chiffre, la ligne « théorique » reste dessous.
+
+## 14/10/2026 — Performance (issue #131)
+
+**Décision (utilisateur)** : fait maintenant, sans attendre l'ouverture au public (#4).
+- Calcul : les lignes de vente sont regroupées par vente en un seul passage (au lieu d'un filtre par vente).
+- Alertes : un seul appel toutes les 30 secondes au plus, partagé par la barre de navigation et l'écran Articles,
+  vidé après toute modification.
+- Index ajoutés (migration `0011_index_performance`, ajouts seulement) : `vente`, `boost`, `photo` par utilisateur,
+  `frais_general` par utilisateur et date, `publication_vinted` par article, `reglages` par jeton de publication.
+- Tableau de bord et Publication Vinted chargés à la demande (gardés sur le téléphone par le service worker) ;
+  fichiers `/assets/*` (noms changeant à chaque version) gardés un an par le navigateur.
+Points tranchés par Claude (*à relire*) : pas de chargement « au périmètre d'une fiche » ni de fusion des deux
+lectures du tableau de bord (Q7) : gain faible à quelques centaines d'articles, risque sur les calculs ; pas de
+pagination de la liste (acceptable jusqu'à ~2 000 articles).
