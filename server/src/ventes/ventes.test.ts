@@ -289,6 +289,30 @@ describe("ventes et calculs", () => {
     });
   });
 
+  it("sortie « À vendre hors Vinted » (#180) : canal obligatoire, encore en stock, puis revendu", async () => {
+    const a = await enLigne(900, 440);
+    expect((await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "a_vendre" })).statusCode).toBe(400);
+    let r = await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "a_vendre", canal: "leboncoin" });
+    expect(r.json<ArticleLu>()).toMatchObject({
+      statut: "sortie_stock",
+      sortieStock: { motif: "a_vendre", canal: "leboncoin", prixRevente: null },
+      couts: { benefice: -440, realise: false },
+    });
+    r = await requete("POST", `/api/articles/${a}/sortie-stock`, {
+      motif: "revendu",
+      prixRevente: 500,
+      canal: "leboncoin",
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json<ArticleLu>()).toMatchObject({
+      statut: "sortie_stock",
+      sortieStock: { motif: "revendu", prixRevente: 500 },
+      couts: { benefice: 60, realise: true },
+    });
+    // Sorti pour de bon : plus de changement de motif.
+    expect((await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "donne" })).statusCode).toBe(409);
+  });
+
   it("sortie du stock refusée pour un article dans un colis en cours", async () => {
     const a = await enLigne(900);
     await vendre([a], 900);

@@ -49,3 +49,21 @@ describe("bénéfice attendu (#105)", () => {
     expect(d).toMatchObject({ benefice: -500, beneficeAttendu: null });
   });
 });
+
+describe("sortie du stock « À vendre hors Vinted » (#180)", () => {
+  const sortie = (motif: ArticlePourBenefice["motifSortie"], prixRevente: number | null = null) => ({
+    ...article("A", "sortie_stock"),
+    motifSortie: motif,
+    prixRevente,
+  });
+
+  it("à vendre hors Vinted : encore en stock, rien de réalisé (−coût total provisoire)", () => {
+    const d = calculerDetails(donnees(sortie("a_vendre"), false)).get("A");
+    expect(d).toMatchObject({ coutTotal: 500, benefice: -500, realise: false, beneficeAttendu: null });
+  });
+
+  it("revendu hors Vinted : le bénéfice reste réalisé (inchangé)", () => {
+    const d = calculerDetails(donnees(sortie("revendu", 1200), false)).get("A");
+    expect(d).toMatchObject({ benefice: 700, realise: true });
+  });
+});

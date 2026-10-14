@@ -87,7 +87,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **Vente** | Une transaction avec un acheteur = **un colis**. Contient 1 article (vente simple) ou plusieurs (**vente groupée**). |
 | **Retour partiel** | L'acheteur d'un colis groupé renvoie une partie des articles seulement. |
 | **Finalisé** | Vente validée par Vinted, argent crédité. C'est la **date de finalisation** qui compte pour le chiffre d'affaires. |
-| **Sortie du stock** | Article qui quitte le stock sans vente Vinted (Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu). |
+| **Sortie du stock** | Article qui quitte le stock sans vente Vinted (Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu, À vendre hors Vinted). |
 | **Coût total** | Prix d'achat + part d'essence + part d'emballage + boosts d'un article. |
 | **Frais généraux** | Dépense non rattachée à un article : essence d'une sortie sans achat (calculée) et **frais divers** saisis à la main (ex. vitrine Vinted, rouleau d'étiquettes). |
 | **Boost** | Option payante Vinted pour mettre un article en avant ; coût rattaché à l'article. |
@@ -195,8 +195,10 @@ Le passage **En ligne** exige un **prix affiché** : l'application le demande au
 - **Retour partiel** : sélection des articles renvoyés + saisie du **nouveau montant réellement crédité** pour le colis.
 
 ### 5.7 Sortie du stock
-- Motif obligatoire : **Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu**.
+- Motif obligatoire : **Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu, À vendre hors Vinted**.
 - **Revendu hors Vinted** : prix de revente + canal (Vide-grenier, Leboncoin, Main propre, Autre).
+- **À vendre hors Vinted** (14/10/2026, #180) : canal ; l'article reste compté en stock (rien de réalisé) jusqu'à sa
+  revente, enregistrée ensuite comme « Revendu hors Vinted » (ou un autre motif).
 
 ### 5.8 Alertes (affichées dans l'application uniquement)
 - **Brouillon trop ancien** : Brouillon depuis **3 jours ou plus**.

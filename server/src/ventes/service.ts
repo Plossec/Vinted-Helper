@@ -233,7 +233,11 @@ export interface DemandeSortieStock {
   date: Date;
 }
 
-/** Sortie du stock (§5.7) : motif obligatoire ; « Revendu hors Vinted » demande le prix et le canal. */
+/**
+ * Sortie du stock (§5.7) : motif obligatoire ; « Revendu hors Vinted » demande le prix et le canal, « À vendre hors
+ * Vinted » (#180) le canal. Un article déjà sorti « À vendre hors Vinted » peut changer de motif (une fois revendu,
+ * donné…) : la date de sortie devient celle du nouveau motif, sans nouveau changement de statut.
+ */
 export async function sortirDuStock(
   base: Base,
   utilisateurId: string,
@@ -246,17 +250,29 @@ export async function sortirDuStock(
   if (revendu && (d.prixRevente === null || d.canal === null)) {
     throw erreurSaisie("Revendu hors Vinted : indiquez le prix de revente et le canal.");
   }
+  if (d.motif === "a_vendre" && d.canal === null) throw erreurSaisie("À vendre hors Vinted : indiquez le canal.");
+  const champs = {
+    motifSortie: d.motif,
+    canalRevente: revendu || d.motif === "a_vendre" ? d.canal : null,
+    prixRevente: revendu ? d.prixRevente : null,
+    dateSortieStock: d.date,
+  };
   await base.transaction(async (tx) => {
     const a = await chargerArticle(tx, utilisateurId, articleId);
     if (STATUTS_COLIS.has(a.statut)) {
       throw conflit("Article dans un colis en cours : annulez la vente ou enregistrez un retour d'abord.");
     }
-    await passer(tx, utilisateurId, [a], "sortie_stock", d.date, maintenant, {
-      motifSortie: d.motif,
-      canalRevente: revendu ? d.canal : null,
-      prixRevente: revendu ? d.prixRevente : null,
-      dateSortieStock: d.date,
-    });
+    if (a.statut === "sortie_stock") {
+      if (a.motifSortie !== "a_vendre") throw conflit("Cet article est déjà sorti du stock.");
+      const modifies = await tx
+        .update(article)
+        .set({ ...champs, modifieLe: maintenant })
+        .where(and(eq(article.id, a.id), eq(article.statut, "sortie_stock"), eq(article.motifSortie, "a_vendre")))
+        .returning({ id: article.id });
+      if (modifies.length === 0) throw conflitStatutChange();
+      return;
+    }
+    await passer(tx, utilisateurId, [a], "sortie_stock", d.date, maintenant, champs);
   });
 }
 

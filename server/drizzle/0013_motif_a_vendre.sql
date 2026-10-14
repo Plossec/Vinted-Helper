@@ -1,0 +1,1 @@
+ALTER TYPE "public"."motif_sortie" ADD VALUE 'a_vendre';

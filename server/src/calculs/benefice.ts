@@ -9,7 +9,14 @@ import {
 } from "./couts.js";
 import { repartir } from "./repartir.js";
 
-export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu";
+export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu" | "a_vendre";
+
+/**
+ * Article qui a définitivement quitté le stock (finalisé, ou sorti du stock pour de bon). « À vendre hors Vinted »
+ * (#180) reste compté en stock : rien n'est réalisé tant qu'il n'est pas revendu.
+ */
+export const horsStock = (statut: string, motifSortie: MotifSortie | null): boolean =>
+  statut === "finalise" || (statut === "sortie_stock" && motifSortie !== "a_vendre");
 
 export interface ArticlePourBenefice extends ArticlePourCout {
   statut: string;
@@ -133,7 +140,7 @@ export function calculerDetails(d: DonneesCalcul): Map<string, DetailArticle> {
     if (a.statut === "finalise") {
       benefice = (vente?.prixVendu ?? 0) - coutTotal;
       realise = true;
-    } else if (enSortieStock) {
+    } else if (enSortieStock && horsStock(a.statut, a.motifSortie)) {
       benefice = (a.motifSortie === "revendu" ? (a.prixRevente ?? 0) : 0) - coutTotal;
       realise = true;
     }

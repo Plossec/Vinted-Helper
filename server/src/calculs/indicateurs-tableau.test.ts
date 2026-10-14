@@ -7,6 +7,7 @@ import {
   type DonneesIndicateurs,
   indicateursEtTresorerieParMois,
   stockParStatut,
+  valeurStock,
 } from "./indicateurs.js";
 
 const article = (
@@ -112,5 +113,42 @@ describe("tableau de bord — stock par statut (#88)", () => {
       finalise: { nombre: 1, coutTotal: 238, prixAffiche: 900 },
       en_ligne: { nombre: 1, coutTotal: 380, prixAffiche: 1200 },
     });
+  });
+});
+
+describe("sortie du stock « À vendre hors Vinted » (#180)", () => {
+  /** B sorti du stock en octobre : à vendre hors Vinted, puis revendu 10 € (même mois). */
+  const avecSortieB = (motif: "a_vendre" | "revendu") => {
+    const d = donnees();
+    const calcul = {
+      ...d.calcul,
+      articles: d.calcul.articles.map((a) =>
+        a.id === "B"
+          ? { ...a, statut: "sortie_stock", motifSortie: motif, prixRevente: motif === "revendu" ? 1000 : null }
+          : a,
+      ),
+    };
+    const articles = d.articles.map((a) =>
+      a.id === "B" ? { ...article("B", "sortie_stock", 1200, "2026-09-20"), dateSortieStock: "2026-10-12" } : a,
+    );
+    return { ...d, calcul, articles };
+  };
+
+  it("à vendre hors Vinted : compté dans la valeur du stock, aucun bénéfice réalisé", () => {
+    const d = avecSortieB("a_vendre");
+    const details = calculerDetails(d.calcul);
+    expect(valeurStock(d, details)).toMatchObject({ coutTotal: 380, prixAffiche: 1200 });
+    const { mois } = indicateursEtTresorerieParMois(d, details);
+    // Octobre : seul A est réalisé (9 € − 2,38 €), moins 1 € de frais divers.
+    expect(mois.get("2026-10")).toMatchObject({ chiffreAffaires: 900, beneficeRealise: 562 });
+  });
+
+  it("revendu hors Vinted ensuite : sort de la valeur du stock, revente réalisée à la date de sortie", () => {
+    const d = avecSortieB("revendu");
+    const details = calculerDetails(d.calcul);
+    expect(valeurStock(d, details)).toMatchObject({ coutTotal: 0, prixAffiche: 0 });
+    const { mois } = indicateursEtTresorerieParMois(d, details);
+    // B : 10 € − (3 € + 0,30 € + 0,50 €) = 6,20 €, ajouté à A (6,62 €) moins 1 € de frais divers.
+    expect(mois.get("2026-10")).toMatchObject({ chiffreAffaires: 1900, beneficeRealise: 662 + 620 - 100 });
   });
 });

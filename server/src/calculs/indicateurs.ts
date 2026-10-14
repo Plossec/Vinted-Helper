@@ -1,7 +1,7 @@
 // Indicateurs du tableau de bord — cahier des charges §5.9 et §6.6.
 // Fonctions pures : elles reçoivent les données et le détail de chaque article (calculerDetails) ; aucune part
 // n'est stockée. Les mois sont ceux de l'heure de Paris.
-import type { DetailArticle, DonneesCalcul, VentePourCalcul } from "./benefice.js";
+import { type DetailArticle, type DonneesCalcul, horsStock, type VentePourCalcul } from "./benefice.js";
 import { essenceSortiesVides } from "./couts.js";
 
 export interface ArticlePourIndicateurs {
@@ -135,7 +135,7 @@ export function indicateursEtTresorerieParMois(d: DonneesIndicateurs, details: R
         p.chiffreAffaires += detail.prixVendu ?? 0;
         p.beneficeRealise += detail.benefice;
       }
-    } else if (a.statut === "sortie_stock" && a.dateSortieStock) {
+    } else if (a.statut === "sortie_stock" && a.dateSortieStock && detail.realise) {
       const cle = moisParis(a.dateSortieStock);
       const p = de(cle);
       const calcul = sorties.get(a.id);
@@ -273,16 +273,18 @@ export function cumuler(periodes: readonly Periode[]): Periode {
   );
 }
 
-const EN_STOCK = (statut: string) => statut !== "finalise" && statut !== "sortie_stock";
-
-/** Valeur du stock (§6.6) : articles ni finalisés ni sortis du stock, au coût total et au prix affiché. */
+/**
+ * Valeur du stock (§6.6) : articles ni finalisés ni sortis du stock, au coût total et au prix affiché. Un article
+ * sorti « À vendre hors Vinted » reste en stock (#180).
+ */
 export function valeurStock(d: DonneesIndicateurs, details: ReadonlyMap<string, DetailArticle>) {
+  const motifs = new Map(d.calcul.articles.map((a) => [a.id, a.motifSortie]));
   const parStatut: Record<string, number> = {};
   let coutTotal = 0;
   let prixAffiche = 0;
   for (const a of d.articles) {
     parStatut[a.statut] = (parStatut[a.statut] ?? 0) + 1;
-    if (!EN_STOCK(a.statut)) continue;
+    if (horsStock(a.statut, motifs.get(a.id) ?? null)) continue;
     coutTotal += details.get(a.id)?.coutTotal ?? 0;
     prixAffiche += a.prixAffiche ?? 0;
   }

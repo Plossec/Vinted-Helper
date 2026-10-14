@@ -75,6 +75,26 @@ describe("réduction des photos", () => {
     expect(readdirSync(t.dossier).some((f) => f.startsWith(p2))).toBe(false);
   });
 
+  it("sortie « À vendre hors Vinted » (#180) : photos gardées telles quelles", async () => {
+    const terrain = await envoyer("terrain");
+    const articleId = randomUUID();
+    await requete("POST", "/api/achats", {
+      id: randomUUID(),
+      articleIds: [articleId],
+      sortieId: t.sortieId,
+      prixTotal: 200,
+      photoId: terrain,
+      date: "2026-10-01",
+    });
+    const p1 = await envoyer("annonce");
+    const p2 = await envoyer("annonce");
+    for (const photoId of [p1, p2]) await requete("POST", `/api/articles/${articleId}/photos`, { photoId });
+    const r = await requete("POST", `/api/articles/${articleId}/sortie-stock`, { motif: "a_vendre", canal: "autre" });
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json<{ photos: { id: string }[] }>().photos).toHaveLength(3);
+    expect(await largeur(p2)).toBe(3000);
+  });
+
   it("photo terrain partagée : réduite seulement quand tous les articles du lot sont finalisés ou sortis", async () => {
     const terrain = await envoyer("terrain");
     const ids = [randomUUID(), randomUUID()];

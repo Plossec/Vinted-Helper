@@ -33,6 +33,7 @@ function libelleAction(de: Statut, vers: Statut): string {
   if (de === "a_recuperer" && vers === "a_publier") return "Récupéré : à publier";
   if (de === "a_recuperer" && vers === "en_ligne") return "Récupéré : remettre en ligne";
   if (de === "sortie_stock" && vers === "a_publier") return "Annuler la sortie du stock";
+  if (de === "sortie_stock" && vers === "sortie_stock") return "Vendu ou autre motif";
   return ACTIONS_STATUT[vers];
 }
 
@@ -60,7 +61,14 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
   /** Envoi en cours : « Confirmer » désactivé, pour qu'une double tape ne crée pas deux ventes (issue #120). */
   const [envoi, setEnvoi] = useState(false);
   const { confirmerAbandon } = useModifications();
-  const etape = etapeSuivante(article.statut);
+  // « À vendre hors Vinted » (#180) : encore en stock, la prochaine étape est d'enregistrer la revente.
+  const aVendre = article.statut === "sortie_stock" && article.sortieStock?.motif === "a_vendre";
+  const etape = aVendre
+    ? {
+        conseil: "À vendre hors Vinted : une fois vendu, enregistrer la revente (prix et canal).",
+        vers: "sortie_stock" as const,
+      }
+    : etapeSuivante(article.statut);
   const modifier = (m: Partial<Saisie>) => setSaisie((s) => (s === null ? s : { ...s, ...m }));
 
   async function preparer(vers: Statut) {
@@ -78,6 +86,10 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
       prixRevente: "",
       conversation: "",
     };
+    if (vers === "sortie_stock" && aVendre) {
+      base.motif = "revendu";
+      base.canal = article.sortieStock?.canal ?? "";
+    }
     try {
       if (vers === "a_expedier") {
         const [reglages, articles] = await Promise.all([
@@ -152,9 +164,12 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
         if (saisie.motif === "revendu" && (prixRevente === null || prixRevente === "invalide" || saisie.canal === "")) {
           return setErreur("Revendu hors Vinted : indiquez le prix de revente et le canal.");
         }
+        if (saisie.motif === "a_vendre" && saisie.canal === "") {
+          return setErreur("À vendre hors Vinted : indiquez le canal.");
+        }
         await api.post(`/api/articles/${article.id}/sortie-stock`, {
           motif: saisie.motif,
-          canal: saisie.motif === "revendu" ? saisie.canal : null,
+          canal: saisie.motif === "revendu" || saisie.motif === "a_vendre" ? saisie.canal : null,
           prixRevente: saisie.motif === "revendu" ? prixRevente : null,
           date,
         });
@@ -378,23 +393,27 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                 <span>Motif *</span>
                 <select value={saisie.motif} onChange={(e) => modifier({ motif: e.target.value as MotifSortie })}>
                   <option value="">Choisir…</option>
-                  {Object.entries(LIBELLES_MOTIF).map(([code, libelle]) => (
-                    <option key={code} value={code}>
-                      {libelle}
-                    </option>
-                  ))}
+                  {Object.entries(LIBELLES_MOTIF)
+                    .filter(([code]) => !(aVendre && code === "a_vendre"))
+                    .map(([code, libelle]) => (
+                      <option key={code} value={code}>
+                        {libelle}
+                      </option>
+                    ))}
                 </select>
               </label>
-              {saisie.motif === "revendu" && (
+              {(saisie.motif === "revendu" || saisie.motif === "a_vendre") && (
                 <div className="champs-ligne">
-                  <label className="champ">
-                    <span>Prix de revente (€) *</span>
-                    <input
-                      inputMode="decimal"
-                      value={saisie.prixRevente}
-                      onChange={(e) => modifier({ prixRevente: e.target.value })}
-                    />
-                  </label>
+                  {saisie.motif === "revendu" && (
+                    <label className="champ">
+                      <span>Prix de revente (€) *</span>
+                      <input
+                        inputMode="decimal"
+                        value={saisie.prixRevente}
+                        onChange={(e) => modifier({ prixRevente: e.target.value })}
+                      />
+                    </label>
+                  )}
                   <label className="champ">
                     <span>Canal *</span>
                     <select value={saisie.canal} onChange={(e) => modifier({ canal: e.target.value as CanalRevente })}>
