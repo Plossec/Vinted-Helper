@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Photos : celles d'un article « À vendre hors Vinted » sont réduites dès qu'il est revendu (ou sorti pour un
+  autre motif), comme pour une vente Vinted finalisée. C'était déjà le cas ; la règle est maintenant écrite et
+  vérifiée par un test (#194).
+
 ## [1.14.2] — 14/10/2026
 
 ### Modifié
