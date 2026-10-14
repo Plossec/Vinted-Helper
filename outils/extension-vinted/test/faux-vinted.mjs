@@ -1,7 +1,7 @@
 // Faux formulaire « Vendre un article » (imitation locale, AUCUNE requête vers Vinted) et fausse application.
 import { createServer } from "node:http";
 
-/** Page du faux formulaire. Options : sans un champ, déconnecté, captcha, titre tronqué. */
+/** Page du faux formulaire. Options : sans un champ, déconnecté, captcha, titre tronqué, prix reformaté. */
 function pageFormulaire({
   sansChamp = null,
   deconnecte = false,
@@ -9,6 +9,7 @@ function pageFormulaire({
   captcha = false,
   categoriePreremplie = "",
   genrePrerempli = "Hommes",
+  prixFormate = false,
 } = {}) {
   const liste = (id, options) =>
     sansChamp === id
@@ -64,7 +65,12 @@ function pageFormulaire({
              .join("")}</div></div>`
     }
     ${liste("color", ["Bleu", "Noir"])}
-    <input data-testid="price-input--input" oninput="this.value = this.value.replace(',', '.')">
+    ${
+      prixFormate
+        ? // Relevé du 14/10/2026 (#176) : Vinted reformate le prix en « 9.00 € » et ne lit pas la virgule (« NaN € »).
+          `<input data-testid="price-input--input" placeholder="0,00 €" onchange="this.value = Number(this.value.replace(' €', '')).toFixed(2) + ' €'">`
+        : `<input data-testid="price-input--input" oninput="this.value = this.value.replace(',', '.')">`
+    }
     ${["Petit", "Moyen", "Grand"]
       .map(
         (o, i) => `<div data-testid="${i + 1}-package-size--cell" role="button">

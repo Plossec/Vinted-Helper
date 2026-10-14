@@ -4,7 +4,7 @@
 > Indiquez ce qu'il faut ajouter, renommer, déplacer ou supprimer. Seules les catégories du dernier niveau
 > (en **gras**) peuvent être choisies pour un article.
 
-**440 catégories sélectionnables.**
+**443 catégories sélectionnables.**
 
 ## Femmes
 
@@ -236,12 +236,15 @@
     - **Autres**
   - Sweats et pulls
     - **Sweats**
-    - **Sweats à capuche**
-    - **Sweats zippés**
-    - **Pulls**
-    - **Pulls col roulé**
-    - **Pulls col V**
-    - **Gilets**
+    - **Pulls et pulls à capuche**
+    - **Pulls à capuche avec zip**
+    - **Cardigans**
+    - **Pulls ras de cou**
+    - **Sweats à col V**
+    - **Pulls à col roulé**
+    - **Sweats longs**
+    - **Pulls d'hiver**
+    - **Vestes**
     - **Autres**
   - Pantalons
     - **Chinos**

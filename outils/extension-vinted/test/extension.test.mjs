@@ -109,6 +109,18 @@ test("contrôle avant envoi : une valeur modifiée par la page (titre tronqué) 
   assert.match(app.resultats[0].message, /Contrôle avant envoi : titre/);
 });
 
+test("contrôle avant envoi en échec : relevé de la page enregistré (#176)", async () => {
+  const { app, diagnostic: d } = await lancer({ demande: DEMANDE(false), vinted: { titreCourt: true } });
+  assert.match(app.resultats[0].message, /Contrôle avant envoi : titre/);
+  assert.equal(d.etape, "controle");
+});
+
+test("prix reformaté par Vinted (« 9,00 » lu « NaN € ») : saisi avec un point, contrôle réussi (#176)", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(false), vinted: { prixFormate: true } });
+  assert.equal(app.resultats[0].resultat, "publie", app.resultats[0].message);
+  assert.equal(vinted.clics, 1);
+});
+
 for (const [nom, vinted, raison] of [
   ["non connecté à Vinted", { deconnecte: true }, /Non connecté/],
   ["vérification (captcha)", { captcha: true }, /Vérification Vinted/],

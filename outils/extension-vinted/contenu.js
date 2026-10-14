@@ -284,12 +284,26 @@ const ETAPES = {
     for (const couleur of article.couleurs) await choisir("couleur", couleur, { fermer: true });
   },
   async prix(article) {
-    saisir(await champ("prix"), article.prix);
+    // Relevé du 14/10/2026 (#176) : Vinted reformate le prix (« 9.00 € ») et lit « 9,00 » comme « NaN € » : saisie
+    // avec un point, puis relecture tout de suite (erreur et relevé à cette étape plutôt qu'au contrôle).
+    const el = await champ("prix");
+    saisir(el, article.prix.replace(",", "."));
+    await attendreMs(500);
+    if (montant(el.value) !== montant(article.prix))
+      throw new ErreurPublication(`Prix : Vinted affiche « ${el.value} » au lieu de « ${article.prix} ».`);
   },
   async colis(article) {
     await choisirColis({ petit: "Petit", moyen: "Moyen", grand: "Grand" }[article.formatColis] ?? "Petit");
   },
 };
+
+/** Montant lu dans un texte (« 9,00 », « 9.00 € ») ; NaN si illisible. */
+const montant = (t) =>
+  Number(
+    String(t ?? "")
+      .replace(/[^\d,.-]/g, "")
+      .replace(",", "."),
+  );
 
 /** Relit chaque champ dans la page. Renvoie la liste des écarts (vide = on peut publier). */
 async function controler(article, nombrePhotos) {
@@ -304,14 +318,8 @@ async function controler(article, nombrePhotos) {
   };
   await attendu("titre", article.titre);
   await attendu("description", article.description);
-  // Prix : comparé en nombre (Vinted affiche « 9.00 » pour « 9,00 » saisi).
+  // Prix : comparé en nombre (Vinted affiche « 9.00 € » pour « 9,00 »).
   const prix = await champ("prix", false);
-  const montant = (t) =>
-    Number(
-      String(t ?? "")
-        .replace(/[^\d,.-]/g, "")
-        .replace(",", "."),
-    );
   if (!prix) ecarts.push("prix : champ introuvable");
   else if (montant(prix.value) !== montant(article.prix))
     ecarts.push(`prix : « ${prix.value} » au lieu de « ${article.prix} »`);
@@ -418,6 +426,19 @@ async function diagnostic(niveau) {
   };
 }
 
+/** Relevé automatique de la page au moment d'une erreur (liste éventuellement ouverte) : calibrage de selecteurs.js. */
+function releveErreur(etape, erreur) {
+  return {
+    adresse: location.href,
+    etat: etatPage(),
+    date: new Date().toISOString(),
+    etape,
+    erreur,
+    selecteursTrouves: selecteursTrouves(),
+    elements: releve(),
+  };
+}
+
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
 
@@ -427,8 +448,10 @@ async function traiter(message) {
     try {
       if (message.nom === "controle") {
         const ecarts = await controler(message.article, message.nombrePhotos);
-        if (ecarts.length > 0)
-          return { ok: false, message: `Contrôle avant envoi : ${ecarts.join(" ; ")}. Rien n'a été publié.` };
+        if (ecarts.length > 0) {
+          const texte = `Contrôle avant envoi : ${ecarts.join(" ; ")}. Rien n'a été publié.`;
+          return { ok: false, message: texte, releve: releveErreur(message.nom, texte) };
+        }
         if (!boutonAjouter())
           return { ok: false, message: "Bouton « Ajouter » introuvable (à calibrer). Rien n'a été publié." };
         return { ok: true };
@@ -442,17 +465,7 @@ async function traiter(message) {
       const apres = etatPage();
       if (apres !== "pret") return { ok: false, etat: apres };
       const texte = erreur instanceof Error ? erreur.message : String(erreur);
-      // Relevé automatique de la page au moment de l'erreur (liste éventuellement ouverte) : calibrage de selecteurs.js.
-      const releveErreur = {
-        adresse: location.href,
-        etat: apres,
-        date: new Date().toISOString(),
-        etape: message.nom,
-        erreur: texte,
-        selecteursTrouves: selecteursTrouves(),
-        elements: releve(),
-      };
-      return { ok: false, message: texte, releve: releveErreur };
+      return { ok: false, message: texte, releve: releveErreur(message.nom, texte) };
     }
   }
 
