@@ -2,7 +2,7 @@
 name: analyste-releve
 description: Analyse un relevé de l'extension Vinted (fichier diagnostic-vinted-….json, « Dernier relevé » ou « Diagnostic ») et rend uniquement la conclusion — étape en cause, sélecteur ou logique à corriger, structure à reproduire dans la fausse page. À utiliser dès que l'utilisateur fournit un relevé, et depuis /calibrer-vinted.
 tools: Read, Grep, Glob
-model: inherit
+model: sonnet
 ---
 
 Tu analyses un **relevé de la page Vinted** produit par l'extension `outils/extension-vinted/`. Tu es en **lecture
@@ -18,18 +18,10 @@ seule** : tu ne modifies aucun fichier, tu ne consultes jamais Vinted (règle n�
 
 Si le relevé manque, arrête-toi et dis-le.
 
-## Format du relevé (produit par `contenu.js`, fonctions `decrire`, `releve`, `diagnostic`)
+## Format du relevé
 
-- `adresse`, `date`, `etat` (`pret`, `verification`, `bloque`, `deconnecte`).
-- **Relevé automatique** (erreur pendant une publication) : `etape` (photos, titre, description, categorie, marque,
-  taille, etat, couleurs, prix, colis), `erreur`, `selecteursTrouves`, `elements`.
-- **Relevé à la demande** (bouton Diagnostic) : `selecteursTrouves`, `elements`, `apparusApresClicCategorie`,
-  `options « Femmes »` (ancêtres des éléments dont le texte est « Femmes »).
-- Chaque élément : `balise`, `type`, `name`, `id`, `testid`, `role`, `aria`, `ariaExpanded`, `placeholder`,
-  `valeur` (ce que le champ contient, y compris ce que Vinted a pré-rempli), `coche`, `classe`, `texte` (80
-  caractères, en minuscules, espaces regroupés), `visible`.
-- `selecteursTrouves` : pour chaque champ de `SELECTEURS.champs`, le premier sélecteur présent, ou `null`. Un `null`
-  n'est pas forcément une erreur (champ affiché seulement après le choix de la catégorie).
+Décrit dans `docs/decisions/publication-vinted.md` (« Format du relevé de l'extension »), à côté des décisions de
+l'extension : lis cette section si un champ du relevé n'est pas clair.
 
 ## Méthode
 
@@ -37,11 +29,9 @@ Si le relevé manque, arrête-toi et dis-le.
    `selecteursTrouves`), puis cherche avec `Grep` (avec contexte `-C`) : les `testid` liés à l'étape
    (`catalog`, `brand`, `size`, `condition`, `color`, `price`, `package-size`, `image-wrapper`…), les `role`
    (`radio`, `option`, `button`, `checkbox`), les `valeur` non nulles, le texte attendu.
-2. Lis `outils/extension-vinted/selecteurs.js` et la partie de `contenu.js` qui traite l'étape (objet `ETAPES`,
-   `choisir`, `option`, `optionsVisibles`, `choisirCategorie`, `meilleurResultat`, `choisirColis`, `controler`),
-   pour comprendre ce que le code attendait. Repère-les avec `Grep` (`function nom`) et lis seulement ces
-   passages.
-3. Compare : ce que le code cherche ↔ ce que la page contient réellement. Causes déjà rencontrées (PR #59 à #67) :
+2. Lis `outils/extension-vinted/selecteurs.js` et la partie de `contenu.js` qui traite l'étape (repère-la avec
+   `Grep` sur le nom de l'étape, puis lis seulement ce passage), pour comprendre ce que le code attendait.
+3. Compare : ce que le code cherche ↔ ce que la page contient réellement. Causes déjà rencontrées :
    option hors du conteneur attendu, valeur pré-remplie par Vinted (parfois dans le mauvais rayon), texte proche
    (« Bon état » / « Très bon état »), libellé absent du catalogue Vinted, format affiché différent (« 9.00 » pour
    « 9,00 »), compteur de photos sur le mauvais repère, options du menu du haut (« Femmes ») prises pour celles de

@@ -1,5 +1,6 @@
 // Configuration ESLint (format « flat config »).
 import js from "@eslint/js";
+import vitest from "@vitest/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -14,7 +15,11 @@ export default tseslint.config(
     // Garde-fou CLAUDE.md : pas de contournement des erreurs.
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/ban-ts-comment": "error",
+      // Aucun commentaire de contournement, même décrit (#115) : @ts-expect-error compris.
+      "@typescript-eslint/ban-ts-comment": [
+        "error",
+        { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": true, "ts-check": false },
+      ],
       "no-console": ["warn", { allow: ["warn", "error", "info"] }],
     },
     linterOptions: {
@@ -45,6 +50,15 @@ export default tseslint.config(
   {
     files: ["client/sw-modele.js"],
     languageOptions: { globals: { ...globals.serviceworker, __FICHIERS__: "readonly" } },
+  },
+  {
+    // Aucun test sauté ni isolé (#115) : .skip, .only, .todo, fit, xit…
+    files: ["**/*.test.{ts,tsx}"],
+    plugins: { vitest },
+    rules: {
+      "vitest/no-focused-tests": "error",
+      "vitest/no-disabled-tests": "error",
+    },
   },
   {
     files: ["client/**/*.{ts,tsx}"],

@@ -9,8 +9,9 @@ disable-model-invocation: true
 
 Entrée : `$ARGUMENTS`.
 
-Les lots du cahier des charges (§9) sont terminés : le travail se fait par **issue → branche → PR → fusion**. Une
-fusion dans `main` **part en production** (déploiement continu) : ne fusionne que du code prêt.
+Le travail se fait par **issue → branche → PR → fusion**. Une fusion dans `main` **part en production**
+(déploiement continu) : ne fusionne que du code prêt. Invoquer `/lot` (ou `/calibrer-vinted`) **vaut demande** de
+pousser et de fusionner (dans les limites de l'étape 7) : c'est l'exception à « aucun push sans demande ».
 
 ## 0. Pas encore d'issue ?
 Si l'entrée n'est pas un numéro d'issue, c'est une nouvelle demande : crée l'issue (titre `[Évolution] …` ou
@@ -50,7 +51,8 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
 - Commits petits, en français, à l'impératif, avec le numéro de l'issue.
 
 ## 6. Vérifier et documenter
-- `/verifier` : les étapes de la CI doivent être vertes (et l'extension si elle a changé).
+- `/verifier` (`npm run verifier`, mêmes étapes que la CI) vert, et l'extension si elle a changé
+  (`.claude/rules/extension-vinted.md` : sa version aussi).
 - Documentation, selon le cas :
   - guide utilisateur concerné (`docs/guides/`) ;
   - `CHANGELOG.md`, section `[Non publié]`, en langage simple, avec le numéro de l'issue ;

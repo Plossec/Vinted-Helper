@@ -25,11 +25,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm test
-      - run: npm run build
+      # Mêmes étapes que /verifier (types, lint, format, tests, construction) : une seule liste, scripts/verifier.mjs.
+      - run: npm run verifier
       # Vulnérabilités connues des dépendances embarquées en production (issue #124).
       - run: npm audit --omit=dev
 

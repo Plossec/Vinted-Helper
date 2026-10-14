@@ -35,7 +35,3 @@ Référence : `docs/cahier-des-charges.md`, §2.2, §2.3 et §5.
   « N achats en attente d'envoi ». Identifiants générés sur le téléphone (UUID).
 - Référence `#0127` affichée « en attente » tant que le serveur ne l'a pas attribuée.
 - Nouvelle version déployée : bandeau « Nouvelle version disponible — Mettre à jour ».
-
-## Sécurité
-
-- **Aucune clé API** dans `client/` : tout appel à Gemini passe par le serveur.
