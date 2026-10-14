@@ -1,10 +1,11 @@
 // Onglets de la barre de navigation (issue #103) : l'onglet parent reste actif sur ses écrans secondaires.
+// Écran « À faire » en premier onglet, à l'adresse « / » (#191) ; la liste des articles est en « /articles ».
 
-export type Onglet = "articles" | "terrain" | "tableau" | "reglages";
+export type Onglet = "a-faire" | "articles" | "terrain" | "tableau" | "reglages";
 
 /** Premier segment de l'adresse → onglet parent (fiche article et vente sous Articles, sorties sous Terrain…). */
 const PARENTS: Record<string, Onglet> = {
-  "": "articles",
+  "": "a-faire",
   articles: "articles",
   ventes: "articles",
   terrain: "terrain",

@@ -3,7 +3,7 @@
   "short_name": "Vinted Helper",
   "description": "Achats, stock et ventes Vinted",
   "lang": "fr",
-  "start_url": "/terrain",
+  "start_url": "/demarrage",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

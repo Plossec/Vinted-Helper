@@ -2,6 +2,21 @@
 
 [← Sommaire de la documentation](../README.md)
 
+## Tous les jours (onglet **À faire**)
+
+L'écran **À faire** (1er onglet, pastille = nombre de choses à faire) regroupe tout ce qui demande votre attention,
+par urgence :
+- **Urgent** : publications Vinted en erreur → **Republier** (l'article retourne dans la file de publication) ;
+- **À traiter** : articles **à expédier** → **Envoyé** (à la date du jour, pour tout le colis) et 💬 pour ouvrir la
+  conversation ; articles **à récupérer** → **Récupéré → À publier** ;
+- **Pour info** : articles **dormants** et **brouillons** anciens → **Vu** les masque ; ils reviennent si la situation
+  change (ex. article de nouveau dormant après une baisse de prix).
+
+Touchez le nom d'un article pour ouvrir sa fiche. « Rien à faire 🎉 » quand tout est fait.
+
+**Écran d'ouverture** de l'application installée : **Réglages → Affichage → Ouverture de l'application installée**,
+*Terrain* (par défaut, pour le vide-grenier) ou *À faire* ; choix gardé sur chaque appareil.
+
 ## En vide-grenier (onglet **Terrain**)
 
 1. **Démarrer une sortie** : tapez le lieu (librement : un lieu nouveau est ajouté à la liste), la date (aujourd'hui
@@ -32,15 +47,15 @@ lien, puis collez-le et « Enregistrer le lien ». Un article Brouillon ou À pu
 
 **Lien de la conversation avec l'acheteur** : quand vous passez un article « Vendu : à expédier », collez le lien de
 la conversation Vinted (facultatif ; dans Vinted : la conversation → copier l'adresse). Il est gardé sur chaque article
-du colis, modifiable dans la section Vinted de la fiche, et l'icône 💬 de l'alerte « À expédier » l'ouvre.
+du colis, modifiable dans la section Vinted de la fiche, et l'icône 💬 de la ligne « À expédier » de l'écran **À faire** l'ouvre.
 
 **Retour de l'acheteur** : sur la fiche d'un article Envoyé, « Retour de l'acheteur » (colis entier, ou articles
-renvoyés + nouveau montant crédité). L'article passe **À récupérer** (alerte sur l'écran Articles, avec 💬 si la
+renvoyés + nouveau montant crédité). L'article passe **À récupérer** (ligne dans l'écran **À faire**, avec 💬 si la
 conversation est connue). Une fois l'article récupéré : « Récupéré : à publier », « Récupéré : remettre en ligne »
 (prix affiché demandé) ou « Sortir du stock ».
 
 **Publication Vinted en erreur** : si l'extension Chrome échoue sur une vraie publication (pas en mode essai),
-l'article passe **Erreur** (badge rouge, alerte « Publications Vinted en erreur » sur l'écran Articles). Le message
+l'article passe **Erreur** (badge rouge, ligne « Urgent » de l'écran **À faire**). Le message
 de l'échec est dans la section Vinted de la fiche. Vérifiez sur Vinted qu'aucune annonce n'a été créée, puis :
 « Publier sur Vinted » (l'article repasse À publier et retourne dans la file), « Revenir à « À publier » », ou
 « Publié à la main : mettre en ligne » si vous l'avez publiée vous-même.

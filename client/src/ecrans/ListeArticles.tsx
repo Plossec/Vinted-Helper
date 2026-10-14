@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type Referentiels, type ResumeArticle, type ResumeSortie } from "../api.js";
-import { Alertes } from "../composants/Alertes.js";
 import { ChoixMultiple } from "../composants/ChoixMultiple.js";
 import type { OptionListe } from "../composants/ListeDeroulante.js";
 import {
@@ -195,7 +194,6 @@ export function ListeArticles() {
   return (
     <main className={mode === "detaille" || mode === "mosaique" ? "page page--large" : "page"}>
       <h1>Articles</h1>
-      <Alertes />
       {/* Haut d'écran allégé (#100) : recherche + filtres sur une ligne, tri dans les filtres, « + » flottant. */}
       <div className="recherche">
         <div className="recherche__ligne">

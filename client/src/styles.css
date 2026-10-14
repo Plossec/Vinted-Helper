@@ -182,7 +182,7 @@ input[inputmode="decimal"] {
   font-weight: 600;
 }
 
-/* Icône + libellé (#103) ; la pastille d'alertes est accrochée à l'icône d'Articles. */
+/* Icône + libellé (#103) ; la pastille des choses à faire est accrochée à l'icône d'« À faire » (#191). */
 .navigation__icone {
   position: relative;
   display: flex;
@@ -1174,70 +1174,62 @@ a {
   color: var(--accent-texte);
 }
 
-/* --- Lot 7 : alertes --- */
-.alertes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e-2);
+/* --- Écran « À faire » (#191) : sections par urgence, une ligne par article avec son action directe. --- */
+.a-faire__vide {
+  font-size: var(--t-corps);
+  color: var(--texte-secondaire);
+}
+
+.a-faire__section {
   margin-bottom: var(--e-4);
 }
 
-.alertes__puces {
+.a-faire__section h2 {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: var(--e-2);
 }
 
-/* Puce d'alerte (#100) : compteur + libellé court, la couleur du groupe en bordure gauche. */
-.alerte-puce {
-  font: inherit;
-  font-size: var(--t-secondaire);
-  font-weight: 600;
-  min-height: var(--hauteur-tactile);
-  padding: var(--e-1) var(--e-2);
-  display: inline-flex;
+.a-faire__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+/* Ligne : la couleur du groupe en bordure gauche (comme les anciennes puces d'alertes, #100). */
+.a-faire__ligne {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--e-1);
-  white-space: nowrap;
-  border-radius: var(--rayon);
-  border: 1px solid var(--bordure);
-  border-left: 4px solid var(--badge-a-publier);
-  background: var(--surface);
-  color: var(--texte);
-  cursor: pointer;
-}
-
-.alerte-puce[aria-expanded="true"] {
-  background: var(--accent-doux);
-  border-color: var(--accent);
-}
-
-.alerte {
+  justify-content: space-between;
+  gap: var(--e-2);
+  padding: var(--e-2) var(--e-3);
   border-radius: var(--rayon-carte);
   border: 1px solid var(--bordure);
   border-left: 4px solid var(--badge-a-publier);
   background: var(--surface);
 }
 
-.alerte--aExpedier {
+.a-faire__ligne.alerte--aExpedier {
   border-left-color: var(--badge-vente);
 }
 
-.alerte--erreursPublication {
+.a-faire__ligne.alerte--erreursPublication {
   border-left-color: var(--badge-erreur);
 }
 
-.alerte__titre {
-  font-size: var(--t-corps);
-  margin: 0;
-  padding: var(--e-3) var(--e-4) var(--e-2);
-}
-
-.alerte ul {
-  margin: 0;
-  padding: 0 var(--e-4) var(--e-3) 1.9rem;
+.a-faire__texte {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.a-faire__actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--e-2);
 }
 

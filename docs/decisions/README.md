@@ -94,7 +94,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0076](0076-tache-validee-prix-propose.md) | 14/10/2026 | Tâche « Validée prix proposé » | Tâches automatisées | Accepté |  |
 | [0077](0077-tache-recuperation-du-bon-de-livraison.md) | 14/10/2026 | Tâche « Récupération du bon de livraison » | Tâches automatisées | Accepté |  |
 | [0078](0078-rythme-des-taches-automatisees.md) | 14/10/2026 | Rythme des tâches automatisées | Tâches automatisées | Accepté |  |
-| [0079](0079-ecran-d-accueil-a-faire.md) | 14/10/2026 | Écran d'accueil « À faire » | Tâches automatisées | Accepté |  |
+| [0079](0079-ecran-d-accueil-a-faire.md) | 14/10/2026 | Écran d'accueil « À faire » | Tâches automatisées | Accepté · réalisation précisée par [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) |  |
 | [0080](0080-photos-d-un-article-revendu-hors-vinted.md) | 14/10/2026 | Photos d'un article revendu hors Vinted | Photos et sauvegardes | Accepté |  |
 | [0081](0081-fusions-dans-main-par-claude-et-dependabot.md) | 14/10/2026 | Fusions dans main par Claude et Dependabot | Serveur | Accepté |  |
 | [0082](0082-extension-garde-fous-de-perimetre-supprimes.md) | 14/10/2026 | Extension : garde-fous de périmètre supprimés | Publication Vinted | Accepté |  |
@@ -104,4 +104,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0086](0086-couleurs-des-badges-de-statut.md) | 14/10/2026 | Couleurs des badges de statut | Interface | Accepté |  |
 | [0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | 14/10/2026 | Serveur OVH : connexion SSH par clé | Serveur | Accepté |  |
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | IA Gemini | Accepté |  |
-
+| [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Interface | Accepté |  |

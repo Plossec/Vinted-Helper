@@ -1,7 +1,7 @@
 // Alertes partagées par la barre de navigation et l'écran Articles (#131) : un seul appel toutes les 30 secondes au
 // plus, au lieu d'un appel à chaque changement d'écran ; toute modification (vente, statut…) vide le cache.
 import { api, surModification } from "../api.js";
-import type { AlertesServeur } from "../composants/Alertes.js";
+import type { AlertesServeur } from "./alertes.js";
 
 export const DUREE_CACHE_ALERTES_MS = 30_000;
 

@@ -40,7 +40,7 @@ export function FicheVente() {
 
   return (
     <main className="page">
-      <Link to="/" className="lien-retour">
+      <Link to="/articles" className="lien-retour">
         ← Articles
       </Link>
       <h1>Colis</h1>

@@ -4,7 +4,8 @@ import { ongletActif } from "./navigation.js";
 
 describe("ongletActif", () => {
   it("écrans principaux", () => {
-    expect(ongletActif("/")).toBe("articles");
+    expect(ongletActif("/")).toBe("a-faire");
+    expect(ongletActif("/articles")).toBe("articles");
     expect(ongletActif("/terrain")).toBe("terrain");
     expect(ongletActif("/tableau")).toBe("tableau");
     expect(ongletActif("/reglages")).toBe("reglages");

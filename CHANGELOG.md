@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.15.0] — 14/10/2026
+
+### Ajouté
+- Écran d'accueil **« À faire »** (1er onglet, avec la pastille) : tout ce qui demande votre attention, classé
+  Urgent / À traiter / Pour info, avec une action directe sur chaque ligne — Republier, Envoyé, Récupéré → À publier,
+  Vu (#191).
+- Réglage de l'écran d'ouverture de l'application installée : Terrain (par défaut) ou À faire, sur chaque appareil
+  (#191).
+
+### Modifié
+- La liste des articles a son propre onglet « Articles » (adresse `/articles`) ; les alertes du haut de la liste sont
+  passées dans « À faire » (#191).
+
 ## [1.14.4] — 14/10/2026
 
 ### Modifié

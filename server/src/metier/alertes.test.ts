@@ -1,6 +1,6 @@
 // Alertes (§5.8) — cas 21 et 28 de l'annexe §11.
 import { describe, expect, it } from "vitest";
-import { type ArticlePourAlertes, calculerAlertes } from "./alertes.js";
+import { type ArticlePourAlertes, calculerAlertes, masquerVus } from "./alertes.js";
 
 const DELAIS = { delaiBrouillon: 3, delaiDormant: 7 };
 const article = (extra: Partial<ArticlePourAlertes>): ArticlePourAlertes => ({
@@ -68,5 +68,34 @@ describe("alertes — autres règles", () => {
     const r = calculerAlertes([expedier, brouillon], { delaiBrouillon: 1, delaiDormant: 7 }, le("2026-10-05"));
     expect(r.aExpedier.map((x) => x.id)).toEqual(["A"]);
     expect(r.brouillons.map((x) => x.id)).toEqual(["B"]);
+  });
+});
+
+describe("« Vu » de l'écran À faire (#191)", () => {
+  const alerte = (id: string, depuis: string) => ({ id, reference: 1, nom: null, depuis, jours: 7 });
+  const alertes = {
+    brouillons: [alerte("B", "2026-10-01")],
+    dormants: [alerte("D1", "2026-10-05"), alerte("D2", "2026-10-05")],
+    aExpedier: [alerte("E", "2026-10-05")],
+  };
+
+  it("masque une alerte « Pour info » vue à la même date de départ", () => {
+    const r = masquerVus(alertes, [{ type: "dormants", articleId: "D1", depuis: "2026-10-05" }]);
+    expect(r.dormants.map((a) => a.id)).toEqual(["D2"]);
+    expect(r.brouillons).toHaveLength(1);
+  });
+
+  it("fait réapparaître l'alerte quand la date de départ change (article de nouveau dormant)", () => {
+    const r = masquerVus(alertes, [{ type: "dormants", articleId: "D1", depuis: "2026-09-20" }]);
+    expect(r.dormants.map((a) => a.id)).toEqual(["D1", "D2"]);
+  });
+
+  it("un « Vu » ne vaut que pour son groupe, et ne touche pas aux choses à faire", () => {
+    const r = masquerVus(alertes, [
+      { type: "dormants", articleId: "B", depuis: "2026-10-01" },
+      { type: "aExpedier", articleId: "E", depuis: "2026-10-05" },
+    ]);
+    expect(r.brouillons.map((a) => a.id)).toEqual(["B"]);
+    expect(r.aExpedier.map((a) => a.id)).toEqual(["E"]);
   });
 });
