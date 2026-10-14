@@ -11,3 +11,11 @@
 | Sauvegarde automatique | Service Docker `sauvegarde` (image PostgreSQL déjà utilisée, rien à installer) : une fois par jour à partir de 3 h, ou au démarrage du PC si l'heure est passée ; base compressée + archive complète des photos ; 30 jours gardés. |
 | Copie hors serveur | En attente de l'issue #2 (OVH) : en local, copie manuelle du dossier `sauvegardes/auto` (clé USB, cloud), expliquée dans le README. |
 | Restauration | Script lancé dans le service `sauvegarde`, application arrêtée ; base remplacée (`pg_dump --clean`), photos remises sans effacer les plus récentes. Testée le 06/10/2026 sur la base de test. |
+
+## 14/10/2026 — Photos d'un article revendu hors Vinted (issue #194)
+
+**Décision (utilisateur)** : un article sorti « À vendre hors Vinted » (#180) garde ses photos en pleine taille ;
+dès qu'il change de motif (**Revendu hors Vinted**, ou Donné, Jeté…), ses photos sont réduites comme pour une vente
+Vinted finalisée (principale et terrain réduites, autres photos supprimées, irréversible). Comportement déjà en
+place depuis #180 (même route que la sortie du stock) : il est désormais couvert par un test
+(`server/src/photos/reduction.test.ts`).
