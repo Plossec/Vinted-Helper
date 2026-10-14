@@ -21,6 +21,14 @@ function Icone({ children }: { children: ReactNode }) {
   );
 }
 
+/** Liste cochée : l'écran « À faire » (#191). */
+export const IconeAFaire = () => (
+  <Icone>
+    <path d="m4 6 1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17" />
+    <path d="M11 6h9M11 12h9M11 18h9" />
+  </Icone>
+);
+
 /** T-shirt : les articles. */
 export const IconeArticles = () => (
   <Icone>

@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import { AFaire } from "./ecrans/AFaire.js";
 import { Connexion } from "./ecrans/Connexion.js";
 import { Disposition } from "./ecrans/Disposition.js";
 import { ErreurAffichage } from "./ecrans/ErreurAffichage.js";
@@ -13,6 +14,7 @@ import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
 import { Terrain } from "./ecrans/Terrain.js";
+import { cheminDemarrage, lireDemarrage } from "./demarrage.js";
 import { enregistrerServiceWorker } from "./pwa.js";
 import { appliquerPreferenceTheme, lirePreferenceTheme } from "./theme.js";
 import "./styles.css";
@@ -27,7 +29,11 @@ const routeur = createBrowserRouter([
         // Erreur dans un écran : message à la place de l'écran, la navigation reste disponible.
         errorElement: <ErreurAffichage />,
         children: [
-          { index: true, element: <ListeArticles /> },
+          // Accueil « À faire » (#191) ; la liste des articles a sa propre adresse.
+          { index: true, element: <AFaire /> },
+          { path: "articles", element: <ListeArticles /> },
+          // Ouverture de l'application installée (manifeste) : écran choisi dans les Réglages, sur l'appareil.
+          { path: "demarrage", element: <Navigate to={cheminDemarrage(lireDemarrage())} replace /> },
           { path: "articles/nouveau", element: <FicheArticle /> },
           { path: "articles/:id", element: <FicheArticle /> },
           { path: "terrain", element: <Terrain /> },

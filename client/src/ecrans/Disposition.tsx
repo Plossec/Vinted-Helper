@@ -3,11 +3,11 @@
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { api, ErreurApi } from "../api.js";
-import { nombreAlertes } from "../composants/Alertes.js";
+import { nombreAlertes } from "../outils/alertes.js";
 import { chargerAlertes } from "../outils/alertesCache.js";
 import { BandeauFile } from "../composants/BandeauFile.js";
 import { FenetreDialogue } from "../composants/Dialogue.js";
-import { IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
+import { IconeAFaire, IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
 import { demarrerFile, envoyerMaintenant } from "../hors-ligne/index.js";
 import { type Onglet, ongletActif } from "../navigation.js";
 import { useTitreEtFocus } from "../outils/titrePage.js";
@@ -16,7 +16,8 @@ import { mettreAJour, useNouvelleVersion } from "../pwa.js";
 type Etat = "verification" | "connecte" | "hors-ligne";
 
 const ONGLETS: { onglet: Onglet; chemin: string; libelle: string; Icone: ComponentType }[] = [
-  { onglet: "articles", chemin: "/", libelle: "Articles", Icone: IconeArticles },
+  { onglet: "a-faire", chemin: "/", libelle: "À faire", Icone: IconeAFaire },
+  { onglet: "articles", chemin: "/articles", libelle: "Articles", Icone: IconeArticles },
   { onglet: "terrain", chemin: "/terrain", libelle: "Terrain", Icone: IconeTerrain },
   { onglet: "tableau", chemin: "/tableau", libelle: "Tableau", Icone: IconeTableau },
   { onglet: "reglages", chemin: "/reglages", libelle: "Réglages", Icone: IconeReglages },
@@ -31,7 +32,7 @@ export function Disposition() {
   const actif = ongletActif(pathname);
   const contenu = useRef<HTMLDivElement>(null);
 
-  // Pastille d'alertes sur l'onglet Articles, mise à jour à chaque changement d'écran.
+  // Pastille du nombre de choses à faire sur l'onglet « À faire » (#191), mise à jour à chaque changement d'écran.
   useEffect(() => {
     let actif = true;
     chargerAlertes()
@@ -103,8 +104,8 @@ export function Disposition() {
           >
             <span className="navigation__icone">
               <Icone />
-              {onglet === "articles" && alertes > 0 && (
-                <span className="pastille" aria-label={`${alertes} alertes`}>
+              {onglet === "a-faire" && alertes > 0 && (
+                <span className="pastille" aria-label={`${alertes} à faire`}>
                   {alertes}
                 </span>
               )}

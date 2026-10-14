@@ -1,9 +1,10 @@
-// Réglages : version, affichage (thème), changement du mot de passe, déconnexion.
+// Réglages : version, affichage (thème, écran d'ouverture #191), changement du mot de passe, déconnexion.
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api, type Sante } from "../api.js";
 import { ParametresCalcul } from "../composants/ParametresCalcul.js";
 import { PromptsIA } from "../composants/PromptsIA.js";
+import { CHOIX_DEMARRAGE, type EcranDemarrage, enregistrerDemarrage, lireDemarrage } from "../demarrage.js";
 import { CHOIX_THEME, enregistrerPreferenceTheme, lirePreferenceTheme, type PreferenceTheme } from "../theme.js";
 
 export function Reglages() {
@@ -15,6 +16,7 @@ export function Reglages() {
   const [confirmation, setConfirmation] = useState("");
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
   const [theme, setTheme] = useState<PreferenceTheme>(lirePreferenceTheme);
+  const [demarrage, setDemarrage] = useState<EcranDemarrage>(lireDemarrage);
 
   useEffect(() => {
     let actif = true;
@@ -51,6 +53,11 @@ export function Reglages() {
   function choisirTheme(preference: PreferenceTheme) {
     enregistrerPreferenceTheme(preference);
     setTheme(preference);
+  }
+
+  function choisirDemarrage(ecran: EcranDemarrage) {
+    enregistrerDemarrage(ecran);
+    setDemarrage(ecran);
   }
 
   async function seDeconnecter() {
@@ -101,6 +108,21 @@ export function Reglages() {
               className={choix.valeur === theme ? "bouton bouton--principal" : "bouton"}
               aria-pressed={choix.valeur === theme}
               onClick={() => choisirTheme(choix.valeur)}
+            >
+              {choix.libelle}
+            </button>
+          ))}
+        </div>
+        <h3>Ouverture de l'application installée</h3>
+        <p className="secondaire">Écran affiché quand vous ouvrez l'application sur cet appareil.</p>
+        <div className="segments" role="group" aria-label="Écran d'ouverture">
+          {CHOIX_DEMARRAGE.map((choix) => (
+            <button
+              key={choix.valeur}
+              type="button"
+              className={choix.valeur === demarrage ? "bouton bouton--principal" : "bouton"}
+              aria-pressed={choix.valeur === demarrage}
+              onClick={() => choisirDemarrage(choix.valeur)}
             >
               {choix.libelle}
             </button>

@@ -352,7 +352,7 @@ export function FicheArticle() {
   return (
     <ContexteModifications value={modifications}>
       <main className={article ? "page page--fiche" : "page"}>
-        <Link to="/" className="lien-retour">
+        <Link to="/articles" className="lien-retour">
           ← Articles
         </Link>
         <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
@@ -571,7 +571,7 @@ export function FicheArticle() {
                         if (!ok) return;
                         await api.delete(`/api/articles/${article.id}`);
                         sansAvertissement.current = true;
-                        await naviguer("/", { replace: true });
+                        await naviguer("/articles", { replace: true });
                       })
                       .catch((e: unknown) =>
                         setMessage({
