@@ -1,4 +1,4 @@
-// Publication automatique sur Vinted (décisions des 06 et 07/10/2026, docs/decisions/publication-vinted.md).
+// Publication automatique sur Vinted (décisions des 06 et 07/10/2026, docs/decisions/ ADR 0020 et 0034).
 // Le serveur tient la file d'attente ; l'extension Chrome (outils/extension-vinted) vient chercher la demande
 // suivante avec un jeton personnel, publie, puis renvoie le résultat. Le serveur ne contacte jamais Vinted.
 import { createHash, randomBytes } from "node:crypto";

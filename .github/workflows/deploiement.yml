@@ -1,5 +1,5 @@
 # Vérification (chaque pull request et chaque fusion dans main) puis déploiement automatique sur le serveur OVH
-# (fusion dans main uniquement, si la vérification est verte). Décision : docs/decisions/deploiement-continu.md.
+# (fusion dans main uniquement, si la vérification est verte). Décision : docs/decisions/0022-deploiement-a-chaque-fusion-dans-main.md.
 # Secrets (GitHub → Settings → Secrets and variables → Actions), créés par scripts/ovh/activer-deploiement-continu.sh :
 #   DEPLOIEMENT_CLE         clé SSH privée, limitée sur le serveur au lancement de la mise à jour ;
 #   DEPLOIEMENT_HOTE_CONNU  ligne « known_hosts » du serveur (son adresse et son empreinte).

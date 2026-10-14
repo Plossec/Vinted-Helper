@@ -20,8 +20,8 @@ Si le relevé manque, arrête-toi et dis-le.
 
 ## Format du relevé
 
-Décrit dans `docs/decisions/publication-vinted.md` (« Format du relevé de l'extension »), à côté des décisions de
-l'extension : lis cette section si un champ du relevé n'est pas clair.
+Décrit dans `docs/guides/publication-vinted.md` (« Annexe : format du relevé de l'extension ») : lis cette annexe si
+un champ du relevé n'est pas clair.
 
 ## Méthode
 

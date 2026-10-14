@@ -9,8 +9,9 @@ utilisateur, données prêtes pour plusieurs. PC Windows + Docker Desktop en loc
 ## Documentation (à lire quand le sujet l'exige)
 
 - **`docs/cahier-des-charges.md` fait foi.** Ambiguïté ou contradiction : **pose la question** plutôt que supposer.
-- `docs/decisions/` : décisions datées, un fichier par sujet (index `README.md`) ; elles priment sur le cahier des
-  charges quand elles le précisent. Toute nouvelle décision y est consignée.
+- `docs/decisions/` : décisions numérotées (ADR), **un fichier par décision** (`NNNN-titre.md`, modèle `0000-modele.md`,
+  index `README.md`) ; elles priment sur le cahier des charges quand elles le précisent. Toute nouvelle décision y
+  est consignée ; une décision acceptée ne se réécrit pas, un nouvel ADR la remplace.
 - `docs/guides/` : modes d'emploi ; `docs/README.md` : sommaire ; `docs/architecture.md` : schémas.
 - `.claude/rules/` : consignes chargées selon les fichiers touchés (calculs, interface, migrations, déploiement,
   extension Vinted, Gemini).

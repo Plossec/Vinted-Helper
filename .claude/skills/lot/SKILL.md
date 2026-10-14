@@ -58,7 +58,8 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
   - `CHANGELOG.md`, section `[Non publié]`, en langage simple, avec le numéro de l'issue ;
   - **version de la PR** : procédure `/version` (numéro selon la règle 1.x, CHANGELOG daté, `package.json`,
     architecture), en dernier commit de la PR ;
-  - décision datée dans le fichier du sujet (`docs/decisions/`) ou `00-outillage-et-methode.md` pour la méthode ;
+  - décision : nouvel ADR `docs/decisions/NNNN-titre.md` (modèle `0000-modele.md`, numéro suivant) ajouté à
+    l'index `docs/decisions/README.md` ; une décision remplacée prend le statut « Remplacé par ADR-NNNN » ;
   - cahier des charges, **avec l'accord de l'utilisateur** ;
   - `docs/architecture.md` si une table, un module, un service ou un outil externe change.
 - Relis ton diff : périmètre de l'issue seulement, aucun secret, aucune donnée personnelle (dépôt public).

@@ -2,7 +2,7 @@
  * Design tokens — direction « Techno » (indigo), issue #138.
  * Chaque couleur est déclarée une seule fois : light-dark() suit le réglage du téléphone (clair / sombre automatique),
  * sauf si l'utilisateur force un thème dans les Réglages (attribut data-theme sur <html>, voir theme.ts).
- * Contrastes mesurés (WCAG) : voir docs/decisions/refonte-interface.md.
+ * Contrastes mesurés (WCAG) : voir docs/decisions/0053-refonte-de-l-interface-design-tokens-techno.md.
  */
 :root {
   color-scheme: light dark;
