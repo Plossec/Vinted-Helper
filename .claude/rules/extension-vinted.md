@@ -5,7 +5,8 @@ paths:
 
 # Règles de l'extension Chrome de publication Vinted
 
-Décisions : `docs/decisions/publication-vinted.md` ; guide : `docs/guides/publication-vinted.md`.
+Décisions : `docs/decisions/`, thème « Publication Vinted » de l'index (garde-fous : ADR 0034 et 0082) ; guide :
+`docs/guides/publication-vinted.md` (format du relevé en annexe).
 
 - Fonctionnement actuel : sur une vérification ou une page « session bloquée », l'extension se met en pause et
   attend l'utilisateur.

@@ -1,0 +1,55 @@
+# ADR-0020 — Publication des annonces par un programme sur le PC
+
+- **Date** : 06/10/2026
+- **Statut** : Remplacé par [ADR-0034](0034-publication-par-une-extension-chrome.md) et [ADR-0036](0036-extension-validee-ancien-programme-retire.md)
+- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Issue** : —
+- **Thème** : Publication Vinted
+
+[← Index des décisions](README.md)
+
+## Décision
+
+**Décision (utilisateur)** : lever la règle « aucune automatisation de Vinted » pour **la seule publication des
+annonces**. Risques expliqués et acceptés : les conditions d'utilisation de Vinted interdisent les outils
+automatisés (suspension possible du compte, avec annonces, avis et porte-monnaie) ; le programme casse à chaque
+changement du site Vinted.
+
+| Sujet | Choix |
+|---|---|
+| Lancement | Programme en tâche de fond sur le PC (démarre avec Windows) ; le bouton de l'application suffit |
+| Validation | Le programme remplit le formulaire **et clique lui-même « Ajouter »**, article après article |
+| Champs ajoutés à la fiche | Couleur(s) (liste Vinted, 2 au plus) et format du colis (petit / moyen / grand, défaut réglable) |
+| Navigateur | Profil Chrome dédié ; l'utilisateur s'y connecte à Vinted une fois |
+| Après publication | Article passé En ligne (prix affiché, date du jour) ; lien de l'annonce gardé sur la fiche |
+| Articles incomplets | Refusés, avec la liste de ce qui manque |
+
+**Garde-fous (posés par Claude)**
+- Aucun contournement de détection : pas de camouflage du navigateur, pas de résolution de captcha. Vérification
+  Vinted, captcha, déconnexion ou champ introuvable → le programme s'arrête et l'article passe « en erreur » avec
+  le motif.
+- **Contrôle avant envoi** : chaque champ est relu dans la page ; s'il manque ou diffère, aucun clic.
+- **Mode essai** (activé par défaut) : tout est rempli mais rien n'est publié, pour vérifier le remplissage.
+- Le programme ne fait rien d'autre sur Vinted (ni lecture des ventes, ni messages, ni modification d'annonces).
+- Les sélecteurs de la page Vinted sont regroupés dans un seul fichier, calibrés avec l'utilisateur sur son PC
+  (Claude ne consulte jamais Vinted).
+
+**Précisions de réalisation (06/10/2026, tranchées par Claude)**
+- **Fréquence** : le programme demande à l'application **toutes les 5 minutes** s'il y a des articles à publier
+  (changé le 06/10/2026 à la demande de l'utilisateur, au lieu de 10 s). Une sélection de plusieurs articles est
+  publiée à raison d'**un seul article toutes les 10 minutes** (précisé le 06/10/2026 par l'utilisateur) ; les essais,
+  qui ne publient rien, s'enchaînent. L'écran Publication Vinted affiche le programme « arrêté » après 16 minutes sans
+  nouvelles.
+- **Jeton** : un code d'accès réservé au programme (il commence par `vh_`), qui remplace le mot de passe puisque le
+  programme tourne sans l'utilisateur. Il est créé dans Réglages → Publication Vinted et affiché une seule fois ; en
+  créer un nouveau annule l'ancien. L'application n'en garde qu'une version brouillée (empreinte), qui permet de le
+  reconnaître sans pouvoir le retrouver. Il ne permet que de lire les articles à publier et leurs photos, et de
+  signaler « publié » ou « erreur ».
+- Une seule publication à la fois. Une publication « en cours » depuis plus de 15 minutes passe en erreur et **n'est
+  jamais relancée automatiquement** (risque d'annonce en double).
+- La connexion à Vinted est vérifiée **avant** de prendre un article : un article ne reste jamais bloqué par une
+  déconnexion.
+- Mode essai mémorisé sur l'appareil (case de l'écran Publication Vinted) ; en essai, pause de relecture de 20 s,
+  l'article reste À publier.
+- Taille facultative (certaines catégories n'en ont pas) ; format du colis : celui de la fiche, sinon celui des
+  Réglages (« petit » par défaut).

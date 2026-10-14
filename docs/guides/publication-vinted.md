@@ -4,7 +4,7 @@ Vous choisissez des articles « À publier » dans l'application. Une **extensio
 Chrome habituel**, ouvre alors un onglet Vinted, remplit le formulaire article par article, vérifie chaque champ,
 puis clique « Ajouter ». L'article passe ensuite **En ligne** et le lien de l'annonce est gardé sur sa fiche.
 
-> **Risques acceptés** (décisions des 06 et 07/10/2026, `docs/decisions/publication-vinted.md`) : Vinted peut
+> **Risques acceptés** (décisions des 06 et 07/10/2026, ADR 0020 et 0034 de `docs/decisions/`) : Vinted peut
 > suspendre un compte qui publie automatiquement, et l'extension cessera de fonctionner si Vinted modifie son site.
 > Si Vinted affiche une vérification (captcha), une page « session bloquée », ou si vous n'êtes pas connecté,
 > l'extension **se met en pause** : rien n'est rechargé ni publié tant que vous n'avez pas cliqué « Reprendre ».
@@ -119,3 +119,18 @@ l'extension → **Dernier relevé** → **Télécharger le fichier**, et envoyez
 | L'article reste « en attente » | L'extension est en pause (badge « ! ») ou attend les 10 minutes entre deux articles |
 | Article au statut « Erreur » | La publication a échoué : lisez le message sur la fiche, vérifiez sur Vinted, puis « Publier sur Vinted » |
 | Erreur « contrôle avant envoi » | Un champ n'a pas été rempli comme prévu ; rien n'a été publié (voir §8) |
+
+## Annexe : format du relevé de l'extension
+
+Pour Claude (agent `analyste-releve`) : contenu du fichier `diagnostic-vinted-….json`.
+
+- `adresse`, `date`, `etat` (`pret`, `verification`, `bloque`, `deconnecte`).
+- **Relevé automatique** (erreur pendant une publication) : `etape` (photos, titre, description, categorie, marque,
+  taille, etat, couleurs, prix, colis), `erreur`, `selecteursTrouves`, `elements`.
+- **Relevé à la demande** (bouton Diagnostic) : `selecteursTrouves`, `elements`, `apparusApresClicCategorie`,
+  `options « Femmes »` (ancêtres des éléments dont le texte est « Femmes »).
+- Chaque élément : `balise`, `type`, `name`, `id`, `testid`, `role`, `aria`, `ariaExpanded`, `placeholder`,
+  `valeur` (ce que le champ contient, y compris ce que Vinted a pré-rempli), `coche`, `classe`, `texte` (80
+  caractères, en minuscules, espaces regroupés), `visible`.
+- `selecteursTrouves` : pour chaque champ de `SELECTEURS.champs`, le premier sélecteur présent, ou `null`. Un `null`
+  n'est pas forcément une erreur (champ affiché seulement après le choix de la catégorie).

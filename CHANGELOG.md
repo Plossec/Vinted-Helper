@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Documentation : les décisions (`docs/decisions/`) sont désormais rangées au format **ADR** : un fichier numéroté
+  par décision, avec un statut (Proposé, Accepté, Remplacé par…) et un index qui signale les points à relire. Les
+  88 décisions existantes ont été reprises telles quelles, avec les réponses de la relecture du 14/10/2026 (#197).
+
 ## [1.14.3] — 14/10/2026
 
 ### Modifié
