@@ -8,7 +8,7 @@ argument-hint: "[chemin du relevé] [message d'erreur]"
 
 Entrée : `$ARGUMENTS` (relevé, message du journal, captures) ; sinon, ce que l'utilisateur vient d'envoyer.
 
-Règles de l'extension (règle n° 4, version, tests) : `.claude/rules/extension-vinted.md`.
+Règles de l'extension (version, tests) : `.claude/rules/extension-vinted.md`.
 
 ## 1. Issue
 Si aucune issue ouverte ne couvre ce problème, crée `[Correctif] Extension Vinted : …` (étape, message, ce que
