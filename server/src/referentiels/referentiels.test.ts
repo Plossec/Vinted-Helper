@@ -23,7 +23,7 @@ describe("listes de référence", () => {
       lieuId,
       prixAchat: 300,
       dateAchat: "2026-10-04",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId,
       etat: "bon_etat",
     });

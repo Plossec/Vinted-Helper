@@ -6,7 +6,7 @@ import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
 import { changerStatut } from "../articles/service.js";
-import { CATEGORIES } from "../catalogue/categories.js";
+import { CATEGORIE_AUTRE, CATEGORIES } from "../catalogue/categories.js";
 import { libelleCouleur } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
@@ -74,6 +74,7 @@ export function manques(a: ArticleComplet, nombrePhotosAnnonce: number): string[
   if (!a.titre?.trim()) m.push("titre de l'annonce");
   if (!a.description?.trim()) m.push("description de l'annonce");
   if (!a.categorie) m.push("catégorie");
+  else if (a.categorie === CATEGORIE_AUTRE) m.push("catégorie Vinted (« Autre » : à publier à la main sur Vinted)");
   if (!a.marque) m.push("marque");
   if (!a.etat) m.push("état");
   if (a.couleurs.length === 0) m.push("couleur");

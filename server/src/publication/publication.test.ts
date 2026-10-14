@@ -22,7 +22,10 @@ describe("publication Vinted", () => {
     t.app.inject({ method, url, headers: { authorization: `Bearer ${jeton}` }, ...(payload ? { payload } : {}) });
 
   /** Article À publier, complet sauf ce qui est retiré. */
-  async function article(sans: { photo?: boolean; couleur?: boolean } = {}) {
+  async function article(
+    sans: { photo?: boolean; couleur?: boolean } = {},
+    categorie = "hommes/vetements/jeans/jeans-coupe-droite",
+  ) {
     const refs = (await requete("GET", "/api/referentiels")).json<{
       lieux: { id: string }[];
       marques: { id: string }[];
@@ -33,7 +36,7 @@ describe("publication Vinted", () => {
         lieuId: refs.lieux[0]?.id,
         prixAchat: 300,
         dateAchat: "2026-10-01",
-        categorie: "hommes/vetements/jeans/jeans-droits",
+        categorie,
         marqueId: refs.marques[0]?.id,
         etat: "bon_etat",
         taille: "W32",
@@ -78,6 +81,16 @@ describe("publication Vinted", () => {
     expect(encore.refuses).toHaveLength(1);
   });
 
+  it("refuse un article de catégorie « Autre » : à publier à la main (#177)", async () => {
+    const a = await article({}, "autre");
+    const r = (await requete("POST", "/api/publications", { articleIds: [a.id] })).json<{
+      acceptes: number[];
+      refuses: { manques: string[] }[];
+    }>();
+    expect(r.acceptes).toEqual([]);
+    expect(r.refuses[0]?.manques).toEqual(["catégorie Vinted (« Autre » : à publier à la main sur Vinted)"]);
+  });
+
   it("jeton : obligatoire, limité aux routes du programme et à la lecture des photos", async () => {
     expect((await programme("GET", "/api/programme/suivante", undefined, "faux")).statusCode).toBe(401);
     expect(
@@ -99,7 +112,7 @@ describe("publication Vinted", () => {
       reference: a.reference,
       titre: "Jean bleu",
       prix: "12,50",
-      categorie: ["Hommes", "Vêtements", "Jeans", "Jeans droits"],
+      categorie: ["Hommes", "Vêtements", "Jeans", "Jeans coupe droite"],
       etat: "Bon état",
       taille: "W32",
       couleurs: ["Bleu"],
@@ -336,7 +349,7 @@ describe("publication Vinted", () => {
       lieuId: refs.lieux[0]?.id,
       prixAchat: 1,
       dateAchat: "2026-10-01",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId: refs.marques[0]?.id,
       etat: "bon_etat",
     };

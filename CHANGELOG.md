@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Catégories : l'arbre reprend désormais exactement celui de Vinted (libellés relevés sur vinted.fr le 14/10/2026)
+  pour Femmes, Hommes, Sport, Loisirs et collections ; tout le reste va dans « Autre ». Les articles déjà classés
+  passent automatiquement dans la catégorie la plus proche. Un article « Autre » se publie à la main sur Vinted :
+  la publication automatique le refuse (#177).
+
 ## [1.14.1] — 14/10/2026
 
 ### Modifié
