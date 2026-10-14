@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.5] — 14/10/2026
+
+### Modifié
+- Extension Vinted 1.8.2 : délais fixes, sans tirage aléatoire (10 minutes entre deux annonces publiées, 5 secondes
+  entre deux étapes) ; inventaire des délais consigné (#136).
+
 ## [1.12.4] — 14/10/2026
 
 ### Modifié
