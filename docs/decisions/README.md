@@ -22,6 +22,7 @@ Toute nouvelle décision va dans le fichier de son sujet (le fichier du lot conc
 | [import-tableur.md](import-tableur.md) | Import de l'ancien tableur dans la base du serveur |
 | [deploiement-continu.md](deploiement-continu.md) | Déploiement automatique sur le serveur à chaque fusion dans main |
 | [refonte-interface.md](refonte-interface.md) | Refonte de l'interface : design tokens « Techno », polices système, thème clair / sombre (#138) |
+| [taches-automatisees.md](taches-automatisees.md) | Tâches automatisées sur Vinted : articles dormants, ventes, offres, favoris, bordereaux, rythme, écran « À faire » (#147 à #151, #190, #191) |
 
 ## À relire par l'utilisateur
 
