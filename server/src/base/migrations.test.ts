@@ -6,6 +6,9 @@ import { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const dossier = resolve(import.meta.dirname, "..", "..", "drizzle");
+// Une base PGlite neuve et plusieurs migrations peuvent dépasser les 5 à 10 s par défaut quand toute la suite
+// tourne en parallèle (échec intermittent constaté le 14/10/2026) : délai élargi pour ces tests.
+const DELAI = 30_000;
 const appliquer = async (client: PGlite, fichier: string) => {
   for (const instruction of readFileSync(resolve(dossier, fichier), "utf8").split("--> statement-breakpoint")) {
     if (instruction.trim()) await client.exec(instruction);
@@ -46,7 +49,7 @@ describe("migration 0001 — conversion des données existantes", () => {
         "SELECT nom, categorie, etat, gamme, notes FROM article ORDER BY reference",
       )
     ).rows;
-  });
+  }, DELAI);
   afterAll(() => client.close());
 
   it("gamme recopiée en texte, catégorie vidée", () => {
@@ -79,7 +82,7 @@ describe("migration 0001 — conversion des données existantes", () => {
   });
 });
 
-describe("migration 0002 — marques de départ ajoutées aux comptes existants", () => {
+describe("migration 0002 — marques de départ ajoutées aux comptes existants", { timeout: DELAI }, () => {
   const client = new PGlite();
   afterAll(() => client.close());
 
@@ -102,7 +105,7 @@ describe("migration 0002 — marques de départ ajoutées aux comptes existants"
   });
 });
 
-describe("migration 0012 — Hommes › Sweats et pulls aligné sur Vinted (#176)", () => {
+describe("migration 0012 — Hommes › Sweats et pulls aligné sur Vinted (#176)", { timeout: DELAI }, () => {
   const client = new PGlite();
   afterAll(() => client.close());
 

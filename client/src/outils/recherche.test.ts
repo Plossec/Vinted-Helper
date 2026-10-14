@@ -91,10 +91,11 @@ describe("filtres", () => {
     expect(f({ statuts: [] })).toEqual([3, 2, 1]);
   });
 
-  it("par défaut : tous les statuts sauf Finalisé et Sortie du stock", () => {
+  it("par défaut : tous les statuts sauf Finalisé, Sortie du stock et En stock (#183)", () => {
     const liste = STATUTS_PAR_DEFAUT.map((statut, i) => article(i + 1, { statut })).concat(
       article(10, { statut: "finalise" }),
       article(11, { statut: "sortie_stock" }),
+      article(12, { statut: "en_stock" }),
     );
     expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(nombreFiltresActifs(FILTRES_PAR_DEFAUT)).toBe(0);

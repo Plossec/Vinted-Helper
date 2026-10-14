@@ -47,7 +47,7 @@ export const FILTRES_VIDES: Filtres = {
   sortieIds: [],
 };
 
-/** Statuts cochés par défaut : tout sauf Finalisé et Sortie du stock (le stock et les ventes en cours). */
+/** Statuts cochés par défaut : tout sauf Finalisé, Sortie du stock et En stock (#183, gardé hors vente). */
 export const STATUTS_PAR_DEFAUT: Statut[] = [
   "brouillon",
   "a_publier",

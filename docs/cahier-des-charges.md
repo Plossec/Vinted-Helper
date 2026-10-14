@@ -100,6 +100,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | Statut | Signification |
 |---|---|
 | **Brouillon** | Photo terrain + prix d'achat, fiche incomplète |
+| **En stock** | Gardé hors vente (boîte de lunettes vide…) : compté dans le stock, sans alerte, masqué par défaut dans les filtres — ajouté le 14/10/2026 (issue #183) |
 | **À publier** | Fiche complète, photos annonce prêtes, pas encore en ligne |
 | **Erreur** | La publication automatique sur Vinted (extension Chrome) a échoué ; le message de l'échec est sur la fiche — ajouté le 08/10/2026 (issue #72) |
 | **En ligne** | Annonce publiée sur Vinted (prix affiché obligatoire) |
@@ -112,8 +113,9 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 ### 4.2 Transitions autorisées
 | Statut actuel | Peut passer à |
 |---|---|
-| Brouillon | À publier, En ligne |
-| À publier | En ligne, Brouillon ; **Erreur** uniquement par une publication Vinted en échec (jamais à la main, jamais en mode essai) |
+| Brouillon | À publier, En ligne, **En stock** |
+| En stock | Brouillon, À publier |
+| À publier | En ligne, Brouillon, **En stock** ; **Erreur** uniquement par une publication Vinted en échec (jamais à la main, jamais en mode essai) |
 | Erreur | À publier (nouvelle demande « Publier sur Vinted », ou retour à la main), En ligne (annonce publiée à la main), Brouillon |
 | En ligne | À expédier, À publier (annonce retirée temporairement) |
 | À expédier | Envoyé, En ligne (annulation par l'acheteur) |

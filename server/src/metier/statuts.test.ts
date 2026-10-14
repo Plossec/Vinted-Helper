@@ -1,14 +1,17 @@
 // Règles de statut — cahier des charges §4.2. Le tableau attendu est recopié du cahier,
-// indépendamment du code, pour vérifier toutes les combinaisons (9 statuts × 9 statuts).
+// indépendamment du code, pour vérifier toutes les combinaisons (10 statuts × 10 statuts).
 // Évolution du 07/10/2026 (issue #52, docs/decisions/lot-3.md) : retour Envoyé → À récupérer, puis À publier,
 // En ligne ou Sortie du stock. Évolution du 08/10/2026 (issue #72) : statut Erreur (publication Vinted en échec),
 // atteint seulement par la publication, d'où l'on revient à À publier, En ligne, Brouillon ou Sortie du stock.
+// Évolution du 14/10/2026 (issue #183) : statut En stock (article gardé hors vente), comme un Brouillon : depuis
+// Brouillon ou À publier, vers Brouillon, À publier ou Sortie du stock.
 import { describe, expect, it } from "vitest";
 import { estTransitionSimple, STATUTS, type Statut, transitionAutorisee, verifierTransition } from "./statuts.js";
 
 const ATTENDU: Record<Statut, Statut[]> = {
-  brouillon: ["a_publier", "en_ligne", "sortie_stock"],
-  a_publier: ["en_ligne", "brouillon", "sortie_stock"],
+  brouillon: ["a_publier", "en_ligne", "en_stock", "sortie_stock"],
+  en_stock: ["brouillon", "a_publier", "sortie_stock"],
+  a_publier: ["en_ligne", "brouillon", "en_stock", "sortie_stock"],
   erreur_publication: ["a_publier", "en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
   a_expedier: ["envoye", "en_ligne", "sortie_stock"],
@@ -18,12 +21,12 @@ const ATTENDU: Record<Statut, Statut[]> = {
   sortie_stock: ["a_publier"],
 };
 
-describe("§4.2 — transitions autorisées (81 combinaisons)", () => {
+describe("§4.2 — transitions autorisées (100 combinaisons)", () => {
   const combinaisons = STATUTS.flatMap((de) => STATUTS.map((vers) => [de, vers] as const));
 
-  it("couvre bien les 9 statuts (cahier des charges + « À récupérer » + « Erreur »)", () => {
+  it("couvre bien les 10 statuts (cahier des charges + « À récupérer » + « Erreur » + « En stock »)", () => {
     expect([...STATUTS].sort()).toEqual(Object.keys(ATTENDU).sort());
-    expect(combinaisons).toHaveLength(81);
+    expect(combinaisons).toHaveLength(100);
   });
 
   it.each(combinaisons)("%s → %s", (de, vers) => {
@@ -72,6 +75,13 @@ describe("verifierTransition — messages en français", () => {
 describe("Lot 3 — passages simples et passages avec leur propre action", () => {
   it("le changement simple ne concerne que Brouillon, À publier et En ligne", () => {
     expect(estTransitionSimple("brouillon", "en_ligne")).toBe(true);
+    for (const [de, vers] of [
+      ["brouillon", "en_stock"],
+      ["a_publier", "en_stock"],
+      ["en_stock", "brouillon"],
+      ["en_stock", "a_publier"],
+    ] as const)
+      expect(estTransitionSimple(de, vers), `${de} → ${vers} (#183)`).toBe(true);
     expect(estTransitionSimple("en_ligne", "a_publier")).toBe(true);
     expect(estTransitionSimple("en_ligne", "a_expedier")).toBe(false); // vente
     expect(estTransitionSimple("envoye", "a_publier")).toBe(false); // retour du colis

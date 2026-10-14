@@ -3,6 +3,8 @@
 
 export const STATUTS = [
   "brouillon",
+  /** Article gardé hors vente (boîte de lunettes vide…), compté dans le stock, sans alerte (issue #183). */
+  "en_stock",
   "a_publier",
   /** Publication Vinted (extension Chrome) en échec : l'article attend une nouvelle demande (issue #72). */
   "erreur_publication",
@@ -19,6 +21,7 @@ export type Statut = (typeof STATUTS)[number];
 
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",
+  en_stock: "En stock",
   a_publier: "À publier",
   erreur_publication: "Erreur",
   en_ligne: "En ligne",
@@ -34,8 +37,10 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
  * n'est jamais proposé à l'utilisateur, seule une publication Vinted en échec le fait (`publication/service.ts`).
  */
 const TRANSITIONS: Record<Statut, readonly Statut[]> = {
-  brouillon: ["a_publier", "en_ligne", "sortie_stock"],
-  a_publier: ["en_ligne", "brouillon", "sortie_stock"],
+  brouillon: ["a_publier", "en_ligne", "en_stock", "sortie_stock"],
+  // En stock (issue #183) : comme un Brouillon, sans mise en vente.
+  en_stock: ["brouillon", "a_publier", "sortie_stock"],
+  a_publier: ["en_ligne", "brouillon", "en_stock", "sortie_stock"],
   // Erreur de publication (issue #72) : retour à À publier, ou annonce publiée à la main (En ligne).
   erreur_publication: ["a_publier", "en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
@@ -57,6 +62,10 @@ const TRANSITIONS_SIMPLES = new Set<string>([
   "brouillon>en_ligne",
   "a_publier>en_ligne",
   "a_publier>brouillon",
+  "brouillon>en_stock",
+  "a_publier>en_stock",
+  "en_stock>brouillon",
+  "en_stock>a_publier",
   "en_ligne>a_publier",
   "erreur_publication>a_publier",
   "erreur_publication>en_ligne",

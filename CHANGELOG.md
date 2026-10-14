@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.14.0] — 14/10/2026
+
+### Ajouté
+- Statut d'article « En stock » : gardé hors vente (boîte de lunettes vide…), compté dans le stock, sans alerte et
+  masqué par défaut dans les filtres de la liste (#183).
+
 ## [1.13.0] — 14/10/2026
 
 ### Ajouté
