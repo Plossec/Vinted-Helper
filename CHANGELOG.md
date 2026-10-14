@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.7] — 14/10/2026
+
+### Modifié
+- Extension Vinted 1.9.0 : logo et couleurs de l'application (indigo), en-tête avec la version, état mis en avant
+  dans une carte, journal plus lisible ; réglages et diagnostic au même style (#179).
+
 ## [1.12.6] — 14/10/2026
 
 ### Corrigé

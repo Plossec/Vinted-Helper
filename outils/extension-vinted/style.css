@@ -1,89 +1,229 @@
-/* Fenêtre et options de l'extension : mêmes couleurs que l'application, clair / sombre automatique. */
+/*
+ * Fenêtres de l'extension (popup, réglages, diagnostic) : mêmes repères visuels que l'application
+ * (client/src/styles.css, direction « Techno » indigo, #138) ; clair / sombre automatique (#179).
+ */
 :root {
   color-scheme: light dark;
-  --fond: #ffffff;
-  --texte: #1b1b1b;
-  --secondaire: #5f6368;
-  --accent: #0b7a75;
-  --erreur: #c62828;
-  --bord: #d0d4d8;
+  --fond: light-dark(#f6f7fb, #0a0c1a);
+  --surface: light-dark(#ffffff, #14172e);
+  --texte: light-dark(#10132a, #e9ebfa);
+  --texte-secondaire: light-dark(#4b5070, #a0a6cc);
+  --bordure: light-dark(#d8dbeb, #272b4d);
+  --bordure-champ: light-dark(#7c82a8, #5c6392);
+  --accent: light-dark(#4338ca, #9aa2ff);
+  --accent-survol: light-dark(#3730a3, #b7bcff);
+  --accent-doux: light-dark(#e8e7fb, #20244a);
+  --accent-texte: light-dark(#ffffff, #0b0d26);
+  --erreur: light-dark(#c11a33, #ff8d9c);
+  --erreur-doux: light-dark(#fde7ea, #3c1220);
+  --ok: light-dark(#12794a, #5bd79b);
+  --ok-doux: light-dark(#e3f4ec, #0f2a1f);
+  --police-texte: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --police-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, "Roboto Mono", monospace;
+  --rayon: 6px;
+  --rayon-carte: 8px;
+  --rayon-rond: 999px;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --fond: #1b1d1f;
-    --texte: #eceff1;
-    --secondaire: #a8b0b6;
-    --accent: #4fc3bb;
-    --erreur: #ef7f7f;
-    --bord: #3a3f44;
-  }
-}
+
 body {
   margin: 0;
   padding: 16px;
   font:
-    15px/1.4 system-ui,
+    15px/1.45 var(--police-texte),
     sans-serif;
   background: var(--fond);
   color: var(--texte);
 }
+
+/* En-tête : logo, titre, version de l'extension (entete.js). */
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.entete img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex: none;
+}
 h1 {
   font-size: 1.1rem;
-  margin: 0 0 12px;
+  line-height: 1.2;
+  margin: 0;
 }
+.version {
+  color: var(--texte-secondaire);
+  font-size: 0.8rem;
+}
+h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--texte-secondaire);
+  margin: 20px 0 8px;
+}
+
 .secondaire {
-  color: var(--secondaire);
+  color: var(--texte-secondaire);
   font-size: 0.9rem;
 }
 .erreur {
   color: var(--erreur);
 }
 .ok {
-  color: var(--accent);
+  color: var(--ok);
 }
+
+/* Carte d'état (popup) : couleur selon la classe posée par popup.js (ok / erreur / neutre). */
+.carte,
+#etat {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
+  color: var(--texte);
+}
+#etat.ok {
+  border-left-color: var(--ok);
+  background: var(--ok-doux);
+}
+#etat.erreur {
+  border-left-color: var(--erreur);
+  background: var(--erreur-doux);
+}
+#etat::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: var(--rayon-rond);
+  background: var(--accent);
+  vertical-align: 1px;
+}
+#etat.ok::before {
+  background: var(--ok);
+}
+#etat.erreur::before {
+  background: var(--erreur);
+}
+#etat:empty {
+  display: none;
+}
+
 button {
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid var(--bord);
-  border-radius: 8px;
-  background: transparent;
+  border: 1px solid var(--bordure-champ);
+  border-radius: var(--rayon);
+  background: var(--surface);
   color: var(--texte);
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
+}
+button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 button.principal {
   background: var(--accent);
   border-color: var(--accent);
-  color: #ffffff;
+  color: var(--accent-texte);
 }
+button.principal:hover {
+  background: var(--accent-survol);
+  border-color: var(--accent-survol);
+  color: var(--accent-texte);
+}
+button.discret {
+  min-height: 34px;
+  padding: 0 10px;
+  border-color: var(--bordure);
+  background: transparent;
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+}
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin: 12px 0;
 }
+.actions--principales button {
+  flex: 1 1 auto;
+}
+.actions--outils {
+  padding-top: 12px;
+  border-top: 1px solid var(--bordure);
+}
+
 label {
   display: grid;
   gap: 4px;
   margin-bottom: 12px;
+  font-weight: 500;
 }
 input {
   min-height: 40px;
   padding: 0 10px;
-  border: 1px solid var(--bord);
-  border-radius: 8px;
-  background: transparent;
+  border: 1px solid var(--bordure-champ);
+  border-radius: var(--rayon);
+  background: var(--surface);
   color: var(--texte);
   font: inherit;
+  font-weight: 400;
 }
+
+a {
+  color: var(--accent);
+}
+
+/* Listes (journal, champs du diagnostic) : cartes empilées. */
 ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
+  overflow: hidden;
 }
 li {
-  padding: 6px 0;
-  border-top: 1px solid var(--bord);
+  padding: 8px 12px;
   font-size: 0.85rem;
   overflow-wrap: anywhere;
+}
+li + li {
+  border-top: 1px solid var(--bordure);
+}
+li time {
+  display: block;
+  color: var(--texte-secondaire);
+  font-family: var(--police-mono);
+  font-size: 0.75rem;
+}
+ul:empty {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  button {
+    transition:
+      background-color 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+  }
 }
