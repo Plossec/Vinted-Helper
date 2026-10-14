@@ -37,7 +37,8 @@ export const etatPublication = pgEnum("etat_publication", [
   "erreur",
   "annule",
 ]);
-export const motifSortie = pgEnum("motif_sortie", ["donne", "jete", "revendu", "garde", "perdu"]);
+/** « a_vendre » (#180) : à vendre hors Vinted, l'article reste compté en stock. */
+export const motifSortie = pgEnum("motif_sortie", ["donne", "jete", "revendu", "garde", "perdu", "a_vendre"]);
 export const canalRevente = pgEnum("canal_revente", ["vide_grenier", "leboncoin", "main_propre", "autre"]);
 export const etatArticle = pgEnum("etat_article", CODES_ETAT);
 
@@ -154,7 +155,7 @@ export const article = pgTable(
     prixVenteMinimum: integer("prix_vente_minimum"),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
     modifieLe: horodatage("modifie_le").notNull().defaultNow(),
-    /** Sortie du stock (§5.7) : motif, canal et prix de revente (centimes) si « revendu », date. */
+    /** Sortie du stock (§5.7) : motif, canal (« revendu », « a_vendre »), prix de revente (centimes) si « revendu », date. */
     motifSortie: motifSortie("motif_sortie"),
     canalRevente: canalRevente("canal_revente"),
     prixRevente: integer("prix_revente"),

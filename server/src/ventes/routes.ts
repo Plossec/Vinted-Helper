@@ -43,7 +43,7 @@ import {
   sortirDuStock,
 } from "./service.js";
 
-const MOTIFS = ["donne", "jete", "revendu", "garde", "perdu"] as const;
+const MOTIFS = ["donne", "jete", "revendu", "garde", "perdu", "a_vendre"] as const;
 const CANAUX = ["vide_grenier", "leboncoin", "main_propre", "autre"] as const;
 
 function listeIds(valeur: unknown, champ: string): string[] {

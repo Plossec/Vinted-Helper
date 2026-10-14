@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.13.0] — 14/10/2026
+
+### Ajouté
+- Motif de sortie du stock « À vendre hors Vinted » (avec le canal) : l'article reste compté en stock jusqu'à sa
+  revente, enregistrée ensuite par « Vendu ou autre motif » (#180).
+
 ## [1.12.7] — 14/10/2026
 
 ### Modifié

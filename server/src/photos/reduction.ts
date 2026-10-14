@@ -8,7 +8,9 @@ import { article, articlePhoto, photo } from "../base/schema.js";
 import { photosDesArticles, supprimerSiOrpheline } from "./service.js";
 import type { StockagePhotos } from "./stockage.js";
 
-const FINAUX = new Set(["finalise", "sortie_stock"]);
+/** Finalisé ou sorti du stock pour de bon : « À vendre hors Vinted » (#180) garde ses photos. */
+const estFinal = (a: { statut: string; motifSortie: string | null }) =>
+  a.statut === "finalise" || (a.statut === "sortie_stock" && a.motifSortie !== "a_vendre");
 
 export async function reduirePhotosArticle(
   base: Base,
@@ -17,10 +19,10 @@ export async function reduirePhotosArticle(
   articleId: string,
 ): Promise<void> {
   const [a] = await base
-    .select({ statut: article.statut })
+    .select({ statut: article.statut, motifSortie: article.motifSortie })
     .from(article)
     .where(and(eq(article.id, articleId), eq(article.utilisateurId, utilisateurId)));
-  if (!a || !FINAUX.has(a.statut)) return;
+  if (!a || !estFinal(a)) return;
   const photos = (await photosDesArticles(base, [articleId])).get(articleId) ?? [];
   const annonces = photos.filter((p) => p.type === "annonce");
   const principale = annonces.find((p) => p.estPrincipale) ?? annonces[0];
@@ -44,11 +46,11 @@ export async function reduirePhotosArticle(
       .where(eq(photo.id, p.id));
     if (!ligne || ligne.estReduite) continue;
     const utilisateurs = await base
-      .select({ statut: article.statut })
+      .select({ statut: article.statut, motifSortie: article.motifSortie })
       .from(articlePhoto)
       .innerJoin(article, eq(article.id, articlePhoto.articleId))
       .where(and(eq(articlePhoto.photoId, p.id), isNull(article.supprimeLe)));
-    if (!utilisateurs.every((u) => FINAUX.has(u.statut))) continue;
+    if (!utilisateurs.every(estFinal)) continue;
     const nouveau = await stockage.reduire(utilisateurId, p.id, ligne.fichier);
     await base.update(photo).set({ fichier: nouveau, estReduite: true }).where(eq(photo.id, p.id));
     await stockage.retirerAncien(utilisateurId, ligne.fichier, nouveau);

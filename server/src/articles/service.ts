@@ -471,7 +471,11 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     prixVenteMinimum: a.prixVenteMinimum,
     creeLe: a.creeLe,
     modifieLe: a.modifieLe,
-    transitionsPossibles: transitionsProposees(a.statut),
+    // « À vendre hors Vinted » (#180) : le motif peut encore changer (revendu, donné…), sans changer de statut.
+    transitionsPossibles:
+      a.statut === "sortie_stock" && a.motifSortie === "a_vendre"
+        ? ["sortie_stock" as const, ...transitionsProposees(a.statut)]
+        : transitionsProposees(a.statut),
     historiqueStatuts,
   };
 }

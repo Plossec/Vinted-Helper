@@ -296,7 +296,7 @@ export interface Couts {
   beneficeAttendu: number | null;
 }
 
-export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu";
+export type MotifSortie = "donne" | "jete" | "revendu" | "garde" | "perdu" | "a_vendre";
 export type CanalRevente = "vide_grenier" | "leboncoin" | "main_propre" | "autre";
 
 export const LIBELLES_MOTIF: Record<MotifSortie, string> = {
@@ -305,6 +305,7 @@ export const LIBELLES_MOTIF: Record<MotifSortie, string> = {
   revendu: "Revendu hors Vinted",
   garde: "Gardé pour moi",
   perdu: "Perdu",
+  a_vendre: "À vendre hors Vinted",
 };
 
 export const LIBELLES_CANAL: Record<CanalRevente, string> = {
