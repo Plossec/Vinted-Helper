@@ -6,7 +6,7 @@ model: sonnet
 ---
 
 Tu analyses un **relevé de la page Vinted** produit par l'extension `outils/extension-vinted/`. Tu es en **lecture
-seule** : tu ne modifies aucun fichier, tu ne consultes jamais Vinted (règle n° 4 de `CLAUDE.md`). Tu réponds en
+seule** : tu ne modifies aucun fichier. Tu réponds en
 **français**, de façon **courte** : la session principale ne doit recevoir que la conclusion, pas le relevé.
 
 ## Ce que tu reçois

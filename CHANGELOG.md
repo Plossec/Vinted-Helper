@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.14.1] — 14/10/2026
+
+### Modifié
+- Règle n° 4 (limite de l'automatisation de Vinted) retirée des instructions de Claude, du cahier des charges et de
+  la documentation, à la demande de l'utilisateur (#185).
+
 ## [1.14.0] — 14/10/2026
 
 ### Ajouté

@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.14.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.14.1**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -40,7 +40,8 @@ flowchart LR
   gh -- "SSH : commande imposée<br/>(fusion dans main)" --> OVH
 ```
 
-- **Seule** l'extension touche Vinted, et uniquement pour publier (règle n° 4) ; le serveur n'appelle jamais Vinted.
+- L'extension publie les annonces sur Vinted ; le serveur n'appelle pas Vinted (la règle n° 4 qui limitait
+  l'automatisation de Vinted a été retirée le 14/10/2026, #185).
 - La clé Gemini ne quitte pas le serveur (règle n° 3).
 - Sur le PC de développement, le même `docker-compose.yml` tourne avec Caddy en HTTPS local (Wi-Fi de la maison).
 
