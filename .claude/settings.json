@@ -88,10 +88,7 @@
       "Edit(/data/**)", "Edit(/.claude/settings.json)", "Edit(/.claude/settings.local.json)",
       "Edit(/.claude/hooks/**)",
 
-      "mcp__github__push_files", "mcp__github__create_or_update_file", "mcp__github__delete_file",
-
-      "WebFetch(domain:vinted.fr)", "WebFetch(domain:*.vinted.fr)",
-      "WebFetch(domain:vinted.com)", "WebFetch(domain:*.vinted.com)"
+      "mcp__github__push_files", "mcp__github__create_or_update_file", "mcp__github__delete_file"
     ]
   },
   "hooks": {
