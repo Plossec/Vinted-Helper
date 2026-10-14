@@ -14,11 +14,27 @@ import * as schema from "../base/schema.js";
 export const IDENTIFIANT_TEST = "pascal";
 export const MOT_DE_PASSE_TEST = "mot-de-passe-test";
 
+/**
+ * Base modèle migrée une seule fois par fichier de test, puis copiée pour chaque test (#130) : une copie prend
+ * ~0,3 s au lieu de ~1,8 s pour rejouer toutes les migrations. Chaque test garde sa propre base, vide.
+ */
+let modele: Promise<File | Blob> | null = null;
+function baseModele(): Promise<File | Blob> {
+  modele ??= (async () => {
+    const client = new PGlite();
+    await migrate(drizzle(client, { schema }), {
+      migrationsFolder: resolve(import.meta.dirname, "..", "..", "drizzle"),
+    });
+    const copie = await client.dumpDataDir("none");
+    await client.close();
+    return copie;
+  })();
+  return modele;
+}
+
 export async function creerBaseDeTest() {
-  const client = new PGlite();
-  const db = drizzle(client, { schema });
-  await migrate(db, { migrationsFolder: resolve(import.meta.dirname, "..", "..", "drizzle") });
-  const base: Base = db;
+  const client = new PGlite({ loadDataDir: await baseModele() });
+  const base: Base = drizzle(client, { schema });
   return { base, fermer: () => client.close() };
 }
 

@@ -21,3 +21,4 @@ Thumbs.db
 # Rapports des tests de l'extension (Playwright)
 playwright-report/
 test-results/
+coverage/

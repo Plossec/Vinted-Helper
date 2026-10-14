@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.3] — 14/10/2026
+
+### Modifié
+- Tests : mesure de la couverture (`npm run test:couverture`), suite du serveur deux fois plus rapide, tests des
+  listes de référence (#130).
+
 ## [1.12.2] — 14/10/2026
 
 ### Modifié
