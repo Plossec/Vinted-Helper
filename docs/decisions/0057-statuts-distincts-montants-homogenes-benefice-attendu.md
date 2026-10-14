@@ -2,10 +2,9 @@
 
 - **Date** : 13/10/2026
 - **Statut** : Accepté · couleurs détaillées par [ADR-0086](0086-couleurs-des-badges-de-statut.md)
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #105
 - **Thème** : Interface
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

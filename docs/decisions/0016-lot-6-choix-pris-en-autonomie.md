@@ -1,11 +1,10 @@
 # ADR-0016 — Lot 6 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Proposé
-- **Décideurs** : Claude
+- **Statut** : Accepté
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : IA Gemini
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

@@ -2,10 +2,9 @@
 
 - **Date** : 06/10/2026
 - **Statut** : Accepté · connexion SSH remplacée par [ADR-0087](0087-serveur-ovh-connexion-ssh-par-cle.md)
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #2
 - **Thème** : Serveur
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

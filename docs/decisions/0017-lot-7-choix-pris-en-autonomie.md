@@ -1,11 +1,10 @@
 # ADR-0017 — Lot 7 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Proposé · sauvegardes remplacées par [ADR-0018](0018-mise-en-ligne-ovh.md) et [ADR-0019](0019-rapatriement-automatique-des-sauvegardes.md)
-- **Décideurs** : Claude
+- **Statut** : Accepté · sauvegardes remplacées par [ADR-0018](0018-mise-en-ligne-ovh.md) et [ADR-0019](0019-rapatriement-automatique-des-sauvegardes.md)
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : Photos et sauvegardes
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

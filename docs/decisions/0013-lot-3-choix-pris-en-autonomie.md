@@ -1,11 +1,10 @@
 # ADR-0013 — Lot 3 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Proposé · sortie du stock dans un colis en cours : voir l'issue #192
-- **Décideurs** : Claude
+- **Statut** : Accepté · sortie du stock dans un colis en cours : voir l'issue #192
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : Ventes
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 

@@ -1,11 +1,10 @@
 # ADR-0009 — HTTPS local pour le téléphone
 
 - **Date** : 05/10/2026
-- **Statut** : Proposé
-- **Décideurs** : Claude
+- **Statut** : Accepté
+- **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #3
 - **Thème** : Serveur
-- **À relire** : oui (points tranchés par Claude, marqués « *à relire* » ou « choix de Claude »)
 
 [← Index des décisions](README.md)
 
