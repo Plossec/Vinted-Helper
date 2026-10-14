@@ -99,3 +99,31 @@ export function calculerAlertes(
     erreursPublication: erreursPublication.sort(plusAnciens),
   };
 }
+
+/** Groupes « Pour info » de l'écran « À faire » qu'on peut marquer « Vu » (#191). */
+export const GROUPES_VU = ["brouillons", "dormants"] as const;
+export type GroupeVu = (typeof GROUPES_VU)[number];
+
+export interface SignalementVu {
+  type: string;
+  articleId: string;
+  /** Date de départ de l'alerte au moment du « Vu » (AAAA-MM-JJ). */
+  depuis: string;
+}
+
+/**
+ * Retire les alertes « Pour info » marquées « Vu » (#191). Un « Vu » ne vaut que pour la même date de départ :
+ * l'article redevenu dormant après une baisse de prix (ou revenu en Brouillon) réapparaît.
+ */
+export function masquerVus<T extends Record<GroupeVu, readonly Alerte[]>>(
+  alertes: T,
+  vus: readonly SignalementVu[],
+): T {
+  const cle = (type: string, articleId: string, depuis: string) => `${type}|${articleId}|${depuis}`;
+  const masques = new Set(vus.map((v) => cle(v.type, v.articleId, v.depuis)));
+  const resultat = { ...alertes };
+  for (const type of GROUPES_VU) {
+    resultat[type] = alertes[type].filter((a) => !masques.has(cle(type, a.id, a.depuis))) as T[GroupeVu];
+  }
+  return resultat;
+}

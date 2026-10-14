@@ -378,3 +378,24 @@ export const publicationVinted = pgTable(
     index("publication_vinted_article_idx").on(t.articleId),
   ],
 );
+
+/**
+ * Signalements « Pour info » de l'écran « À faire » marqués « Vu » (#191) : masqués tant que leur date de départ
+ * (`depuis`, AAAA-MM-JJ) ne change pas ; une nouvelle date (ex. article de nouveau dormant) les fait réapparaître.
+ */
+export const signalementVu = pgTable(
+  "signalement_vu",
+  {
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    /** Groupe d'alertes : « brouillons » ou « dormants ». */
+    type: text("type").notNull(),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    depuis: date("depuis", { mode: "string" }).notNull(),
+    vuLe: horodatage("vu_le").notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.utilisateurId, t.type, t.articleId] })],
+);
