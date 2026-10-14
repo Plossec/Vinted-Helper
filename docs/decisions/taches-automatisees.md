@@ -74,13 +74,19 @@ l'acheter. La plus risquée vis-à-vis de Vinted (envoi vers des tiers) : réali
 | Offre acceptée | Traitée par **#150** (pas par cette tâche). |
 | Rythme | *TBD* (#190). |
 
-## 14/10/2026 — #150 Validée prix proposé (*à préciser*)
+## 14/10/2026 — #150 Validée prix proposé
 
-**Piste retenue au cadrage** : l'extension lit les **offres reçues** ; offre ≥ prix vente minimum (#146) →
-**acceptée** ; en dessous → **refus ou contre-offre**. Une offre acceptée crée une vente, récupérée par #148.
+**Décision (utilisateur)** : la tâche répond aux **offres reçues** des acheteurs et **crée la vente** quand une offre
+(reçue, ou envoyée par #149) est acceptée et payée.
 
-Reste à trancher : 100 % automatique ou d'abord une notification « offre à valider » ; règle de contre-offre (au
-minimum ? à mi-chemin ?).
+| Sujet | Décision |
+|---|---|
+| Offre ≥ prix vente minimum | **Acceptée si l'article est dormant depuis au moins X jours** (X réglable dans les réglages du compte), comptés **comme l'alerte dormant** : depuis la dernière baisse de prix ou la mise en ligne. Moins de X jours → **contre-offre à mi-chemin**. |
+| Offre < prix vente minimum | **Contre-offre à mi-chemin** entre l'offre et le prix affiché, arrondie vers le haut au 0,50 €, jamais sous le minimum. |
+| Sans prix vente minimum | **Rien sur Vinted**, l'offre est **signalée dans l'application** (écran « À faire », #191). |
+| Offre acceptée et payée | **La vente est créée** : article *À expédier*, prix vendu = prix accepté, date de vente = date du paiement lue sur Vinted, lien de la conversation enregistré. Offre groupée (plusieurs articles) → vente groupée, montant réparti au prorata (§6.4). Vaut aussi pour les offres envoyées par #149. |
+| Mode | **Automatique ou manuel**, au réglage du compte ; manuel = liste des réponses prévues (accepter, contre-offre) à valider. |
+| Rythme | *TBD* (#190). |
 
 ## 14/10/2026 — #151 Récupération du bon de livraison (*à préciser*)
 
