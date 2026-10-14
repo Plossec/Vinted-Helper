@@ -12,7 +12,7 @@ possible du compte) valent pour chacune.
 |---|---|
 | Qui agit sur Vinted | **L'extension Chrome** seule, déjà connectée au compte Vinted de l'utilisateur. Le serveur OVH ne se connecte jamais à Vinted (aucun mot de passe Vinted stocké). |
 | Quand | Pendant les passages réguliers de l'extension (alarme existante), donc **seulement quand Chrome est ouvert** ; rattrapage au démarrage suivant. |
-| Rythme | Celui de la publication : une action à la fois, 10 minutes entre deux actions, pause sur captcha ou erreur d'accès. |
+| Rythme | **Propre à chaque tâche, à définir** (*TBD*) à la fin de #147 à #151 : issue #190. Tâche déjà réalisée, la **publication** : une annonce à la fois, 10 minutes entre deux annonces publiées, 5 secondes entre deux étapes (#63). Toute tâche s'arrête sur captcha ou erreur d'accès. |
 | Résultats | Remontés au serveur par les routes du programme (jeton), comme la publication ; journal visible dans l'application. |
 | Ordre de réalisation proposé | Socle + #148, puis #151, #150, #147, #149. **L'utilisateur choisit de commencer par #147** (la plus simple). |
 | Démarrage | Chaque tâche pourra démarrer en mode « proposer puis l'utilisateur valide » ; #147 est directement **automatique** (choix de l'utilisateur). |
@@ -34,6 +34,7 @@ republie** l'annonce une fois au prix minimum.
 | Ordre de la republication | **Supprimer l'ancienne annonce, puis créer la nouvelle** (choix de l'utilisateur, en connaissance du risque) ; si la création échoue, l'article passe *Erreur de publication* avec une alerte et se republie d'un clic. Nouveau lien enregistré sur l'article. |
 | Mode | **Automatique** (pas de validation préalable). |
 | Compte des jours | Une baisse et une republication relancent le délai dormant. |
+| Rythme | *TBD* (#190). |
 | Journal | L'écran « Publication Vinted » affiche aussi ces actions (« Baisse 11 € → 9,50 € », « Republiée ») et leur résultat ; chaque baisse entre dans l'historique des prix. |
 | Calibrage | Les pages Vinted « Modifier l'annonce » et « Supprimer » sont relevées par le **Diagnostic** de l'extension ; première version en **mode essai** (rien d'enregistré) jusqu'au relevé de l'utilisateur. |
 | Livraison | PR 1 : réglages (migration), calcul, file d'actions, journal, extension en mode essai, relevé au Diagnostic. PR 2 : calibrage d'après le relevé, passage au mode réel. |
