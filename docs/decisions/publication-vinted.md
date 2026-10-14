@@ -154,3 +154,16 @@ reçoivent automatiquement « Erreur ».
 - Coller le lien de l'annonce sur un article en Erreur (publiée à la main) le fait passer En ligne, comme pour un
   article À publier.
 - Le message affiché sur la fiche est celui de la dernière **vraie** publication en échec.
+
+## Format du relevé de l'extension (déplacé de l'agent `analyste-releve`, #115)
+
+- `adresse`, `date`, `etat` (`pret`, `verification`, `bloque`, `deconnecte`).
+- **Relevé automatique** (erreur pendant une publication) : `etape` (photos, titre, description, categorie, marque,
+  taille, etat, couleurs, prix, colis), `erreur`, `selecteursTrouves`, `elements`.
+- **Relevé à la demande** (bouton Diagnostic) : `selecteursTrouves`, `elements`, `apparusApresClicCategorie`,
+  `options « Femmes »` (ancêtres des éléments dont le texte est « Femmes »).
+- Chaque élément : `balise`, `type`, `name`, `id`, `testid`, `role`, `aria`, `ariaExpanded`, `placeholder`,
+  `valeur` (ce que le champ contient, y compris ce que Vinted a pré-rempli), `coche`, `classe`, `texte` (80
+  caractères, en minuscules, espaces regroupés), `visible`.
+- `selecteursTrouves` : pour chaque champ de `SELECTEURS.champs`, le premier sélecteur présent, ou `null`. Un `null`
+  n'est pas forcément une erreur (champ affiché seulement après le choix de la catégorie).

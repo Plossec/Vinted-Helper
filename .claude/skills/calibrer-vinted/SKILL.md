@@ -8,9 +8,7 @@ argument-hint: "[chemin du relevé] [message d'erreur]"
 
 Entrée : `$ARGUMENTS` (relevé, message du journal, captures) ; sinon, ce que l'utilisateur vient d'envoyer.
 
-**Règle n° 4 (`CLAUDE.md`)** : Claude ne consulte jamais Vinted ; aucune correction ne contourne une détection
-(camouflage du navigateur, captcha, rechargement en boucle, changement d'IP, effacement des cookies). Une
-vérification ou une page « session bloquée » n'est pas un bug à corriger : l'extension doit se mettre en pause.
+Règles de l'extension (règle n° 4, version, tests) : `.claude/rules/extension-vinted.md`.
 
 ## 1. Issue
 Si aucune issue ouverte ne couvre ce problème, crée `[Correctif] Extension Vinted : …` (étape, message, ce que
@@ -32,22 +30,17 @@ relevée (fragment proposé par le sous-agent : `data-testid`, `role`, textes, v
 (titre en français, numéro de l'issue). Lance-le : il **doit échouer** pour la raison attendue.
 
 ## 4. Correction
-- Repères de la page → `selecteurs.js`, avec un commentaire daté (« Relevé du JJ/MM/AAAA : … »). Garde les anciens
-  sélecteurs en secours sauf s'ils provoquent l'erreur.
-- Logique de remplissage ou de contrôle → `contenu.js` ; rythme, file, pauses → `service-worker.js`.
-- Correction minimale : ne retouche pas les autres étapes.
+Selon `.claude/rules/extension-vinted.md` (garde les anciens sélecteurs en secours sauf s'ils provoquent l'erreur).
+Correction minimale : ne retouche pas les autres étapes.
 
 ## 5. Vérifications
 1. `npm test` dans `outils/extension-vinted` : **tous** les tests passent (pas seulement le nouveau).
 2. À la racine : `npm run lint` et `npm run format:check`.
 3. Relis le diff : rien qui contourne une détection, aucune donnée personnelle du relevé (le dépôt est public).
 
-## 6. Version de l'extension
-Augmente la version dans `outils/extension-vinted/manifest.json` **et** `outils/extension-vinted/package.json`
-(même numéro ; correctif → dernier chiffre, comportement nouveau → chiffre du milieu). Sans cela, Chrome affiche
-l'ancienne version et l'utilisateur ne sait pas si la mise à jour est prise. Ajoute une ligne à la section
-`[Non publié]` de `CHANGELOG.md` (Corrigé), en langage simple, puis applique `/version` (version de
-l'application, en général le dernier chiffre) : le tag est créé par GitHub après la fusion.
+## 6. Version
+Version de l'extension (`manifest.json` + `package.json`, voir la règle), ligne « Corrigé » dans `CHANGELOG.md`, puis
+`/version` pour l'application.
 
 ## 7. Livraison
 Commit en français à l'impératif, push, PR `#N — Corrige …` avec `Closes #N`. Fusionne quand les vérifications

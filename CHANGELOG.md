@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.12.4] — 14/10/2026
+
+### Modifié
+- Outillage de développement : instructions de Claude allégées, une seule commande de vérification pour la CI et en
+  local (`npm run verifier`), tests sautés ou isolés refusés automatiquement (#113, #115, #116).
+
 ## [1.12.3] — 14/10/2026
 
 ### Modifié
