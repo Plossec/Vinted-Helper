@@ -26,7 +26,7 @@ function copieDeTest() {
 }
 
 /** Lance Chromium avec l'extension, configure-la, et exécute un ou plusieurs passages. */
-async function lancer({ demande, vinted = {}, passages = 1, delaiEtapes = [0, 0], action = () => cycle() }) {
+async function lancer({ demande, vinted = {}, passages = 1, delaiEtape = 0, action = () => cycle() }) {
   const faux = await demarrerFauxVinted(vinted);
   const app = await demarrerFausseApplication(demande);
   const extension = copieDeTest();
@@ -38,13 +38,13 @@ async function lancer({ demande, vinted = {}, passages = 1, delaiEtapes = [0, 0]
   try {
     const sw = contexte.serviceWorkers()[0] ?? (await contexte.waitForEvent("serviceworker"));
     await sw.evaluate(
-      ([adresse, vintedUrl, delais]) =>
+      ([adresse, vintedUrl, delai]) =>
         chrome.storage.local.set({
           config: { adresse, jeton: "jeton-test" },
           vinted: vintedUrl,
-          delaiEtapes: delais,
+          delaiEtape: delai,
         }),
-      [app.url, faux.url, delaiEtapes],
+      [app.url, faux.url, delaiEtape],
     );
     const debut = Date.now();
     let reponse;
@@ -65,8 +65,9 @@ test("publication complète : formulaire rempli, contrôlé, « Ajouter » cliqu
   assert.equal(app.resultats.length, 1);
   assert.equal(app.resultats[0].resultat, "publie");
   assert.match(app.resultats[0].url, /\/items\/987654/);
-  // Prochaine publication : au moins 10 minutes plus tard.
+  // Prochaine publication : 10 minutes plus tard, sans supplément aléatoire (#136).
   assert.ok(etat.prochain >= Date.now() + 9 * 60_000);
+  assert.ok(etat.prochain <= Date.now() + 10 * 60_000);
   assert.equal(etat.pause, false);
 });
 
@@ -126,7 +127,7 @@ for (const [nom, vinted, raison] of [
 }
 
 test("pause entre chaque étape du remplissage (#57)", async () => {
-  const { app, duree } = await lancer({ demande: DEMANDE(true), delaiEtapes: [150, 150] });
+  const { app, duree } = await lancer({ demande: DEMANDE(true), delaiEtape: 150 });
   assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
   // 10 étapes + le contrôle : 10 pauses de 150 ms au moins.
   assert.ok(duree >= 1500, `durée ${duree} ms`);

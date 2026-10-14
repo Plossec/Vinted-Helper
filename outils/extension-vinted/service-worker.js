@@ -1,8 +1,8 @@
 // Service worker de l'extension Vinted Helper (décision du 07/10/2026, docs/guides/publication-vinted.md).
 // Toutes les 5 minutes : demande à l'application s'il y a des annonces à publier ; si oui, ouvre « Vendre un article »
 // dans le Chrome habituel de l'utilisateur (sa propre session Vinted), fait remplir le formulaire par le script de
-// contenu étape par étape (5 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes,
-// plus un délai aléatoire.
+// contenu étape par étape (5 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes.
+// Délais fixes, pour espacer les publications et laisser les pages se charger, jamais pour paraître humain (#136).
 // Aucun contournement : vérification, page de blocage ou déconnexion → PAUSE, reprise uniquement à la main.
 
 /* global SELECTEURS */
@@ -11,11 +11,10 @@ importScripts("selecteurs.js");
 const VINTED_DEFAUT = "https://www.vinted.fr";
 const PERIODE_MINUTES = 5;
 const PAUSE_ENTRE_ARTICLES_MS = 10 * 60_000;
-const PAUSE_ALEATOIRE_MS = 3 * 60_000;
 const ATTENTE_ANNONCE_MS = 60_000;
 const TAILLE_JOURNAL = 30;
-/** Pause entre deux étapes du remplissage (issue #57 ; 5 s depuis #63), tirée dans cet intervalle. */
-const DELAI_ETAPES_MS = [5_000, 5_000];
+/** Pause fixe entre deux étapes du remplissage (issue #57 ; 5 s depuis #63) : laisse la page réagir. */
+const DELAI_ETAPE_MS = 5_000;
 const ETAPES = ["photos", "titre", "description", "categorie", "marque", "taille", "etat", "couleurs", "prix", "colis"];
 
 const attendreMs = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -38,14 +37,14 @@ const RAISONS = {
 const ETAT_INITIAL = { pause: false, raison: null, prochain: 0, enCours: null, onglet: null, journal: [] };
 
 async function lire() {
-  // « vinted » et « delaiEtapes » ne sont changés que par les tests (page factice locale, délais courts).
+  // « vinted » et « delaiEtape » ne sont changés que par les tests (page factice locale, délais courts).
   const {
     config = null,
     etat = {},
     vinted = VINTED_DEFAUT,
-    delaiEtapes = DELAI_ETAPES_MS,
-  } = await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtapes"]);
-  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, delaiEtapes };
+    delaiEtape = DELAI_ETAPE_MS,
+  } = await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtape"]);
+  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, delaiEtape };
 }
 
 async function ecrireEtat(modifications) {
@@ -178,9 +177,8 @@ async function patienter(onglet, ms) {
 }
 
 async function pauseEntreEtapes(onglet) {
-  const { delaiEtapes } = await lire();
-  const [min, max] = delaiEtapes;
-  await patienter(onglet, min + Math.round(Math.random() * Math.max(0, max - min)));
+  const { delaiEtape } = await lire();
+  await patienter(onglet, delaiEtape);
 }
 
 /** Une étape du remplissage, demandée au script de contenu (qui vérifie d'abord la page). */
@@ -283,10 +281,7 @@ async function cycleSansVerrou(manuel) {
   // L'attente de 10 minutes ne suit qu'une vraie publication : après un essai ou une erreur, rien n'a été publié.
   await ecrireEtat({
     enCours: null,
-    prochain:
-      resultat.resultat === "publie"
-        ? Date.now() + PAUSE_ENTRE_ARTICLES_MS + Math.round(Math.random() * PAUSE_ALEATOIRE_MS)
-        : 0,
+    prochain: resultat.resultat === "publie" ? Date.now() + PAUSE_ENTRE_ARTICLES_MS : 0,
   });
   await journal(
     resultat.resultat === "publie"
