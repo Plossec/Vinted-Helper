@@ -11,16 +11,16 @@ function lignes(noeuds: readonly NoeudCategorie[], niveau: number): string[] {
 
 export function documentCategories(): string {
   const entete = [
-    "# Catégories (arbre calqué sur Vinted) — à relire",
+    "# Catégories (arbre recopié de Vinted)",
     "",
-    "> Rédigé **de mémoire** le 05/10/2026 : des écarts avec le Vinted actuel sont possibles.",
-    "> Indiquez ce qu'il faut ajouter, renommer, déplacer ou supprimer. Seules les catégories du dernier niveau",
+    "> Recopié de vinted.fr le 14/10/2026 (#177) pour les rayons Femmes, Hommes, Sport, Loisirs et collections ;",
+    "> tout le reste va dans « Autre », à publier à la main sur Vinted. Seules les catégories du dernier niveau",
     "> (en **gras**) peuvent être choisies pour un article.",
     "",
     `**${CATEGORIES.length} catégories sélectionnables.**`,
   ];
   const sections = ARBRE_CATEGORIES.map((racine) =>
-    [`## ${racine.nom}`, "", ...lignes(racine.enfants ?? [], 0)].join("\n"),
+    [`## ${racine.nom}`, "", ...(racine.enfants ? lignes(racine.enfants, 0) : [`- **${racine.nom}**`])].join("\n"),
   );
   return [entete.join("\n"), ...sections].join("\n\n") + "\n";
 }

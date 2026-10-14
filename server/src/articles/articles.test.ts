@@ -31,7 +31,7 @@ const ficheMinimale = (lieuId: string, ajouts: Record<string, unknown> = {}) => 
   lieuId,
   prixAchat: 300,
   dateAchat: "2026-10-04",
-  categorie: "hommes/vetements/jeans/jeans-droits",
+  categorie: "hommes/vetements/jeans/jeans-coupe-droite",
   marqueId: marqueParDefaut,
   etat: "bon_etat",
   ...ajouts,

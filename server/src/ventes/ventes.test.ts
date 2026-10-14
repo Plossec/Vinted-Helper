@@ -58,7 +58,7 @@ describe("ventes et calculs", () => {
       lieuId: t.lieuId,
       prixAchat,
       dateAchat: "2026-09-01",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId: t.marqueId,
       etat: "bon_etat",
     });

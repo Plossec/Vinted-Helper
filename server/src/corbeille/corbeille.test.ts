@@ -36,7 +36,7 @@ describe("lot 4 — corbeille et listes", () => {
       lieuId: t.lieuId,
       prixAchat,
       dateAchat: "2026-10-01",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId,
       etat: "bon_etat",
     });
@@ -189,7 +189,7 @@ describe("lot 4 — corbeille et listes", () => {
     expect(ligne).toMatchObject({
       reference: 1,
       marque: "Levi's",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       lieuId: t.lieuId,
       dateAchat: "2026-10-01",
       dateMiseEnLigne: t.horloge.maintenant().toISOString(),

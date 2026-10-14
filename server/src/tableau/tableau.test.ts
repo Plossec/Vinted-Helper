@@ -41,7 +41,7 @@ describe("tableau de bord", () => {
       lieuId: refs.lieux.find((l) => l.nom === "Vide grenier")?.id,
       prixAchat: 200,
       dateAchat: "2026-09-01",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId: refs.marques[0]?.id,
       etat: "bon_etat",
     });
@@ -110,7 +110,7 @@ describe("tableau de bord", () => {
         lieuId: refs.lieux[0]?.id,
         prixAchat,
         dateAchat: "2026-10-01",
-        categorie: "hommes/vetements/jeans/jeans-droits",
+        categorie: "hommes/vetements/jeans/jeans-coupe-droite",
         marqueId: refs.marques[0]?.id,
         etat: "bon_etat",
       });

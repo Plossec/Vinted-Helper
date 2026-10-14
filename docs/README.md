@@ -4,7 +4,7 @@
 |---|---|---|
 | [`cahier-des-charges.md`](cahier-des-charges.md) | tous | Le besoin complet : **fait foi**. Statuts, fonctionnalités, règles de calcul, critères d'acceptation, cas chiffrés |
 | [`architecture.md`](architecture.md) | tous | Schémas : vue d'ensemble (application, API, base, extension, serveur), découpage du code, modèle de données |
-| [`categories-vinted.md`](categories-vinted.md) | tous | Annexe : l'arbre des 440 catégories, **générée** depuis `server/src/catalogue/categories.ts` (`npm run doc:categories -w server`) |
+| [`categories-vinted.md`](categories-vinted.md) | tous | Annexe : l'arbre des catégories recopié de Vinted, **générée** depuis `server/src/catalogue/categories.ts` (`npm run doc:categories -w server`) |
 | [`decisions/`](decisions/README.md) | tous | Décisions prises en cours de route, **un fichier par lot**, et la liste des points « à relire » |
 | [`guides/`](#guides) | utilisateur | Modes d'emploi pas à pas |
 

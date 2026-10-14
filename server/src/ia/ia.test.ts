@@ -185,7 +185,7 @@ describe("IA par l'API", () => {
         lieuId: refs.lieux[0]?.id,
         prixAchat: 300,
         dateAchat: "2026-10-01",
-        categorie: "hommes/vetements/jeans/jeans-droits",
+        categorie: "hommes/vetements/jeans/jeans-coupe-droite",
         marqueId: refs.marques.find((m) => m.nom === "Levi's")?.id,
         etat: "bon_etat",
         taille: "W32",

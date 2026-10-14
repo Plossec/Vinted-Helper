@@ -1,537 +1,1167 @@
-# Catégories (arbre calqué sur Vinted) — à relire
+# Catégories (arbre recopié de Vinted)
 
-> Rédigé **de mémoire** le 05/10/2026 : des écarts avec le Vinted actuel sont possibles.
-> Indiquez ce qu'il faut ajouter, renommer, déplacer ou supprimer. Seules les catégories du dernier niveau
+> Recopié de vinted.fr le 14/10/2026 (#177) pour les rayons Femmes, Hommes, Sport, Loisirs et collections ;
+> tout le reste va dans « Autre », à publier à la main sur Vinted. Seules les catégories du dernier niveau
 > (en **gras**) peuvent être choisies pour un article.
 
-**443 catégories sélectionnables.**
+**1001 catégories sélectionnables.**
 
 ## Femmes
 
 - Vêtements
-  - Manteaux et vestes
-    - Manteaux
-      - **Cabans**
-      - **Duffle-coats**
-      - **Manteaux en fausse fourrure**
-      - **Pardessus et manteaux longs**
-      - **Parkas**
-      - **Trench-coats**
-      - **Imperméables**
-    - Vestes
-      - **Blousons aviateur**
-      - **Vestes en jean**
-      - **Vestes en cuir**
-      - **Vestes militaires et utilitaires**
-      - **Vestes polaires**
-      - **Vestes de ski et de snowboard**
-      - **Vestes légères**
-    - **Doudounes et vestes matelassées**
-    - **Vestes sans manches**
-    - **Capes et ponchos**
-  - Sweats et sweats à capuche
-    - **Sweats**
-    - **Sweats à capuche**
-    - **Sweats zippés**
-    - **Autres sweats**
-  - Blazers et tailleurs
-    - **Blazers**
-    - **Tailleurs jupe**
-    - **Tailleurs pantalon**
-    - **Autres tailleurs**
-  - Robes
-    - **Mini-robes**
-    - **Robes midi**
-    - **Robes longues**
-    - **Robes d'été**
-    - **Robes de soirée**
-    - **Robes en jean**
-    - **Robes pull**
-    - **Autres robes**
-  - Jupes
-    - **Minijupes**
-    - **Jupes mi-longues**
-    - **Jupes longues**
-    - **Jupes en jean**
-    - **Jupes-shorts**
   - Hauts et t-shirts
+    - **Blouses**
     - **T-shirts**
     - **Chemises**
-    - **Blouses**
-    - **Débardeurs**
     - **Tops courts**
+    - **Blouses manches longues**
+    - **Débardeurs**
+    - **Blouses manches courtes**
     - **Bodies**
-    - **Polos**
-    - **Tuniques**
-    - **T-shirts à manches longues**
+    - **Tops épaules dénudées**
     - **Autres hauts**
-  - Pulls et gilets
-    - **Pulls**
-    - **Pulls col roulé**
-    - **Pulls col V**
-    - **Gilets**
-    - **Pulls longs**
-    - **Autres pulls**
+    - **Tops dos nu**
+    - **Blouses ¾**
+    - **Tuniques**
+    - **Cols roulés**
+    - **Vestes**
+    - **Tops peplum**
+  - Sweats et sweats à capuche
+    - Sweats
+      - **Pulls d'hiver**
+      - **Pulls col V**
+      - **Pulls col roulé**
+      - **Autres sweats**
+      - **Sweats manche ¾**
+      - **Sweats longs**
+    - **Sweats & sweats à capuche**
+    - **Cardigans**
+    - **Vestes**
+    - **Autres pull-overs & sweat-shirts**
+    - **Kimonos**
+    - **Boléros**
+  - Robes
+    - **Robes longues**
+    - **Robes d'été**
+    - Pour occasions
+      - **Fêtes et cocktails**
+      - **Robes de soirée**
+      - **Robes de mariée**
+      - **Robes dos nu**
+      - **Robes de bal de fin d'année**
+    - **Mini**
+    - **Petites robes noires**
+    - **Robes casual**
+    - **Midi**
+    - **Robes d'hiver**
+    - **Robes chics**
+    - **Autres robes**
+    - **Robes en jean**
+    - **Robes sans bretelles**
+  - Manteaux et vestes
+    - Vestes
+      - **Doudounes**
+      - **Vestes en jean**
+      - **Perfectos et blousons de moto**
+      - **Vestes matelassées**
+      - **Blousons aviateur**
+      - **Vestes chemises**
+      - **Vestes polaires**
+      - **Vestes coupe-vent**
+      - **Vestes militaires et utilitaires**
+      - **Vestes de ski et snowboard**
+      - **Blousons teddy**
+    - Manteaux
+      - **Pardessus et manteaux longs**
+      - **Manteaux en fausse fourrure**
+      - **Trenchs**
+      - **Parkas**
+      - **Cabans**
+      - **Imperméables**
+      - **Duffle-coats**
+    - **Vestes sans manches**
+    - **Capes et ponchos**
   - Jeans
     - **Jeans skinny**
-    - **Jeans slim**
     - **Jeans droits**
-    - **Jeans flare**
-    - **Jeans boyfriend**
-    - **Jeans mom**
     - **Jeans taille haute**
-    - **Jeans larges**
+    - **Jeans évasés**
     - **Jeans troués**
-    - **Autres jeans**
+    - **Autre**
+    - **Jeans boyfriend**
+    - **Jeans courts**
   - Pantalons et leggings
+    - **Pantalons à jambes larges**
     - **Pantalons droits**
-    - **Pantalons larges**
-    - **Pantalons cigarette**
-    - **Pantalons cargo**
-    - **Chinos**
-    - **Pantalons en cuir**
-    - **Joggings**
     - **Leggings**
     - **Autres pantalons**
-  - Shorts et pantacourts
-    - **Shorts en jean**
-    - **Shorts taille haute**
-    - **Shorts de sport**
-    - **Pantacourts**
-    - **Autres shorts**
-  - Combinaisons et combishorts
-    - **Combinaisons**
-    - **Combishorts**
-    - **Salopettes**
-  - Maillots de bain
-    - **Maillots une pièce**
-    - **Bikinis**
-    - **Paréos et tenues de plage**
+    - **Pantalons en cuir**
+    - **Pantalons skinny**
+    - **Pantalons courts & chinos**
+    - **Pantalons ajustés**
+    - **Sarouels**
+  - Jupes
+    - **Minijupes**
+    - **Jupes longues**
+    - **Jupes longueur genou**
+    - **Jupes midi**
+    - **Jupes asymétriques**
+  - Blazers et tailleurs
+    - **Blazers**
+    - **Ensembles tailleur/pantalon**
+    - **Jupes et robes tailleurs**
+    - **Tailleurs pièces séparées**
+    - **Autres ensembles & tailleurs**
+  - Vêtements de sport
+    - **Survêtements**
+    - **Hauts & t-shirts**
+    - **Shorts**
+    - **Pantalons & leggings**
+    - **Brassières**
+    - Accessoires de sports
+      - **Écharpes**
+      - **Lunettes**
+      - **Chapeaux**
+      - **Gants**
+      - **Bracelets**
+    - **Vêtements d'extérieur**
+    - **Robes**
+    - **Autres**
+    - **Sweats et sweats à capuche**
+    - **Jupes**
+    - **Maillots**
   - Lingerie et pyjamas
     - **Soutiens-gorge**
-    - **Culottes**
-    - **Ensembles de lingerie**
-    - **Pyjamas**
-    - **Peignoirs**
-    - **Collants**
+    - **Pyjamas et tenues de nuit**
     - **Chaussettes**
+    - **Collants**
+    - **Ensembles**
+    - **Culottes**
+    - **Peignoirs**
+    - **Accessoires de lingerie**
+    - **Gaines**
     - **Autres**
+  - Shorts
+    - **Short en jean**
+    - **Shorts taille haute**
+    - **Autres shorts**
+    - **Shorts taille basse**
+    - **Pantacourts**
+    - **Shorts longueur genou**
+    - **Shorts cargo**
+    - **Shorts en cuir**
+    - **Shorts en dentelle**
+  - Combinaisons et combishorts
+    - **Combinaisons**
+    - **Combi Shorts**
+    - **Autres combinaisons & combishorts**
+  - Maillots de bain
+    - **Deux pièces**
+    - **Une pièce**
+    - **Paréos et sarongs**
+    - **Autres**
+  - **Autres**
   - Maternité
-    - **Hauts de maternité**
-    - **Pantalons de maternité**
-    - **Robes de maternité**
-    - **Autres vêtements de maternité**
-  - Vêtements de sport
-    - **Hauts et t-shirts de sport**
-    - **Brassières de sport**
-    - **Leggings de sport**
-    - **Pantalons de sport**
-    - **Shorts de sport**
-    - **Survêtements**
-    - **Vestes de sport**
-    - **Sweats de sport**
-    - **Maillots de sport**
-    - **Autres vêtements de sport**
-  - Costumes et tenues particulières
-    - **Déguisements**
-    - **Tenues traditionnelles**
-    - **Autres tenues**
-  - **Autres vêtements**
+    - **Pantalons maternité**
+    - **Tops maternité**
+    - **Robes maternité**
+    - **Sous-vêtements maternité**
+    - **Pulls à capuche & pulls maternité**
+    - **Jupes maternité**
+    - **Manteaux & vestes maternité**
+    - **Shorts maternité**
+    - **Vêtements de sport**
+    - **Maillots & tenues de plage maternité**
+    - **Combinaisons & combi shorts maternité**
+  - **Costumes et tenues particulières**
+  - **Jupes-shorts**
 - Chaussures
   - **Baskets**
-  - **Bottes**
-  - **Bottines**
-  - **Escarpins**
+  - Bottes
+    - **Bottines**
+    - **Bottes hautes**
+    - **Bottes mi-hautes**
+    - **Bottes de neige**
+    - **Cuissardes**
+    - **Bottes de pluie**
+    - **Bottes de travail**
+  - **Chaussures à talons**
   - **Sandales**
-  - **Ballerines**
+  - Chaussures de sport
+    - **Chaussures de course**
+    - **Chaussures de basket**
+    - **Chaussures de fitness**
+    - **Chaussures de tennis**
+    - **Chaussures et bottes de randonnée**
+    - **Chaussures de danse**
+    - **Patins à roulettes et rollers**
+    - **Chaussures de foot**
+    - **Chaussures de ski**
+    - **Chaussures aquatiques**
+    - **Chaussures de cyclisme**
+    - **Bottes de moto**
+    - **Chaussures d'escalade**
+    - **Chaussures de golf**
+    - **Chaussures de foot en salle**
+    - **Bottes de snowboard**
+    - **Patins à glace**
   - **Mocassins et chaussures bateau**
+  - **Ballerines**
+  - **Chaussures à lacets**
+  - **Claquettes et tongs**
   - **Mules et sabots**
+  - **Chaussons et pantoufles**
   - **Espadrilles**
-  - **Chaussures de sport**
-  - **Chaussons**
-  - **Tongs**
-  - **Autres chaussures**
-- Sacs
-  - **Sacs à main**
-  - **Sacs à dos**
-  - **Sacs bandoulière**
-  - **Pochettes**
-  - **Cabas et tote bags**
-  - **Bananes**
-  - **Sacs de voyage**
-  - **Portefeuilles et porte-monnaie**
-  - **Trousses**
-  - **Autres sacs**
+  - **Babies et Mary-Jane**
 - Accessoires
   - Bijoux
     - **Colliers**
-    - **Bagues**
     - **Boucles d'oreilles**
     - **Bracelets**
+    - **Bagues**
+    - **Breloques et pendentifs**
+    - **Ensembles de bijoux**
     - **Broches**
     - **Autres bijoux**
-  - **Montres**
+    - **Bijoux de corps**
+    - **Bracelets de cheville**
+  - **Écharpes et châles**
+  - Chapeaux et casquettes
+    - **Chapeaux**
+    - **Bonnets**
+    - **Casquettes**
+    - **Bandeaux**
+    - **Cache-oreilles**
+    - **Fascinators**
+    - **Cagoules**
   - **Lunettes de soleil**
-  - **Lunettes de vue et étuis**
-  - **Chapeaux et casquettes**
-  - **Bonnets**
-  - **Écharpes et foulards**
   - **Ceintures**
-  - **Gants**
-  - **Accessoires pour cheveux**
   - **Porte-clés**
-  - **Parapluies**
+  - **Montres**
+  - **Accessoires pour cheveux**
   - **Autres accessoires**
+  - **Bandanas et foulards pour cheveux**
+  - **Gants**
+  - **Mouchoirs de poche**
+  - **Parapluies**
+- Sacs
+  - **Sacs à main**
+  - **Sacs à bandoulière**
+  - **Sacs fourre-tout**
+  - **Porte-monnaie**
+  - **Pochettes**
+  - **Sacs à dos**
+  - **Trousses à maquillage**
+  - **Sacs banane**
+  - **Sacs seau**
+  - **Sacs de plage**
+  - **Besaces**
+  - **Wristlets**
+  - **Fourre-tout et sacs marins**
+  - **Sacs de voyage**
+  - **Sacs de sport**
+  - **Cartables et sacoches**
+  - **Housses pour vêtements**
+  - **Mallettes**
 - Beauté
   - **Maquillage**
   - **Parfums**
   - **Soins du visage**
   - **Soins du corps**
-  - **Soins des cheveux**
-  - **Ongles**
-  - **Accessoires de beauté**
-  - **Autres**
+  - Accessoires de beauté
+    - **Accessoires maquillage**
+    - **Accessoires soins des ongles**
+    - **Accessoires soins capillaires**
+    - **Accessoires soins du visage**
+    - **Accessoires soins corporels**
+  - **Soins cheveux**
+  - **Manucure**
+  - **Autres cosmétiques et accessoires**
+  - **Soin mains**
 
 ## Hommes
 
 - Vêtements
-  - Jeans
-    - **Jeans skinny**
-    - **Jeans slim**
-    - **Jeans droits**
-    - **Jeans coupe large**
-    - **Jeans troués**
-    - **Autres jeans**
-  - Manteaux et vestes
-    - Manteaux
-      - **Cabans**
-      - **Duffle-coats**
-      - **Pardessus et manteaux longs**
-      - **Parkas**
-      - **Trench-coats**
-      - **Imperméables**
-    - Vestes
-      - **Blousons aviateur**
-      - **Vestes en jean**
-      - **Vestes en cuir**
-      - **Vestes militaires et utilitaires**
-      - **Vestes polaires**
-      - **Vestes de ski et de snowboard**
-      - **Vestes légères**
-      - **Vestes Harrington**
-    - **Doudounes et vestes matelassées**
-    - **Vestes sans manches**
   - Hauts et t-shirts
-    - **T-shirts**
-    - **T-shirts à manches longues**
-    - **Chemises**
+    - T-shirts
+      - **T-shirts imprimés**
+      - **T-shirts unis**
+      - **T-shirts à manches longues**
+      - **T-shirts à rayures**
+      - **Autres T-shirts**
+    - Chemises
+      - **Chemises unies**
+      - **Chemises à carreaux**
+      - **Chemises à motifs**
+      - **Chemises à rayures**
+      - **Chemises en jean**
+      - **Autres chemises**
     - **Polos**
-    - **Débardeurs**
-    - **Autres hauts**
+    - **T-shirts sans manches**
+  - Sweats et pulls
+    - **Pulls et pulls à capuche**
+    - **Sweats**
+    - **Pulls ras de cou**
+    - **Pulls à capuche avec zip**
+    - **Sweats à col V**
+    - **Pulls d'hiver**
+    - **Cardigans**
+    - **Pulls à col roulé**
+    - **Autres**
+    - **Vestes**
+    - **Sweats longs**
+  - Manteaux et vestes
+    - Vestes
+      - **Vestes coupe-vent**
+      - **Doudounes**
+      - **Blousons aviateur**
+      - **Perfectos et blousons de moto**
+      - **Vestes polaires**
+      - **Vestes chemises**
+      - **Vestes matelassées**
+      - **Vestes en jean**
+      - **Vestes militaires et utilitaires**
+      - **Vestes Harrington**
+      - **Blousons teddy**
+      - **Vestes de ski et snowboard**
+    - Manteaux
+      - **Parkas**
+      - **Pardessus et manteaux longs**
+      - **Imperméables**
+      - **Trenchs**
+      - **Duffle-coats**
+      - **Cabans**
+    - **Vestes sans manches**
+    - **Ponchos**
+  - Vêtements de sport et accessoires
+    - **Maillots**
+    - **Survêtements**
+    - **Hauts et t-shirts**
+    - **Shorts**
+    - Accessoires de sports
+      - **Chapeaux et casquettes**
+      - **Écharpes**
+      - **Lunettes**
+      - **Gants**
+      - **Bracelets**
+    - **Pantalons**
+    - **Vêtements d'extérieur**
+    - **Pulls & sweats**
+    - **Autres**
+  - Pantalons
+    - **Jogging**
+    - **Chinos**
+    - **Autres pantalons**
+    - **Pantalons à jambes larges**
+    - **Pantalons de costume**
+    - **Pantalons skinny**
+    - **Pantacourts**
+  - Jeans
+    - **Jeans coupe droite**
+    - **Jeans slim**
+    - **Jeans troués**
+    - **Jeans skinny**
   - Costumes et blazers
     - **Blazers**
-    - **Costumes**
+    - **Ensembles costume**
     - **Pantalons de costume**
     - **Gilets de costume**
     - **Autres**
-  - Sweats et pulls
-    - **Sweats**
-    - **Pulls et pulls à capuche**
-    - **Pulls à capuche avec zip**
-    - **Cardigans**
-    - **Pulls ras de cou**
-    - **Sweats à col V**
-    - **Pulls à col roulé**
-    - **Sweats longs**
-    - **Pulls d'hiver**
-    - **Vestes**
-    - **Autres**
-  - Pantalons
-    - **Chinos**
-    - **Pantalons cargo**
-    - **Joggings**
-    - **Pantalons habillés**
-    - **Pantalons larges**
-    - **Autres pantalons**
+    - **Costumes de mariage**
   - Shorts
-    - **Shorts cargo**
-    - **Shorts chino**
     - **Shorts en jean**
-    - **Shorts de sport**
+    - **Shorts chino**
     - **Autres shorts**
+    - **Shorts cargo**
   - Sous-vêtements et chaussettes
-    - **Boxers**
-    - **Slips**
     - **Chaussettes**
-    - **Pyjamas**
-    - **Peignoirs**
+    - **Sous-vêtements**
     - **Autres**
+    - **Peignoirs**
   - **Maillots de bain**
-  - Vêtements de sport
-    - **Hauts et t-shirts de sport**
-    - **Maillots de sport**
-    - **Pantalons de sport**
-    - **Shorts de sport**
-    - **Survêtements**
-    - **Vestes de sport**
-    - **Sweats de sport**
-    - **Autres vêtements de sport**
-  - Costumes et tenues particulières
-    - **Déguisements**
-    - **Tenues traditionnelles**
-    - **Autres tenues**
-  - **Autres vêtements**
+  - **Vêtements spécialisés et costumes**
+  - **Autres**
+  - Pyjamas
+    - **Bas de pyjama**
+    - **Ensembles de pyjamas**
+    - **Pyjamas une-pièce**
+    - **Hauts de pyjama**
 - Chaussures
   - **Baskets**
-  - **Bottes**
+  - Chaussures de sport
+    - **Chaussures de basket**
+    - **Chaussures de foot**
+    - **Chaussures de course**
+    - **Chaussures de fitness**
+    - **Chaussures de tennis**
+    - **Chaussures et bottes de randonnée**
+    - **Chaussures de foot en salle**
+    - **Chaussures de cyclisme**
+    - **Bottes de moto**
+    - **Patins à roulettes et rollers**
+    - **Bottes de ski**
+    - **Chaussures d'escalade**
+    - **Chaussures de golf**
+    - **Chaussures aquatiques**
+    - **Bottes de snowboard**
+    - **Patins à glace**
+    - **Chaussures de danse**
+  - Bottes
+    - **Bottines à lacets**
+    - **Bottines Chelsea et sans lacets**
+    - **Bottes de travail**
+    - **Bottes de neige**
+    - **Bottes de pluie**
   - **Chaussures habillées**
   - **Mocassins et chaussures bateau**
+  - **Claquettes et tongs**
+  - **Chaussons et pantoufles**
   - **Sandales**
+  - **Mules et sabots**
   - **Espadrilles**
-  - **Chaussures de sport**
-  - **Chaussons**
-  - **Tongs**
-  - **Autres chaussures**
 - Accessoires
+  - Chapeaux et casquettes
+    - **Casquettes**
+    - **Bonnets**
+    - **Chapeaux**
+    - **Cagoules**
   - Sacs et sacoches
+    - **Sacs à bandoulière**
+    - **Porte-monnaie**
     - **Sacs à dos**
-    - **Sacoches et sacs bandoulière**
-    - **Sacs de voyage**
-    - **Bananes**
-    - **Mallettes et porte-documents**
-    - **Autres sacs**
-  - **Portefeuilles**
-  - **Ceintures**
-  - **Chapeaux et casquettes**
-  - **Bonnets**
-  - **Écharpes et foulards**
-  - **Gants**
-  - **Lunettes de soleil**
-  - **Lunettes de vue et étuis**
+    - **Cartables et sacoches**
+    - **Sacs banane**
+    - **Mallettes**
+    - **Bagages et valises**
+    - **Fourre-tout et sacs marins**
+    - **Sacs de sport**
+    - **Housses pour vêtements**
   - **Montres**
   - Bijoux
-    - **Bagues**
-    - **Bracelets**
     - **Colliers**
+    - **Bracelets**
+    - **Autre**
+    - **Bagues**
+    - **Breloques et pendentifs**
     - **Boucles d'oreilles**
     - **Boutons de manchette**
-    - **Autres bijoux**
-  - **Cravates et nœuds papillon**
-  - **Porte-clés**
-  - **Autres accessoires**
+  - **Cravates et nœuds papillons**
+  - **Lunettes de soleil**
+  - **Autres**
+  - **Ceintures**
+  - **Écharpes et châles**
+  - **Gants**
+  - **Bandanas et foulards pour cheveux**
+  - **Bretelles**
+  - **Pochettes de costume**
+  - **Mouchoirs de poche**
 - Soins
   - **Parfums**
-  - **Soins du visage**
-  - **Rasage**
+  - Accessoires
+    - **Accessoires de toilette**
+    - **Accessoires de rasage**
+    - **Autres accessoires beauté**
   - **Soins du corps**
-  - **Soins des cheveux**
-  - **Autres**
-
-## Enfants
-
-- Filles
-  - Vêtements bébé
-    - **Bodies**
-    - **Pyjamas et grenouillères**
-    - **Ensembles**
-    - **Robes**
-    - **Hauts**
-    - **Bas**
-    - **Manteaux et combinaisons**
-    - **Autres**
-  - **Manteaux et vestes**
-  - **Sweats et pulls**
-  - **Hauts et t-shirts**
-  - **Robes**
-  - **Jupes**
-  - **Pantalons et jeans**
-  - **Shorts**
-  - **Combinaisons et salopettes**
-  - **Pyjamas**
-  - **Maillots de bain**
-  - **Vêtements de sport**
-  - **Chaussures**
-  - **Accessoires**
-  - **Déguisements**
-  - **Autres**
-- Garçons
-  - Vêtements bébé
-    - **Bodies**
-    - **Pyjamas et grenouillères**
-    - **Ensembles**
-    - **Hauts**
-    - **Bas**
-    - **Manteaux et combinaisons**
-    - **Autres**
-  - **Manteaux et vestes**
-  - **Sweats et pulls**
-  - **Hauts et t-shirts**
-  - **Chemises**
-  - **Pantalons et jeans**
-  - **Shorts**
-  - **Combinaisons et salopettes**
-  - **Pyjamas**
-  - **Maillots de bain**
-  - **Vêtements de sport**
-  - **Chaussures**
-  - **Accessoires**
-  - **Déguisements**
-  - **Autres**
-- Jouets
-  - **Peluches**
-  - **Poupées et accessoires**
-  - **Figurines**
-  - **Jeux de construction**
-  - **Voitures et véhicules**
-  - **Jeux éducatifs**
-  - **Jouets en bois**
-  - **Jeux d'extérieur**
-  - **Instruments de musique pour enfants**
-  - **Autres jouets**
-- Puériculture
-  - **Poussettes**
-  - **Sièges auto**
-  - **Porte-bébés**
-  - **Chaises hautes**
-  - **Lits et berceaux**
-  - **Allaitement et repas**
-  - **Bain et change**
-  - **Sécurité bébé**
-  - **Autres**
-- **Mobilier et décoration enfant**
-- Fournitures scolaires
-  - **Cartables et sacs**
-  - **Trousses**
-  - **Autres fournitures**
-
-## Maison
-
-- Textiles
-  - **Linge de lit**
-  - **Linge de bain**
-  - **Linge de table**
-  - **Rideaux**
-  - **Coussins**
-  - **Plaids et couvertures**
-  - **Tapis**
-  - **Autres textiles**
-- Décoration
-  - **Cadres**
-  - **Bougies et bougeoirs**
-  - **Vases**
-  - **Miroirs**
-  - **Horloges**
-  - **Affiches et tableaux**
-  - **Plantes artificielles**
-  - **Boîtes et rangements**
-  - **Objets décoratifs**
-  - **Autres**
-- Arts de la table
-  - **Assiettes**
-  - **Verres**
-  - **Tasses et mugs**
-  - **Couverts**
-  - **Plats et saladiers**
-  - **Carafes et théières**
-  - **Autres**
-- Cuisine
-  - **Ustensiles**
-  - **Casseroles et poêles**
-  - **Pâtisserie**
-  - **Rangement**
-  - **Autres**
-- **Petit mobilier**
-- **Jardin et extérieur**
-- **Fêtes et célébrations**
-
-## Électronique
-
-- Jeux vidéo et consoles
-  - **Consoles**
-  - **Jeux vidéo**
-  - **Manettes et accessoires**
-- Téléphones et accessoires
-  - **Smartphones**
-  - **Coques et protections**
-  - **Chargeurs et câbles**
-  - **Autres**
-- Ordinateurs et tablettes
-  - **Ordinateurs portables**
-  - **Ordinateurs de bureau**
-  - **Tablettes**
-  - **Claviers, souris et accessoires**
-  - **Autres**
-- Audio
-  - **Casques et écouteurs**
-  - **Enceintes**
-  - **Platines vinyle**
-  - **Chaînes hi-fi**
-  - **Autres**
-- Photo et vidéo
-  - **Appareils photo**
-  - **Objectifs**
-  - **Caméras**
-  - **Accessoires photo**
-- **TV et vidéo**
-- **Montres connectées et objets connectés**
-- **Autres appareils électroniques**
-
-## Divertissement
-
-- Livres
-  - **Romans**
-  - **Bandes dessinées**
-  - **Mangas**
-  - **Livres jeunesse**
-  - **Livres pratiques**
-  - **Beaux livres**
-  - **Autres livres**
-- Musique
-  - **Vinyles**
-  - **CD**
-  - **Cassettes**
-  - **Instruments de musique**
-- Films et séries
-  - **DVD**
-  - **Blu-ray**
-  - **VHS**
-- Jeux de société et puzzles
-  - **Jeux de société**
-  - **Puzzles**
-  - **Jeux de cartes**
-- Collections
-  - **Pin's**
-  - **Cartes à collectionner**
-  - **Figurines de collection**
-  - **Pièces et billets**
-  - **Timbres**
-  - **Autres objets de collection**
-- **Loisirs créatifs**
+  - **Soins visage**
+  - **Soins cheveux**
+  - **Autres cosmétiques**
+  - **Coffrets**
+  - **Soins mains et ongles**
+  - **Maquillage**
 
 ## Sport
 
-- **Football**
-- **Rugby**
-- **Basketball**
-- **Sports de raquette**
-- **Vélos et accessoires**
-- **Fitness et musculation**
-- **Running**
-- **Randonnée et camping**
-- **Sports d'hiver**
-- **Sports nautiques**
-- **Pêche et chasse**
-- **Sports de combat**
-- **Équitation**
-- **Golf**
-- **Équipement moto**
-- **Autres sports**
+- Cyclisme
+  - **Casques de vélo**
+  - Vélos pour enfant
+    - **Vélos pour enfant**
+    - **Draisiennes**
+    - **Tricycles**
+  - Pièces pour vélo
+    - **Autres pièces pour vélo**
+    - **Selles**
+    - **Freins**
+    - **Pédales**
+    - **Roues**
+    - **Chambres à air**
+    - **Guidons**
+    - **Plateaux**
+    - **Cassettes**
+    - **Pédaliers**
+    - **Poignées de guidon**
+    - **Dérailleurs**
+    - **Pneus**
+    - **Tiges de selle**
+    - **Manettes**
+    - **Fourches**
+    - **Chaînes**
+    - **Boîtiers de pédalier**
+    - **Amortisseurs**
+    - **Jeux de direction**
+  - Accessoires et outils pour vélo
+    - **Autres accessoires pour vélo**
+    - **Gourdes pour vélo**
+    - **Sacoches et sacs pour vélo**
+    - **Éclairages pour vélo**
+    - **Antivols pour vélo**
+    - **Porte-vélos pour voiture**
+    - **Pompes à vélo**
+    - **Sonnettes et klaxons pour vélo**
+    - **Porte-gourdes pour vélo**
+    - **Outils pour vélo**
+    - **Paniers pour vélo**
+    - **Râteliers et supports muraux pour vélo**
+    - **Valises et sacs de transport pour vélo**
+    - **Garde-boue pour vélo**
+    - **Béquilles**
+    - **Porte-bagages pour vélo**
+  - **Sièges enfants pour vélo**
+  - **Remorques pour vélo**
+- Équitation
+  - Selles et harnachement
+    - **Autres équipements d'harnachement**
+    - **Tapis de selle**
+    - **Bridons**
+    - **Couvertures pour chevaux**
+    - **Selles**
+    - **Sangles**
+    - **Mors**
+    - **Étriers**
+    - **Cravaches**
+    - **Martingales et plastrons**
+    - **Rênes**
+    - **Étrivières**
+    - **Housses de selle**
+    - **Sacs de selle**
+  - **Protections d'équitation**
+  - **Bombes d'équitation**
+  - **Gants d'équitation**
+  - **Couvre-casques d'équitation**
+- Fitness, course à pied et yoga
+  - **Gourdes**
+  - Accessoires de fitness à domicile
+    - **Autres accessoires de fitness**
+    - **Cordes à sauter**
+    - **Ballons de gym**
+    - **Matériel de gymnastique rythmique**
+    - **Rouleaux de massage**
+    - **Matériel de core training**
+    - **Steps**
+    - **Planches d'équilibre**
+    - **Cerceaux lestés**
+    - **Genouillères de danse**
+    - **Mini trampolines**
+    - **Coussins d'équilibre**
+    - **Anneaux de gymnastique**
+    - **Tapis de gymnastique**
+    - **Bâtons de marche nordique**
+    - **Box jumps**
+  - Course à pied
+    - **Autres accessoires pour course à pied**
+    - **Ceintures et brassards de course**
+    - **Gilets de course**
+    - **Accessoires de course réfléchissants**
+  - Musculation
+    - **Autres accessoires de musculation**
+    - **Élastiques de musculation**
+    - **Haltères**
+    - **Ceintures d'haltérophilie**
+    - **Hand grips**
+    - **Barres et accessoires**
+    - **Gants de musculation**
+    - **Poids pour chevilles et poignets**
+    - **Barres de traction**
+    - **Medecine balls**
+    - **Gilets lestés**
+    - **Kettlebells**
+    - **Rangements pour poids de musculation**
+  - Matériel de yoga et de pilates
+    - **Tapis de yoga**
+    - **Accessoires de pilates**
+    - **Briques et accessoires de yoga**
+    - **Coussins de yoga**
+    - **Sangles de yoga**
+    - **Sacs et housses pour tapis de yoga**
+    - **Serviettes de yoga**
+- Sports de plein air
+  - Pêche et chasse
+    - **Matériel de pêche et leurres**
+    - **Autres accessoires de pêche et de chasse**
+    - **Moulinets de pêche**
+    - **Cannes à pêche**
+    - **Accessoires de pêche**
+    - **Boîtes et sacs de pêche**
+    - **Protections auditives pour la chasse**
+    - **Filets de pêche**
+    - **Appeaux et leurres de chasse**
+    - **Rangements pour canne à pêche**
+    - **Caméras de chasse**
+  - **Autres accessoires de sports de plein air**
+  - Sacs de randonnée
+    - **Sacs à dos de trek**
+    - **Petits sacs de randonnée**
+    - **Housses de sac à dos**
+  - Tentes et matériel de couchage
+    - **Sacs de couchage**
+    - **Tentes**
+    - **Matelas gonflables**
+    - **Hamacs de voyage**
+    - **Matelas de camping**
+    - **Empreintes de tentes et tapis de sol**
+    - **Piquets de tente**
+    - **Doublures de sac de couchage**
+  - **Jumelles et longues-vues**
+  - Torches, lampes frontales et lanternes
+    - **Lampes frontales**
+    - **Lampes torches**
+    - **Lanternes**
+  - Escalade et escalade de bloc
+    - **Harnais d'escalade**
+    - **Cordes, dispositifs d'assurage et mousquetons**
+    - **Matériel d'entraînement pour l'escalade**
+    - **Autres accessoires d'escalade**
+    - **Matériel d'alpinisme**
+    - **Sacs à magnésie**
+    - **Casques d'escalade**
+    - **Prises d'escalade**
+    - **Slacklines**
+    - **Brosses d'escalade**
+    - **Gants d'escalade**
+    - **Kits de via ferrata**
+    - **Crash pads**
+  - Meubles de camping
+    - **Chaises de camping**
+    - **Tables de camping**
+    - **Cuisines de camping**
+    - **Armoires de camping**
+  - **Glacières**
+  - Réchauds et ustensiles de cuisine de camping
+    - **Vaisselle de camping**
+    - **Couverts de camping**
+    - **Ustensiles de cuisine de camping**
+    - **Réchauds de camping**
+  - **Boussoles**
+  - **Bâtons de randonnée**
+  - **Systèmes et kits d'hydratation**
+- Sports nautiques
+  - Natation
+    - **Palmes**
+    - **Bonnets de bain**
+    - **Matériel d'entraînement pour la natation**
+    - **Lunettes de natation**
+    - **Jouets de piscine**
+    - **Bouées de nage en eau libre**
+    - **Masques de plongée**
+    - **Kits de plongée**
+    - **Accessoires d'aquagym et d'aquafitness**
+    - **Tubas**
+  - Combinaisons, gants et chaussons
+    - **Combinaisons de plongée**
+    - **Chaussons de plongée**
+    - **Gants de plongée**
+    - **Cagoules de plongée**
+  - Accessoires pour sports nautiques
+    - **Autres accessoires pour sports nautiques**
+    - **Gilets d'impact pour sports nautiques**
+    - **Sacs étanches**
+    - **Pièces pour sports nautiques**
+    - **Chausses**
+    - **Pompes pour sports nautiques**
+    - **Barres de toit pour sports nautiques**
+    - **Harnais pour sports nautiques**
+    - **Housses de voyage pour sports nautiques**
+    - **Cordes de traction pour sports nautiques**
+  - **Gilets de flottaison**
+  - **Planches de kitesurf**
+  - **Bateaux gonflables**
+  - Paddles
+    - **Paddles gonflables**
+    - **Pagaies de paddle**
+  - Kayaks
+    - **Kayaks gonflables**
+    - **Kayaks pliants**
+    - **Pagaies de kayak**
+  - **Casques pour sports nautiques**
+  - **Skis nautiques**
+  - **Planches de wakeboard**
+  - **Bouées tractées**
+  - **Skimboards**
+- Sports d'équipe
+  - Football
+    - **Autres accessoires de football**
+    - **Protège-tibias de football**
+    - **Ballons de football**
+    - **Gants de gardien de football**
+    - **Buts et filets de football**
+  - **Autres équipements pour sports d'équipe**
+  - Basketball
+    - **Autres accessoires de basket**
+    - **Ballons de basket**
+    - **Paniers de basket**
+    - **Mini paniers de basket**
+  - Volley-ball
+    - **Genouillères de volley**
+    - **Ballons de volley**
+    - **Filets de volley et matériel pour terrain**
+  - Rugby
+    - **Autres équipements de rugby**
+    - **Ballons de rugby**
+    - **Casques de rugby**
+    - **Tees de rugby**
+    - **Gants de rugby**
+  - Matériel d'entraînement et d'arbitrage
+    - **Autres équipements d'entraînement et d'arbitrage**
+    - **Chasubles**
+    - **Chronomètres**
+    - **Pompes à ballon**
+    - **Cartons et drapeaux d'arbitrage**
+    - **Cônes d'entraînement et marqueurs de sol**
+    - **Tableaux tactiques**
+    - **Échelles de coordination**
+    - **Filets de rebond**
+  - Hockey sur gazon
+    - **Crosses de hockey sur gazon**
+    - **Protège-tibias de hockey sur gazon**
+    - **Gants de hockey sur gazon**
+    - **Balles de hockey sur gazon**
+    - **Protections pour gardien de hockey sur gazon**
+    - **Masques de hockey sur gazon**
+  - Sports gaéliques
+    - **Casques de hurling et de camogie**
+    - **Autres équipements pour sports gaéliques**
+    - **Crosses de hurling et de camogie**
+    - **Sliotars**
+    - **Gants de football gaélique**
+    - **Ballons de football gaélique**
+  - Football américain
+    - **Autres équipements de football américain**
+    - **Ballons de football américain**
+    - **Protections de football américain**
+    - **Casques de football américain**
+    - **Tees de football américain**
+    - **Ceintures de flag football**
+  - Baseball et softball
+    - **Gants de baseball et de softball**
+    - **Balles de baseball**
+    - **Battes de baseball et de softball**
+    - **Équipements pour receveurs de baseball et de softball**
+    - **Casques de baseball et de softball**
+    - **Balles de softball**
+    - **Batting tees de baseball et de softball**
+  - Handball
+    - **Ballons de handball**
+    - **Genouillères de handball**
+    - **Filets de handball**
+  - Lacrosse
+    - **Casques de lacrosse**
+    - **Équipement de protection de lacrosse**
+    - **Crosses de lacrosse**
+    - **Autres accessoires de lacrosse**
+    - **Sacs de lacrosse**
+    - **Gants de lacrosse**
+    - **Balles de lacrosse**
+  - Cricket
+    - **Battes de cricket**
+    - **Protections de cricket**
+    - **Balles de cricket**
+    - **Casques de cricket**
+    - **Gants de cricket**
+    - **Batting tees de cricket**
+    - **Stumps de cricket**
+  - Floorball
+    - **Autres équipements de floorball**
+    - **Crosses de floorball**
+    - **Balles de floorball**
+  - Netball
+    - **Ballons de netball**
+    - **Autres équipements de netball**
+    - **Paniers de netball**
+  - Football australien
+    - **Autres équipements de football australien**
+    - **Ballons de football australien**
+- Sports de raquette
+  - Tennis
+    - **Raquettes de tennis**
+    - **Sacs de tennis et housses de raquette**
+    - **Autres accessoires de tennis**
+    - **Balles de tennis**
+    - **Accessoires pour cordage et grip**
+    - **Filets de tennis**
+    - **Paniers de balles de tennis**
+  - Padel
+    - **Raquettes de padel**
+    - **Sacs de padel et housses de raquette**
+    - **Balles de padel**
+    - **Filets de padel**
+  - Tennis de table
+    - **Raquettes de tennis de table**
+    - **Accessoires de tennis de table**
+    - **Filets de tennis de table**
+    - **Balles de tennis de table**
+  - Badminton
+    - **Raquettes de badminton**
+    - **Volants**
+    - **Sacs de badminton et housses de raquette**
+    - **Sets de badminton**
+    - **Filets de badminton**
+  - Squash
+    - **Raquettes de squash**
+    - **Balles de squash**
+    - **Sacs de squash et housses de raquette**
+  - **Lunettes pour sports de raquette**
+  - Pickleball
+    - **Raquettes de pickleball**
+    - **Balles de pickleball**
+    - **Sacs de pickleball**
+    - **Kits de pickleball**
+    - **Filets de pickleball**
+  - Racquetball
+    - **Raquettes de racquetball**
+    - **Sacs de racquetball et housses de raquette**
+    - **Balles de racquetball**
+- Skateboards et trottinettes
+  - **Trottinettes**
+  - **Skateboards**
+  - Protections de skate
+    - **Kits de protection de skate**
+    - **Genouillères**
+    - **Coudières**
+    - **Protège-poignets**
+  - **Pièces et accessoires pour skateboard**
+  - **Pièces et accessoires pour skating**
+  - **Casques de skate**
+  - **Longboards**
+- Sports d'hiver
+  - Matériel de ski
+    - **Autres équipements de ski**
+    - **Skis alpins**
+    - **Sacs pour skis et chaussures de ski**
+    - **Skis de randonnée**
+    - **Attache-skis**
+    - **Bâtons de ski alpin**
+    - **Skis de fond**
+    - **Fixations de ski**
+    - **Bâtons de ski de fond**
+  - **Casques pour sports d'hiver**
+  - **Masques et lunettes de ski**
+  - **Luges**
+  - Matériel de snowboard
+    - **Planches de snowboard**
+    - **Fixations de snowboard**
+    - **Sacs pour snowboard et boots de snowboard**
+    - **Planches de splitboard**
+  - Hockey sur glace
+    - **Protections de hockey sur glace**
+    - **Autres équipements de hockey sur glace**
+    - **Palets de hockey sur glace**
+    - **Casques de hockey sur glace**
+    - **Crosses de hockey sur glace**
+    - **Gants de hockey sur glace**
+    - **Buts de hockey sur glace**
+  - **Accessoires de patinage artistique**
+  - **Raquettes à neige**
+  - **Guêtres**
+- Boxe et arts martiaux
+  - **Gants de boxe et d'arts martiaux**
+  - **Autres équipements pour arts martiaux**
+  - **Protections pour le corps**
+  - **Ceintures d'arts martiaux**
+  - **Protections pour la tête**
+  - **Bandes de boxe**
+  - **Sacs de frappe**
+  - **Pattes d'ours, pao et boucliers**
+  - **Poires de vitesse**
+- Golf
+  - **Balles de golf**
+  - **Clubs de golf**
+  - **Accessoires de golf**
+  - **Sacs de golf**
+  - **Matériel d'entraînement pour le golf**
+  - **Gants de golf**
+  - **Chariots de golf**
+- Sports et jeux de loisir
+  - Matériel pour fléchettes
+    - **Fléchettes**
+    - **Accessoires pour fléchettes**
+    - **Cibles de fléchettes**
+  - Pétanque et autres jeux
+    - **Autres jeux de jardin**
+    - **Boules de pétanque**
+    - **Accessoires de pétanque**
+    - **Housses pour boules de pétanque**
+  - **Balles et ballons**
+  - Billard et snooker
+    - **Queues**
+    - **Boules de billard et de snooker**
+    - **Autres accessoires de billard et de snooker**
+    - **Housses pour table de billard et de snooker**
+    - **Étuis pour queues de billard**
+    - **Brosses pour table de billard et de snooker**
+    - **Porte-queues**
+  - **Frisbee et disc golf**
+  - **Bowling**
+  - **Roundnet et spikeball**
 
-## Animaux
+## Loisirs et collections
 
-- **Chiens**
-- **Chats**
-- **Petits animaux**
-- **Oiseaux**
-- **Poissons et aquariums**
-- **Autres animaux**
+- Cartes à collectionner
+  - **Cartes à collectionner à l'unité**
+  - **Lots de cartes à collectionner**
+  - **Coffrets de boosters**
+  - **Jeux de cartes**
+  - **Boosters**
+  - **Cartes non découpées**
+- Loisirs créatifs
+  - Couture, tricot et travaux d'aiguille
+    - **Tissus**
+    - **Laines et fils**
+    - **Finitions**
+    - **Fermetures**
+    - **Patrons pour travaux d'aiguille**
+    - **Aiguilles et crochets**
+    - **Kits de broderie**
+    - **Fils**
+    - **Outils**
+    - **Tissus et toiles pour travaux d'aiguille**
+    - **Machines à coudre**
+    - **Feutre**
+    - **Fournitures de couture**
+    - **Pièces et accessoires pour machines à coudre**
+    - **Cercles à broder**
+    - **Cadres pour broderie au point de croix**
+    - **Pieds pour machine à coudre**
+    - **Surjeteuses**
+  - Fabrication de bijoux
+    - **Cabochons et pierres**
+    - **Apprêts pour bijoux**
+    - **Perles**
+    - **Charms et pendentifs**
+    - **Kits et sets de fabrication de bijoux**
+    - **Outils de fabrication de bijoux**
+    - **Rangements pour fabrication de bijoux**
+    - **Chaînes**
+    - **Cordons**
+    - **Fils métalliques**
+    - **Ficelles et cordes**
+    - **Métiers à perler**
+  - Papercraft
+    - **Papiers et cartons**
+    - **Décorations pour scrapbooking**
+    - **Albums et carnets de scrapbooking**
+    - **Outils de scrapbooking**
+    - **Équipements d'estampe**
+    - **Équipements de reliure**
+    - **Équipements de quilling**
+  - Fournitures pour loisirs créatifs
+    - **Autocollants**
+    - **Rubans**
+    - **Colles et adhésifs**
+    - **Paillettes**
+    - **Rubans adhésifs**
+    - **Tampons encreurs**
+    - **Plumes**
+    - **Pompons**
+    - **Sceaux et cachets de cire**
+    - **Poudres à embosser**
+  - Dessin et esquisse
+    - **Matériel pour le dessin et l'esquisse**
+    - **Papiers**
+    - **Carnets de croquis**
+    - **Planches à dessin**
+    - **Fixatifs**
+  - Peinture
+    - **Toiles et panneaux**
+    - **Peintures et médiums**
+    - **Pinceaux**
+    - **Pochoirs pour peinture**
+    - **Rangements**
+    - **Chevalets**
+    - **Palettes**
+    - **Aérographes**
+    - **Cercles chromatiques**
+    - **Éponges à peinture**
+    - **Couteaux à palette**
+    - **Diluants pour peinture**
+  - Outils pour loisirs créatifs
+    - **Tampons et équipements de tamponnage**
+    - **Pinces et presses**
+    - **Outils de gravure**
+    - **Pistolets à colle chaude**
+    - **Outils et équipements de soudure**
+    - **Brucelles**
+    - **Poinçons**
+    - **Embosseurs**
+    - **Cisailles à papier**
+    - **Tapis de découpe**
+    - **Appareils à pompons**
+    - **Chauffe-cire et cuillères pour cire à cacheter**
+    - **Machines à boutons**
+  - Calligraphie
+    - **Stylos pour calligraphie**
+    - **Papiers et carnets de calligraphie**
+    - **Autres outils de calligraphie**
+    - **Encres**
+    - **Plumes**
+    - **Recharges d'encre**
+    - **Pinceaux pour calligraphie**
+  - Découpe
+    - **Matrices de découpe**
+    - **Autres équipements de découpe**
+    - **Pochoirs**
+    - **Machines de découpe**
+    - **Plaques et tapis d'embossage**
+    - **Plaques de découpe**
+    - **Feuilles de protection**
+    - **Rangements pour matrices**
+    - **Cales de découpe**
+  - Fabrication de bougies
+    - **Moules à bougies**
+    - **Parfums et fragrances pour bougies**
+    - **Kits et sets de fabrication de bougies**
+    - **Cires pour bougies**
+    - **Colorants pour bougies**
+    - **Mèches**
+    - **Fondoirs à cire**
+  - Sculpture et poterie
+    - **Autres équipements pour sculpture et poterie**
+    - **Argile**
+    - **Biscuits et pièces non émaillées**
+    - **Plâtre**
+    - **Moules pour sculpture et poterie**
+    - **Outils pour la sculpture et la poterie**
+    - **Glaçures pour céramique et poterie**
+    - **Peintures pour céramique et poterie**
+    - **Tabliers de poterie**
+    - **Tours de potier**
+    - **Accessoires pour fours**
+    - **Fils métalliques pour sculpture**
+    - **Extrudeuses à argile**
+- **Jeux de société**
+- **Puzzles**
+- Souvenirs
+  - **Autres souvenirs**
+  - **Souvenirs de sport**
+  - **Souvenirs TV et cinéma**
+  - **Souvenirs de musique**
+- Pièces de monnaie et billets
+  - **Pièces de monnaie**
+  - **Médailles et jetons**
+  - **Lots**
+  - **Billets**
+  - **Titres et actions**
+- Rangements pour objets de collection
+  - **Boîtes de rangement**
+  - **Albums et classeurs**
+  - **Autres rangements**
+  - **Protège-cartes souples**
+  - **Boîtes pour jeux de cartes**
+  - **Protège-cartes rigides**
+  - **Intercalaires pour albums et classeurs**
+  - **Recharges pour albums et classeurs**
+  - **Tapis de puzzle**
+- Instruments de musique et équipement
+  - Accessoires pour la création musicale
+    - **Autres accessoires musicaux**
+    - **Partitions et recueils de chansons**
+    - **Accordeurs pour instrument de musique**
+    - **Apprentissage musical**
+    - **Pupitres**
+    - **Métronomes**
+    - **Lampes pour pupitre**
+    - **Baguettes de chef d'orchestre**
+  - Matériel de studio et sonorisation live
+    - **Microphones**
+    - **Éclairage de scène**
+    - **Autre équipement de studio et de sonorisation live**
+    - **Interfaces audio**
+    - **Câbles audio**
+    - **Mixeurs audio**
+    - **Accessoires et supports pour microphone**
+    - **Enceintes de sonorisation**
+    - **Équipements pour l'extérieur**
+    - **Amplis de puissance**
+    - **Boîte de direct**
+    - **Systèmes de sonorisation portables**
+    - **Moniteurs audio**
+    - **Patchbays**
+  - Guitares et basses
+    - **Guitares classiques**
+    - **Accessoires et pièces pour guitare**
+    - **Guitares électriques**
+    - **Guitares acoustiques**
+    - **Guitares basses**
+    - **Guitares électro-acoustiques**
+    - **Guitares spécialisées**
+  - Claviers et synthétiseurs
+    - **Accordéons**
+    - **Claviers électroniques**
+    - **Contrôleurs MIDI**
+    - **Synthétiseurs**
+    - **Échantillonneurs et boîtes à rythmes**
+    - **Claviers et synthétiseurs spécialisés**
+    - **Accessoires et pièces pour synthétiseurs**
+    - **Accessoires et pièces pour clavier**
+  - Instruments à vent
+    - **Bois**
+    - **Harmonicas**
+    - **Accessoires et pièces pour instrument à vent**
+    - **Cuivres**
+    - **Sifflets pour la musique**
+    - **Mélodicas**
+    - **Kazoos**
+  - Batterie et percussions
+    - **Percussions à main**
+    - **Accessoires et pièces pour batterie**
+    - **Batteries**
+    - **Kits de cymbales pour batterie**
+    - **Percussions à maillet**
+  - Amplis et pédales
+    - **Pédales**
+    - **Amplis guitare**
+    - **Accessoires et pièces détachées pour ampli**
+    - **Accessoires et pièces pour pédale**
+    - **Modélisateurs et processeurs d'amplis**
+    - **Amplis basse**
+    - **Amplis batterie électronique**
+    - **Amplis claviers**
+  - Instruments à cordes
+    - **Ukulélés**
+    - **Violons**
+    - **Accessoires et pièces pour instrument à cordes**
+    - **Instruments à cordes spéciaux**
+    - **Cordes**
+    - **Autoharpes, psaltérion et cithares**
+    - **Mandolines**
+    - **Violoncelles**
+    - **Violas**
+    - **Banjos**
+    - **Sitar**
+  - Équipement DJ
+    - **Contrôleurs DJ**
+    - **Équipement DJ spécialisé**
+    - **Tables de mixage DJ**
+    - **Platines DJ**
+    - **Systèmes DJ tout-en-un**
+    - **Sacoches et étuis pour DJ**
+  - Équipement de karaoké
+    - **Microphones karaoké**
+    - **Machines de karaoké**
+    - **Autre équipement de karaoké**
+    - **Systèmes de karaoké**
+- **Jeux de plateau et jeux miniatures**
+- **Cartes postales**
+- Timbres
+  - **Lots de timbres**
+  - **Timbres à l'unité**
+  - **Enveloppes premier jour**
+  - **Catalogues et guides de timbres**
+  - **Outils et matériel pour timbres**
+- Accessoires de jeux
+  - **Autres accessoires de jeux**
+  - **Jetons et marqueurs de jeu**
+  - **Dés**
+  - **Tapis de jeux**
+
+## Autre
+
+- **Autre**

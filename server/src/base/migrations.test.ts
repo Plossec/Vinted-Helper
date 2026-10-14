@@ -140,3 +140,49 @@ describe("migration 0012 — Hommes › Sweats et pulls aligné sur Vinted (#176
       expect(codes.has(code[1] ?? "")).toBe(true);
   });
 });
+
+describe("migration 0015 — arbre des catégories recopié de Vinted (#177)", { timeout: DELAI }, () => {
+  const client = new PGlite();
+  afterAll(() => client.close());
+
+  it("reprend chaque article vers une catégorie du nouvel arbre, « Autre » hors des rayons retenus", async () => {
+    const fichiers = readdirSync(dossier)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    for (const fichier of fichiers.filter((f) => f < "0015")) await appliquer(client, fichier);
+    const avant = [
+      "femmes/vetements/pulls-et-gilets/pulls-col-v", // renommée
+      "femmes/vetements/robes/robes-longues", // inchangée
+      "hommes/vetements/sweats-et-pulls/sweats", // inchangée (relevé #176)
+      "sport/football", // feuille devenue un rayon
+      "divertissement/jeux-de-societe-et-puzzles/puzzles", // rayon déplacé
+      "divertissement/livres/romans", // rayon non retenu
+      "maison/decoration/vases", // rayon non retenu
+    ];
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES ('00000000-0000-4000-8000-000000000001', 'u', 'x');
+      INSERT INTO article (utilisateur_id, reference, categorie) VALUES
+        ${avant.map((c, i) => `('00000000-0000-4000-8000-000000000001', ${i + 1}, '${c}')`).join(",\n")},
+        ('00000000-0000-4000-8000-000000000001', ${avant.length + 1}, NULL);
+    `);
+    await appliquer(client, "0015_categories_vinted.sql");
+    const lignes = (
+      await client.query<{ categorie: string | null }>("SELECT categorie FROM article ORDER BY reference")
+    ).rows;
+    expect(lignes.map((l) => l.categorie)).toEqual([
+      "femmes/vetements/sweats-et-sweats-a-capuche/sweats/pulls-col-v",
+      "femmes/vetements/robes/robes-longues",
+      "hommes/vetements/sweats-et-pulls/sweats",
+      "sport/sports-d-equipe/football/autres-accessoires-de-football",
+      "loisirs-et-collections/puzzles",
+      "autre",
+      "autre",
+      null,
+    ]);
+    // Chaque code d'arrivée existe dans l'arbre des catégories.
+    const { CATEGORIES } = await import("../catalogue/categories.js");
+    const codes = new Set(CATEGORIES.map((c) => c.code));
+    for (const code of readFileSync(resolve(dossier, "0015_categories_vinted.sql"), "utf8").matchAll(/THEN '([^']+)'/g))
+      expect(codes.has(code[1] ?? "")).toBe(true);
+  });
+});

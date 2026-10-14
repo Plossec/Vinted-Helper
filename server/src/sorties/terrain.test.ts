@@ -260,7 +260,7 @@ describe("saisie terrain", () => {
       lieuId: t.lieuId,
       prixAchat: 5000,
       dateAchat: "2026-10-04",
-      categorie: "hommes/vetements/jeans/jeans-droits",
+      categorie: "hommes/vetements/jeans/jeans-coupe-droite",
       marqueId: marques[0]?.id,
       etat: "bon_etat",
     });
