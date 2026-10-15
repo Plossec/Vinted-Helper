@@ -389,6 +389,13 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
 
           {choix === "sortie_stock" && (
             <>
+              {(article.statut === "a_expedier" || article.statut === "envoye") && (
+                <p className="secondaire">
+                  {tailleColis > 1
+                    ? "L'article sort du colis : le montant crédité reste le même et revient aux autres articles."
+                    : "C'est le seul article du colis : la vente est annulée."}
+                </p>
+              )}
               <label className="champ">
                 <span>Motif *</span>
                 <select value={saisie.motif} onChange={(e) => modifier({ motif: e.target.value as MotifSortie })}>

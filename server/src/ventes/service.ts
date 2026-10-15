@@ -234,7 +234,7 @@ export interface DemandeSortieStock {
 }
 
 /**
- * Sortie du stock (§5.7) : motif obligatoire ; « Revendu hors Vinted » demande le prix et le canal, « À vendre hors
+ * Sortie du stock (§5.7) : motif obligatoire, tous possibles même depuis un colis en cours (#192) ; « Revendu hors Vinted » demande le prix et le canal, « À vendre hors
  * Vinted » (#180) le canal. Un article déjà sorti « À vendre hors Vinted » peut changer de motif (une fois revendu,
  * donné…) : la date de sortie devient celle du nouveau motif, sans nouveau changement de statut.
  */
@@ -260,7 +260,16 @@ export async function sortirDuStock(
   await base.transaction(async (tx) => {
     const a = await chargerArticle(tx, utilisateurId, articleId);
     if (STATUTS_COLIS.has(a.statut)) {
-      throw conflit("Article dans un colis en cours : annulez la vente ou enregistrez un retour d'abord.");
+      // Colis en cours (#192) : l'article sort du colis, dont le montant reste tel quel et va aux articles restants
+      // (comme la corbeille) ; s'il était le dernier, la vente est annulée (comme un retour du colis entier).
+      const v = await venteActive(tx, utilisateurId, articleId);
+      if (v.actifs.length <= 1) {
+        await tx.update(vente).set({ annulee: true }).where(eq(vente.id, v.vente.id));
+      } else {
+        await tx
+          .delete(venteArticle)
+          .where(and(eq(venteArticle.venteId, v.vente.id), eq(venteArticle.articleId, articleId)));
+      }
     }
     if (a.statut === "sortie_stock") {
       if (a.motifSortie !== "a_vendre") throw conflit("Cet article est déjà sorti du stock.");
@@ -343,6 +352,11 @@ export async function annulerDernierChangement(
       throw conflit("Un retour ne se supprime pas : refaites la vente si besoin.");
     }
     if (dernier.vers === "sortie_stock") {
+      if (STATUTS_COLIS.has(dernier.de)) {
+        throw conflit(
+          "Une sortie du stock depuis un colis en cours ne se supprime pas : annulez la sortie du stock, puis refaites la vente si besoin.",
+        );
+      }
       await revenir([articleId], { motifSortie: null, canalRevente: null, prixRevente: null, dateSortieStock: null });
       return;
     }

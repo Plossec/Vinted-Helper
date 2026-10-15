@@ -1,7 +1,7 @@
 # ADR-0013 — Lot 3 : choix pris en autonomie
 
 - **Date** : 06/10/2026
-- **Statut** : Accepté · sortie du stock dans un colis en cours : voir l'issue #192
+- **Statut** : Accepté · sortie du stock dans un colis en cours : remplacée par [ADR-0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md)
 - **Décideurs** : Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : —
 - **Thème** : Ventes
