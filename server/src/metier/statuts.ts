@@ -9,6 +9,8 @@ export const STATUTS = [
   /** Publication Vinted (extension Chrome) en échec : l'article attend une nouvelle demande (issue #72). */
   "erreur_publication",
   "en_ligne",
+  /** Article dormant republié 3 fois sans vente (#147) : l'annonce reste en ligne, la tâche ne le touche plus. */
+  "invendu",
   "a_expedier",
   "envoye",
   /** Retour de l'acheteur : l'article est à aller chercher (issue #52). */
@@ -25,6 +27,7 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
   a_publier: "À publier",
   erreur_publication: "Erreur",
   en_ligne: "En ligne",
+  invendu: "Invendu",
   a_expedier: "À expédier",
   envoye: "Envoyé",
   a_recuperer: "À récupérer",
@@ -44,6 +47,8 @@ const TRANSITIONS: Record<Statut, readonly Statut[]> = {
   // Erreur de publication (issue #72) : retour à À publier, ou annonce publiée à la main (En ligne).
   erreur_publication: ["a_publier", "en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
+  // Invendu (#147) : atteint seulement par la tâche « Articles dormants » ; l'annonce reste en vente sur Vinted.
+  invendu: ["a_expedier", "en_ligne", "a_publier", "sortie_stock"],
   a_expedier: ["envoye", "en_ligne", "sortie_stock"],
   // Retour de l'acheteur : Envoyé → À récupérer (issue #52, au lieu d'À publier).
   envoye: ["finalise", "a_recuperer", "sortie_stock"],
@@ -72,6 +77,8 @@ const TRANSITIONS_SIMPLES = new Set<string>([
   "erreur_publication>brouillon",
   "a_recuperer>a_publier",
   "a_recuperer>en_ligne",
+  "invendu>en_ligne",
+  "invendu>a_publier",
 ]);
 
 export function estTransitionSimple(de: Statut, vers: Statut): boolean {

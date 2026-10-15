@@ -32,6 +32,7 @@ function libelleAction(de: Statut, vers: Statut): string {
   if (de === "erreur_publication" && vers === "en_ligne") return "Publié à la main : mettre en ligne";
   if (de === "a_recuperer" && vers === "a_publier") return "Récupéré : à publier";
   if (de === "a_recuperer" && vers === "en_ligne") return "Récupéré : remettre en ligne";
+  if (de === "invendu" && vers === "en_ligne") return "Remettre en ligne (la tâche reprend)";
   if (de === "sortie_stock" && vers === "a_publier") return "Annuler la sortie du stock";
   if (de === "sortie_stock" && vers === "sortie_stock") return "Vendu ou autre motif";
   return ACTIONS_STATUT[vers];
@@ -98,7 +99,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
         ]);
         base.emballage = centimesVersSaisie(reglages.emballageDefaut);
         base.montant = centimesVersSaisie(article.prixAffiche);
-        setEnLigne(articles.filter((a) => a.statut === "en_ligne" && a.id !== article.id));
+        setEnLigne(articles.filter((a) => (a.statut === "en_ligne" || a.statut === "invendu") && a.id !== article.id));
       }
       if (article.vente && (article.statut === "envoye" || article.statut === "a_expedier")) {
         setVente(await api.get<Vente>(`/api/ventes/${article.vente.id}`));
@@ -128,7 +129,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
     if (date === null) return setErreur("Indiquez une date et une heure valides.");
     const venteId = article.vente?.id;
     try {
-      if (de === "en_ligne" && choix === "a_expedier") {
+      if ((de === "en_ligne" || de === "invendu") && choix === "a_expedier") {
         const montant = lireMontant(saisie.montant);
         const emballage = lireMontant(saisie.emballage);
         if (montant === null || montant === "invalide") return setErreur("Indiquez le montant crédité (ex. 12,00).");
@@ -280,7 +281,11 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
         <div className="encadre">
           <p>
             {libelleAction(article.statut, choix)} → <strong>{LIBELLES_STATUT[choix]}</strong>
-            {tailleColis > 1 && article.statut !== "en_ligne" && choix !== "sortie_stock" && choix !== "a_publier"
+            {tailleColis > 1 &&
+            article.statut !== "en_ligne" &&
+            article.statut !== "invendu" &&
+            choix !== "sortie_stock" &&
+            choix !== "a_publier"
               ? ` (les ${tailleColis} articles du colis)`
               : ""}
           </p>

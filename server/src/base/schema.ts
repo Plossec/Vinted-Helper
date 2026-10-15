@@ -42,6 +42,23 @@ export const etatPublication = pgEnum("etat_publication", [
 export const motifSortie = pgEnum("motif_sortie", ["donne", "jete", "revendu", "garde", "perdu", "a_vendre"]);
 export const canalRevente = pgEnum("canal_revente", ["vide_grenier", "leboncoin", "main_propre", "autre"]);
 export const etatArticle = pgEnum("etat_article", CODES_ETAT);
+/** Tâches automatisées (#147, ADR-0072) : exécutées seules, ou proposées dans une liste à valider. */
+export const modeTache = pgEnum("mode_tache", ["automatique", "manuel"]);
+/** Baisse de prix d'un article dormant (#147) : règle du compte. */
+export const typeBaisse = pgEnum("type_baisse", ["pourcentage", "montant"]);
+/** Baisse de prix d'un article dormant (#147) : réglage de l'article ; « aucune » = ne pas baisser le prix. */
+export const reglageBaisse = pgEnum("reglage_baisse", ["compte", "pourcentage", "montant", "aucune"]);
+export const typeActionVinted = pgEnum("type_action_vinted", ["baisse", "republication"]);
+export const etatActionVinted = pgEnum("etat_action_vinted", [
+  "a_valider",
+  "en_attente",
+  "en_cours",
+  "faite",
+  "essai",
+  "erreur",
+  "refusee",
+  "annulee",
+]);
 
 export const utilisateur = pgTable("utilisateur", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -154,6 +171,10 @@ export const article = pgTable(
     prixAffiche: integer("prix_affiche"),
     /** Centimes. Prix de vente minimum accepté (≤ prix affiché, verrouillé par la base : #146, #195). */
     prixVenteMinimum: integer("prix_vente_minimum"),
+    /** Tâche « Articles dormants » (#147) : règle de baisse de l'article (« compte » = celle des réglages). */
+    baisseRegle: reglageBaisse("baisse_regle").notNull().default("compte"),
+    /** Pourcentage entier ou centimes, selon `baisseRegle` (pourcentage / montant) ; sinon vide. */
+    baisseValeur: integer("baisse_valeur"),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
     modifieLe: horodatage("modifie_le").notNull().defaultNow(),
     /** Sortie du stock (§5.7) : motif, canal (« revendu », « a_vendre »), prix de revente (centimes) si « revendu », date. */
@@ -355,6 +376,25 @@ export const reglages = pgTable(
     jetonPublication: text("jeton_publication"),
     /** Dernier contact du programme de publication. */
     programmeVuLe: horodatage("programme_vu_le"),
+    // Tâches automatisées (#147, ADR-0072, ADR-0078) : plage horaire (heure de Paris), mode essai commun.
+    tachesHeureDebut: integer("taches_heure_debut").notNull().default(8),
+    tachesHeureFin: integer("taches_heure_fin").notNull().default(22),
+    /** Mode essai : l'extension ouvre les pages Vinted mais ne modifie rien (jusqu'au calibrage). */
+    tachesEssai: boolean("taches_essai").notNull().default(true),
+    // Tâche « Articles dormants » (#147, ADR-0073).
+    dormantsActive: boolean("dormants_active").notNull().default(false),
+    dormantsMode: modeTache("dormants_mode").notNull().default("manuel"),
+    dormantsBaisseType: typeBaisse("dormants_baisse_type").notNull().default("pourcentage"),
+    /** Pourcentage entier (10 = 10 %) ou centimes. */
+    dormantsBaisseValeur: integer("dormants_baisse_valeur").notNull().default(10),
+    dormantsFrequenceHeures: integer("dormants_frequence_heures").notNull().default(24),
+    /** Secondes entre deux baisses, entre deux republications. */
+    dormantsPauseBaisse: integer("dormants_pause_baisse").notNull().default(120),
+    dormantsPauseRepublication: integer("dormants_pause_republication").notNull().default(600),
+    dormantsPlafondBaisses: integer("dormants_plafond_baisses").notNull().default(20),
+    dormantsPlafondRepublications: integer("dormants_plafond_republications").notNull().default(10),
+    /** Dernier passage de la tâche (planification des actions). */
+    dormantsDernierPassage: horodatage("dormants_dernier_passage"),
   },
   // Le programme du PC s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
@@ -382,6 +422,40 @@ export const publicationVinted = pgTable(
   (t) => [
     index("publication_vinted_utilisateur_idx").on(t.utilisateurId, t.etat),
     index("publication_vinted_article_idx").on(t.articleId),
+  ],
+);
+
+/**
+ * Actions des tâches automatisées sur Vinted (#147) : baisse de prix ou republication d'un article dormant, à valider
+ * (mode manuel), puis exécutées une à une par l'extension. Le résultat (« faite ») met à jour l'article.
+ */
+export const actionVinted = pgTable(
+  "action_vinted",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    type: typeActionVinted("type").notNull(),
+    etat: etatActionVinted("etat").notNull(),
+    /** Centimes : prix affiché au moment de la planification, et nouveau prix d'une baisse. */
+    prixAvant: integer("prix_avant").notNull(),
+    prixApres: integer("prix_apres"),
+    /** Mode essai : l'extension ouvre les pages mais ne modifie rien. */
+    essai: boolean("essai").notNull().default(true),
+    message: text("message"),
+    /** Republication : lien de la nouvelle annonce. */
+    url: text("url"),
+    creeLe: horodatage("cree_le").notNull(),
+    debutLe: horodatage("debut_le"),
+    finLe: horodatage("fin_le"),
+  },
+  (t) => [
+    index("action_vinted_utilisateur_idx").on(t.utilisateurId, t.etat),
+    index("action_vinted_article_idx").on(t.articleId),
   ],
 );
 

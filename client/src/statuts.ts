@@ -5,6 +5,7 @@ export type Statut =
   | "a_publier"
   | "erreur_publication"
   | "en_ligne"
+  | "invendu"
   | "a_expedier"
   | "envoye"
   | "a_recuperer"
@@ -17,6 +18,7 @@ export const LIBELLES_STATUT: Record<Statut, string> = {
   a_publier: "À publier",
   erreur_publication: "Erreur",
   en_ligne: "En ligne",
+  invendu: "Invendu",
   a_expedier: "À expédier",
   envoye: "Envoyé",
   a_recuperer: "À récupérer",
@@ -32,6 +34,8 @@ export const ACTIONS_STATUT: Record<Statut, string> = {
   // Jamais proposé : seule une publication Vinted en échec fait passer l'article en Erreur (#72).
   erreur_publication: "Erreur de publication",
   en_ligne: "Mettre en ligne",
+  // Jamais proposé : seule la tâche « Articles dormants » fait passer l'article Invendu (#147).
+  invendu: "Invendu",
   a_expedier: "Vendu : à expédier",
   envoye: "Marquer envoyé",
   a_recuperer: "Retour de l'acheteur",
@@ -69,6 +73,12 @@ export function etapeSuivante(statut: Statut): { conseil: string; vers: Statut |
       return { conseil: "La publication a échoué : corriger puis revenir à « À publier ».", vers: "a_publier" };
     case "en_ligne":
       return { conseil: "En vente sur Vinted : dès qu'elle est vendue, saisir la vente.", vers: "a_expedier" };
+    case "invendu":
+      return {
+        conseil:
+          "Republié 3 fois sans vente : l'annonce reste en vente. Baisser le prix à la main, le sortir du stock, ou le remettre « En ligne » (la tâche reprend).",
+        vers: null,
+      };
     case "a_expedier":
       return { conseil: "Préparer le colis et l'envoyer.", vers: "envoye" };
     case "envoye":

@@ -18,6 +18,7 @@ import {
 } from "../base/schema.js";
 import type { FormatColis } from "../catalogue/couleurs.js";
 import type { CodeEtat } from "../catalogue/etats.js";
+import type { ReglageBaisseArticle } from "../calculs/baisse.js";
 import { manquesArticle } from "../metier/completude.js";
 import { estTransitionSimple, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
 import { calculer } from "../couts/service.js";
@@ -45,6 +46,9 @@ export interface DonneesArticle {
   /** Codes de couleur (2 au plus) et format du colis : nécessaires à la publication sur Vinted. */
   couleurs: string[];
   formatColis: FormatColis | null;
+  /** Tâche « Articles dormants » (#147) : règle de baisse de l'article ; absente = inchangée (compte à la création). */
+  baisseRegle?: ReglageBaisseArticle;
+  baisseValeur?: number | null;
 }
 
 /** Tolérance pour une date « dans le futur » (décalage d'horloge entre téléphone et serveur). */
@@ -171,7 +175,7 @@ export async function modifierArticle(
 ): Promise<void> {
   await base.transaction(async (tx) => {
     const actuel = await chargerArticle(tx, utilisateurId, id);
-    if (actuel.statut === "en_ligne" && donnees.prixAffiche === null) {
+    if ((actuel.statut === "en_ligne" || actuel.statut === "invendu") && donnees.prixAffiche === null) {
       throw erreurSaisie("Un article En ligne doit garder un prix affiché.");
     }
     verifierPrixMinimum(donnees.prixAffiche, donnees.prixVenteMinimum);
@@ -508,6 +512,8 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     statut: a.statut,
     prixAffiche: a.prixAffiche,
     prixVenteMinimum: a.prixVenteMinimum,
+    baisseRegle: a.baisseRegle,
+    baisseValeur: a.baisseValeur,
     creeLe: a.creeLe,
     modifieLe: a.modifieLe,
     // « À vendre hors Vinted » (#180) : le motif peut encore changer (revendu, donné…), sans changer de statut.

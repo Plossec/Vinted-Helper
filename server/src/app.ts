@@ -15,6 +15,7 @@ import { routesIA } from "./ia/routes.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
 import { routesPublication } from "./publication/routes.js";
+import { routesTaches } from "./taches/routes.js";
 import { utilisateurParJeton } from "./publication/service.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 import { routesReferentiels } from "./referentiels/routes.js";
@@ -154,6 +155,7 @@ export async function creerApp({
   routesTableau(app, contexte);
   routesPublication(app, contexte);
   routesAlertes(app, contexte);
+  routesTaches(app, contexte);
   const stockage = creerStockagePhotos(dossierPhotos);
   routesVentes(app, contexte, stockage);
   routesPhotos(app, contexte, stockage);

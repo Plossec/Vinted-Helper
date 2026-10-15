@@ -25,6 +25,8 @@ export interface AlertesServeur {
   erreursPublication?: Alerte[];
   /** Articles À publier incomplets (#196). */
   incomplets?: Alerte[];
+  /** Dormants republiés 3 fois sans vente (#147). */
+  invendus?: Alerte[];
 }
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
@@ -34,11 +36,13 @@ export const nombreAlertes = (a: AlertesServeur | null) =>
       a.aExpedier.length +
       (a.aRecuperer?.length ?? 0) +
       (a.erreursPublication?.length ?? 0) +
-      (a.incomplets?.length ?? 0)
+      (a.incomplets?.length ?? 0) +
+      (a.invendus?.length ?? 0)
     : 0;
 
 /** Groupe d'alertes du serveur (clé de `AlertesServeur`). */
-export type TypeAlerte = "erreursPublication" | "aExpedier" | "aRecuperer" | "incomplets" | "dormants" | "brouillons";
+export type TypeAlerte =
+  "erreursPublication" | "aExpedier" | "aRecuperer" | "incomplets" | "invendus" | "dormants" | "brouillons";
 
 /** Une ligne de l'écran « À faire » : une alerte et son type. */
 export interface LigneAFaire extends Alerte {
@@ -53,7 +57,7 @@ export interface SectionAFaire {
 /** Ordre de l'écran « À faire » (#191), par urgence ; les sections vides ne sont pas renvoyées. */
 const ORDRE: readonly { titre: SectionAFaire["titre"]; types: readonly TypeAlerte[] }[] = [
   { titre: "Urgent", types: ["erreursPublication"] },
-  { titre: "À traiter", types: ["aExpedier", "aRecuperer", "incomplets"] },
+  { titre: "À traiter", types: ["aExpedier", "aRecuperer", "incomplets", "invendus"] },
   { titre: "Pour info", types: ["dormants", "brouillons"] },
 ];
 

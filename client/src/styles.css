@@ -489,6 +489,11 @@ a.carte-article:hover,
   background: var(--badge-en-ligne);
 }
 
+/* Invendu (#147) : en vente mais à décider, même teinte que « À récupérer ». */
+.badge--invendu {
+  background: var(--badge-recuperer);
+}
+
 /* Dix statuts, dix apparences (#105, #183) : Sortie du stock en contour, pour ne pas ressembler à Brouillon. */
 .badge--a_expedier {
   background: var(--badge-vente);

@@ -75,6 +75,22 @@ export const REGLAGES_DEFAUT = {
   promptAnnonce: null as string | null,
   promptEtiquette: null as string | null,
   formatColisDefaut: "petit" as FormatColis,
+  // Tâches automatisées (#147, ADR-0072, ADR-0078) : plage horaire (heure de Paris) et mode essai communs.
+  tachesHeureDebut: 8,
+  tachesHeureFin: 22,
+  tachesEssai: true,
+  // Tâche « Articles dormants » (ADR-0073) : désactivée par défaut, liste à valider (manuel).
+  dormantsActive: false,
+  dormantsMode: "manuel" as "automatique" | "manuel",
+  dormantsBaisseType: "pourcentage" as "pourcentage" | "montant",
+  /** Pourcentage entier ou centimes. */
+  dormantsBaisseValeur: 10,
+  dormantsFrequenceHeures: 24,
+  /** Secondes. */
+  dormantsPauseBaisse: 120,
+  dormantsPauseRepublication: 600,
+  dormantsPlafondBaisses: 20,
+  dormantsPlafondRepublications: 10,
 };
 
 export type Reglages = typeof REGLAGES_DEFAUT;
@@ -89,6 +105,18 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     promptAnnonce: r.promptAnnonce,
     promptEtiquette: r.promptEtiquette,
     formatColisDefaut: r.formatColisDefaut,
+    tachesHeureDebut: r.tachesHeureDebut,
+    tachesHeureFin: r.tachesHeureFin,
+    tachesEssai: r.tachesEssai,
+    dormantsActive: r.dormantsActive,
+    dormantsMode: r.dormantsMode,
+    dormantsBaisseType: r.dormantsBaisseType,
+    dormantsBaisseValeur: r.dormantsBaisseValeur,
+    dormantsFrequenceHeures: r.dormantsFrequenceHeures,
+    dormantsPauseBaisse: r.dormantsPauseBaisse,
+    dormantsPauseRepublication: r.dormantsPauseRepublication,
+    dormantsPlafondBaisses: r.dormantsPlafondBaisses,
+    dormantsPlafondRepublications: r.dormantsPlafondRepublications,
   };
 }
 

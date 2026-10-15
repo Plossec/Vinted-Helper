@@ -9,6 +9,7 @@ const TRANSITIONS: Record<Statut, Statut[]> = {
   a_publier: ["en_ligne", "brouillon", "en_stock", "sortie_stock"],
   erreur_publication: ["a_publier", "en_ligne", "brouillon", "sortie_stock"],
   en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
+  invendu: ["a_expedier", "en_ligne", "a_publier", "sortie_stock"],
   a_expedier: ["envoye", "en_ligne", "sortie_stock"],
   envoye: ["finalise", "a_recuperer", "sortie_stock"],
   a_recuperer: ["a_publier", "en_ligne", "sortie_stock"],

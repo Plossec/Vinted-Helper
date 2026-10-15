@@ -53,6 +53,7 @@ export const STATUTS_PAR_DEFAUT: Statut[] = [
   "a_publier",
   "erreur_publication",
   "en_ligne",
+  "invendu",
   "a_expedier",
   "envoye",
   "a_recuperer",

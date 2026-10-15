@@ -1,0 +1,286 @@
+// Tâches automatisées (#147, ADR-0072, ADR-0073) : planification des actions sur les articles dormants, au passage de
+// l'extension (seule à agir sur Vinted), liste à valider (mode manuel) et journal des actions.
+import { and, desc, eq, gte, inArray, isNull, ne, or } from "drizzle-orm";
+import type { Base, Transaction } from "../base/connexion.js";
+import { actionVinted, article, historiquePrix, historiqueStatut, reglages } from "../base/schema.js";
+import { jourParis } from "../calculs/indicateurs.js";
+import { calculerAlertes } from "../metier/alertes.js";
+import { type CandidatDormant, passageDu, planifierDormants } from "../metier/taches.js";
+import { erreurSaisie } from "../outils/erreurs.js";
+
+const EN_COURS = ["a_valider", "en_attente", "en_cours"] as const;
+
+/** Articles En ligne dormants (§5.8, une republication relance le délai), les plus anciens d'abord. */
+async function candidatsDormants(
+  tx: Transaction,
+  utilisateurId: string,
+  delaiDormant: number,
+  maintenant: Date,
+): Promise<CandidatDormant[]> {
+  const articles = await tx
+    .select({
+      id: article.id,
+      reference: article.reference,
+      nom: article.nom,
+      statut: article.statut,
+      prixAffiche: article.prixAffiche,
+      prixVenteMinimum: article.prixVenteMinimum,
+      baisseRegle: article.baisseRegle,
+      baisseValeur: article.baisseValeur,
+      urlVinted: article.urlVinted,
+    })
+    .from(article)
+    .where(and(eq(article.utilisateurId, utilisateurId), eq(article.statut, "en_ligne"), isNull(article.supprimeLe)));
+  if (articles.length === 0) return [];
+  const ids = articles.map((a) => a.id);
+  const [historiques, prix, actions] = await Promise.all([
+    tx
+      .select({ articleId: historiqueStatut.articleId, vers: historiqueStatut.vers, date: historiqueStatut.date })
+      .from(historiqueStatut)
+      .where(inArray(historiqueStatut.articleId, ids)),
+    tx
+      .select({ articleId: historiquePrix.articleId, prix: historiquePrix.prix, date: historiquePrix.date })
+      .from(historiquePrix)
+      .where(inArray(historiquePrix.articleId, ids)),
+    tx
+      .select({
+        articleId: actionVinted.articleId,
+        type: actionVinted.type,
+        etat: actionVinted.etat,
+        finLe: actionVinted.finLe,
+      })
+      .from(actionVinted)
+      .where(inArray(actionVinted.articleId, ids)),
+  ]);
+  const parId = new Map(articles.map((a) => [a.id, a]));
+  const details = articles.map((a) => {
+    const historique = historiques.filter((h) => h.articleId === a.id);
+    const miseEnLigne = Math.max(0, ...historique.filter((h) => h.vers === "en_ligne").map((h) => h.date.getTime()));
+    const republiees = actions
+      .filter((x) => x.articleId === a.id && x.type === "republication" && x.etat === "faite" && x.finLe !== null)
+      .map((x) => x.finLe?.getTime() ?? 0);
+    const derniere = republiees.length > 0 ? Math.max(...republiees) : null;
+    return {
+      a,
+      republications: republiees.filter((t) => t > miseEnLigne).length,
+      actionEnCours: actions.some((x) => x.articleId === a.id && (EN_COURS as readonly string[]).includes(x.etat)),
+      alerte: {
+        id: a.id,
+        reference: a.reference,
+        nom: a.nom,
+        statut: a.statut,
+        historique: historique.map((h) => ({ vers: h.vers, date: h.date.toISOString() })),
+        historiquePrix: prix
+          .filter((p) => p.articleId === a.id)
+          .map((p) => ({ prix: p.prix, date: p.date.toISOString() })),
+        derniereRepublication: derniere === null ? null : new Date(derniere).toISOString(),
+      },
+    };
+  });
+  const parArticle = new Map(details.map((d) => [d.a.id, d]));
+  const { dormants } = calculerAlertes(
+    details.map((d) => d.alerte),
+    { delaiBrouillon: Number.MAX_SAFE_INTEGER, delaiDormant },
+    maintenant,
+  );
+  return dormants.flatMap((al) => {
+    const d = parArticle.get(al.id);
+    const a = parId.get(al.id);
+    if (!d || !a) return [];
+    return [{ ...a, republications: d.republications, actionEnCours: d.actionEnCours }];
+  });
+}
+
+/** Actions déjà prévues aujourd'hui (heure de Paris), par type, pour les plafonds par jour. */
+async function actionsDuJour(tx: Transaction, utilisateurId: string, maintenant: Date) {
+  const lignes = await tx
+    .select({ type: actionVinted.type, creeLe: actionVinted.creeLe })
+    .from(actionVinted)
+    .where(
+      and(
+        eq(actionVinted.utilisateurId, utilisateurId),
+        gte(actionVinted.creeLe, new Date(maintenant.getTime() - 2 * 86_400_000)),
+        ne(actionVinted.etat, "refusee"),
+        ne(actionVinted.etat, "annulee"),
+      ),
+    );
+  const aujourdhui = jourParis(maintenant.toISOString());
+  const du = lignes.filter((l) => jourParis(l.creeLe.toISOString()) === aujourdhui);
+  return {
+    baisse: du.filter((l) => l.type === "baisse").length,
+    republication: du.filter((l) => l.type === "republication").length,
+  };
+}
+
+/**
+ * Passage de la tâche « Articles dormants », appelé à chaque passage de l'extension : si la tâche est activée, dans la
+ * plage horaire et à sa fréquence, ajoute une action par article dormant (à valider en mode manuel) et fait passer
+ * « Invendu » les articles republiés 3 fois sans vente.
+ */
+export async function planifierTaches(base: Base, utilisateurId: string, maintenant: Date): Promise<void> {
+  const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
+  if (!r) return;
+  const du = passageDu(
+    {
+      active: r.dormantsActive,
+      heureDebut: r.tachesHeureDebut,
+      heureFin: r.tachesHeureFin,
+      frequenceHeures: r.dormantsFrequenceHeures,
+      dernierPassage: r.dormantsDernierPassage,
+    },
+    maintenant,
+  );
+  if (!du) return;
+  await base.transaction(async (tx) => {
+    // Un seul passage, même si deux appels arrivent ensemble : la date du dernier passage n'est prise qu'une fois.
+    const pris = await tx
+      .update(reglages)
+      .set({ dormantsDernierPassage: maintenant })
+      .where(
+        and(
+          eq(reglages.utilisateurId, utilisateurId),
+          r.dormantsDernierPassage === null
+            ? isNull(reglages.dormantsDernierPassage)
+            : eq(reglages.dormantsDernierPassage, r.dormantsDernierPassage),
+        ),
+      )
+      .returning({ id: reglages.utilisateurId });
+    if (pris.length === 0) return;
+    const candidats = await candidatsDormants(tx, utilisateurId, r.delaiDormant, maintenant);
+    const { actions, invendus } = planifierDormants(candidats, {
+      regleCompte: { type: r.dormantsBaisseType, valeur: r.dormantsBaisseValeur },
+      plafondBaisses: r.dormantsPlafondBaisses,
+      plafondRepublications: r.dormantsPlafondRepublications,
+      dejaAujourdhui: await actionsDuJour(tx, utilisateurId, maintenant),
+    });
+    if (actions.length > 0) {
+      await tx.insert(actionVinted).values(
+        actions.map((a) => ({
+          utilisateurId,
+          ...a,
+          etat: r.dormantsMode === "automatique" ? ("en_attente" as const) : ("a_valider" as const),
+          essai: r.tachesEssai,
+          creeLe: maintenant,
+        })),
+      );
+    }
+    // Invendu : passage fait par la tâche seule (absent du tableau du §4.2 proposé à l'utilisateur).
+    for (const articleId of invendus) {
+      const modifies = await tx
+        .update(article)
+        .set({ statut: "invendu", modifieLe: maintenant })
+        .where(and(eq(article.id, articleId), eq(article.statut, "en_ligne")))
+        .returning({ id: article.id });
+      if (modifies.length > 0)
+        await tx
+          .insert(historiqueStatut)
+          .values({ utilisateurId, articleId, de: "en_ligne", vers: "invendu", date: maintenant });
+    }
+  });
+}
+
+/**
+ * Actions prévues devenues sans objet (article vendu, retiré, mis à la corbeille, ou prix changé à la main) :
+ * annulées avant d'être montrées ou exécutées.
+ */
+export async function annulerActionsPerimees(base: Base, utilisateurId: string, maintenant: Date) {
+  const prevues = await base
+    .select({
+      id: actionVinted.id,
+      prixAvant: actionVinted.prixAvant,
+      statut: article.statut,
+      prixAffiche: article.prixAffiche,
+      supprimeLe: article.supprimeLe,
+    })
+    .from(actionVinted)
+    .innerJoin(article, eq(article.id, actionVinted.articleId))
+    .where(
+      and(
+        eq(actionVinted.utilisateurId, utilisateurId),
+        or(eq(actionVinted.etat, "a_valider"), eq(actionVinted.etat, "en_attente")),
+      ),
+    );
+  const perimees = prevues.filter(
+    (p) => p.statut !== "en_ligne" || p.prixAffiche !== p.prixAvant || p.supprimeLe !== null,
+  );
+  if (perimees.length === 0) return;
+  await base
+    .update(actionVinted)
+    .set({
+      etat: "annulee",
+      message: "Article modifié entre-temps (statut ou prix) : action annulée.",
+      finLe: maintenant,
+    })
+    .where(
+      and(
+        inArray(
+          actionVinted.id,
+          perimees.map((p) => p.id),
+        ),
+        or(eq(actionVinted.etat, "a_valider"), eq(actionVinted.etat, "en_attente")),
+      ),
+    );
+}
+
+/** Liste à valider (mode manuel) et journal des dernières actions, avec l'article concerné. */
+export async function listerActions(base: Base, utilisateurId: string, maintenant: Date) {
+  await annulerActionsPerimees(base, utilisateurId, maintenant);
+  const lignes = await base
+    .select({
+      id: actionVinted.id,
+      articleId: actionVinted.articleId,
+      reference: article.reference,
+      nom: article.nom,
+      type: actionVinted.type,
+      etat: actionVinted.etat,
+      prixAvant: actionVinted.prixAvant,
+      prixApres: actionVinted.prixApres,
+      essai: actionVinted.essai,
+      message: actionVinted.message,
+      url: actionVinted.url,
+      creeLe: actionVinted.creeLe,
+      finLe: actionVinted.finLe,
+    })
+    .from(actionVinted)
+    .innerJoin(article, eq(article.id, actionVinted.articleId))
+    .where(eq(actionVinted.utilisateurId, utilisateurId))
+    .orderBy(desc(actionVinted.creeLe), article.reference)
+    .limit(200);
+  return {
+    aValider: lignes.filter((l) => l.etat === "a_valider"),
+    journal: lignes.filter((l) => l.etat !== "a_valider").slice(0, 50),
+  };
+}
+
+/** « Appliquer » (→ en attente de l'extension) ou « Refuser » des actions à valider. */
+export async function validerActions(
+  base: Base,
+  utilisateurId: string,
+  ids: string[],
+  appliquer: boolean,
+  maintenant: Date,
+): Promise<number> {
+  if (ids.length === 0) throw erreurSaisie("Cochez au moins une action.");
+  await annulerActionsPerimees(base, utilisateurId, maintenant);
+  const r = await base
+    .update(actionVinted)
+    .set(appliquer ? { etat: "en_attente" } : { etat: "refusee", finLe: maintenant })
+    .where(
+      and(
+        eq(actionVinted.utilisateurId, utilisateurId),
+        inArray(actionVinted.id, ids),
+        eq(actionVinted.etat, "a_valider"),
+      ),
+    )
+    .returning({ id: actionVinted.id });
+  return r.length;
+}
+
+/** Nombre d'actions à valider (pastille de l'écran « À faire »). */
+export async function nombreAValider(base: Base, utilisateurId: string): Promise<number> {
+  const r = await base
+    .select({ id: actionVinted.id })
+    .from(actionVinted)
+    .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "a_valider")));
+  return r.length;
+}

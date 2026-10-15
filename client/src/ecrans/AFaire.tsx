@@ -1,5 +1,6 @@
 // Écran d'accueil « À faire » (#191) : tout ce qui demande l'attention, par urgence (Urgent, À traiter, Pour info).
-// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Compléter, Vu.
+// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Compléter,
+// Remettre en ligne (invendu), Vu.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
@@ -22,6 +23,8 @@ function detail(l: LigneAFaire): string {
       return `À récupérer — retour du ${formatDate(l.depuis)}`;
     case "incomplets":
       return `À publier mais incomplet — il manque : ${(l.manques ?? []).join(", ")}`;
+    case "invendus":
+      return `Invendu depuis le ${formatDate(l.depuis)} — republié 3 fois sans vente, l'annonce reste en ligne`;
     case "dormants":
       return `Dormant — sans vente ni baisse de prix depuis ${pluriel(l.jours, "jour")}`;
     case "brouillons":
@@ -100,6 +103,11 @@ export function AFaire() {
         return bouton("Récupéré → À publier", async () => {
           await api.post(`/api/articles/${l.id}/statut`, { vers: "a_publier" });
           return { ok: true, texte: `${formatReference(l.reference)} repassé « À publier ».` };
+        });
+      case "invendus":
+        return bouton("Remettre en ligne", async () => {
+          await api.post(`/api/articles/${l.id}/statut`, { vers: "en_ligne" });
+          return { ok: true, texte: `${formatReference(l.reference)} remis « En ligne » : la tâche reprend.` };
         });
       case "incomplets":
         return (
