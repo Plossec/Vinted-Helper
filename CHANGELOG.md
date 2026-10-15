@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.15.2] — 15/10/2026
+
+### Modifié
+- Un seul terme, « bénéfice attendu », pour le bénéfice d'un article vendu pas encore finalisé (prix vendu − coût
+  total) ; « bénéfice en cours » disparaît du cahier des charges. Aucun calcul ne change (#193).
+
 ## [1.15.1] — 15/10/2026
 
 ### Modifié

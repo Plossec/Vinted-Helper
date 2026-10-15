@@ -1,7 +1,7 @@
 # ADR-0040 — CA et bénéfice théoriques (ventes en cours)
 
 - **Date** : 08/10/2026
-- **Statut** : Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » : voir l'issue #193
+- **Statut** : Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » remplacé par « bénéfice attendu » ([ADR-0090](0090-un-seul-terme-benefice-attendu.md))
 - **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #85
 - **Thème** : Tableau de bord
