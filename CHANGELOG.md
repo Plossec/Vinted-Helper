@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.15.3] — 15/10/2026
+
+### Modifié
+- Le prix vente minimum ne peut plus dépasser le prix affiché, quel que soit le chemin (futures tâches automatiques
+  comprises) : verrou ajouté dans la base. Un minimum existant trop haut est ramené au prix affiché (#195).
+
 ## [1.15.2] — 15/10/2026
 
 ### Modifié
