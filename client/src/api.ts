@@ -260,9 +260,16 @@ export interface Article {
   prixAffiche: number | null;
   /** Prix de vente minimum accepté (information ; #146). */
   prixVenteMinimum: number | null;
+  /** Tâche « Articles dormants » (#147) : règle de baisse de l'article (« compte » = réglage du compte). */
+  baisseRegle: ReglageBaisse;
+  /** Pourcentage entier ou centimes, selon la règle. */
+  baisseValeur: number | null;
   transitionsPossibles: Statut[];
   historiqueStatuts: ChangementStatut[];
 }
+
+/** Baisse automatique d'un article dormant (#147) ; « aucune » = ne pas baisser le prix. */
+export type ReglageBaisse = "compte" | "pourcentage" | "montant" | "aucune";
 
 export interface DonneesArticle {
   nom: string;
@@ -281,6 +288,8 @@ export interface DonneesArticle {
   prixVenteMinimum: number | null;
   couleurs: string[];
   formatColis: string | null;
+  baisseRegle: ReglageBaisse;
+  baisseValeur: number | null;
 }
 
 export interface Couts {
@@ -344,6 +353,38 @@ export interface ReglagesUtilisateur {
   promptAnnonce: string | null;
   promptEtiquette: string | null;
   formatColisDefaut: string;
+  // Tâches automatisées (#147) : plage horaire (heure de Paris), mode essai, tâche « Articles dormants ».
+  tachesHeureDebut: number;
+  tachesHeureFin: number;
+  tachesEssai: boolean;
+  dormantsActive: boolean;
+  dormantsMode: "automatique" | "manuel";
+  dormantsBaisseType: "pourcentage" | "montant";
+  /** Pourcentage entier ou centimes. */
+  dormantsBaisseValeur: number;
+  dormantsFrequenceHeures: number;
+  /** Secondes. */
+  dormantsPauseBaisse: number;
+  dormantsPauseRepublication: number;
+  dormantsPlafondBaisses: number;
+  dormantsPlafondRepublications: number;
+}
+
+/** Action d'une tâche automatisée sur Vinted (#147). */
+export interface ActionVinted {
+  id: string;
+  articleId: string;
+  reference: number;
+  nom: string | null;
+  type: "baisse" | "republication";
+  etat: "a_valider" | "en_attente" | "en_cours" | "faite" | "essai" | "erreur" | "refusee" | "annulee";
+  prixAvant: number;
+  prixApres: number | null;
+  essai: boolean;
+  message: string | null;
+  url: string | null;
+  creeLe: string;
+  finLe: string | null;
 }
 
 export type EtatPublication = "en_attente" | "en_cours" | "publie" | "essai" | "erreur" | "annule";

@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
+import { ActionsAValider } from "../composants/ActionsTaches.js";
 import { type AlertesServeur, type LigneAFaire, type SectionAFaire, sectionsAFaire } from "../outils/alertes.js";
 import { chargerAlertes } from "../outils/alertesCache.js";
 import { formatDate } from "../outils/dates.js";
@@ -131,7 +132,11 @@ export function AFaire() {
       {retour && <p className={retour.ok ? "message message--ok" : "message message--erreur"}>{retour.texte}</p>}
       {erreur && <p className="message message--erreur">{erreur}</p>}
       {alertes === null && !erreur && <p className="statut">Chargement…</p>}
-      {alertes !== null && sections.length === 0 && <p className="a-faire__vide">Rien à faire 🎉</p>}
+      {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
+      {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}
+      {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && (
+        <p className="a-faire__vide">Rien à faire 🎉</p>
+      )}
       {sections.map((s) => (
         <section
           key={s.titre}

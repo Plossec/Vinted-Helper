@@ -27,6 +27,8 @@ export interface AlertesServeur {
   incomplets?: Alerte[];
   /** Dormants republiés 3 fois sans vente (#147). */
   invendus?: Alerte[];
+  /** Tâches automatisées en mode manuel (#147) : nombre d'actions prévues à valider. */
+  aValider?: number;
 }
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
@@ -37,7 +39,8 @@ export const nombreAlertes = (a: AlertesServeur | null) =>
       (a.aRecuperer?.length ?? 0) +
       (a.erreursPublication?.length ?? 0) +
       (a.incomplets?.length ?? 0) +
-      (a.invendus?.length ?? 0)
+      (a.invendus?.length ?? 0) +
+      (a.aValider ?? 0)
     : 0;
 
 /** Groupe d'alertes du serveur (clé de `AlertesServeur`). */

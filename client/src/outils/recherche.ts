@@ -94,8 +94,11 @@ export function lireFiltres(brut: unknown): Filtres {
   return {
     texte: typeof f.texte === "string" ? f.texte : "",
     gamme: typeof f.gamme === "string" ? f.gamme : "",
-    // Statuts par défaut d'avant le statut Erreur (#72) : on y ajoute Erreur, pour que ces articles restent visibles.
-    statuts: statutsParDefaut([...statuts, "erreur_publication"]) ? STATUTS_PAR_DEFAUT : statuts,
+    // Statuts par défaut d'avant les statuts Erreur (#72) et Invendu (#147) : on les y ajoute, pour que ces articles
+    // restent visibles.
+    statuts: statutsParDefaut([...new Set<Statut>([...statuts, "erreur_publication", "invendu"])])
+      ? STATUTS_PAR_DEFAUT
+      : statuts,
     categories: f.categories as string[],
     marqueIds: f.marqueIds as string[],
     lieuIds: f.lieuIds as string[],

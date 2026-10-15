@@ -17,6 +17,7 @@ import {
   type DonneesArticle,
   envoyerImage,
   type Referentiels,
+  type ReglageBaisse,
   type TypeListe,
   urlVignette,
 } from "../api.js";
@@ -54,6 +55,9 @@ interface Formulaire {
   dateAchat: string;
   prixAffiche: string;
   prixVenteMinimum: string;
+  /** Baisse automatique d'un article dormant (#147) et sa valeur (% entier ou euros). */
+  baisseRegle: ReglageBaisse;
+  baisseValeur: string;
   notes: string;
   couleur1: string;
   couleur2: string;
@@ -76,6 +80,8 @@ const formulaireVide = (): Formulaire => ({
   dateAchat: aujourdhui(),
   prixAffiche: "",
   prixVenteMinimum: "",
+  baisseRegle: "compte",
+  baisseValeur: "",
   notes: "",
   couleur1: "",
   couleur2: "",
@@ -103,6 +109,13 @@ function versFormulaire(a: Article, refs: Referentiels): Formulaire {
     dateAchat: a.dateAchat ?? "",
     prixAffiche: centimesVersSaisie(a.prixAffiche),
     prixVenteMinimum: centimesVersSaisie(a.prixVenteMinimum),
+    baisseRegle: a.baisseRegle,
+    baisseValeur:
+      a.baisseValeur === null
+        ? ""
+        : a.baisseRegle === "montant"
+          ? centimesVersSaisie(a.baisseValeur)
+          : String(a.baisseValeur),
     notes: a.notes ?? "",
     couleur1: a.couleurs[0] ?? "",
     couleur2: a.couleurs[1] ?? "",
@@ -262,6 +275,16 @@ export function FicheArticle() {
     if (prixVenteMinimum === "invalide") return erreur("Prix vente minimum invalide (ex. 10,00).");
     if (prixAffiche !== null && prixVenteMinimum !== null && prixVenteMinimum > prixAffiche)
       return erreur("Le prix vente minimum doit être inférieur ou égal au prix affiché.");
+    let baisseValeur: number | null = null;
+    if (form.baisseRegle === "pourcentage") {
+      baisseValeur = /^\d+$/.test(form.baisseValeur.trim()) ? Number(form.baisseValeur.trim()) : NaN;
+      if (!(baisseValeur >= 1 && baisseValeur <= 90)) return erreur("Baisse automatique : pourcentage entre 1 et 90.");
+    } else if (form.baisseRegle === "montant") {
+      const montant = lireMontant(form.baisseValeur);
+      if (montant === null || montant === "invalide" || montant <= 0)
+        return erreur("Baisse automatique : montant invalide (ex. 1,00).");
+      baisseValeur = montant;
+    }
 
     setEnvoi(true);
     try {
@@ -281,6 +304,8 @@ export function FicheArticle() {
         notes: form.notes.trim() || null,
         couleurs: [form.couleur1, form.couleur2].filter((c, i, t) => c !== "" && t.indexOf(c) === i),
         formatColis: form.formatColis || null,
+        baisseRegle: form.baisseRegle,
+        baisseValeur,
       };
       if (article?.lot && typeof prixLot === "number" && prixLot !== article.lot.prixTotal) {
         await api.put(`/api/lots/${article.lot.id}`, { prixTotal: prixLot });
@@ -488,6 +513,32 @@ export function FicheArticle() {
                     placeholder="Facultatif"
                   />
                 </label>
+                {/* Tâche « Articles dormants » (#147) : jamais sous le prix vente minimum ; sans minimum, republication. */}
+                <div className="champs-ligne">
+                  <label className="champ">
+                    <span>Baisse automatique (dormant)</span>
+                    <select
+                      value={form.baisseRegle}
+                      onChange={(e) => modifier("baisseRegle")(e.target.value as ReglageBaisse)}
+                    >
+                      <option value="compte">Selon le réglage du compte</option>
+                      <option value="pourcentage">Pourcentage</option>
+                      <option value="montant">Montant</option>
+                      <option value="aucune">Ne pas baisser le prix</option>
+                    </select>
+                  </label>
+                  {(form.baisseRegle === "pourcentage" || form.baisseRegle === "montant") && (
+                    <label className="champ">
+                      <span>{form.baisseRegle === "pourcentage" ? "Baisse (%)" : "Baisse (€)"}</span>
+                      <input
+                        inputMode={form.baisseRegle === "pourcentage" ? "numeric" : "decimal"}
+                        value={form.baisseValeur}
+                        onChange={(e) => modifier("baisseValeur")(e.target.value)}
+                        placeholder={form.baisseRegle === "pourcentage" ? "10" : "1,00"}
+                      />
+                    </label>
+                  )}
+                </div>
                 <div className="champs-ligne">
                   <label className="champ">
                     <span>Couleur</span>
