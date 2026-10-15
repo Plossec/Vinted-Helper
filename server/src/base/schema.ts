@@ -9,6 +9,7 @@ import { sql } from "drizzle-orm";
 import {
   bigserial,
   boolean,
+  check,
   date,
   index,
   integer,
@@ -151,7 +152,7 @@ export const article = pgTable(
     statut: statutArticle("statut").notNull().default("brouillon"),
     /** Centimes. Prix actuel de l'annonce ; l'historique est dans historique_prix. */
     prixAffiche: integer("prix_affiche"),
-    /** Centimes. Prix de vente minimum accepté (information, ≤ prix affiché ; #146). */
+    /** Centimes. Prix de vente minimum accepté (≤ prix affiché, verrouillé par la base : #146, #195). */
     prixVenteMinimum: integer("prix_vente_minimum"),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
     modifieLe: horodatage("modifie_le").notNull().defaultNow(),
@@ -181,6 +182,11 @@ export const article = pgTable(
     index("article_utilisateur_cree_idx").on(t.utilisateurId, t.creeLe),
     index("article_sortie_idx").on(t.sortieId),
     index("article_lot_idx").on(t.lotId),
+    // Verrou (#195) : aucun chemin, tâches automatiques comprises, ne peut laisser un minimum au-dessus du prix affiché.
+    check(
+      "article_prix_minimum_inferieur_prix_affiche",
+      sql`${t.prixVenteMinimum} IS NULL OR ${t.prixAffiche} IS NULL OR ${t.prixVenteMinimum} <= ${t.prixAffiche}`,
+    ),
   ],
 );
 

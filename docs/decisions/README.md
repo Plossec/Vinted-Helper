@@ -63,7 +63,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0045](0045-une-version-par-pr-tag-automatique.md) | 13/10/2026 | Une version par PR, tag automatique | Méthode | Accepté |  |
 | [0046](0046-securite-du-depot-reglages-hooks-fusions.md) | 13/10/2026 | Sécurité du dépôt : réglages, hooks, fusions | Méthode | Accepté · fusions précisées par [ADR-0081](0081-fusions-dans-main-par-claude-et-dependabot.md) |  |
 | [0047](0047-qualite-du-code-doublons-retires.md) | 13/10/2026 | Qualité du code : doublons retirés | Méthode | Accepté |  |
-| [0048](0048-prix-vente-minimum.md) | 13/10/2026 | Prix vente minimum | Socle | Accepté · contrôle à chaque baisse : voir l'issue #195 |  |
+| [0048](0048-prix-vente-minimum.md) | 13/10/2026 | Prix vente minimum | Socle | Accepté · verrou dans la base : voir [ADR-0091](0091-verrou-prix-minimum-dans-la-base.md) |  |
 | [0049](0049-securite-connexion-mot-de-passe-quota-de-l-ia.md) | 13/10/2026 | Sécurité : connexion, mot de passe, quota de l'IA | Socle | Accepté |  |
 | [0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) | 13/10/2026 | Graphique et API du tableau de bord après la revue de code | Tableau de bord | Accepté |  |
 | [0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md) | 13/10/2026 | Tuiles CA et bénéfice : montant affiché une seule fois | Tableau de bord | Accepté |  |
@@ -106,3 +106,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | IA Gemini | Accepté |  |
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Interface | Accepté |  |
 | [0090](0090-un-seul-terme-benefice-attendu.md) | 15/10/2026 | Un seul terme : « bénéfice attendu » | Tableau de bord | Accepté |  |
+| [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Socle | Accepté |  |

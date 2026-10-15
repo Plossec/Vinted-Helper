@@ -186,3 +186,34 @@ describe("migration 0015 — arbre des catégories recopié de Vinted (#177)", {
       expect(codes.has(code[1] ?? "")).toBe(true);
   });
 });
+
+describe("migration 0017 — verrou prix vente minimum ≤ prix affiché (#195)", { timeout: DELAI }, () => {
+  const client = new PGlite();
+  afterAll(() => client.close());
+
+  it("ramène un minimum trop haut au prix affiché, puis refuse tout nouveau minimum au-dessus", async () => {
+    const fichiers = readdirSync(dossier)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    for (const fichier of fichiers.filter((f) => f < "0017")) await appliquer(client, fichier);
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES ('00000000-0000-4000-8000-000000000001', 'u', 'x');
+      INSERT INTO article (utilisateur_id, reference, prix_affiche, prix_vente_minimum) VALUES
+        ('00000000-0000-4000-8000-000000000001', 1, 1000, 1200),
+        ('00000000-0000-4000-8000-000000000001', 2, 1000, 800),
+        ('00000000-0000-4000-8000-000000000001', 3, NULL, 800),
+        ('00000000-0000-4000-8000-000000000001', 4, 1000, NULL);
+    `);
+    await appliquer(client, "0017_prix_minimum_verrou.sql");
+    const lignes = (
+      await client.query<{ prix_vente_minimum: number | null }>(
+        "SELECT prix_vente_minimum FROM article ORDER BY reference",
+      )
+    ).rows;
+    expect(lignes.map((l) => l.prix_vente_minimum)).toEqual([1000, 800, 800, null]);
+    await expect(client.exec("UPDATE article SET prix_affiche = 700 WHERE reference = 2")).rejects.toThrow(
+      /article_prix_minimum_inferieur_prix_affiche/,
+    );
+    await expect(client.exec("UPDATE article SET prix_affiche = 800 WHERE reference = 2")).resolves.toBeDefined();
+  });
+});
