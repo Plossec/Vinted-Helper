@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.17.0] — 15/10/2026
+
+### Ajouté
+- Un article ne passe **« À publier »** que s'il est complet (photos d'annonce, prix, titre, description, catégorie,
+  marque, état, couleur) : sinon l'application dit ce qui manque. La catégorie « Autre » reste admise (publication à
+  la main). Les articles À publier incomplets sont signalés dans « À faire » (bouton « Compléter ») ; dans la
+  sélection pour Vinted, ils restent visibles, grisés et non cochables, avec ce qui leur manque (#196).
+
 ## [1.16.0] — 15/10/2026
 
 ### Ajouté
