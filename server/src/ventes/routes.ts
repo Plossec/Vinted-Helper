@@ -286,6 +286,8 @@ export function routesVentes(
       throw erreurSaisie("Tâches automatiques : l'heure de début doit précéder l'heure de fin.");
     if (fusion.dormantsBaisseType === "pourcentage" && fusion.dormantsBaisseValeur > 90)
       throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
-    return modifierReglages(base, utilisateurId, modif);
+    await modifierReglages(base, utilisateurId, modif);
+    // Réponse relue en base, jamais construite à partir de la requête (alerte CodeQL, #147).
+    return lireReglages(base, utilisateurId);
   });
 }
