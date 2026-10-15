@@ -44,15 +44,17 @@ d'article.
 
 ## 4. Préparer les articles
 
-L'application refuse un article incomplet et affiche ce qui manque. Il faut : statut **À publier**, photos
+Un article ne passe **À publier** que s'il est complet (sinon l'application affiche ce qui manque) : photos
 d'annonce, prix affiché, titre, description, catégorie, marque, état et au moins une **couleur** (2 au maximum). La
-taille est facultative. Le **format du colis** se choisit sur la fiche ; sinon celui des Réglages (Paramètres de
+taille est facultative. Catégorie « Autre » : l'article passe À publier mais se publie **à la main** sur Vinted (la
+publication automatique le refuse). Un article À publier devenu incomplet est signalé dans **À faire**. Le **format du colis** se choisit sur la fiche ; sinon celui des Réglages (Paramètres de
 calcul) est utilisé.
 
 ## 5. Publier
 
 - **Plusieurs articles** : Articles → Filtres → Statut « À publier » et/ou « Erreur » (seulement ces statuts) →
-  **Sélectionner pour Vinted** → cochez → **Publier sur Vinted (N)**. Les articles en Erreur repassent À publier
+  **Sélectionner pour Vinted** → cochez → **Publier sur Vinted (N)**. Les articles incomplets restent visibles, grisés
+  et non cochables, avec ce qui leur manque. Les articles en Erreur repassent À publier
   (sauf en mode essai, qui ne change rien).
 - **Un article** : sur sa fiche, bouton **Publier sur Vinted**.
 - **Suivi** : Réglages → Publication Vinted : file d'attente, état de chaque article (en attente, en cours, publié,

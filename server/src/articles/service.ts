@@ -18,6 +18,7 @@ import {
 } from "../base/schema.js";
 import type { FormatColis } from "../catalogue/couleurs.js";
 import type { CodeEtat } from "../catalogue/etats.js";
+import { manquesArticle } from "../metier/completude.js";
 import { estTransitionSimple, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
 import { calculer } from "../couts/service.js";
 import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
@@ -139,6 +140,28 @@ export async function chargerArticle(tx: Transaction | Base, utilisateurId: stri
   return ligne;
 }
 
+/**
+ * Passage « À publier » (#196) : refusé tant que l'annonce est incomplète, avec ce qui manque (même liste que la file
+ * de publication ; la catégorie « Autre » est admise, l'article se publiant alors à la main).
+ */
+export async function verifierCompletude(tx: Transaction | Base, a: typeof article.$inferSelect) {
+  const photos = (await photosDesArticles(tx, [a.id])).get(a.id) ?? [];
+  const m = manquesArticle(
+    {
+      prixAffiche: a.prixAffiche,
+      titre: a.titreAnnonce,
+      description: a.descriptionAnnonce,
+      categorie: a.categorie,
+      marque: a.marqueId,
+      etat: a.etat,
+      couleurs: a.couleurs,
+    },
+    photos.filter((p) => p.type === "annonce").length,
+    false,
+  );
+  if (m.length > 0) throw conflit(`Article incomplet pour « À publier » : il manque ${m.join(", ")}.`);
+}
+
 export async function modifierArticle(
   base: Base,
   utilisateurId: string,
@@ -199,6 +222,7 @@ export async function changerStatut(
         "Ce passage se fait par son action dédiée : « Vendu », envoi, finalisation, annulation, retour ou sortie du stock.",
       );
     }
+    if (demande.vers === "a_publier") await verifierCompletude(tx, { ...actuel, prixAffiche });
     // Mise à jour conditionnelle (issue #120) : statut changé entre-temps par une autre requête → tout est annulé.
     const modifies = await tx
       .update(article)
@@ -322,6 +346,11 @@ export async function listerArticles(base: Base, utilisateurId: string) {
       urlVinted: article.urlVinted,
       dateStatut,
       dateMiseEnLigne,
+      // Complétude (#196), non renvoyés tels quels.
+      titre: article.titreAnnonce,
+      description: article.descriptionAnnonce,
+      etat: article.etat,
+      couleurs: article.couleurs,
     })
     .from(article)
     .leftJoin(marque, eq(marque.id, article.marqueId))
@@ -335,13 +364,23 @@ export async function listerArticles(base: Base, utilisateurId: string) {
   const { details } = await calculer(base, utilisateurId);
   // Les sous-requêtes SQL renvoient du texte : on rétablit des dates ISO.
   const iso = (d: Date | string | null) => (d === null ? null : new Date(d).toISOString());
-  return lignes.map((a) => {
+  return lignes.map(({ titre, description, etat, couleurs, ...a }) => {
     const detail = details.get(a.id);
+    const listePhotos = photos.get(a.id) ?? [];
     return {
       ...a,
+      // Sélection pour Vinted (#196) : ce qui empêche la publication automatique d'un article À publier ou en Erreur.
+      manquesPublication:
+        a.statut === "a_publier" || a.statut === "erreur_publication"
+          ? manquesArticle(
+              { ...a, titre, description, etat, couleurs },
+              listePhotos.filter((p) => p.type === "annonce").length,
+              true,
+            )
+          : [],
       dateStatut: iso(a.dateStatut),
       dateMiseEnLigne: iso(a.dateMiseEnLigne),
-      vignette: choisirVignette(photos.get(a.id) ?? []),
+      vignette: choisirVignette(listePhotos),
       prixAchat: detail?.prixAchat ?? null,
       benefice: detail?.benefice ?? null,
       beneficeRealise: detail?.realise ?? false,

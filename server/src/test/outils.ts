@@ -1,9 +1,11 @@
 // Outils de test : vraie base PostgreSQL en mémoire (PGlite), migrations du projet, compte de test.
 // Aucun accès à Docker ni à la base de l'utilisateur.
+import { randomUUID } from "node:crypto";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { PGlite } from "@electric-sql/pglite";
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { creerApp } from "../app.js";
@@ -112,4 +114,27 @@ export async function seConnecter(
   const cookie = reponse.cookies.find((c) => c.name === "vh_session");
   if (!cookie) throw new Error("Aucun cookie de session reçu.");
   return `vh_session=${cookie.value}`;
+}
+
+/**
+ * Complète l'annonce d'un article directement en base (#196 : le passage À publier exige un article complet) :
+ * titre, description, couleur, prix affiché s'il manque, et une photo d'annonce (fichier non créé).
+ */
+export async function completerAnnonce(base: Base, articleId: string) {
+  const [a] = await base
+    .update(schema.article)
+    .set({
+      titreAnnonce: "Titre de test",
+      descriptionAnnonce: "Description de test.",
+      couleurs: ["bleu"],
+      prixAffiche: sql`coalesce(${schema.article.prixAffiche}, 1000)`,
+    })
+    .where(eq(schema.article.id, articleId))
+    .returning({ utilisateurId: schema.article.utilisateurId });
+  if (!a) throw new Error("Article introuvable.");
+  const photoId = randomUUID();
+  await base
+    .insert(schema.photo)
+    .values({ id: photoId, utilisateurId: a.utilisateurId, type: "annonce", fichier: `${photoId}.jpg` });
+  await base.insert(schema.articlePhoto).values({ articleId, photoId });
 }

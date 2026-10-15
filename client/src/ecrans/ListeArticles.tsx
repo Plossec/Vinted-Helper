@@ -307,7 +307,13 @@ export function ListeArticles() {
             {selectionActive ? "Terminer la sélection" : "Sélectionner pour Vinted"}
           </button>
           {selectionActive && (
-            <button type="button" className="bouton" onClick={() => setSelection(new Set(resultats.map((a) => a.id)))}>
+            <button
+              type="button"
+              className="bouton"
+              onClick={() =>
+                setSelection(new Set(resultats.filter((a) => a.manquesPublication.length === 0).map((a) => a.id)))
+              }
+            >
               Tout cocher
             </button>
           )}

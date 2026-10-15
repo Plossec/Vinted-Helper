@@ -1,5 +1,5 @@
-// Alertes (§5.8) renvoyées par le serveur : à expédier, à récupérer, publications Vinted en erreur (#72), brouillons
-// trop anciens, articles dormants. Affichées par l'écran « À faire » (#191) ; leur nombre fait la pastille de l'onglet.
+// Alertes (§5.8) renvoyées par le serveur : à expédier, à récupérer, publications Vinted en erreur (#72), articles
+// À publier incomplets (#196), brouillons trop anciens, articles dormants. Affichées par l'écran « À faire » (#191) ; leur nombre fait la pastille de l'onglet.
 
 export interface Alerte {
   id: string;
@@ -11,6 +11,8 @@ export interface Alerte {
   urlConversation?: string | null;
   /** Articles à expédier : leur vente (bouton « Envoyé », #191). */
   venteId?: string | null;
+  /** Articles À publier incomplets : ce qui manque à l'annonce (#196). */
+  manques?: string[];
 }
 
 export interface AlertesServeur {
@@ -21,6 +23,8 @@ export interface AlertesServeur {
   aRecuperer?: Alerte[];
   /** Publications Vinted en échec (issue #72). */
   erreursPublication?: Alerte[];
+  /** Articles À publier incomplets (#196). */
+  incomplets?: Alerte[];
 }
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
@@ -29,11 +33,12 @@ export const nombreAlertes = (a: AlertesServeur | null) =>
       a.dormants.length +
       a.aExpedier.length +
       (a.aRecuperer?.length ?? 0) +
-      (a.erreursPublication?.length ?? 0)
+      (a.erreursPublication?.length ?? 0) +
+      (a.incomplets?.length ?? 0)
     : 0;
 
 /** Groupe d'alertes du serveur (clé de `AlertesServeur`). */
-export type TypeAlerte = "erreursPublication" | "aExpedier" | "aRecuperer" | "dormants" | "brouillons";
+export type TypeAlerte = "erreursPublication" | "aExpedier" | "aRecuperer" | "incomplets" | "dormants" | "brouillons";
 
 /** Une ligne de l'écran « À faire » : une alerte et son type. */
 export interface LigneAFaire extends Alerte {
@@ -48,7 +53,7 @@ export interface SectionAFaire {
 /** Ordre de l'écran « À faire » (#191), par urgence ; les sections vides ne sont pas renvoyées. */
 const ORDRE: readonly { titre: SectionAFaire["titre"]; types: readonly TypeAlerte[] }[] = [
   { titre: "Urgent", types: ["erreursPublication"] },
-  { titre: "À traiter", types: ["aExpedier", "aRecuperer"] },
+  { titre: "À traiter", types: ["aExpedier", "aRecuperer", "incomplets"] },
   { titre: "Pour info", types: ["dormants", "brouillons"] },
 ];
 

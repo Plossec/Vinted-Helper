@@ -1334,6 +1334,24 @@ a {
   min-width: 0;
 }
 
+/* Sélection pour Vinted (#196) : article incomplet visible, grisé, non cochable, avec ce qui manque. */
+.carte-selection {
+  flex-wrap: wrap;
+}
+
+.selection--incomplet > a,
+.selection--incomplet > th,
+.selection--incomplet > td {
+  opacity: 0.55;
+}
+
+.manques-publication {
+  flex-basis: 100%;
+  display: block;
+  font-size: var(--t-petit);
+  color: var(--texte-secondaire);
+}
+
 /* --- Modes d'affichage de la liste des articles (issue #31) --- */
 .page--large {
   max-width: 76rem;

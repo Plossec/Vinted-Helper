@@ -127,6 +127,9 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 
 Toute autre transition est refusée par l'application.
 Le passage **En ligne** exige un **prix affiché** : l'application le demande au moment du changement de statut s'il manque.
+Le passage **À publier** (15/10/2026, #196) exige un **article complet** — mêmes champs que la publication Vinted
+(photos d'annonce, prix affiché, titre, description, catégorie, marque, état, couleur) ; refusé sinon, avec ce qui
+manque. La catégorie « Autre » est admise (publication à la main).
 
 ### 4.3 Colis (ventes groupées) et statuts
 - Les changements **Envoyé**, **Finalisé** et **Annulation** (retour En ligne depuis À expédier) s'appliquent **automatiquement à tous les articles du colis** en même temps.

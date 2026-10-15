@@ -1,7 +1,7 @@
 # ADR-0006 — Lot 1 : décisions de cadrage
 
 - **Date** : 05/10/2026
-- **Statut** : Accepté · « À publier » sans contrôle : voir l'issue #196
+- **Statut** : Accepté · « À publier » sans contrôle : remplacé par [ADR-0093](0093-completude-des-le-passage-a-publier.md)
 - **Décideurs** : utilisateur
 - **Issue** : —
 - **Thème** : Socle

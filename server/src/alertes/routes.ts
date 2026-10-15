@@ -1,14 +1,17 @@
 // Route des alertes (§5.8) : lecture des articles et de leurs historiques, puis calcul (metier/alertes).
-// Écran « À faire » (#191) : les alertes « Pour info » marquées « Vu » sont retirées, les ventes à expédier données.
+// Écran « À faire » (#191) : les alertes « Pour info » marquées « Vu » sont retirées, les ventes à expédier données ;
+// les articles À publier incomplets sont signalés avec ce qui leur manque (#196).
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { article, historiquePrix, historiqueStatut, signalementVu, vente, venteArticle } from "../base/schema.js";
+import { manquesArticle } from "../metier/completude.js";
 import { lireReglages } from "../frais/service.js";
 import { calculerAlertes, GROUPES_VU, type GroupeVu, masquerVus } from "../metier/alertes.js";
 import { erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { photosDesArticles } from "../photos/service.js";
 
-const SURVEILLES = ["brouillon", "en_ligne", "a_expedier", "a_recuperer", "erreur_publication"] as const;
+const SURVEILLES = ["brouillon", "a_publier", "en_ligne", "a_expedier", "a_recuperer", "erreur_publication"] as const;
 
 export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/alertes", async (requete) => {
@@ -20,6 +23,13 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
         nom: article.nom,
         statut: article.statut,
         urlConversation: article.urlConversation,
+        prixAffiche: article.prixAffiche,
+        titre: article.titreAnnonce,
+        description: article.descriptionAnnonce,
+        categorie: article.categorie,
+        marque: article.marqueId,
+        etat: article.etat,
+        couleurs: article.couleurs,
       })
       .from(article)
       .where(
@@ -47,6 +57,11 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
               .from(historiquePrix)
               .where(inArray(historiquePrix.articleId, ids)),
           ]);
+    // Articles À publier : ce qui manque à leur annonce (#196).
+    const photos = await photosDesArticles(
+      base,
+      articles.filter((a) => a.statut === "a_publier").map((a) => a.id),
+    );
     const reglages = await lireReglages(base, utilisateurId);
     const vus = await base
       .select({ type: signalementVu.type, articleId: signalementVu.articleId, depuis: signalementVu.depuis })
@@ -61,6 +76,10 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
         historiquePrix: prix
           .filter((p) => p.articleId === a.id)
           .map((p) => ({ prix: p.prix, date: p.date.toISOString() })),
+        manques:
+          a.statut === "a_publier"
+            ? manquesArticle(a, (photos.get(a.id) ?? []).filter((p) => p.type === "annonce").length, false)
+            : [],
       })),
       reglages,
       maintenant(),
