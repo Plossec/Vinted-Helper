@@ -1,9 +1,11 @@
-// Réglages : version, affichage (thème, écran d'ouverture #191), changement du mot de passe, déconnexion.
+// Réglages : version, affichage (thème, écran d'ouverture #191), calculs, tâches automatiques (#147), mot de passe,
+// déconnexion.
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { api, type Sante } from "../api.js";
 import { ParametresCalcul } from "../composants/ParametresCalcul.js";
 import { PromptsIA } from "../composants/PromptsIA.js";
+import { TachesAutomatiques } from "../composants/TachesAutomatiques.js";
 import { CHOIX_DEMARRAGE, type EcranDemarrage, enregistrerDemarrage, lireDemarrage } from "../demarrage.js";
 import { CHOIX_THEME, enregistrerPreferenceTheme, lirePreferenceTheme, type PreferenceTheme } from "../theme.js";
 
@@ -131,6 +133,7 @@ export function Reglages() {
       </section>
 
       <ParametresCalcul />
+      <TachesAutomatiques />
       <PromptsIA />
 
       <section className="section">

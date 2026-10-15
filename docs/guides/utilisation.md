@@ -9,11 +9,30 @@ par urgence :
 - **Urgent** : publications Vinted en erreur → **Republier** (l'article retourne dans la file de publication) ;
 - **À traiter** : articles **à expédier** → **Envoyé** (à la date du jour, pour tout le colis) et 💬 pour ouvrir la
   conversation ; articles **à récupérer** → **Récupéré → À publier** ; articles **À publier incomplets** (avec ce qui
-  manque) → **Compléter** ;
+  manque) → **Compléter** ; articles **invendus** → **Remettre en ligne** (ou baisse à la main, sortie du stock) ;
 - **Pour info** : articles **dormants** et **brouillons** anciens → **Vu** les masque ; ils reviennent si la situation
   change (ex. article de nouveau dormant après une baisse de prix).
 
 Touchez le nom d'un article pour ouvrir sa fiche. « Rien à faire 🎉 » quand tout est fait.
+
+**Articles dormants : à valider** (en tête de l'écran, si la tâche automatique est en mode manuel) : les baisses de
+prix et republications prévues ; cochez-les puis **Appliquer** (l'extension Chrome les fera) ou **Refuser**.
+
+## Tâche automatique « Articles dormants »
+
+**Réglages → Tâches automatiques** (désactivée par défaut) : un article dormant voit son prix baissé (pourcentage ou
+montant, arrondi vers le haut au 0,50 €, jamais sous le **prix vente minimum**), puis, une fois au minimum, son
+annonce republiée. Sans prix vente minimum, ou réglé **« Ne pas baisser le prix »** sur la fiche (champ « Baisse
+automatique », sous le prix vente minimum), l'article est seulement republié. Après **3 republications sans vente**,
+il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
+
+- **Mode** : *manuel* (liste à valider dans « À faire ») ou *automatique*.
+- **Rythme** : un passage par jour (6 h au moins entre deux), pauses entre deux actions, plafonds par jour, de 8 h à
+  22 h ; tout se fait par l'extension Chrome, seulement quand Chrome est ouvert.
+- **Mode essai** (coché par défaut) : l'extension ouvre les pages Vinted sans rien modifier. À garder tant que
+  l'extension n'a pas été calibrée sur les pages « Modifier l'annonce » et « Supprimer » (envoyez le « Dernier
+  relevé » de l'extension après un essai, voir `publication-vinted.md`).
+- **Journal** : Réglages → Publication Vinted, section « Tâches automatiques ».
 
 **Écran d'ouverture** de l'application installée : **Réglages → Affichage → Ouverture de l'application installée**,
 *Terrain* (par défaut, pour le vide-grenier) ou *À faire* ; choix gardé sur chaque appareil.

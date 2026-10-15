@@ -22,6 +22,8 @@ import {
   centimesFacultatif,
   centimesObligatoire,
   dateObligatoire,
+  booleenFacultatif,
+  entierFacultatif,
   horodatageFacultatif,
   idDe,
   lienVintedFacultatif,
@@ -60,12 +62,57 @@ function lireFrais(corps: unknown): DonneesFrais {
   };
 }
 
-function entierFacultatif(valeur: unknown, champ: string, min: number, max: number): number | undefined {
-  if (valeur === undefined) return undefined;
-  if (typeof valeur !== "number" || !Number.isInteger(valeur) || valeur < min || valeur > max) {
-    throw erreurSaisie(`${champ} : nombre entier entre ${min} et ${max} attendu.`);
+/**
+ * Réglages des tâches automatisées (#147) : limites imposées contre le spam (ADR-0078) — fréquence au plus toutes les
+ * 6 h, pauses minimales, plafonds par jour maximaux.
+ */
+function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
+  const m: Partial<Reglages> = {};
+  const poser = <K extends keyof Reglages>(cle: K, valeur: Reglages[K] | undefined) => {
+    if (valeur !== undefined) m[cle] = valeur;
+  };
+  poser("tachesHeureDebut", entierFacultatif(c.tachesHeureDebut, "Tâches : heure de début", 0, 23));
+  poser("tachesHeureFin", entierFacultatif(c.tachesHeureFin, "Tâches : heure de fin", 1, 24));
+  poser("tachesEssai", booleenFacultatif(c.tachesEssai, "Tâches : mode essai"));
+  poser("dormantsActive", booleenFacultatif(c.dormantsActive, "Articles dormants : activée"));
+  // Valeurs fixes enregistrées (jamais la chaîne reçue telle quelle).
+  if (c.dormantsMode !== undefined) {
+    if (c.dormantsMode !== "automatique" && c.dormantsMode !== "manuel")
+      throw erreurSaisie("Articles dormants : mode inconnu.");
+    m.dormantsMode = c.dormantsMode === "automatique" ? "automatique" : "manuel";
   }
-  return valeur;
+  if (c.dormantsBaisseType !== undefined) {
+    if (c.dormantsBaisseType !== "pourcentage" && c.dormantsBaisseType !== "montant")
+      throw erreurSaisie("Articles dormants : type de baisse inconnu.");
+    m.dormantsBaisseType = c.dormantsBaisseType === "montant" ? "montant" : "pourcentage";
+  }
+  poser("dormantsBaisseValeur", entierFacultatif(c.dormantsBaisseValeur, "Articles dormants : baisse", 1, 100_000));
+  poser(
+    "dormantsFrequenceHeures",
+    entierFacultatif(c.dormantsFrequenceHeures, "Articles dormants : fréquence (heures)", 6, 168),
+  );
+  poser(
+    "dormantsPauseBaisse",
+    entierFacultatif(c.dormantsPauseBaisse, "Articles dormants : pause entre deux baisses (s)", 60, 3600),
+  );
+  poser(
+    "dormantsPauseRepublication",
+    entierFacultatif(
+      c.dormantsPauseRepublication,
+      "Articles dormants : pause entre deux republications (s)",
+      600,
+      7200,
+    ),
+  );
+  poser(
+    "dormantsPlafondBaisses",
+    entierFacultatif(c.dormantsPlafondBaisses, "Articles dormants : baisses par jour", 1, 40),
+  );
+  poser(
+    "dormantsPlafondRepublications",
+    entierFacultatif(c.dormantsPlafondRepublications, "Articles dormants : republications par jour", 1, 20),
+  );
+  return m;
 }
 
 export function routesVentes(
@@ -231,6 +278,16 @@ export function routesVentes(
       if (!estFormatColis(c.formatColisDefaut)) throw erreurSaisie("Format de colis inconnu.");
       modif.formatColisDefaut = c.formatColisDefaut;
     }
-    return modifierReglages(base, utilisateurDe(requete).id, modif);
+    Object.assign(modif, lireReglagesTaches(c));
+    const utilisateurId = utilisateurDe(requete).id;
+    const actuels = await lireReglages(base, utilisateurId);
+    const fusion = { ...actuels, ...modif };
+    if (fusion.tachesHeureDebut >= fusion.tachesHeureFin)
+      throw erreurSaisie("Tâches automatiques : l'heure de début doit précéder l'heure de fin.");
+    if (fusion.dormantsBaisseType === "pourcentage" && fusion.dormantsBaisseValeur > 90)
+      throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
+    await modifierReglages(base, utilisateurId, modif);
+    // Réponse relue en base, jamais construite à partir de la requête (alerte CodeQL, #147).
+    return lireReglages(base, utilisateurId);
   });
 }

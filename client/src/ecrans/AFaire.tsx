@@ -1,8 +1,10 @@
 // Écran d'accueil « À faire » (#191) : tout ce qui demande l'attention, par urgence (Urgent, À traiter, Pour info).
-// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Compléter, Vu.
+// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Compléter,
+// Remettre en ligne (invendu), Vu.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
+import { ActionsAValider } from "../composants/ActionsTaches.js";
 import { type AlertesServeur, type LigneAFaire, type SectionAFaire, sectionsAFaire } from "../outils/alertes.js";
 import { chargerAlertes } from "../outils/alertesCache.js";
 import { formatDate } from "../outils/dates.js";
@@ -22,6 +24,8 @@ function detail(l: LigneAFaire): string {
       return `À récupérer — retour du ${formatDate(l.depuis)}`;
     case "incomplets":
       return `À publier mais incomplet — il manque : ${(l.manques ?? []).join(", ")}`;
+    case "invendus":
+      return `Invendu depuis le ${formatDate(l.depuis)} — republié 3 fois sans vente, l'annonce reste en ligne`;
     case "dormants":
       return `Dormant — sans vente ni baisse de prix depuis ${pluriel(l.jours, "jour")}`;
     case "brouillons":
@@ -101,6 +105,11 @@ export function AFaire() {
           await api.post(`/api/articles/${l.id}/statut`, { vers: "a_publier" });
           return { ok: true, texte: `${formatReference(l.reference)} repassé « À publier ».` };
         });
+      case "invendus":
+        return bouton("Remettre en ligne", async () => {
+          await api.post(`/api/articles/${l.id}/statut`, { vers: "en_ligne" });
+          return { ok: true, texte: `${formatReference(l.reference)} remis « En ligne » : la tâche reprend.` };
+        });
       case "incomplets":
         return (
           <Link to={`/articles/${l.id}`} className="bouton">
@@ -123,7 +132,11 @@ export function AFaire() {
       {retour && <p className={retour.ok ? "message message--ok" : "message message--erreur"}>{retour.texte}</p>}
       {erreur && <p className="message message--erreur">{erreur}</p>}
       {alertes === null && !erreur && <p className="statut">Chargement…</p>}
-      {alertes !== null && sections.length === 0 && <p className="a-faire__vide">Rien à faire 🎉</p>}
+      {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
+      {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}
+      {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && (
+        <p className="a-faire__vide">Rien à faire 🎉</p>
+      )}
       {sections.map((s) => (
         <section
           key={s.titre}

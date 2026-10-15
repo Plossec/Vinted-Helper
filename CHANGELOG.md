@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.18.0] — 15/10/2026
+
+### Ajouté
+- Tâche automatique **« Articles dormants »**, étape 1 sur 3 (côté application) : réglages (Réglages → Tâches
+  automatiques, désactivée par défaut), règle de baisse sur la fiche (« Baisse automatique »), calcul du nouveau prix,
+  actions prévues au passage de l'extension, liste à valider dans « À faire » (mode manuel), journal dans
+  « Publication Vinted » (#147).
+- Extension **1.10.0**, étape 2 sur 3 : les actions sont faites une à une, après les publications et avec les pauses
+  réglées, **en mode essai seulement** (pages ouvertes et relevées, rien n'est modifié sur Vinted) ; le relevé sert
+  au calibrage du mode réel (étape 3) (#147).
+- Nouveau statut **« Invendu »** : article dormant republié 3 fois sans vente ; l'annonce reste en ligne, alerte dans
+  « À faire » (#147).
+
 ## [1.17.0] — 15/10/2026
 
 ### Ajouté

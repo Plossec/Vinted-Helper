@@ -5,6 +5,7 @@ import { api, type EtatPublication, type Publication } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { ecrireModeEssai, lireModeEssai } from "../publication.js";
 import { formatReference } from "../statuts.js";
+import { JournalActions } from "../composants/ActionsTaches.js";
 import { confirmer } from "../composants/Dialogue.js";
 
 const LIBELLES: Record<EtatPublication, string> = {
@@ -140,6 +141,8 @@ export function PublicationVinted() {
           ))}
         </ul>
       </section>
+
+      <JournalActions />
 
       <section className="section">
         <h2>Jeton de l'extension</h2>

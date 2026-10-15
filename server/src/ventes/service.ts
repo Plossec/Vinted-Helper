@@ -84,7 +84,8 @@ export async function creerVente(base: Base, utilisateurId: string, d: DemandeVe
     const articles = [];
     for (const id of d.articleIds) {
       const a = await chargerArticle(tx, utilisateurId, id);
-      if (a.statut !== "en_ligne")
+      // Invendu (#147) : l'annonce reste en vente sur Vinted, l'article peut donc être vendu.
+      if (a.statut !== "en_ligne" && a.statut !== "invendu")
         throw conflit(`L'article #${String(a.reference).padStart(4, "0")} n'est pas En ligne.`);
       articles.push(a);
     }

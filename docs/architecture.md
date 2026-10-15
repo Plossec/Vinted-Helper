@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.17.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.18.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -61,9 +61,9 @@ flowchart TB
   end
 
   subgraph serveur["server/ — Fastify + Drizzle (TypeScript strict)"]
-    routes["Routes par sujet<br/>articles, achats, sorties, ventes, frais,<br/>photos, ia, publication, alertes,<br/>corbeille, referentiels, compte, import"]
-    metier["metier/<br/>statuts, alertes, complétude"]
-    calculs["calculs/<br/>seul module d'argent :<br/>répartitions, coûts, bénéfice, indicateurs"]
+    routes["Routes par sujet<br/>articles, achats, sorties, ventes, frais,<br/>photos, ia, publication, alertes,<br/>taches, corbeille, referentiels, compte, import"]
+    metier["metier/<br/>statuts, alertes, complétude, tâches"]
+    calculs["calculs/<br/>seul module d'argent :<br/>répartitions, coûts, bénéfice, indicateurs, baisse"]
     catalogue["catalogue/<br/>catégories, marques, états, couleurs Vinted"]
     base["base/<br/>schéma, migrations"]
     routes --> metier
@@ -107,6 +107,7 @@ erDiagram
   article ||--o{ vente_article : "vendu dans"
   article ||--o{ publication_vinted : "publié via"
   article ||--o{ signalement_vu : "alerte vue"
+  article ||--o{ action_vinted : "baissé / republié"
   utilisateur ||--o{ frais_general : paie
 ```
 
@@ -121,4 +122,5 @@ erDiagram
 | `frais_general` | Frais divers hors articles |
 | `publication_vinted` | File d'attente de l'extension et résultat de chaque publication (échec d'une vraie publication → article au statut Erreur) |
 | `signalement_vu` | Alertes « Pour info » de l'écran « À faire » marquées « Vu » (#191), avec leur date de départ |
-| `reglages`, `session`, `marque` | Paramètres de calcul, connexions, marques |
+| `action_vinted` | Actions des tâches automatiques (#147) : baisse de prix ou republication d'un article dormant, à valider, puis faites par l'extension |
+| `reglages`, `session`, `marque` | Paramètres de calcul et des tâches automatiques, connexions, marques |

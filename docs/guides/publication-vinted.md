@@ -78,6 +78,21 @@ Case **Mode essai** de l'écran Publication Vinted. En essai, l'extension rempli
 clique pas « Ajouter »** : l'onglet reste ouvert, vous pouvez relire. Rien n'est publié et l'article reste À publier.
 Décochez la case seulement quand plusieurs essais sont parfaits.
 
+## 6 bis. Tâches automatiques : articles dormants (extension 1.10, en essai)
+
+Activées dans l'application (**Réglages → Tâches automatiques**, voir `utilisation.md`). Quand aucune annonce n'est
+à publier (la publication passe toujours d'abord), l'extension fait l'action suivante, **une à la fois**, avec les
+pauses réglées dans l'application. **Cette version ne fait que des essais** (case « Mode essai » des tâches cochée) :
+
+- **Baisse de prix** : ouvre l'annonce, puis « Modifier l'annonce », et lit le prix affiché ; **rien n'est saisi ni
+  enregistré**.
+- **Republication** : ouvre l'annonce (le bouton « Supprimer » est repéré, **jamais cliqué**), puis remplit
+  « Vendre un article » avec l'annonce, **sans cliquer « Ajouter »**.
+
+Après chaque essai, les pages sont relevées : **Dernier relevé → Télécharger le fichier**, et envoyez-le à Claude
+pour le calibrage (étape 3, mode réel). Décochée trop tôt, la case « Mode essai » fait refuser l'action par
+l'extension (« Mode réel des tâches pas encore disponible »), sans rien toucher sur Vinted.
+
 ## 7. La fenêtre de l'extension
 
 Cliquez l'icône de l'extension :

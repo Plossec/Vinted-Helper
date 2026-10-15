@@ -1,5 +1,5 @@
 // Alertes affichées dans l'application (§5.8) : brouillon trop ancien, article dormant, articles à expédier,
-// retours à récupérer, publications Vinted en erreur (#72), articles À publier incomplets (#196).
+// retours à récupérer, publications Vinted en erreur (#72), articles À publier incomplets (#196), invendus (#147).
 // Fonction pure : la date « maintenant » est passée en paramètre ; les jours sont ceux de l'heure de Paris.
 import { jourParis } from "../calculs/indicateurs.js";
 
@@ -14,6 +14,8 @@ export interface ArticlePourAlertes {
   historiquePrix: readonly { prix: number; date: string }[];
   /** À publier : ce qui manque à l'annonce (metier/completude), vide si complète. */
   manques?: readonly string[];
+  /** Dernière republication par la tâche « Articles dormants » (ISO, #147) : relance le délai dormant. */
+  derniereRepublication?: string | null;
 }
 
 export interface Alerte {
@@ -39,7 +41,7 @@ function arriveeDansStatut(a: ArticlePourAlertes): string | null {
 
 /**
  * Point de départ « dormant » (§5.8) : la dernière baisse de prix depuis la mise en ligne,
- * ou la mise en ligne s'il n'y a pas eu de baisse.
+ * ou la mise en ligne s'il n'y a pas eu de baisse ; une republication plus récente (#147) relance aussi le délai.
  */
 export function departDormant(a: ArticlePourAlertes): string | null {
   const miseEnLigne = arriveeDansStatut(a);
@@ -52,6 +54,8 @@ export function departDormant(a: ArticlePourAlertes): string | null {
     if (!avant || !courant) continue;
     if (courant.prix < avant.prix && Date.parse(courant.date) >= Date.parse(miseEnLigne)) depart = courant.date;
   }
+  if (a.derniereRepublication && Date.parse(a.derniereRepublication) > Date.parse(depart))
+    depart = a.derniereRepublication;
   return depart;
 }
 
@@ -71,6 +75,7 @@ export function calculerAlertes(
   const aRecuperer: Alerte[] = [];
   const erreursPublication: Alerte[] = [];
   const incomplets: (Alerte & { manques: string[] })[] = [];
+  const invendus: Alerte[] = [];
   for (const a of articles) {
     if (a.statut === "brouillon") {
       const date = arriveeDansStatut(a);
@@ -87,10 +92,21 @@ export function calculerAlertes(
     } else if (a.statut === "a_publier") {
       const date = arriveeDansStatut(a);
       if (date && a.manques && a.manques.length > 0) incomplets.push({ ...alerte(a, date), manques: [...a.manques] });
-    } else if (a.statut === "a_expedier" || a.statut === "a_recuperer" || a.statut === "erreur_publication") {
+    } else if (
+      a.statut === "a_expedier" ||
+      a.statut === "a_recuperer" ||
+      a.statut === "erreur_publication" ||
+      a.statut === "invendu"
+    ) {
       const date = arriveeDansStatut(a);
       const groupe =
-        a.statut === "a_expedier" ? aExpedier : a.statut === "a_recuperer" ? aRecuperer : erreursPublication;
+        a.statut === "a_expedier"
+          ? aExpedier
+          : a.statut === "a_recuperer"
+            ? aRecuperer
+            : a.statut === "invendu"
+              ? invendus
+              : erreursPublication;
       if (date) groupe.push(alerte(a, date));
     }
   }
@@ -105,6 +121,8 @@ export function calculerAlertes(
     erreursPublication: erreursPublication.sort(plusAnciens),
     /** Articles À publier incomplets (déjà là avant le contrôle, ou complétés puis vidés), refusés par la file (#196). */
     incomplets: incomplets.sort(plusAnciens),
+    /** Dormants republiés 3 fois sans vente (#147) : à décider (baisse à la main, sortie du stock, retour En ligne). */
+    invendus: invendus.sort(plusAnciens),
   };
 }
 

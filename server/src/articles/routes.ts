@@ -3,11 +3,13 @@ import type { FastifyInstance } from "fastify";
 import { estCategorie } from "../catalogue/categories.js";
 import { COULEURS_MAX, estCouleur, estFormatColis, type FormatColis } from "../catalogue/couleurs.js";
 import { type CodeEtat, estEtat } from "../catalogue/etats.js";
+import type { ReglageBaisseArticle } from "../calculs/baisse.js";
 import { estStatut } from "../metier/statuts.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import {
   centimesFacultatif,
   dateObligatoire,
+  entierFacultatif,
   horodatageFacultatif,
   idDe,
   lienVintedFacultatif,
@@ -49,6 +51,27 @@ function couleursFacultatives(valeur: unknown): string[] {
   return [...new Set(valeur)];
 }
 
+const REGLAGES_BAISSE: readonly ReglageBaisseArticle[] = ["compte", "pourcentage", "montant", "aucune"];
+
+/** Règle de baisse de l'article (#147) : absente → inchangée ; valeur obligatoire pour un pourcentage ou un montant. */
+function baisseFacultative(c: Record<string, unknown>): Pick<DonneesArticle, "baisseRegle" | "baisseValeur"> {
+  if (c.baisseRegle === undefined) return {};
+  // Valeur prise dans la liste fixe (jamais la chaîne reçue telle quelle).
+  const baisseRegle = REGLAGES_BAISSE.find((r) => r === c.baisseRegle);
+  if (baisseRegle === undefined) throw erreurSaisie("Baisse automatique : règle inconnue.");
+  if (baisseRegle === "pourcentage") {
+    const valeur = entierFacultatif(c.baisseValeur, "Baisse automatique (%)", 1, 90);
+    if (valeur === undefined) throw erreurSaisie("Baisse automatique : indiquez le pourcentage.");
+    return { baisseRegle, baisseValeur: valeur };
+  }
+  if (baisseRegle === "montant") {
+    const valeur = centimesFacultatif(c.baisseValeur, "Baisse automatique (€)");
+    if (valeur === null || valeur <= 0) throw erreurSaisie("Baisse automatique : indiquez le montant.");
+    return { baisseRegle, baisseValeur: valeur };
+  }
+  return { baisseRegle, baisseValeur: null };
+}
+
 function formatColisFacultatif(valeur: unknown): FormatColis | null {
   if (valeur === undefined || valeur === null || valeur === "") return null;
   if (!estFormatColis(valeur)) throw erreurSaisie("Format de colis inconnu.");
@@ -73,6 +96,7 @@ function lireDonneesArticle(corps: unknown): DonneesArticle {
     prixVenteMinimum: centimesFacultatif(c.prixVenteMinimum, "Prix vente minimum"),
     couleurs: couleursFacultatives(c.couleurs),
     formatColis: formatColisFacultatif(c.formatColis),
+    ...baisseFacultative(c),
   };
 }
 

@@ -10,8 +10,17 @@ import { lireReglages } from "../frais/service.js";
 import { calculerAlertes, GROUPES_VU, type GroupeVu, masquerVus } from "../metier/alertes.js";
 import { erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
+import { annulerActionsPerimees, nombreAValider } from "../taches/service.js";
 
-const SURVEILLES = ["brouillon", "a_publier", "en_ligne", "a_expedier", "a_recuperer", "erreur_publication"] as const;
+const SURVEILLES = [
+  "brouillon",
+  "a_publier",
+  "en_ligne",
+  "invendu",
+  "a_expedier",
+  "a_recuperer",
+  "erreur_publication",
+] as const;
 
 export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/alertes", async (requete) => {
@@ -105,8 +114,11 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
     const venteDe = new Map(ventes.map((v) => [v.articleId, v.venteId]));
     // Articles à expédier : lien de la conversation Vinted avec l'acheteur (issue #48).
     const conversations = new Map(articles.map((a) => [a.id, a.urlConversation]));
+    // Tâches automatisées en mode manuel (#147) : actions prévues à valider.
+    await annulerActionsPerimees(base, utilisateurId, maintenant());
     return {
       ...alertes,
+      aValider: await nombreAValider(base, utilisateurId),
       aExpedier: alertes.aExpedier.map((a) => ({
         ...a,
         urlConversation: conversations.get(a.id) ?? null,

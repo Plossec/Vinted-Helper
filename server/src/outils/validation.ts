@@ -98,3 +98,19 @@ export function lienVintedFacultatif(valeur: unknown, champ: string): string | n
 
 /** Identifiant `:id` d'une adresse de l'API (#133 : une seule définition pour toutes les routes). */
 export const idDe = (params: unknown) => uuidObligatoire(objet(params).id, "Identifiant");
+
+/** Entier facultatif borné ; absent → undefined (le réglage n'est pas modifié). */
+export function entierFacultatif(valeur: unknown, champ: string, min: number, max: number): number | undefined {
+  if (valeur === undefined) return undefined;
+  if (typeof valeur !== "number" || !Number.isInteger(valeur) || valeur < min || valeur > max) {
+    throw erreurSaisie(`${champ} : nombre entier entre ${min} et ${max} attendu.`);
+  }
+  return valeur;
+}
+
+/** Case à cocher facultative ; absente → undefined. */
+export function booleenFacultatif(valeur: unknown, champ: string): boolean | undefined {
+  if (valeur === undefined) return undefined;
+  if (typeof valeur !== "boolean") throw erreurSaisie(`${champ} : oui ou non attendu.`);
+  return valeur;
+}

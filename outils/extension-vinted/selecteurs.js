@@ -70,6 +70,18 @@ const SELECTEURS = {
   boutonAjouter: ['[data-testid="upload-form-save-button"]'],
   texteBoutonAjouter: "Ajouter",
 
+  /**
+   * Tâche « Articles dormants » (#147) : pages d'une annonce publiée et « Modifier l'annonce ». Rédigé SANS relevé
+   * (valeurs probables) : le mode essai relève ces pages pour les calibrer avant tout clic réel.
+   */
+  annonce: {
+    modifier: ['[data-testid="item-edit-button"]', 'a[href$="/edit"]'],
+    supprimer: ['[data-testid="item-delete-button"]'],
+    /** Texte des boutons cherchés quand aucun repère ne correspond. */
+    texteModifier: "Modifier l'annonce",
+    texteSupprimer: "Supprimer",
+  },
+
   /** Page d'une annonce créée : https://www.vinted.fr/items/1234567890-titre */
   motifAnnonceCreee: "^/items/\\d+",
 

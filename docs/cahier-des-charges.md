@@ -104,6 +104,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **À publier** | Fiche complète, photos annonce prêtes, pas encore en ligne |
 | **Erreur** | La publication automatique sur Vinted (extension Chrome) a échoué ; le message de l'échec est sur la fiche — ajouté le 08/10/2026 (issue #72) |
 | **En ligne** | Annonce publiée sur Vinted (prix affiché obligatoire) |
+| **Invendu** | Article dormant republié 3 fois sans vente par la tâche « Articles dormants » : l'annonce reste en vente, la tâche ne le touche plus, compté dans le stock — ajouté le 15/10/2026 (issue #147) |
 | **À expédier** | Acheté sur Vinted, colis à préparer |
 | **Envoyé** | Colis expédié |
 | **À récupérer** | Retour de l'acheteur : l'article est à aller chercher (point relais…) — ajouté le 07/10/2026 (issue #52) |
@@ -117,7 +118,8 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | En stock | Brouillon, À publier |
 | À publier | En ligne, Brouillon, **En stock** ; **Erreur** uniquement par une publication Vinted en échec (jamais à la main, jamais en mode essai) |
 | Erreur | À publier (nouvelle demande « Publier sur Vinted », ou retour à la main), En ligne (annonce publiée à la main), Brouillon |
-| En ligne | À expédier, À publier (annonce retirée temporairement) |
+| En ligne | À expédier, À publier (annonce retirée temporairement) ; **Invendu** uniquement par la tâche « Articles dormants » (3 republications sans vente) |
+| Invendu | À expédier (vendu : l'annonce est restée en ligne), En ligne (la tâche reprend, compte des republications remis à zéro), À publier |
 | À expédier | Envoyé, En ligne (annulation par l'acheteur) |
 | Envoyé | Finalisé, **À récupérer** (retour du colis, retour partiel ou litige perdu : l'article est à aller chercher) |
 | À récupérer | À publier ou En ligne (« Récupéré » : l'article est vérifié avant d'être remis en ligne) |
@@ -208,7 +210,8 @@ manque. La catégorie « Autre » est admise (publication à la main).
 
 ### 5.8 Alertes (affichées dans l'application uniquement)
 - **Brouillon trop ancien** : Brouillon depuis **3 jours ou plus**.
-- **Article dormant** : En ligne depuis **7 jours ou plus**, comptés **depuis la dernière baisse de prix** (ou la mise en ligne s'il n'y a pas eu de baisse).
+- **Article dormant** : En ligne depuis **7 jours ou plus**, comptés **depuis la dernière baisse de prix** (ou la mise en ligne s'il n'y a pas eu de baisse) ; une republication par la tâche « Articles dormants » relance aussi le délai (#147).
+- **Invendu** (#147) : tout article dans ce statut.
 - **À expédier** : tout article dans ce statut.
 - Délais modifiables dans les Réglages. Affichage : bandeau / pastilles sur l'écran d'accueil.
 

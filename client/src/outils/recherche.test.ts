@@ -98,7 +98,7 @@ describe("filtres", () => {
       article(11, { statut: "sortie_stock" }),
       article(12, { statut: "en_stock" }),
     );
-    expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(refs(filtrerEtTrier(liste, FILTRES_PAR_DEFAUT, "reference", true))).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(nombreFiltresActifs(FILTRES_PAR_DEFAUT)).toBe(0);
     expect(nombreFiltresActifs({ ...FILTRES_PAR_DEFAUT, statuts: ["en_ligne"], marqueIds: ["A"] })).toBe(2);
   });
@@ -106,6 +106,9 @@ describe("filtres", () => {
   it("filtres mémorisés avec les anciens statuts par défaut : Erreur y est ajouté (#72)", () => {
     const anciens = STATUTS_PAR_DEFAUT.filter((s) => s !== "erreur_publication");
     expect(lireFiltres({ ...FILTRES_VIDES, statuts: anciens }).statuts).toEqual(STATUTS_PAR_DEFAUT);
+    // Anciens statuts par défaut, d'avant Invendu (#147) : Invendu y est ajouté.
+    const avantInvendu = STATUTS_PAR_DEFAUT.filter((s) => s !== "invendu");
+    expect(lireFiltres({ ...FILTRES_VIDES, statuts: avantInvendu }).statuts).toEqual(STATUTS_PAR_DEFAUT);
     expect(lireFiltres({ ...FILTRES_VIDES, statuts: ["en_ligne"] }).statuts).toEqual(["en_ligne"]);
   });
 

@@ -7,7 +7,7 @@ import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
 import { changerStatut } from "../articles/service.js";
 import { CATEGORIES } from "../catalogue/categories.js";
-import { libelleCouleur } from "../catalogue/couleurs.js";
+import { type FormatColis, libelleCouleur } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
 import { manquesArticle } from "../metier/completude.js";
@@ -264,26 +264,45 @@ async function suivanteDansLaFile(base: Transaction, utilisateurId: string, main
       .returning({ id: publicationVinted.id });
     if (prise.length === 0) return null;
     const { formatColisDefaut } = await lireReglages(base, utilisateurId);
-    const ordonnees = [...photos.filter((p) => p.estPrincipale), ...photos.filter((p) => !p.estPrincipale)];
-    return {
-      id: suivante.id,
-      essai: suivante.essai,
-      article: {
-        reference: a.reference,
-        titre: a.titre ?? "",
-        description: a.description ?? "",
-        /** Euros, tel que saisi sur Vinted (ex. « 12,50 »). */
-        prix: centimesVersSaisie(a.prixAffiche ?? 0),
-        categorie: CATEGORIES.find((c) => c.code === a.categorie)?.chemin ?? [],
-        marque: a.marque ?? "",
-        etat: ETATS.find((e) => e.code === a.etat)?.libelle ?? "",
-        taille: a.taille,
-        couleurs: a.couleurs.map(libelleCouleur),
-        formatColis: a.formatColis ?? formatColisDefaut,
-        photos: ordonnees.map((p) => `/api/photos/${p.id}`),
-      },
-    };
+    return { id: suivante.id, essai: suivante.essai, article: versAnnonce(a, photos, formatColisDefaut) };
   }
+}
+
+/** Données de l'annonce telles que l'extension les saisit sur Vinted (photos principales d'abord). */
+function versAnnonce(
+  a: ArticleComplet,
+  photos: { id: string; estPrincipale: boolean }[],
+  formatColisDefaut: FormatColis,
+) {
+  const ordonnees = [...photos.filter((p) => p.estPrincipale), ...photos.filter((p) => !p.estPrincipale)];
+  return {
+    reference: a.reference,
+    titre: a.titre ?? "",
+    description: a.description ?? "",
+    /** Euros, tel que saisi sur Vinted (ex. « 12,50 »). */
+    prix: centimesVersSaisie(a.prixAffiche ?? 0),
+    categorie: CATEGORIES.find((c) => c.code === a.categorie)?.chemin ?? [],
+    marque: a.marque ?? "",
+    etat: ETATS.find((e) => e.code === a.etat)?.libelle ?? "",
+    taille: a.taille,
+    couleurs: a.couleurs.map(libelleCouleur),
+    formatColis: a.formatColis ?? formatColisDefaut,
+    photos: ordonnees.map((p) => `/api/photos/${p.id}`),
+  };
+}
+
+/**
+ * Annonce d'un article déjà En ligne, à recréer sur Vinted (republication d'un article dormant, #147) ; null si
+ * l'annonce n'est plus complète (mêmes champs que la publication).
+ */
+export async function annonceARepublier(base: Base | Transaction, utilisateurId: string, articleId: string) {
+  const [a] = await chargerArticles(base, utilisateurId, [articleId]);
+  const photos = ((await photosDesArticles(base, [articleId])).get(articleId) ?? []).filter(
+    (p) => p.type === "annonce",
+  );
+  if (!a || manquesArticle(a, photos.length, true).length > 0) return null;
+  const { formatColisDefaut } = await lireReglages(base, utilisateurId);
+  return versAnnonce(a, photos, formatColisDefaut);
 }
 
 export type ResultatProgramme =

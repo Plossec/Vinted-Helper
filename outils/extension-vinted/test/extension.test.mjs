@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { chromium } from "playwright-core";
-import { DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
+import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
 /* global chrome, cycle, diagnostic */
@@ -26,9 +26,9 @@ function copieDeTest() {
 }
 
 /** Lance Chromium avec l'extension, configure-la, et exécute un ou plusieurs passages. */
-async function lancer({ demande, vinted = {}, passages = 1, delaiEtape = 0, action = () => cycle() }) {
+async function lancer({ demande, actions = [], vinted = {}, passages = 1, delaiEtape = 0, action = () => cycle() }) {
   const faux = await demarrerFauxVinted(vinted);
-  const app = await demarrerFausseApplication(demande);
+  const app = await demarrerFausseApplication(demande, actions);
   const extension = copieDeTest();
   const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
     executablePath: CHROME,
@@ -220,4 +220,64 @@ test("taille absente de la liste de Vinted : erreur, aucun clic sur « Ajouter �
   const { app, vinted } = await lancer({ demande });
   assert.equal(vinted.clics, 0);
   assert.match(app.resultats[0].message, /« S » introuvable dans la liste « taille »/);
+});
+
+// --- Tâches automatiques (#147) : actions en mode essai ---
+
+test("baisse en essai : annonce et « Modifier l'annonce » ouvertes et relevées, prix lu, rien n'est saisi", async () => {
+  const { app, vinted, diagnostic: d, etat } = await lancer({ demande: null, actions: [ACTION("baisse")] });
+  assert.deepEqual(app.resultatsActions, [{ resultat: "essai" }]);
+  assert.equal(vinted.pagesAnnonce, 1);
+  assert.equal(vinted.pagesModifier, 1);
+  assert.equal(vinted.clics, 0);
+  assert.equal(d.etape, "tâche : baisse");
+  assert.deepEqual(d.pages.annonce.boutonsTrouves, { modifier: true, supprimer: true });
+  assert.equal(d.pages.modifier.selecteursTrouves.prix, '[data-testid="price-input--input"]');
+  assert.equal(etat.actionEnCours, null);
+  assert.equal(etat.pause, false);
+});
+
+test("baisse en essai, prix introuvable sur « Modifier l'annonce » : erreur et relevé, pas de pause", async () => {
+  const {
+    app,
+    diagnostic: d,
+    etat,
+  } = await lancer({
+    demande: null,
+    actions: [ACTION("baisse")],
+    vinted: { sansPrixModifier: true },
+  });
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.match(app.resultatsActions[0].message, /Prix introuvable/);
+  assert.match(d.erreur, /Prix introuvable/);
+  assert.equal(etat.pause, false);
+});
+
+test("republication en essai : annonce relevée, formulaire « Vendre un article » rempli sans « Ajouter »", async () => {
+  const { app, vinted, diagnostic: d } = await lancer({ demande: null, actions: [ACTION("republication")] });
+  assert.deepEqual(app.resultatsActions, [{ resultat: "essai" }]);
+  assert.equal(vinted.pagesAnnonce, 1);
+  assert.equal(vinted.chargements, 1); // « Vendre un article »
+  assert.equal(vinted.clics, 0);
+  assert.equal(d.pages.annonce.boutonsTrouves.supprimer, true);
+});
+
+test("action hors mode essai : refusée par cette version, aucune page Vinted ouverte", async () => {
+  const { app, vinted } = await lancer({ demande: null, actions: [ACTION("baisse", false)] });
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.match(app.resultatsActions[0].message, /Mode réel des tâches pas encore disponible/);
+  assert.equal(vinted.pagesAnnonce + vinted.pagesModifier + vinted.chargements, 0);
+});
+
+test("la publication passe avant les tâches automatiques", async () => {
+  const { app } = await lancer({ demande: DEMANDE(true), actions: [ACTION("baisse")] });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]);
+  assert.equal(app.actionsPrises, 0);
+});
+
+test("action sur une page « session bloquée » : pause", async () => {
+  const { app, etat } = await lancer({ demande: null, actions: [ACTION("baisse")], vinted: { bloque: true } });
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.equal(etat.pause, true);
+  assert.match(etat.raison, /bloqué la session/);
 });

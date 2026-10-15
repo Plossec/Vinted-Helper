@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { nombreActionsEnAttente, planifierTaches } from "../taches/service.js";
 import {
   annulerPublication,
   creerJeton,
@@ -33,9 +34,21 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
   app.post("/api/publication/jeton", async (requete) => ({ jeton: await creerJeton(base, utilisateurDe(requete).id) }));
 
   // --- Programme du PC ---
-  app.get("/api/programme/attente", async (requete) => ({
-    nombre: await nombreEnAttente(base, utilisateurDe(requete).id, maintenant()),
-  }));
+  app.get("/api/programme/attente", async (requete) => {
+    const utilisateurId = utilisateurDe(requete).id;
+    // Tâches automatisées (#147) : planifiées au passage de l'extension, qui seule agit sur Vinted. Un échec ici
+    // n'empêche jamais la publication.
+    try {
+      await planifierTaches(base, utilisateurId, maintenant());
+    } catch (erreur) {
+      requete.log.error({ err: erreur }, "Planification des tâches automatisées impossible");
+    }
+    return {
+      nombre: await nombreEnAttente(base, utilisateurId, maintenant()),
+      /** Actions des tâches automatisées à faire (#147). */
+      actions: await nombreActionsEnAttente(base, utilisateurId),
+    };
+  });
 
   app.get("/api/programme/suivante", async (requete) => ({
     publication: await demandeSuivante(base, utilisateurDe(requete).id, maintenant()),
