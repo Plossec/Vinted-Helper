@@ -1,7 +1,7 @@
 # ADR-0048 — Prix vente minimum
 
 - **Date** : 13/10/2026
-- **Statut** : Accepté · contrôle à chaque baisse : voir l'issue #195
+- **Statut** : Accepté · verrou dans la base : voir [ADR-0091](0091-verrou-prix-minimum-dans-la-base.md)
 - **Décideurs** : utilisateur
 - **Issue** : #146
 - **Thème** : Socle

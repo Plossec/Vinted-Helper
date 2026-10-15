@@ -120,6 +120,13 @@
       "when": 1792018317161,
       "tag": "0016_signalements_vus",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792052655420,
+      "tag": "0017_prix_minimum_verrou",
+      "breakpoints": true
     }
   ]
 }
