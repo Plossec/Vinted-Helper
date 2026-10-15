@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.16.0] — 15/10/2026
+
+### Ajouté
+- Un article d'un colis en cours (À expédier, Envoyé) peut sortir du stock, quel que soit le motif : il sort du
+  colis et le montant crédité, inchangé, revient aux autres articles ; s'il était le seul, la vente est annulée (#192).
+
 ## [1.15.3] — 15/10/2026
 
 ### Modifié
