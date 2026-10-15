@@ -274,14 +274,16 @@ Bénéfice   = Prix vendu − Coût total                       (Finalisé)
            = − Coût total                                  (Donné, Jeté, Gardé pour moi, Perdu : perte)
            = − Coût total  (provisoire, affiché comme tel) (tout autre statut)
 ```
+Article vendu pas encore finalisé (À expédier, Envoyé) : **bénéfice attendu** = Prix vendu − Coût total, affiché à côté
+du bénéfice provisoire (un seul terme partout, #193).
 
 ### 6.6 Indicateurs
 | Indicateur | Calcul |
 |---|---|
 | **Chiffre d'affaires** (mois) | Σ prix vendus des articles **finalisés** dans le mois (date de finalisation) + Σ prix de revente hors Vinted (date de sortie du stock) |
 | **Bénéfice réalisé** (mois) | Σ bénéfices des articles **finalisés** ou **sortis du stock** dans le mois + (− frais généraux du mois) |
-| **Ventes en cours** (mois) | Articles **À expédier** ou **Envoyé** d'une vente non annulée, non renvoyés, rattachés à la **date de vente** : Σ prix vendus (CA en cours) et Σ (prix vendu − coût total) (bénéfice en cours) — issue #85 |
-| **CA / bénéfice théoriques** (mois) | CA + CA en cours ; bénéfice réalisé (frais généraux déduits) + bénéfice en cours |
+| **Ventes en cours** (mois) | Articles **À expédier** ou **Envoyé** d'une vente non annulée, non renvoyés, rattachés à la **date de vente** : Σ prix vendus (CA en cours) et Σ (prix vendu − coût total) (**bénéfice attendu**) — issue #85, terme unifié le 15/10/2026 (#193) |
+| **CA / bénéfice théoriques** (mois) | CA + CA en cours ; bénéfice réalisé (frais généraux déduits) + bénéfice attendu |
 | **Trésorerie** (mois) | + montants crédités (date de finalisation) + reventes hors Vinted (date de sortie du stock) − achats (date d'achat) − essence (date de sortie) − emballages (date d'envoi) − boosts (date du boost) − frais généraux |
 | **Valeur du stock** | Σ coûts totaux des articles ni Finalisés ni Sortis du stock (et Σ de leurs prix affichés) |
 | **Marge moyenne** | Moyenne des bénéfices des articles Finalisés, en **€** ; et en **%** = Σ bénéfices / Σ coûts totaux. Si Σ coûts totaux = 0 € (ex. uniquement des articles Maison sans emballage), le taux affiche **« — »** |

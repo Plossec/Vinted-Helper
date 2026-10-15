@@ -55,7 +55,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0037](0037-statut-erreur-de-publication.md) | 08/10/2026 | Statut « Erreur » de publication | Publication Vinted | Accepté · précisé par [ADR-0052](0052-statut-erreur-precisions-apres-la-revue-de-code.md) |  |
 | [0038](0038-calibrage-de-l-extension-sous-agent-et-skill.md) | 08/10/2026 | Calibrage de l'extension : sous-agent et skill | Méthode | Accepté |  |
 | [0039](0039-lot-en-mode-issues-pr.md) | 08/10/2026 | `/lot` en mode issues / PR | Méthode | Accepté |  |
-| [0040](0040-ca-et-benefice-theoriques-ventes-en-cours.md) | 08/10/2026 | CA et bénéfice théoriques (ventes en cours) | Tableau de bord | Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » : voir l'issue #193 |  |
+| [0040](0040-ca-et-benefice-theoriques-ventes-en-cours.md) | 08/10/2026 | CA et bénéfice théoriques (ventes en cours) | Tableau de bord | Accepté · affichage remplacé par [ADR-0041](0041-affichage-du-tableau-de-bord-revu.md) ; terme « bénéfice en cours » remplacé par « bénéfice attendu » ([ADR-0090](0090-un-seul-terme-benefice-attendu.md)) |  |
 | [0041](0041-affichage-du-tableau-de-bord-revu.md) | 08/10/2026 | Affichage du tableau de bord revu | Tableau de bord | Accepté · graphique et tuiles précisés par [ADR-0050](0050-graphique-et-api-du-tableau-de-bord-apres-la-revue-de-code.md) et [ADR-0051](0051-tuiles-ca-et-benefice-montant-affiche-une-seule-fois.md) |  |
 | [0042](0042-verification-apres-deploiement-et-retour-automatique.md) | 13/10/2026 | Vérification après déploiement et retour automatique | Serveur | Accepté |  |
 | [0043](0043-ci-completee.md) | 13/10/2026 | CI complétée | Serveur | Accepté |  |
@@ -105,3 +105,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | 14/10/2026 | Serveur OVH : connexion SSH par clé | Serveur | Accepté |  |
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | IA Gemini | Accepté |  |
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Interface | Accepté |  |
+| [0090](0090-un-seul-terme-benefice-attendu.md) | 15/10/2026 | Un seul terme : « bénéfice attendu » | Tableau de bord | Accepté |  |
