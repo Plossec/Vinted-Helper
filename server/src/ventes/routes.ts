@@ -75,15 +75,16 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
   poser("tachesHeureFin", entierFacultatif(c.tachesHeureFin, "Tâches : heure de fin", 1, 24));
   poser("tachesEssai", booleenFacultatif(c.tachesEssai, "Tâches : mode essai"));
   poser("dormantsActive", booleenFacultatif(c.dormantsActive, "Articles dormants : activée"));
+  // Valeurs fixes enregistrées (jamais la chaîne reçue telle quelle).
   if (c.dormantsMode !== undefined) {
     if (c.dormantsMode !== "automatique" && c.dormantsMode !== "manuel")
       throw erreurSaisie("Articles dormants : mode inconnu.");
-    m.dormantsMode = c.dormantsMode;
+    m.dormantsMode = c.dormantsMode === "automatique" ? "automatique" : "manuel";
   }
   if (c.dormantsBaisseType !== undefined) {
     if (c.dormantsBaisseType !== "pourcentage" && c.dormantsBaisseType !== "montant")
       throw erreurSaisie("Articles dormants : type de baisse inconnu.");
-    m.dormantsBaisseType = c.dormantsBaisseType;
+    m.dormantsBaisseType = c.dormantsBaisseType === "montant" ? "montant" : "pourcentage";
   }
   poser("dormantsBaisseValeur", entierFacultatif(c.dormantsBaisseValeur, "Articles dormants : baisse", 1, 100_000));
   poser(

@@ -56,10 +56,9 @@ const REGLAGES_BAISSE: readonly ReglageBaisseArticle[] = ["compte", "pourcentage
 /** Règle de baisse de l'article (#147) : absente → inchangée ; valeur obligatoire pour un pourcentage ou un montant. */
 function baisseFacultative(c: Record<string, unknown>): Pick<DonneesArticle, "baisseRegle" | "baisseValeur"> {
   if (c.baisseRegle === undefined) return {};
-  const regle = c.baisseRegle;
-  if (typeof regle !== "string" || !(REGLAGES_BAISSE as readonly string[]).includes(regle))
-    throw erreurSaisie("Baisse automatique : règle inconnue.");
-  const baisseRegle = regle as ReglageBaisseArticle;
+  // Valeur prise dans la liste fixe (jamais la chaîne reçue telle quelle).
+  const baisseRegle = REGLAGES_BAISSE.find((r) => r === c.baisseRegle);
+  if (baisseRegle === undefined) throw erreurSaisie("Baisse automatique : règle inconnue.");
   if (baisseRegle === "pourcentage") {
     const valeur = entierFacultatif(c.baisseValeur, "Baisse automatique (%)", 1, 90);
     if (valeur === undefined) throw erreurSaisie("Baisse automatique : indiquez le pourcentage.");
