@@ -3,6 +3,8 @@
 //   « etape »   → une étape du remplissage de « Vendre un article » (photos, titre…), ou « controle » : relecture
 //   « diagnostic » → relevé des éléments du formulaire, pour calibrer selecteurs.js (rien n'est saisi ni envoyé)
 //   « ajouter » → clique « Ajouter » (publication réelle)
+//   « releve-page » → relevé d'une page (annonce, « Modifier l'annonce ») pour la tâche « Articles dormants » (#147)
+//   « lire-prix » → prix affiché dans le formulaire « Modifier l'annonce » (lecture seule, rien n'est saisi)
 // Aucun contournement : pas de camouflage, pas de captcha. Au moindre doute (champ introuvable, valeur différente,
 // vérification), on s'arrête SANS cliquer « Ajouter ».
 /* global SELECTEURS */
@@ -439,8 +441,50 @@ function releveErreur(etape, erreur) {
   };
 }
 
+/** Bouton d'une annonce (« Modifier », « Supprimer ») : repère connu, sinon texte du bouton ou du lien. */
+function boutonAnnonce(repere, texte) {
+  return (
+    trouver(repere) ??
+    [...document.querySelectorAll("button, a")].find(
+      (b) => visible(b) && normaliser(b.textContent) === normaliser(texte),
+    ) ??
+    null
+  );
+}
+
+/** Relevé d'une page de la tâche « Articles dormants » (#147) : rien n'est cliqué ni saisi. */
+function relevePage(nom) {
+  return {
+    page: nom,
+    adresse: location.href,
+    etat: etatPage(),
+    date: new Date().toISOString(),
+    boutonsTrouves: {
+      modifier: !!boutonAnnonce(SELECTEURS.annonce.modifier, SELECTEURS.annonce.texteModifier),
+      supprimer: !!boutonAnnonce(SELECTEURS.annonce.supprimer, SELECTEURS.annonce.texteSupprimer),
+    },
+    selecteursTrouves: selecteursTrouves(),
+    elements: releve(),
+  };
+}
+
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
+
+  if (message.type === "releve-page") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    return { ok: true, releve: relevePage(message.nom) };
+  }
+
+  if (message.type === "lire-prix") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    const el = await attendre(SELECTEURS.champs.prix);
+    const releve = relevePage("modifier");
+    if (!el) return { ok: false, message: "Prix introuvable sur « Modifier l'annonce » (à calibrer).", releve };
+    return { ok: true, prix: montant(el.value), releve };
+  }
 
   if (message.type === "etape") {
     const etat = etatPage();

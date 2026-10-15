@@ -1,8 +1,8 @@
 // Tâche « Articles dormants » (#147) : planification au passage de l'extension, liste à valider, Invendu, réglages.
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { actionVinted, article } from "../base/schema.js";
-import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { actionVinted, article, historiquePrix } from "../base/schema.js";
+import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 
 interface ActionLue {
   id: string;
@@ -212,5 +212,107 @@ describe("tâche « Articles dormants »", () => {
       baisseRegle: "pourcentage",
     });
     expect(refus.statusCode).toBe(400);
+  });
+
+  describe("exécution par l'extension (étape 2)", () => {
+    const programme = (method: "GET" | "POST", url: string, payload?: object) =>
+      t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
+    const suivante = async () =>
+      (await programme("GET", "/api/programme/action-suivante")).json<{
+        action: {
+          id: string;
+          type: string;
+          essai: boolean;
+          prixAvant: string;
+          prixApres: string | null;
+          url: string;
+          annonce: unknown;
+        } | null;
+      }>().action;
+    const resultat = (id: string, corps: object) => programme("POST", `/api/programme/actions/${id}/resultat`, corps);
+    const lire = async (id: string) =>
+      (await requete("GET", `/api/articles/${id}`)).json<{
+        statut: string;
+        prixAffiche: number;
+        urlVinted: string | null;
+      }>();
+
+    it("une action à la fois, en mode essai par défaut : rien ne change ; pause avant la baisse suivante", async () => {
+      const a = await enLigne();
+      const b = await enLigne();
+      await reglerTache({ dormantsMode: "automatique" });
+      t.horloge.avancer(8 * JOUR_MS);
+      expect((await passage()).json()).toEqual({ nombre: 0, actions: 2 });
+      const x = await suivante();
+      expect(x).toMatchObject({ type: "baisse", essai: true, prixAvant: "11,00", prixApres: "10,00", annonce: null });
+      expect(await suivante()).toBeNull(); // une seule à la fois
+      expect((await resultat(x?.id ?? "", { resultat: "essai" })).statusCode).toBe(200);
+      expect((await resultat(x?.id ?? "", { resultat: "essai" })).statusCode).toBe(409); // pas deux fois
+      expect((await lire(a)).prixAffiche).toBe(1100);
+      expect((await lire(b)).prixAffiche).toBe(1100);
+      expect(await suivante()).toBeNull(); // 2 minutes entre deux baisses
+      t.horloge.avancer(2 * 60_000);
+      expect((await suivante())?.type).toBe("baisse");
+    });
+
+    it("hors mode essai : baisse faite → nouveau prix et historique ; « fait » refusé pour un essai", async () => {
+      const a = await enLigne();
+      await reglerTache({ dormantsMode: "automatique", tachesEssai: false });
+      t.horloge.avancer(8 * JOUR_MS);
+      await passage();
+      const x = await suivante();
+      expect(x?.essai).toBe(false);
+      expect((await resultat(x?.id ?? "", { resultat: "fait" })).statusCode).toBe(200);
+      expect((await lire(a)).prixAffiche).toBe(1000);
+      const prix = await t.base.select().from(historiquePrix).where(eq(historiquePrix.articleId, a));
+      expect(prix.map((p) => p.prix)).toEqual([1100, 1000]);
+      // La baisse relance le délai dormant : rien de prévu le lendemain.
+      t.horloge.avancer(JOUR_MS);
+      await passage();
+      expect((await actions()).journal.filter((l) => l.etat === "en_attente")).toEqual([]);
+
+      const b = await enLigne();
+      await requete("PUT", "/api/reglages", { tachesEssai: true });
+      t.horloge.avancer(8 * JOUR_MS);
+      await passage();
+      const y = await suivante();
+      expect(y?.essai).toBe(true);
+      expect((await resultat(y?.id ?? "", { resultat: "fait" })).statusCode).toBe(409);
+      expect((await lire(b)).prixAffiche).toBe(1100);
+    });
+
+    it("republication : annonce à recréer fournie ; faite → nouveau lien ; échec après suppression → Erreur", async () => {
+      const a = await enLigne({ baisseRegle: "aucune" });
+      const b = await enLigne({ baisseRegle: "aucune" });
+      const c = await enLigne({ baisseRegle: "aucune" });
+      for (const id of [a, b]) await completerAnnonce(t.base, id);
+      await reglerTache({ dormantsMode: "automatique", tachesEssai: false, dormantsPauseRepublication: 600 });
+      t.horloge.avancer(8 * JOUR_MS);
+      await passage();
+      const x = await suivante();
+      expect(x).toMatchObject({ type: "republication", url: "https://www.vinted.fr/items/123-jean" });
+      expect(x?.annonce).toMatchObject({ titre: "Titre de test", prix: "11,00", couleurs: ["Bleu"] });
+      expect((await resultat(x?.id ?? "", { resultat: "fait" })).statusCode).toBe(400); // lien manquant
+      const url = "https://www.vinted.fr/items/456-jean";
+      expect((await resultat(x?.id ?? "", { resultat: "fait", url })).statusCode).toBe(200);
+      expect([(await lire(a)).urlVinted, (await lire(b)).urlVinted]).toContain(url);
+
+      t.horloge.avancer(10 * 60_000);
+      const y = await suivante();
+      expect(y?.type).toBe("republication");
+      const echec = await resultat(y?.id ?? "", {
+        resultat: "erreur",
+        message: "Création de la nouvelle annonce impossible.",
+        annonceSupprimee: true,
+      });
+      expect(echec.statusCode).toBe(200);
+      const statuts = [(await lire(a)).statut, (await lire(b)).statut].sort();
+      expect(statuts).toEqual(["en_ligne", "erreur_publication"]);
+
+      // Article incomplet : l'action passe en erreur sans être confiée à l'extension.
+      t.horloge.avancer(10 * 60_000);
+      expect(await suivante()).toBeNull();
+      expect((await actions()).journal.find((l) => l.articleId === c)).toMatchObject({ etat: "erreur" });
+    });
   });
 });

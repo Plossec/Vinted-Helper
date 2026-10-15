@@ -3,7 +3,7 @@ import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
-import { planifierTaches } from "../taches/service.js";
+import { nombreActionsEnAttente, planifierTaches } from "../taches/service.js";
 import {
   annulerPublication,
   creerJeton,
@@ -43,7 +43,11 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
     } catch (erreur) {
       requete.log.error({ err: erreur }, "Planification des tâches automatisées impossible");
     }
-    return { nombre: await nombreEnAttente(base, utilisateurId, maintenant()) };
+    return {
+      nombre: await nombreEnAttente(base, utilisateurId, maintenant()),
+      /** Actions des tâches automatisées à faire (#147). */
+      actions: await nombreActionsEnAttente(base, utilisateurId),
+    };
   });
 
   app.get("/api/programme/suivante", async (requete) => ({

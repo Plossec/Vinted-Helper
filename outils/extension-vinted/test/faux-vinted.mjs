@@ -134,12 +134,25 @@ function pageFormulaire({
   </script></body></html>`;
 }
 
+/**
+ * Page d'une annonce publiée et « Modifier l'annonce » (#147) : rédigées SANS relevé de Vinted (à remplacer par la
+ * structure relevée en mode essai). Option : sans le champ prix sur « Modifier l'annonce ».
+ */
+const PAGE_ANNONCE = `<!doctype html><html><body><h1>Jean Levi's 501</h1>
+  <a data-testid="item-edit-button" href="#">Modifier l'annonce</a>
+  <button data-testid="item-delete-button" type="button">Supprimer</button></body></html>`;
+
+const pageModifier = ({ sansPrixModifier = false } = {}) => `<!doctype html><html><body><form onsubmit="return false">
+  <input data-testid="title--input" value="Jean Levi's 501">
+  ${sansPrixModifier ? "" : '<input data-testid="price-input--input" value="11.00 €">'}
+  <button data-testid="upload-form-save-button" type="button">Enregistrer</button></form></body></html>`;
+
 /** Page « session bloquée » affichée par Vinted à la place du formulaire. */
 const PAGE_BLOCAGE = `<!doctype html><html><body><h1>Ta session a été bloquée</h1>
   <p>Nous avons détecté une activité inhabituelle ou automatisée.</p></body></html>`;
 
 export function demarrerFauxVinted(options = {}) {
-  const etat = { clics: 0, chargements: 0, clicsCategorie: 0 };
+  const etat = { clics: 0, chargements: 0, clicsCategorie: 0, pagesAnnonce: 0, pagesModifier: 0 };
   const serveur = createServer((req, res) => {
     if (req.url === "/clic-categorie") {
       etat.clicsCategorie++;
@@ -157,6 +170,18 @@ export function demarrerFauxVinted(options = {}) {
       res.end(options.bloque ? PAGE_BLOCAGE : pageFormulaire(options));
       return;
     }
+    if (/^\/items\/\d+\/edit/.test(req.url ?? "")) {
+      etat.pagesModifier++;
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(options.bloque ? PAGE_BLOCAGE : pageModifier(options));
+      return;
+    }
+    if (/^\/items\/555/.test(req.url ?? "")) {
+      etat.pagesAnnonce++;
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(options.bloque ? PAGE_BLOCAGE : PAGE_ANNONCE);
+      return;
+    }
     res.setHeader("content-type", "text/html; charset=utf-8");
     res.end("<html><body>Annonce</body></html>");
   });
@@ -172,10 +197,11 @@ const PNG = Buffer.from(
   "base64",
 );
 
-/** Fausse application : une demande en file, résultats enregistrés. */
-export function demarrerFausseApplication(demande) {
-  const etat = { resultats: [], prises: 0 };
+/** Fausse application : une demande en file, des actions de tâches automatiques (#147), résultats enregistrés. */
+export function demarrerFausseApplication(demande, actions = []) {
+  const etat = { resultats: [], prises: 0, resultatsActions: [], actionsPrises: 0 };
   let enFile = demande ? [demande] : [];
+  const actionsEnFile = [...actions];
   const serveur = createServer((req, res) => {
     if (req.headers.authorization !== "Bearer jeton-test") {
       res.statusCode = 401;
@@ -183,7 +209,12 @@ export function demarrerFausseApplication(demande) {
       return;
     }
     res.setHeader("content-type", "application/json");
-    if (req.url === "/api/programme/attente") return res.end(JSON.stringify({ nombre: enFile.length }));
+    if (req.url === "/api/programme/attente")
+      return res.end(JSON.stringify({ nombre: enFile.length, actions: actionsEnFile.length }));
+    if (req.url === "/api/programme/action-suivante") {
+      etat.actionsPrises++;
+      return res.end(JSON.stringify({ action: actionsEnFile.shift() ?? null }));
+    }
     if (req.url === "/api/programme/suivante") {
       etat.prises++;
       const d = enFile.shift() ?? null;
@@ -197,7 +228,9 @@ export function demarrerFausseApplication(demande) {
       let corps = "";
       req.on("data", (c) => (corps += c));
       req.on("end", () => {
-        etat.resultats.push(JSON.parse(corps));
+        (req.url?.startsWith("/api/programme/actions/") ? etat.resultatsActions : etat.resultats).push(
+          JSON.parse(corps),
+        );
         res.end("{}");
       });
       return;
@@ -228,4 +261,17 @@ export const DEMANDE = (essai) => ({
     formatColis: "moyen",
     photos: ["/api/photos/a", "/api/photos/b"],
   },
+});
+
+/** Action d'une tâche automatique (#147), telle que l'application la confie à l'extension. */
+export const ACTION = (type, essai = true) => ({
+  id: `act-${type}`,
+  type,
+  essai,
+  reference: 12,
+  titre: "Jean Levi's 501",
+  url: "https://www.vinted.fr/items/555-jean-levis",
+  prixAvant: "11,00",
+  prixApres: type === "baisse" ? "10,00" : null,
+  annonce: type === "republication" ? { ...DEMANDE(true).article, prix: "11,00" } : null,
 });

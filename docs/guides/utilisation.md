@@ -30,7 +30,8 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 - **Rythme** : un passage par jour (6 h au moins entre deux), pauses entre deux actions, plafonds par jour, de 8 h à
   22 h ; tout se fait par l'extension Chrome, seulement quand Chrome est ouvert.
 - **Mode essai** (coché par défaut) : l'extension ouvre les pages Vinted sans rien modifier. À garder tant que
-  l'extension n'a pas été calibrée sur les pages « Modifier l'annonce » et « Supprimer ».
+  l'extension n'a pas été calibrée sur les pages « Modifier l'annonce » et « Supprimer » (envoyez le « Dernier
+  relevé » de l'extension après un essai, voir `publication-vinted.md`).
 - **Journal** : Réglages → Publication Vinted, section « Tâches automatiques ».
 
 **Écran d'ouverture** de l'application installée : **Réglages → Affichage → Ouverture de l'application installée**,

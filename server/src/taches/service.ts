@@ -1,12 +1,14 @@
 // Tâches automatisées (#147, ADR-0072, ADR-0073) : planification des actions sur les articles dormants, au passage de
 // l'extension (seule à agir sur Vinted), liste à valider (mode manuel) et journal des actions.
-import { and, desc, eq, gte, inArray, isNull, ne, or } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { actionVinted, article, historiquePrix, historiqueStatut, reglages } from "../base/schema.js";
 import { jourParis } from "../calculs/indicateurs.js";
 import { calculerAlertes } from "../metier/alertes.js";
-import { type CandidatDormant, passageDu, planifierDormants } from "../metier/taches.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { type CandidatDormant, heureParis, passageDu, planifierDormants } from "../metier/taches.js";
+import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { centimesVersSaisie } from "../outils/format.js";
+import { annonceARepublier } from "../publication/service.js";
 
 const EN_COURS = ["a_valider", "en_attente", "en_cours"] as const;
 
@@ -183,7 +185,7 @@ export async function planifierTaches(base: Base, utilisateurId: string, mainten
  * Actions prévues devenues sans objet (article vendu, retiré, mis à la corbeille, ou prix changé à la main) :
  * annulées avant d'être montrées ou exécutées.
  */
-export async function annulerActionsPerimees(base: Base, utilisateurId: string, maintenant: Date) {
+export async function annulerActionsPerimees(base: Base | Transaction, utilisateurId: string, maintenant: Date) {
   const prevues = await base
     .select({
       id: actionVinted.id,
@@ -283,4 +285,198 @@ export async function nombreAValider(base: Base, utilisateurId: string): Promise
     .from(actionVinted)
     .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "a_valider")));
   return r.length;
+}
+
+/** Actions en attente de l'extension (réponse au passage de l'extension). */
+export async function nombreActionsEnAttente(base: Base, utilisateurId: string): Promise<number> {
+  const r = await base
+    .select({ id: actionVinted.id })
+    .from(actionVinted)
+    .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_attente")));
+  return r.length;
+}
+
+/** Au-delà, une action restée « en cours » est considérée interrompue (Chrome fermé, extension rechargée). */
+const DELAI_INTERRUPTION_MS = 15 * 60_000;
+
+/**
+ * Action suivante pour l'extension (#147, ADR-0078), passée « en cours » : une seule à la fois, dans la plage horaire,
+ * après la pause réglée depuis la dernière action du même type, la plus ancienne d'abord. Le mode essai est celui des
+ * réglages au moment où l'action est confiée. Une action interrompue n'est jamais relancée seule.
+ */
+export async function actionSuivante(base: Base, utilisateurId: string, maintenant: Date) {
+  return base.transaction(async (tx) => {
+    // Un seul appel à la fois (comme la publication, #121) : deux appels simultanés ne prennent pas la même action.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`actions:${utilisateurId}`}))`);
+    await tx
+      .update(actionVinted)
+      .set({
+        etat: "erreur",
+        finLe: maintenant,
+        message: "Action interrompue (Chrome fermé ou extension rechargée) : vérifiez l'annonce sur Vinted.",
+      })
+      .where(
+        and(
+          eq(actionVinted.utilisateurId, utilisateurId),
+          eq(actionVinted.etat, "en_cours"),
+          lt(actionVinted.debutLe, new Date(maintenant.getTime() - DELAI_INTERRUPTION_MS)),
+        ),
+      );
+    const [enCours] = await tx
+      .select({ id: actionVinted.id })
+      .from(actionVinted)
+      .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_cours")));
+    if (enCours) return null;
+    const [r] = await tx.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
+    if (!r) return null;
+    const heure = heureParis(maintenant);
+    if (heure < r.tachesHeureDebut || heure >= r.tachesHeureFin) return null;
+    await annulerActionsPerimees(tx, utilisateurId, maintenant);
+    const pauses = { baisse: r.dormantsPauseBaisse, republication: r.dormantsPauseRepublication };
+    const fins = await tx
+      .select({ type: actionVinted.type, finLe: actionVinted.finLe })
+      .from(actionVinted)
+      .where(
+        and(
+          eq(actionVinted.utilisateurId, utilisateurId),
+          inArray(actionVinted.etat, ["faite", "essai", "erreur"]),
+          gte(actionVinted.finLe, new Date(maintenant.getTime() - 3 * 3_600_000)),
+        ),
+      );
+    const pret = (type: "baisse" | "republication") =>
+      !fins.some((f) => f.type === type && f.finLe && maintenant.getTime() - f.finLe.getTime() < pauses[type] * 1000);
+    const attente = await tx
+      .select({
+        id: actionVinted.id,
+        articleId: actionVinted.articleId,
+        type: actionVinted.type,
+        prixAvant: actionVinted.prixAvant,
+        prixApres: actionVinted.prixApres,
+        reference: article.reference,
+        titre: article.titreAnnonce,
+        urlVinted: article.urlVinted,
+      })
+      .from(actionVinted)
+      .innerJoin(article, eq(article.id, actionVinted.articleId))
+      .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_attente")))
+      .orderBy(asc(actionVinted.creeLe), asc(article.reference));
+    for (const a of attente) {
+      if (!pret(a.type)) continue;
+      const echec = (message: string) =>
+        tx.update(actionVinted).set({ etat: "erreur", finLe: maintenant, message }).where(eq(actionVinted.id, a.id));
+      if (!a.urlVinted) {
+        await echec("Article sans lien d'annonce Vinted : action impossible.");
+        continue;
+      }
+      // Republication : l'annonce est recréée avec les données de l'article, qui doit être complet.
+      const annonce = a.type === "republication" ? await annonceARepublier(tx, utilisateurId, a.articleId) : null;
+      if (a.type === "republication" && !annonce) {
+        await echec("Annonce incomplète : complétez l'article avant de le republier.");
+        continue;
+      }
+      const prise = await tx
+        .update(actionVinted)
+        .set({ etat: "en_cours", debutLe: maintenant, essai: r.tachesEssai })
+        .where(and(eq(actionVinted.id, a.id), eq(actionVinted.etat, "en_attente")))
+        .returning({ id: actionVinted.id });
+      if (prise.length === 0) return null;
+      return {
+        id: a.id,
+        type: a.type,
+        essai: r.tachesEssai,
+        reference: a.reference,
+        titre: a.titre ?? "",
+        /** Lien de l'annonce actuelle. */
+        url: a.urlVinted,
+        /** Euros, tels que saisis sur Vinted (ex. « 9,50 »). */
+        prixAvant: centimesVersSaisie(a.prixAvant),
+        prixApres: a.prixApres === null ? null : centimesVersSaisie(a.prixApres),
+        /** Republication : annonce à recréer (mêmes données que la publication). */
+        annonce,
+      };
+    }
+    return null;
+  });
+}
+
+export type ResultatAction =
+  | { resultat: "essai" }
+  | { resultat: "fait"; url: string | null }
+  | { resultat: "erreur"; message: string; annonceSupprimee: boolean };
+
+/**
+ * Résultat d'une action renvoyé par l'extension. Faite : une baisse change le prix affiché (et son historique, qui
+ * relance le délai dormant) ; une republication enregistre le lien de la nouvelle annonce. Erreur après suppression de
+ * l'ancienne annonce (la nouvelle n'a pas pu être créée) : l'article passe « Erreur » (#72), à republier d'un clic.
+ * Essai : rien ne change. Un résultat envoyé deux fois est refusé.
+ */
+export async function enregistrerResultatAction(
+  base: Base,
+  utilisateurId: string,
+  id: string,
+  r: ResultatAction,
+  maintenant: Date,
+) {
+  await base.transaction(async (tx) => {
+    const [x] = await tx
+      .update(actionVinted)
+      .set({
+        etat: r.resultat === "fait" ? "faite" : r.resultat,
+        finLe: maintenant,
+        message:
+          r.resultat === "erreur"
+            ? r.message
+            : r.resultat === "essai"
+              ? "Essai : pages Vinted ouvertes, rien n'a été modifié."
+              : null,
+        url: r.resultat === "fait" ? r.url : null,
+      })
+      .where(
+        and(eq(actionVinted.id, id), eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_cours")),
+      )
+      .returning({
+        type: actionVinted.type,
+        articleId: actionVinted.articleId,
+        essai: actionVinted.essai,
+        prixApres: actionVinted.prixApres,
+      });
+    if (!x) {
+      const [existe] = await tx
+        .select({ id: actionVinted.id })
+        .from(actionVinted)
+        .where(and(eq(actionVinted.id, id), eq(actionVinted.utilisateurId, utilisateurId)));
+      throw existe ? conflit("Cette action n'est pas en cours.") : introuvable("Action");
+    }
+    if (r.resultat === "fait") {
+      if (x.essai) throw conflit("Action en mode essai : rien ne devait être modifié sur Vinted.");
+      if (x.type === "baisse" && x.prixApres !== null) {
+        await tx
+          .update(article)
+          .set({ prixAffiche: x.prixApres, modifieLe: maintenant })
+          .where(eq(article.id, x.articleId));
+        await tx
+          .insert(historiquePrix)
+          .values({ utilisateurId, articleId: x.articleId, prix: x.prixApres, date: maintenant });
+      }
+      if (x.type === "republication") {
+        if (!r.url) throw erreurSaisie("Republication : lien de la nouvelle annonce manquant.");
+        await tx.update(article).set({ urlVinted: r.url, modifieLe: maintenant }).where(eq(article.id, x.articleId));
+      }
+    }
+    if (r.resultat === "erreur" && r.annonceSupprimee && !x.essai) {
+      const modifies = await tx
+        .update(article)
+        .set({ statut: "erreur_publication", urlVinted: null, modifieLe: maintenant })
+        .where(and(eq(article.id, x.articleId), eq(article.statut, "en_ligne")))
+        .returning({ id: article.id });
+      if (modifies.length > 0)
+        await tx.insert(historiqueStatut).values({
+          utilisateurId,
+          articleId: x.articleId,
+          de: "en_ligne",
+          vers: "erreur_publication",
+          date: maintenant,
+        });
+    }
+  });
 }

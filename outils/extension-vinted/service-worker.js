@@ -4,6 +4,9 @@
 // contenu étape par étape (5 s entre chaque), contrôle, publie. Une annonce au plus toutes les 10 minutes.
 // Délais fixes, pour espacer les publications et laisser les pages se charger, jamais pour paraître humain (#136).
 // Aucun contournement : vérification, page de blocage ou déconnexion → PAUSE, reprise uniquement à la main.
+// Tâches automatiques (#147) : sans annonce à publier (la publication passe d'abord), l'extension demande l'action
+// suivante (baisse de prix ou republication d'un article dormant) ; l'application règle les pauses entre actions.
+// Cette version ne fait les actions qu'en MODE ESSAI : elle ouvre et relève les pages, sans rien modifier.
 
 /* global SELECTEURS */
 importScripts("selecteurs.js");
@@ -34,7 +37,15 @@ const RAISONS = {
 
 // --- État (chrome.storage.local) ---
 
-const ETAT_INITIAL = { pause: false, raison: null, prochain: 0, enCours: null, onglet: null, journal: [] };
+const ETAT_INITIAL = {
+  pause: false,
+  raison: null,
+  prochain: 0,
+  enCours: null,
+  actionEnCours: null,
+  onglet: null,
+  journal: [],
+};
 
 async function lire() {
   // « vinted » et « delaiEtape » ne sont changés que par les tests (page factice locale, délais courts).
@@ -102,6 +113,17 @@ function creerApi({ adresse, jeton }) {
   return {
     async enAttente() {
       return (await (await appeler("/api/programme/attente")).json()).nombre;
+    },
+    /** Annonces à publier et actions des tâches automatiques à faire (#147). */
+    async attente() {
+      const r = await (await appeler("/api/programme/attente")).json();
+      return { nombre: r.nombre, actions: r.actions ?? 0 };
+    },
+    async actionSuivante() {
+      return (await (await appeler("/api/programme/action-suivante")).json()).action;
+    },
+    async resultatAction(id, corps) {
+      await appeler(`/api/programme/actions/${id}/resultat`, { method: "POST", body: JSON.stringify(corps) });
     },
     async suivante() {
       return (await (await appeler("/api/programme/suivante")).json()).publication;
@@ -222,6 +244,108 @@ async function publier(onglet, api, demande) {
   throw new Error("Après « Ajouter » : pas de page d'annonce. Vérifiez sur Vinted si l'annonce existe.");
 }
 
+// --- Tâches automatiques (#147) ---
+
+/** Page Vinted prête (ni vérification, ni blocage, ni déconnexion), sinon pause. */
+async function verifierPage(onglet) {
+  const etat = await etatOnglet(onglet);
+  if (etat !== "pret") throw new Arret(RAISONS[etat] ?? RAISONS.inconnu);
+}
+
+/** Relevé d'une page, demandé au script de contenu. */
+async function releverPage(onglet, nom) {
+  const r = await envoyer(onglet, { type: "releve-page", nom });
+  if (!r) throw new Arret(RAISONS.inconnu);
+  if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+  return r.releve;
+}
+
+const LIBELLES_ACTION = {
+  baisse: (a) => `baisse ${a.prixAvant} € → ${a.prixApres} €`,
+  republication: (a) => `republication (${a.prixAvant} €)`,
+};
+
+/**
+ * Action en mode essai : ouvre l'annonce et relève la page (boutons « Modifier », « Supprimer »), puis
+ * - baisse : ouvre « Modifier l'annonce » et lit le prix affiché, sans rien saisir ;
+ * - republication : remplit le formulaire « Vendre un article » avec l'annonce, sans cliquer « Ajouter ».
+ * Les relevés sont enregistrés (« Dernier relevé ») pour calibrer le mode réel. Rien n'est modifié sur Vinted.
+ */
+async function executerAction(api, action, vinted) {
+  if (!action.essai)
+    return {
+      resultat: "erreur",
+      message:
+        "Mode réel des tâches pas encore disponible dans cette version de l'extension (calibrage à faire) : laissez « Mode essai » coché (Réglages → Tâches automatiques).",
+    };
+  const id = /\/items\/(\d+)/.exec(new URL(action.url).pathname)?.[1];
+  if (!id) return { resultat: "erreur", message: `Lien d'annonce illisible : ${action.url}` };
+  const pages = {};
+  const enregistrer = async (erreur = null) => {
+    const derniere = pages.modifier ?? pages.annonce ?? {};
+    await chrome.storage.local.set({
+      diagnostic: {
+        ...derniere,
+        date: new Date().toISOString(),
+        etape: `tâche : ${action.type}`,
+        erreur,
+        pages,
+      },
+    });
+    await journal("Relevé des pages Vinted enregistré : fenêtre de l'extension → « Dernier relevé ».");
+  };
+  let onglet = await ouvrirOnglet(`${vinted}/items/${id}`);
+  await verifierPage(onglet);
+  pages.annonce = await releverPage(onglet, "annonce");
+  await pauseEntreEtapes(onglet);
+  if (action.type === "baisse") {
+    onglet = await ouvrirOnglet(`${vinted}/items/${id}/edit`);
+    await verifierPage(onglet);
+    const r = await envoyer(onglet, { type: "lire-prix" });
+    if (!r) throw new Arret(RAISONS.inconnu);
+    if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+    pages.modifier = r.releve;
+    if (!r.ok) {
+      await enregistrer(r.message);
+      return { resultat: "erreur", message: `${r.message} Rien n'a été modifié.` };
+    }
+    await enregistrer();
+    return { resultat: "essai" };
+  }
+  await enregistrer();
+  onglet = await ouvrirOnglet(`${vinted}/items/new`);
+  await verifierPage(onglet);
+  await publier(onglet, api, { essai: true, article: action.annonce });
+  return { resultat: "essai" };
+}
+
+/** Action suivante des tâches automatiques : prise, faite (en essai), résultat renvoyé à l'application. */
+async function faireActionSuivante(api, vinted, signaler) {
+  const action = await api.actionSuivante();
+  if (!action) return signaler("Aucune action prête (pause entre deux actions, ou hors des heures réglées).");
+  await ecrireEtat({ actionEnCours: action.id });
+  const reference = `#${String(action.reference).padStart(4, "0")}`;
+  const libelle = LIBELLES_ACTION[action.type]?.(action) ?? action.type;
+  await journal(`${reference} : ${libelle}${action.essai ? " (essai)" : ""}…`);
+  let resultat;
+  let arret = null;
+  try {
+    resultat = await executerAction(api, action, vinted);
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    resultat = { resultat: "erreur", message };
+    if (erreur instanceof Arret) arret = message;
+  }
+  await api.resultatAction(action.id, resultat);
+  await ecrireEtat({ actionEnCours: null });
+  await journal(
+    resultat.resultat === "essai"
+      ? `${reference} : essai, pages Vinted ouvertes et relevées, rien n'est modifié.`
+      : `${reference} : erreur — ${resultat.message}`,
+  );
+  if (arret) await mettreEnPause(arret);
+}
+
 /**
  * Un passage. « manuel » (bouton « Vérifier maintenant ») : le journal dit toujours pourquoi rien ne se passe
  * (issue #61) ; les passages automatiques, toutes les 5 minutes, restent silencieux quand il n'y a rien à faire.
@@ -243,10 +367,19 @@ async function cycleSansVerrou(manuel) {
     });
     await ecrireEtat({ enCours: null });
   }
+  // De même pour une action des tâches automatiques (#147).
+  if (etat.actionEnCours) {
+    await api.resultatAction(etat.actionEnCours, {
+      resultat: "erreur",
+      message: "Action interrompue (Chrome fermé ou extension rechargée). Vérifiez l'annonce sur Vinted.",
+    });
+    await ecrireEtat({ actionEnCours: null });
+  }
   if (etat.pause) return signaler("En pause : cliquez « Reprendre » pour relancer.");
 
-  const nombre = await api.enAttente(); // signale aussi à l'application que l'extension est active
-  if (nombre === 0)
+  // Signale aussi à l'application que l'extension est active (et lui fait prévoir les tâches automatiques).
+  const { nombre, actions } = await api.attente();
+  if (nombre === 0 && actions === 0)
     return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
   if (Date.now() < etat.prochain) {
     const heure = new Date(etat.prochain).toLocaleTimeString("fr-FR", {
@@ -254,8 +387,14 @@ async function cycleSansVerrou(manuel) {
       hour: "2-digit",
       minute: "2-digit",
     });
-    return signaler(`${nombre} annonce(s) en attente : prochaine publication possible après ${heure}.`);
+    return signaler(
+      nombre > 0
+        ? `${nombre} annonce(s) en attente : prochaine publication possible après ${heure}.`
+        : `${actions} action(s) en attente : prochaine action possible après ${heure}.`,
+    );
   }
+  // La publication passe d'abord ; sans annonce à publier, une action des tâches automatiques (#147).
+  if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).
   const onglet = await ouvrirOnglet(`${vinted}/items/new`);
