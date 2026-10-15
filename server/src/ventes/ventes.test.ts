@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { Base } from "../base/connexion.js";
 import { article, utilisateur, vente } from "../base/schema.js";
-import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 import { creerVente } from "./service.js";
 
 interface ArticleLu {
@@ -275,6 +275,10 @@ describe("ventes et calculs", () => {
     const a = await enLigne(900, 440);
     let r = await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "donne" });
     expect(r.json<ArticleLu>()).toMatchObject({ statut: "sortie_stock", couts: { benefice: -440, realise: true } });
+    // Annuler la sortie repasse l'article À publier : refusé tant que l'annonce est incomplète (#196).
+    r = await requete("POST", `/api/articles/${a}/annulation-sortie-stock`, {});
+    expect(r.statusCode).toBe(409);
+    await completerAnnonce(t.base, a);
     r = await requete("POST", `/api/articles/${a}/annulation-sortie-stock`, {});
     expect(r.json<ArticleLu>()).toMatchObject({ statut: "a_publier", sortieStock: null });
     expect((await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "revendu" })).statusCode).toBe(400);
@@ -356,6 +360,7 @@ describe("ventes et calculs", () => {
       expect((await lire(a)).vente).toBeNull();
       expect((await requete("POST", `/api/articles/${a}/annulation-statut`, {})).statusCode).toBe(409);
       // L'annulation de la sortie du stock reste possible : l'article repasse « À publier ».
+      await completerAnnonce(t.base, a);
       expect((await requete("POST", `/api/articles/${a}/annulation-sortie-stock`, {})).statusCode).toBe(200);
       expect((await lire(a)).statut).toBe("a_publier");
     });
@@ -454,6 +459,7 @@ describe("ventes et calculs", () => {
       expect((await requete("POST", `/api/articles/${a}/statut`, { vers: "en_ligne" })).statusCode).toBe(200);
       expect((await annuler(a)).statusCode).toBe(200);
       expect((await lire(a)).statut).toBe("a_recuperer");
+      await completerAnnonce(t.base, a);
       expect((await requete("POST", `/api/articles/${a}/statut`, { vers: "a_publier" })).statusCode).toBe(200);
       const alertes = (await requete("GET", "/api/alertes")).json<{ aRecuperer: unknown[] }>();
       expect(alertes.aRecuperer).toHaveLength(0);

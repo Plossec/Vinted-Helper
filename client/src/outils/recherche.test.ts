@@ -32,6 +32,7 @@ const article = (reference: number, extra: Partial<ResumeArticle> = {}): ResumeA
   prixAchat: null,
   benefice: null,
   beneficeRealise: false,
+  manquesPublication: [],
   ...extra,
 });
 const refs = (liste: ResumeArticle[]) => liste.map((a) => a.reference);

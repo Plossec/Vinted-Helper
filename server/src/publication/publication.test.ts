@@ -45,7 +45,6 @@ describe("publication Vinted", () => {
         prixAffiche: 1250,
       })
     ).json<{ id: string; reference: number }>();
-    await requete("POST", `/api/articles/${a.id}/statut`, { vers: "a_publier" });
     await requete("PUT", `/api/articles/${a.id}/annonce`, { titre: "Jean bleu", description: "Beau jean.\n\nRéf. 1" });
     if (!sans.photo) {
       const photoId = randomUUID();
@@ -60,6 +59,8 @@ describe("publication Vinted", () => {
       });
       await requete("POST", `/api/articles/${a.id}/photos`, { photoId });
     }
+    // Passage À publier une fois l'annonce prête (#196) : refusé, l'article incomplet reste Brouillon.
+    await requete("POST", `/api/articles/${a.id}/statut`, { vers: "a_publier" });
     return a;
   }
 
@@ -72,7 +73,7 @@ describe("publication Vinted", () => {
     }>();
     expect(r.acceptes).toEqual([complet.reference]);
     expect(r.refuses).toEqual([
-      { reference: incomplet.reference, nom: "Jean", manques: ["photos d'annonce", "couleur"] },
+      { reference: incomplet.reference, nom: "Jean", manques: ["statut « À publier »", "photos d'annonce", "couleur"] },
     ]);
     // Pas deux fois dans la file.
     const encore = (await requete("POST", "/api/publications", { articleIds: [complet.id] })).json<{

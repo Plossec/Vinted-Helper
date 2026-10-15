@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.16.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.17.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -62,7 +62,7 @@ flowchart TB
 
   subgraph serveur["server/ — Fastify + Drizzle (TypeScript strict)"]
     routes["Routes par sujet<br/>articles, achats, sorties, ventes, frais,<br/>photos, ia, publication, alertes,<br/>corbeille, referentiels, compte, import"]
-    metier["metier/<br/>statuts, alertes"]
+    metier["metier/<br/>statuts, alertes, complétude"]
     calculs["calculs/<br/>seul module d'argent :<br/>répartitions, coûts, bénéfice, indicateurs"]
     catalogue["catalogue/<br/>catégories, marques, états, couleurs Vinted"]
     base["base/<br/>schéma, migrations"]

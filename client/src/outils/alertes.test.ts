@@ -12,13 +12,14 @@ describe("sections de l'écran À faire", () => {
       aExpedier: [alerte("E")],
       aRecuperer: [alerte("R")],
       erreursPublication: [alerte("X")],
+      incomplets: [alerte("I")],
     };
     expect(sectionsAFaire(alertes).map((s) => [s.titre, s.lignes.map((l) => `${l.type}:${l.id}`)])).toEqual([
       ["Urgent", ["erreursPublication:X"]],
-      ["À traiter", ["aExpedier:E", "aRecuperer:R"]],
+      ["À traiter", ["aExpedier:E", "aRecuperer:R", "incomplets:I"]],
       ["Pour info", ["dormants:D", "brouillons:B"]],
     ]);
-    expect(nombreAlertes(alertes)).toBe(5);
+    expect(nombreAlertes(alertes)).toBe(6);
   });
 
   it("rien à faire : aucune section", () => {

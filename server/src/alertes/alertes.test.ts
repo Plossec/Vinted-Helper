@@ -1,6 +1,9 @@
-// Écran « À faire » (#191) : « Vu » des alertes « Pour info » et vente des articles à expédier.
+// Écran « À faire » (#191) : « Vu » des alertes « Pour info » et vente des articles à expédier ; articles À publier
+// incomplets (#196).
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { eq } from "drizzle-orm";
+import { article } from "../base/schema.js";
+import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 
 interface AlerteLue {
   id: string;
@@ -11,6 +14,7 @@ interface AlertesLues {
   brouillons: AlerteLue[];
   dormants: AlerteLue[];
   aExpedier: AlerteLue[];
+  incomplets: (AlerteLue & { manques: string[] })[];
 }
 
 const JOUR_MS = 86_400_000;
@@ -84,5 +88,20 @@ describe("alertes de l'écran À faire", () => {
     expect(v.statusCode, v.body).toBe(201);
     const venteId = v.json<{ id: string }>().id;
     expect((await alertes()).aExpedier).toMatchObject([{ id: a, venteId }]);
+  });
+
+  it("signale les articles À publier devenus incomplets, avec ce qui leur manque (#196)", async () => {
+    const complet = await creer();
+    const vide = await creer();
+    const autre = await creer();
+    for (const id of [complet, vide, autre]) {
+      await completerAnnonce(t.base, id);
+      expect((await requete("POST", `/api/articles/${id}/statut`, { vers: "a_publier" })).statusCode).toBe(200);
+    }
+    await t.base.update(article).set({ couleurs: [], titreAnnonce: " " }).where(eq(article.id, vide));
+    await t.base.update(article).set({ categorie: "autre" }).where(eq(article.id, autre));
+    expect((await alertes()).incomplets).toMatchObject([
+      { id: vide, depuis: "2026-10-05", manques: ["titre de l'annonce", "couleur"] },
+    ]);
   });
 });

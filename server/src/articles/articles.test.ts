@@ -2,7 +2,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { article, historiquePrix } from "../base/schema.js";
-import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 
 type Contexte = Awaited<ReturnType<typeof creerAppDeTest>> & {
   cookie: string;
@@ -206,11 +206,13 @@ describe("articles", () => {
       const alertes = (await requete("GET", "/api/alertes")).json<{ brouillons: { id: string }[] }>();
       expect(alertes.brouillons.map((a) => a.id)).not.toContain(cree.id);
       expect((await changer(cree.id, { vers: "en_ligne", prixAffiche: 900 })).statusCode).toBe(409);
+      await completerAnnonce(t.base, cree.id);
       expect((await changer(cree.id, { vers: "a_publier" })).json()).toMatchObject({ statut: "a_publier" });
     });
 
     it("§8 — une date modifiée est enregistrée dans l'historique, et corrigeable ensuite", async () => {
       const cree = await creer();
+      await completerAnnonce(t.base, cree.id);
       const veille = "2026-10-04T18:30:00.000Z";
       const fiche = (await changer(cree.id, { vers: "a_publier", date: veille })).json<{
         historiqueStatuts: { id: string; vers: string; date: string }[];
@@ -226,6 +228,31 @@ describe("articles", () => {
         historiqueStatuts: { vers: string; date: string }[];
       }>();
       expect(relu.historiqueStatuts.find((h) => h.vers === "a_publier")?.date).toBe("2026-10-04T09:00:00.000Z");
+    });
+
+    it("À publier (#196) : refusé tant que l'annonce est incomplète ; catégorie « Autre » admise", async () => {
+      const cree = await creer();
+      const refus = await changer(cree.id, { vers: "a_publier" });
+      expect(refus.statusCode).toBe(409);
+      expect(refus.json()).toEqual({
+        erreur:
+          "Article incomplet pour « À publier » : il manque photos d'annonce, prix affiché, titre de l'annonce, description de l'annonce, couleur.",
+      });
+      expect((await requete("GET", `/api/articles/${cree.id}`)).json()).toMatchObject({ statut: "brouillon" });
+      await completerAnnonce(t.base, cree.id);
+      await t.base.update(article).set({ categorie: "autre" }).where(eq(article.id, cree.id));
+      expect((await changer(cree.id, { vers: "a_publier" })).json()).toMatchObject({ statut: "a_publier" });
+      // Liste (sélection pour Vinted) : ce qui empêche la publication automatique.
+      const liste = (await requete("GET", "/api/articles")).json<{ id: string; manquesPublication: string[] }[]>();
+      expect(liste.find((a) => a.id === cree.id)?.manquesPublication).toEqual([
+        "catégorie Vinted (« Autre » : à publier à la main sur Vinted)",
+      ]);
+      await t.base
+        .update(article)
+        .set({ categorie: "hommes/vetements/jeans/jeans-coupe-droite" })
+        .where(eq(article.id, cree.id));
+      const relue = (await requete("GET", "/api/articles")).json<{ id: string; manquesPublication: string[] }[]>();
+      expect(relue.find((a) => a.id === cree.id)?.manquesPublication).toEqual([]);
     });
 
     it("une date dans le futur est refusée", async () => {

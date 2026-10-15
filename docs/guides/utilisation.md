@@ -8,7 +8,8 @@ L'écran **À faire** (1er onglet, pastille = nombre de choses à faire) regroup
 par urgence :
 - **Urgent** : publications Vinted en erreur → **Republier** (l'article retourne dans la file de publication) ;
 - **À traiter** : articles **à expédier** → **Envoyé** (à la date du jour, pour tout le colis) et 💬 pour ouvrir la
-  conversation ; articles **à récupérer** → **Récupéré → À publier** ;
+  conversation ; articles **à récupérer** → **Récupéré → À publier** ; articles **À publier incomplets** (avec ce qui
+  manque) → **Compléter** ;
 - **Pour info** : articles **dormants** et **brouillons** anciens → **Vu** les masque ; ils reviennent si la situation
   change (ex. article de nouveau dormant après une baisse de prix).
 

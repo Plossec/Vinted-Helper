@@ -1,5 +1,5 @@
 // Alertes affichées dans l'application (§5.8) : brouillon trop ancien, article dormant, articles à expédier,
-// retours à récupérer, publications Vinted en erreur (#72).
+// retours à récupérer, publications Vinted en erreur (#72), articles À publier incomplets (#196).
 // Fonction pure : la date « maintenant » est passée en paramètre ; les jours sont ceux de l'heure de Paris.
 import { jourParis } from "../calculs/indicateurs.js";
 
@@ -12,6 +12,8 @@ export interface ArticlePourAlertes {
   historique: readonly { vers: string; date: string }[];
   /** Prix affichés successifs (ISO). */
   historiquePrix: readonly { prix: number; date: string }[];
+  /** À publier : ce qui manque à l'annonce (metier/completude), vide si complète. */
+  manques?: readonly string[];
 }
 
 export interface Alerte {
@@ -68,6 +70,7 @@ export function calculerAlertes(
   const aExpedier: Alerte[] = [];
   const aRecuperer: Alerte[] = [];
   const erreursPublication: Alerte[] = [];
+  const incomplets: (Alerte & { manques: string[] })[] = [];
   for (const a of articles) {
     if (a.statut === "brouillon") {
       const date = arriveeDansStatut(a);
@@ -81,6 +84,9 @@ export function calculerAlertes(
         const al = alerte(a, date);
         if (al.jours >= delais.delaiDormant) dormants.push(al);
       }
+    } else if (a.statut === "a_publier") {
+      const date = arriveeDansStatut(a);
+      if (date && a.manques && a.manques.length > 0) incomplets.push({ ...alerte(a, date), manques: [...a.manques] });
     } else if (a.statut === "a_expedier" || a.statut === "a_recuperer" || a.statut === "erreur_publication") {
       const date = arriveeDansStatut(a);
       const groupe =
@@ -97,6 +103,8 @@ export function calculerAlertes(
     aRecuperer: aRecuperer.sort(plusAnciens),
     /** Publications Vinted en échec, à redemander ou à remettre À publier (issue #72). */
     erreursPublication: erreursPublication.sort(plusAnciens),
+    /** Articles À publier incomplets (déjà là avant le contrôle, ou complétés puis vidés), refusés par la file (#196). */
+    incomplets: incomplets.sort(plusAnciens),
   };
 }
 

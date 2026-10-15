@@ -3,7 +3,7 @@
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, reglages, vente, venteArticle } from "../base/schema.js";
-import { chargerArticle, verifierDate } from "../articles/service.js";
+import { chargerArticle, verifierCompletude, verifierDate } from "../articles/service.js";
 import { calculer } from "../couts/service.js";
 import type { MotifSortie } from "../calculs/benefice.js";
 import { estTransitionSimple, STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
@@ -285,7 +285,7 @@ export async function sortirDuStock(
   });
 }
 
-/** Annulation de la sortie du stock (Sortie du stock → À publier). */
+/** Annulation de la sortie du stock (Sortie du stock → À publier, article complet : #196). */
 export async function annulerSortieStock(
   base: Base,
   utilisateurId: string,
@@ -297,6 +297,7 @@ export async function annulerSortieStock(
   await base.transaction(async (tx) => {
     const a = await chargerArticle(tx, utilisateurId, articleId);
     if (a.statut !== "sortie_stock") throw conflit("Cet article n'est pas sorti du stock.");
+    await verifierCompletude(tx, a);
     await passer(tx, utilisateurId, [a], "a_publier", date, maintenant, {
       motifSortie: null,
       canalRevente: null,

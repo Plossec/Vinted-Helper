@@ -1,5 +1,5 @@
 // Écran d'accueil « À faire » (#191) : tout ce qui demande l'attention, par urgence (Urgent, À traiter, Pour info).
-// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Vu.
+// Chaque ligne mène à la fiche de l'article et porte son action directe : Republier, Envoyé, Récupéré, Compléter, Vu.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
@@ -20,6 +20,8 @@ function detail(l: LigneAFaire): string {
       return `À expédier — vendu le ${formatDate(l.depuis)}`;
     case "aRecuperer":
       return `À récupérer — retour du ${formatDate(l.depuis)}`;
+    case "incomplets":
+      return `À publier mais incomplet — il manque : ${(l.manques ?? []).join(", ")}`;
     case "dormants":
       return `Dormant — sans vente ni baisse de prix depuis ${pluriel(l.jours, "jour")}`;
     case "brouillons":
@@ -99,6 +101,12 @@ export function AFaire() {
           await api.post(`/api/articles/${l.id}/statut`, { vers: "a_publier" });
           return { ok: true, texte: `${formatReference(l.reference)} repassé « À publier ».` };
         });
+      case "incomplets":
+        return (
+          <Link to={`/articles/${l.id}`} className="bouton">
+            Compléter
+          </Link>
+        );
       case "dormants":
       case "brouillons":
         return bouton("Vu", async () => {

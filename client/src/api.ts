@@ -169,6 +169,8 @@ export interface ResumeArticle {
   prixAchat: number | null;
   benefice: number | null;
   beneficeRealise: boolean;
+  /** À publier / Erreur : ce qui empêche la publication automatique (#196), vide si rien. */
+  manquesPublication: string[];
 }
 
 export interface PhotoArticle {

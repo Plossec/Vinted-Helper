@@ -21,7 +21,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0003](0003-travail-autonome-sur-les-lots-2-a-7.md) | 05/10/2026 | Travail autonome sur les lots 2 à 7 | Méthode | Accepté · ponctuel (nuit du 05 au 06/10/2026), puis [ADR-0039](0039-lot-en-mode-issues-pr.md) |  |
 | [0004](0004-lot-0-choix-techniques-de-mise-en-place.md) | 05/10/2026 | Lot 0 : choix techniques de mise en place | Socle | Accepté |  |
 | [0005](0005-regle-d-arrondi-arrondi-vers-le-bas-le-reste-sur-le-dernier.md) | 05/10/2026 | Règle d'arrondi : arrondi vers le bas, le reste sur le dernier | Calculs | Accepté |  |
-| [0006](0006-lot-1-decisions-de-cadrage.md) | 05/10/2026 | Lot 1 : décisions de cadrage | Socle | Accepté · « À publier » sans contrôle : voir l'issue #196 |  |
+| [0006](0006-lot-1-decisions-de-cadrage.md) | 05/10/2026 | Lot 1 : décisions de cadrage | Socle | Accepté · « À publier » sans contrôle : remplacé par [ADR-0093](0093-completude-des-le-passage-a-publier.md) |  |
 | [0007](0007-lot-1-choix-pendant-le-developpement.md) | 05/10/2026 | Lot 1 : choix pendant le développement | Socle | Accepté |  |
 | [0008](0008-lot-1-categories-marques-etats-et-listes-deroulantes.md) | 05/10/2026 | Lot 1 : catégories, marques, états et listes déroulantes | Socle | Accepté · catégories remplacées par [ADR-0065](0065-categories-recopiees-de-vinted.md) |  |
 | [0009](0009-https-local-pour-le-telephone.md) | 05/10/2026 | HTTPS local pour le téléphone | Serveur | Accepté |  |
@@ -108,3 +108,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0090](0090-un-seul-terme-benefice-attendu.md) | 15/10/2026 | Un seul terme : « bénéfice attendu » | Tableau de bord | Accepté |  |
 | [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Socle | Accepté |  |
 | [0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md) | 15/10/2026 | Sortie du stock depuis un colis en cours | Ventes | Accepté |  |
+| [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Publication Vinted | Accepté |  |

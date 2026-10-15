@@ -116,17 +116,31 @@ function LienVinted({ a }: { a: ResumeArticle }) {
 
 const prixAffiche = (a: ResumeArticle) => (a.prixAffiche === null ? "—" : formatEuros(a.prixAffiche));
 
+/** Sélection pour Vinted (#196) : un article incomplet reste visible, grisé et non cochable. */
+const incomplet = (a: ResumeArticle, props: Props) => props.selection !== null && a.manquesPublication.length > 0;
+const texteManques = (a: ResumeArticle) => `Il manque : ${a.manquesPublication.join(", ")}`;
+
 function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
   if (!props.selection) return null;
+  const bloque = incomplet(a, props);
   return (
     <input
       type="checkbox"
-      aria-label={`Sélectionner ${formatReference(a.reference)}`}
+      aria-label={`Sélectionner ${formatReference(a.reference)}${bloque ? ` (${texteManques(a)})` : ""}`}
+      title={bloque ? texteManques(a) : undefined}
+      disabled={bloque}
       checked={props.selection.has(a.id)}
       onChange={() => props.onBasculer(a.id)}
     />
   );
 }
+
+function Manques({ a, props }: { a: ResumeArticle; props: Props }) {
+  return incomplet(a, props) ? <span className="manques-publication">{texteManques(a)}</span> : null;
+}
+
+const classeSelection = (a: ResumeArticle, props: Props, base?: string) =>
+  [base, incomplet(a, props) ? "selection--incomplet" : null].filter(Boolean).join(" ") || undefined;
 
 function Vignette({ a, classe = "vignette" }: { a: ResumeArticle; classe?: string }) {
   return a.vignette ? (
@@ -145,7 +159,7 @@ export function VuesArticles(props: Props) {
     return (
       <ul className="mosaique">
         {articles.map((a) => (
-          <li key={a.id} className="mosaique__case">
+          <li key={a.id} className={classeSelection(a, props, "mosaique__case")}>
             <CaseSelection a={a} props={props} />
             <Link to={`/articles/${a.id}`} className="mosaique__lien">
               <Vignette a={a} classe="mosaique__photo" />
@@ -162,6 +176,7 @@ export function VuesArticles(props: Props) {
               </span>
               <span className="mosaique__nom">{a.nom ?? "(sans nom)"}</span>
             </Link>
+            <Manques a={a} props={props} />
           </li>
         ))}
       </ul>
@@ -171,7 +186,7 @@ export function VuesArticles(props: Props) {
   return (
     <ul className={mode === "compacte" ? "liste liste--compacte" : "liste"}>
       {articles.map((a) => (
-        <li key={a.id} className={selection ? "carte-selection" : undefined}>
+        <li key={a.id} className={selection ? classeSelection(a, props, "carte-selection") : undefined}>
           <CaseSelection a={a} props={props} />
           {mode === "compacte" ? (
             <Link to={`/articles/${a.id}`} className="ligne-article">
@@ -200,6 +215,7 @@ export function VuesArticles(props: Props) {
               </span>
             </Link>
           )}
+          <Manques a={a} props={props} />
         </li>
       ))}
     </ul>
@@ -241,7 +257,7 @@ function Tableau(props: Props) {
         </thead>
         <tbody>
           {articles.map((a) => (
-            <tr key={a.id} onClick={() => void naviguer(`/articles/${a.id}`)}>
+            <tr key={a.id} className={classeSelection(a, props)} onClick={() => void naviguer(`/articles/${a.id}`)}>
               <th scope="row" className="tableau-articles__fixe">
                 <span className="tableau-articles__article">
                   <CaseSelection a={a} props={props} />
@@ -249,6 +265,7 @@ function Tableau(props: Props) {
                     <span className="reference">{formatReference(a.reference)}</span> {a.nom ?? "(sans nom)"}
                   </Link>
                 </span>
+                <Manques a={a} props={props} />
               </th>
               <td>
                 <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span> <LienVinted a={a} />

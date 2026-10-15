@@ -6,10 +6,11 @@ import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, historiqueStatut, marque, publicationVinted, reglages, utilisateur } from "../base/schema.js";
 import { changerStatut } from "../articles/service.js";
-import { CATEGORIE_AUTRE, CATEGORIES } from "../catalogue/categories.js";
+import { CATEGORIES } from "../catalogue/categories.js";
 import { libelleCouleur } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
+import { manquesArticle } from "../metier/completude.js";
 import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 import { centimesVersSaisie } from "../outils/format.js";
@@ -67,18 +68,8 @@ async function chargerArticles(base: Base | Transaction, utilisateurId: string, 
 
 /** Ce qui manque à un article pour être publié (liste vide = publiable). Depuis Erreur, on peut redemander (#72). */
 export function manques(a: ArticleComplet, nombrePhotosAnnonce: number): string[] {
-  const m: string[] = [];
-  if (a.statut !== "a_publier" && a.statut !== "erreur_publication") m.push("statut « À publier »");
-  if (nombrePhotosAnnonce === 0) m.push("photos d'annonce");
-  if (!a.prixAffiche) m.push("prix affiché");
-  if (!a.titre?.trim()) m.push("titre de l'annonce");
-  if (!a.description?.trim()) m.push("description de l'annonce");
-  if (!a.categorie) m.push("catégorie");
-  else if (a.categorie === CATEGORIE_AUTRE) m.push("catégorie Vinted (« Autre » : à publier à la main sur Vinted)");
-  if (!a.marque) m.push("marque");
-  if (!a.etat) m.push("état");
-  if (a.couleurs.length === 0) m.push("couleur");
-  return m;
+  const statut = a.statut !== "a_publier" && a.statut !== "erreur_publication" ? ["statut « À publier »"] : [];
+  return [...statut, ...manquesArticle(a, nombrePhotosAnnonce, true)];
 }
 
 /** Ajoute des articles à la file de publication ; les articles incomplets sont refusés avec leurs manques. */
