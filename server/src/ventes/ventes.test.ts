@@ -313,10 +313,52 @@ describe("ventes et calculs", () => {
     expect((await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "donne" })).statusCode).toBe(409);
   });
 
-  it("sortie du stock refusée pour un article dans un colis en cours", async () => {
-    const a = await enLigne(900);
-    await vendre([a], 900);
-    expect((await requete("POST", `/api/articles/${a}/sortie-stock`, { motif: "perdu" })).statusCode).toBe(409);
+  describe("sortie du stock d'un article d'un colis en cours (#192)", () => {
+    const sortir = (id: string, payload: object = { motif: "perdu" }) =>
+      requete("POST", `/api/articles/${id}/sortie-stock`, payload);
+    const lireVente = async (id: string) => (await requete("GET", `/api/ventes/${id}`)).json<VenteLue>();
+
+    it("colis de 2 : l'article sort du colis, le montant gardé va à l'autre", async () => {
+      const a = await enLigne(900);
+      const b = await enLigne(600);
+      const v = await vendre([a, b], 1200);
+      const r = await sortir(a);
+      expect(r.statusCode, r.body).toBe(200);
+      expect(r.json<ArticleLu>()).toMatchObject({ statut: "sortie_stock", vente: null, couts: { prixVendu: null } });
+      const apres = await lireVente(v.id);
+      expect(apres).toMatchObject({ annulee: false, montantCredite: 1200 });
+      expect(apres.articles).toMatchObject([{ id: b, statut: "a_expedier", prixVendu: 1200, partEmballage: 8 }]);
+      expect((await lire(b)).vente).toMatchObject({ nombreArticles: 1 });
+    });
+
+    it("colis de 3 envoyé : montant réparti sur les 2 restants, qui avancent seuls", async () => {
+      const a = await enLigne(900);
+      const b = await enLigne(600);
+      const c = await enLigne(300);
+      const v = await vendre([a, b, c], 1200);
+      await requete("POST", `/api/ventes/${v.id}/envoi`, {});
+      expect((await sortir(b, { motif: "revendu", prixRevente: 500, canal: "main_propre" })).statusCode).toBe(200);
+      expect((await lireVente(v.id)).articles).toMatchObject([
+        { id: a, prixVendu: 900, partEmballage: 4 },
+        { id: c, prixVendu: 300, partEmballage: 4 },
+      ]);
+      expect((await requete("POST", `/api/ventes/${v.id}/finalisation`, {})).statusCode).toBe(200);
+      expect((await lire(a)).statut).toBe("finalise");
+      expect((await lire(c)).statut).toBe("finalise");
+      expect(await lire(b)).toMatchObject({ statut: "sortie_stock", sortieStock: { motif: "revendu" } });
+    });
+
+    it("dernier article du colis : la vente est annulée ; la sortie ne se supprime pas", async () => {
+      const a = await enLigne(900);
+      const v = await vendre([a], 900);
+      expect((await sortir(a, { motif: "a_vendre", canal: "leboncoin" })).statusCode).toBe(200);
+      expect((await lireVente(v.id)).annulee).toBe(true);
+      expect((await lire(a)).vente).toBeNull();
+      expect((await requete("POST", `/api/articles/${a}/annulation-statut`, {})).statusCode).toBe(409);
+      // L'annulation de la sortie du stock reste possible : l'article repasse « À publier ».
+      expect((await requete("POST", `/api/articles/${a}/annulation-sortie-stock`, {})).statusCode).toBe(200);
+      expect((await lire(a)).statut).toBe("a_publier");
+    });
   });
 
   it("historique des prix affichés", async () => {

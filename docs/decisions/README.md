@@ -28,7 +28,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0010](0010-lot-2-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 2 : choix pris en autonomie | Saisie terrain | Accepté · ligne « Sortie » remplacée par [ADR-0011](0011-lieu-de-la-sortie-en-saisie-libre.md) |  |
 | [0011](0011-lieu-de-la-sortie-en-saisie-libre.md) | 06/10/2026 | Lieu de la sortie en saisie libre | Saisie terrain | Accepté |  |
 | [0012](0012-annuler-la-sortie.md) | 06/10/2026 | Annuler la sortie | Saisie terrain | Accepté |  |
-| [0013](0013-lot-3-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 3 : choix pris en autonomie | Ventes | Accepté · sortie du stock dans un colis en cours : voir l'issue #192 |  |
+| [0013](0013-lot-3-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 3 : choix pris en autonomie | Ventes | Accepté · sortie du stock dans un colis en cours : remplacée par [ADR-0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md) |  |
 | [0014](0014-lot-4-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 4 : choix pris en autonomie | Liste | Accepté |  |
 | [0015](0015-lot-5-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 5 : choix pris en autonomie | Tableau de bord | Accepté · arrondi de la marge précisé par [ADR-0084](0084-marge-moyenne-arrondie-vers.md) |  |
 | [0016](0016-lot-6-choix-pris-en-autonomie.md) | 06/10/2026 | Lot 6 : choix pris en autonomie | IA Gemini | Accepté |  |
@@ -107,3 +107,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Interface | Accepté |  |
 | [0090](0090-un-seul-terme-benefice-attendu.md) | 15/10/2026 | Un seul terme : « bénéfice attendu » | Tableau de bord | Accepté |  |
 | [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Socle | Accepté |  |
+| [0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md) | 15/10/2026 | Sortie du stock depuis un colis en cours | Ventes | Accepté |  |
