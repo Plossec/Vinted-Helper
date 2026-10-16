@@ -112,6 +112,25 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
     "dormantsPlafondRepublications",
     entierFacultatif(c.dormantsPlafondRepublications, "Articles dormants : republications par jour", 1, 20),
   );
+  // Tâche « Vérification vente finalisée » (#148) : valeur fixe enregistrée pour le mode.
+  poser("finalisationActive", booleenFacultatif(c.finalisationActive, "Ventes finalisées : activée"));
+  if (c.finalisationMode !== undefined) {
+    if (c.finalisationMode !== "automatique" && c.finalisationMode !== "manuel")
+      throw erreurSaisie("Ventes finalisées : mode inconnu.");
+    m.finalisationMode = c.finalisationMode === "automatique" ? "automatique" : "manuel";
+  }
+  poser(
+    "finalisationFrequenceHeures",
+    entierFacultatif(c.finalisationFrequenceHeures, "Ventes finalisées : fréquence (heures)", 6, 168),
+  );
+  poser(
+    "finalisationPause",
+    entierFacultatif(c.finalisationPause, "Ventes finalisées : pause entre deux pages (s)", 30, 600),
+  );
+  poser(
+    "finalisationPlafond",
+    entierFacultatif(c.finalisationPlafond, "Ventes finalisées : finalisations par jour", 1, 100),
+  );
   return m;
 }
 

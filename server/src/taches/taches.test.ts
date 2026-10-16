@@ -242,7 +242,7 @@ describe("tâche « Articles dormants »", () => {
       const b = await enLigne();
       await reglerTache({ dormantsMode: "automatique" });
       t.horloge.avancer(8 * JOUR_MS);
-      expect((await passage()).json()).toEqual({ nombre: 0, actions: 2 });
+      expect((await passage()).json()).toEqual({ nombre: 0, actions: 2, lectureCommandes: false });
       const x = await suivante();
       expect(x).toMatchObject({ type: "baisse", essai: true, prixAvant: "11,00", prixApres: "10,00", annonce: null });
       expect(await suivante()).toBeNull(); // une seule à la fois

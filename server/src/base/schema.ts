@@ -49,6 +49,14 @@ export const typeBaisse = pgEnum("type_baisse", ["pourcentage", "montant"]);
 /** Baisse de prix d'un article dormant (#147) : réglage de l'article ; « aucune » = ne pas baisser le prix. */
 export const reglageBaisse = pgEnum("reglage_baisse", ["compte", "pourcentage", "montant", "aucune"]);
 export const typeActionVinted = pgEnum("type_action_vinted", ["baisse", "republication"]);
+/** Commande terminée lue sur Vinted (#148) : à valider (manuel), à rattacher à un article, appliquée, refusée. */
+export const etatCommandeVinted = pgEnum("etat_commande_vinted", [
+  "a_valider",
+  "a_rattacher",
+  "appliquee",
+  "refusee",
+  "ignoree",
+]);
 export const etatActionVinted = pgEnum("etat_action_vinted", [
   "a_valider",
   "en_attente",
@@ -395,6 +403,16 @@ export const reglages = pgTable(
     dormantsPlafondRepublications: integer("dormants_plafond_republications").notNull().default(10),
     /** Dernier passage de la tâche (planification des actions). */
     dormantsDernierPassage: horodatage("dormants_dernier_passage"),
+    // Tâche « Vérification vente finalisée » (#148, ADR-0074) : lecture de « Mes commandes › Ventes » sur Vinted.
+    finalisationActive: boolean("finalisation_active").notNull().default(false),
+    finalisationMode: modeTache("finalisation_mode").notNull().default("manuel"),
+    finalisationFrequenceHeures: integer("finalisation_frequence_heures").notNull().default(24),
+    /** Secondes entre deux pages lues sur Vinted. */
+    finalisationPause: integer("finalisation_pause").notNull().default(60),
+    /** Finalisations faites sans validation, par jour (au-delà : à valider). */
+    finalisationPlafond: integer("finalisation_plafond").notNull().default(50),
+    /** Dernière lecture des commandes (résultat reçu de l'extension). */
+    finalisationDernierPassage: horodatage("finalisation_dernier_passage"),
   },
   // Le programme du PC s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
@@ -456,6 +474,41 @@ export const actionVinted = pgTable(
   (t) => [
     index("action_vinted_utilisateur_idx").on(t.utilisateurId, t.etat),
     index("action_vinted_article_idx").on(t.articleId),
+  ],
+);
+
+/**
+ * Commandes terminées lues sur Vinted par l'extension (#148) : une ligne par commande, jamais traitée deux fois.
+ * Rattachée à une vente de l'application par le lien des annonces (`article.url_vinted`), sinon « à rattacher ».
+ */
+export const commandeVinted = pgTable(
+  "commande_vinted",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    /** Identifiant de la commande sur Vinted. */
+    idCommande: text("id_commande").notNull(),
+    /** Numéros des annonces Vinted de la commande (le « 123 » de `/items/123-…`). */
+    annonces: text("annonces").array().notNull(),
+    /** Date de fin de la commande sur Vinted : date de la finalisation dans l'application. */
+    dateFin: horodatage("date_fin").notNull(),
+    /** Centimes : montant crédité par Vinted, s'il a été lu. */
+    montant: integer("montant"),
+    etat: etatCommandeVinted("etat").notNull(),
+    venteId: uuid("vente_id").references(() => vente.id, { onDelete: "set null" }),
+    /** Centimes : montant crédité de la vente avant sa correction par le montant Vinted (alerte « montant corrigé »). */
+    montantAvant: integer("montant_avant"),
+    /** Alerte « montant corrigé » marquée « Vu ». */
+    vu: boolean("vu").notNull().default(false),
+    message: text("message"),
+    creeLe: horodatage("cree_le").notNull(),
+    traiteLe: horodatage("traite_le"),
+  },
+  (t) => [
+    uniqueIndex("commande_vinted_unique").on(t.utilisateurId, t.idCommande),
+    index("commande_vinted_etat_idx").on(t.utilisateurId, t.etat),
   ],
 );
 
