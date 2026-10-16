@@ -368,6 +368,32 @@ export interface ReglagesUtilisateur {
   dormantsPauseRepublication: number;
   dormantsPlafondBaisses: number;
   dormantsPlafondRepublications: number;
+  // Tâche « Vérification vente finalisée » (#148).
+  finalisationActive: boolean;
+  finalisationMode: "automatique" | "manuel";
+  finalisationFrequenceHeures: number;
+  /** Secondes. */
+  finalisationPause: number;
+  finalisationPlafond: number;
+}
+
+/** Commande terminée lue sur Vinted (#148), rattachée ou non à une vente de l'application. */
+export interface CommandeVinted {
+  id: string;
+  idCommande: string;
+  annonces: string[];
+  dateFin: string;
+  /** Centimes crédités par Vinted, s'ils ont été lus. */
+  montant: number | null;
+  /** Centimes : montant de l'application avant correction. */
+  montantAvant: number | null;
+  etat: "a_valider" | "a_rattacher" | "appliquee" | "refusee" | "ignoree";
+  message: string | null;
+  vente: {
+    id: string;
+    montantCredite: number | null;
+    articles: { id: string; reference: number; nom: string | null }[];
+  } | null;
 }
 
 /** Action d'une tâche automatisée sur Vinted (#147). */

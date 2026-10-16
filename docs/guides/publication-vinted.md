@@ -93,6 +93,13 @@ Après chaque essai, les pages sont relevées : **Dernier relevé → Téléchar
 pour le calibrage (étape 3, mode réel). Décochée trop tôt, la case « Mode essai » fait refuser l'action par
 l'extension (« Mode réel des tâches pas encore disponible »), sans rien toucher sur Vinted.
 
+## 6 ter. Tâches automatiques : ventes finalisées (extension 1.11, en essai)
+
+Activée dans l'application (**Réglages → Tâches automatiques → Ventes finalisées**). Une fois par jour (réglable),
+après les publications, l'extension ouvre **« Mes commandes › Ventes »** sur Vinted et la relève, **sans rien lire ni
+modifier** dans cette version. Envoyez ensuite le **Dernier relevé** à Claude : la version suivante lira les commandes
+terminées pour finaliser les colis dans l'application.
+
 ## 7. La fenêtre de l'extension
 
 Cliquez l'icône de l'extension :

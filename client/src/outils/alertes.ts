@@ -29,7 +29,13 @@ export interface AlertesServeur {
   invendus?: Alerte[];
   /** Tâches automatisées en mode manuel (#147) : nombre d'actions prévues à valider. */
   aValider?: number;
+  /** Tâche « Vérification vente finalisée » (#148) : commandes à valider, à rattacher, montants corrigés. */
+  commandes?: { aValider: number; aRattacher: number; montantsCorriges: number };
 }
+
+/** Nombre de choses à faire venant des commandes lues sur Vinted (#148). */
+export const nombreCommandes = (a: AlertesServeur | null) =>
+  a?.commandes ? a.commandes.aValider + a.commandes.aRattacher + a.commandes.montantsCorriges : 0;
 
 export const nombreAlertes = (a: AlertesServeur | null) =>
   a
@@ -40,7 +46,8 @@ export const nombreAlertes = (a: AlertesServeur | null) =>
       (a.erreursPublication?.length ?? 0) +
       (a.incomplets?.length ?? 0) +
       (a.invendus?.length ?? 0) +
-      (a.aValider ?? 0)
+      (a.aValider ?? 0) +
+      nombreCommandes(a)
     : 0;
 
 /** Groupe d'alertes du serveur (clé de `AlertesServeur`). */

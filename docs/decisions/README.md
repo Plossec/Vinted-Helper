@@ -111,3 +111,4 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Publication Vinted | Accepté |  |
 | [0094](0094-articles-dormants-realisation-cote-application.md) | 15/10/2026 | Articles dormants : réalisation côté application (étape 1 sur 3) | Tâches automatisées | Accepté |  |
 | [0095](0095-articles-dormants-execution-en-mode-essai.md) | 15/10/2026 | Articles dormants : exécution par l'extension, en mode essai (étape 2 sur 3) | Tâches automatisées | Accepté |  |
+| [0096](0096-ventes-finalisees-realisation-etape-1.md) | 16/10/2026 | Vérification vente finalisée : réalisation, étape 1 sur 2 | Tâches automatisées | Accepté |  |

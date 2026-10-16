@@ -34,6 +34,21 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
   relevé » de l'extension après un essai, voir `publication-vinted.md`).
 - **Journal** : Réglages → Publication Vinted, section « Tâches automatiques ».
 
+## Tâche automatique « Vérification vente finalisée »
+
+**Réglages → Tâches automatiques → Ventes finalisées** (désactivée par défaut) : l'extension lit « Mes commandes ›
+Ventes » sur Vinted ; une commande terminée fait passer **Finalisé** le colis Envoyé correspondant (retrouvé par le
+lien de l'annonce), à la **date de fin lue sur Vinted**.
+
+- **Mode** : *manuel* (« Ventes finalisées sur Vinted : à valider » dans « À faire » → **Finaliser** ou **Refuser**)
+  ou *automatique*.
+- **Montant différent** : le montant crédité lu sur Vinted remplace celui de l'application ; « Montants corrigés par
+  Vinted » dans « À faire » le signale (**Vu**).
+- **Commande non retrouvée** (article sans lien d'annonce, colis différent) : « Commandes Vinted à rattacher » →
+  choisissez l'article Envoyé, puis **Rattacher** (le lien est enregistré et le colis finalisé), ou **Ignorer**.
+- **Extension 1.11 (étape 1)** : elle ouvre et relève seulement la page des ventes ; envoyez le « Dernier relevé » à
+  Claude pour activer la lecture des commandes.
+
 **Écran d'ouverture** de l'application installée : **Réglages → Affichage → Ouverture de l'application installée**,
 *Terrain* (par défaut, pour le vide-grenier) ou *À faire* ; choix gardé sur chaque appareil.
 

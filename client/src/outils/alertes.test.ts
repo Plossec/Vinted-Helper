@@ -20,6 +20,8 @@ describe("sections de l'écran À faire", () => {
       ["Pour info", ["dormants:D", "brouillons:B"]],
     ]);
     expect(nombreAlertes(alertes)).toBe(6);
+    // Commandes lues sur Vinted (#148) : à valider, à rattacher, montants corrigés.
+    expect(nombreAlertes({ ...alertes, commandes: { aValider: 1, aRattacher: 2, montantsCorriges: 1 } })).toBe(10);
   });
 
   it("rien à faire : aucune section", () => {
