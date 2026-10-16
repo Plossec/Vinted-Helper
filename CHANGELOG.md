@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.19.0] — 16/10/2026
+
+### Ajouté
+- Tâche automatique **« Vérification vente finalisée »**, étape 1 sur 2 : réglages (Réglages → Tâches automatiques,
+  désactivée par défaut), commandes terminées sur Vinted rattachées aux colis Envoyés par le lien de l'annonce, colis
+  « Finalisé » à la date de Vinted (automatique ou à valider), montant crédité corrigé et signalé, commandes « à
+  rattacher » dans « À faire ». Extension **1.11.0** : ouvre et relève « Mes commandes › Ventes » (essai), pour
+  calibrer la lecture des commandes (#148).
+
 ## [1.18.0] — 15/10/2026
 
 ### Ajouté

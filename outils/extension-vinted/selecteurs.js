@@ -82,6 +82,12 @@ const SELECTEURS = {
     texteSupprimer: "Supprimer",
   },
 
+  /**
+   * Tâche « Vérification vente finalisée » (#148) : adresse de « Mes commandes › Ventes ». Rédigé SANS relevé (valeur
+   * probable) : le mode essai ouvre et relève cette page pour la calibrer.
+   */
+  pageVentes: "/my_orders/sold",
+
   /** Page d'une annonce créée : https://www.vinted.fr/items/1234567890-titre */
   motifAnnonceCreee: "^/items/\\d+",
 

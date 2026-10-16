@@ -26,9 +26,17 @@ function copieDeTest() {
 }
 
 /** Lance Chromium avec l'extension, configure-la, et exécute un ou plusieurs passages. */
-async function lancer({ demande, actions = [], vinted = {}, passages = 1, delaiEtape = 0, action = () => cycle() }) {
+async function lancer({
+  demande,
+  actions = [],
+  lectureCommandes = false,
+  vinted = {},
+  passages = 1,
+  delaiEtape = 0,
+  action = () => cycle(),
+}) {
   const faux = await demarrerFauxVinted(vinted);
-  const app = await demarrerFausseApplication(demande, actions);
+  const app = await demarrerFausseApplication(demande, actions, { lectureCommandes });
   const extension = copieDeTest();
   const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
     executablePath: CHROME,
@@ -280,4 +288,27 @@ test("action sur une page « session bloquée » : pause", async () => {
   assert.equal(app.resultatsActions[0].resultat, "erreur");
   assert.equal(etat.pause, true);
   assert.match(etat.raison, /bloqué la session/);
+});
+
+// --- Vérification vente finalisée (#148) : lecture des commandes en essai ---
+
+test("lecture des commandes en essai : « Mes commandes › Ventes » ouverte et relevée, liste vide envoyée", async () => {
+  const { app, vinted, diagnostic: d } = await lancer({ demande: null, lectureCommandes: true });
+  assert.equal(vinted.pagesVentes, 1);
+  assert.deepEqual(app.commandes, [{ essai: true, commandes: [] }]);
+  assert.equal(d.etape, "tâche : ventes finalisées");
+  assert.equal(d.page, "ventes");
+  assert.ok(d.elements.some((e) => e.testid === "order-list"));
+});
+
+test("ordre : publication, puis lecture des commandes, puis actions ; une seule opération par passage", async () => {
+  const { app, vinted } = await lancer({
+    demande: DEMANDE(true),
+    actions: [ACTION("baisse")],
+    lectureCommandes: true,
+    passages: 2,
+  });
+  assert.deepEqual(app.resultats, [{ resultat: "essai" }]); // passage 1 : publication
+  assert.equal(vinted.pagesVentes, 1); // passage 2 : lecture des commandes
+  assert.equal(app.actionsPrises, 0); // la baisse attend le passage suivant
 });

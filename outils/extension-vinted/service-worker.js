@@ -7,6 +7,8 @@
 // Tâches automatiques (#147) : sans annonce à publier (la publication passe d'abord), l'extension demande l'action
 // suivante (baisse de prix ou republication d'un article dormant) ; l'application règle les pauses entre actions.
 // Cette version ne fait les actions qu'en MODE ESSAI : elle ouvre et relève les pages, sans rien modifier.
+// Vérification vente finalisée (#148) : après la publication et avant les actions, lecture de « Mes commandes ›
+// Ventes » quand l'application la demande ; cette version ne fait que l'ouvrir et la relever (essai).
 
 /* global SELECTEURS */
 importScripts("selecteurs.js");
@@ -114,10 +116,13 @@ function creerApi({ adresse, jeton }) {
     async enAttente() {
       return (await (await appeler("/api/programme/attente")).json()).nombre;
     },
-    /** Annonces à publier et actions des tâches automatiques à faire (#147). */
+    /** Annonces à publier, actions des tâches automatiques (#147) et lecture des commandes (#148) à faire. */
     async attente() {
       const r = await (await appeler("/api/programme/attente")).json();
-      return { nombre: r.nombre, actions: r.actions ?? 0 };
+      return { nombre: r.nombre, actions: r.actions ?? 0, lectureCommandes: r.lectureCommandes === true };
+    },
+    async commandes(corps) {
+      await appeler("/api/programme/commandes", { method: "POST", body: JSON.stringify(corps) });
     },
     async actionSuivante() {
       return (await (await appeler("/api/programme/action-suivante")).json()).action;
@@ -319,6 +324,22 @@ async function executerAction(api, action, vinted) {
   return { resultat: "essai" };
 }
 
+/**
+ * Lecture de « Mes commandes › Ventes » (#148), en essai : la page est ouverte et relevée (« Dernier relevé ») pour
+ * calibrer la lecture des commandes ; aucune commande n'est encore envoyée à l'application.
+ */
+async function lireCommandes(api, vinted) {
+  await journal("Ventes finalisées : lecture de « Mes commandes › Ventes » (essai)…");
+  const onglet = await ouvrirOnglet(`${vinted}${SELECTEURS.pageVentes}`);
+  await verifierPage(onglet);
+  const releve = await releverPage(onglet, "ventes");
+  await chrome.storage.local.set({
+    diagnostic: { ...releve, date: new Date().toISOString(), etape: "tâche : ventes finalisées", erreur: null },
+  });
+  await api.commandes({ essai: true, commandes: [] });
+  await journal("Ventes finalisées : page relevée, rien n'est modifié. Fenêtre de l'extension → « Dernier relevé ».");
+}
+
 /** Action suivante des tâches automatiques : prise, faite (en essai), résultat renvoyé à l'application. */
 async function faireActionSuivante(api, vinted, signaler) {
   const action = await api.actionSuivante();
@@ -378,8 +399,8 @@ async function cycleSansVerrou(manuel) {
   if (etat.pause) return signaler("En pause : cliquez « Reprendre » pour relancer.");
 
   // Signale aussi à l'application que l'extension est active (et lui fait prévoir les tâches automatiques).
-  const { nombre, actions } = await api.attente();
-  if (nombre === 0 && actions === 0)
+  const { nombre, actions, lectureCommandes } = await api.attente();
+  if (nombre === 0 && actions === 0 && !lectureCommandes)
     return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
   if (Date.now() < etat.prochain) {
     const heure = new Date(etat.prochain).toLocaleTimeString("fr-FR", {
@@ -393,7 +414,9 @@ async function cycleSansVerrou(manuel) {
         : `${actions} action(s) en attente : prochaine action possible après ${heure}.`,
     );
   }
-  // La publication passe d'abord ; sans annonce à publier, une action des tâches automatiques (#147).
+  // La publication passe d'abord ; sans annonce à publier, la lecture des commandes (#148), puis une action des
+  // tâches automatiques (#147). Une seule opération sur Vinted par passage.
+  if (nombre === 0 && lectureCommandes) return lireCommandes(api, vinted);
   if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).

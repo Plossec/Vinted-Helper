@@ -3,6 +3,7 @@ import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { lectureCommandesDue } from "../taches/finalisation.js";
 import { nombreActionsEnAttente, planifierTaches } from "../taches/service.js";
 import {
   annulerPublication,
@@ -47,6 +48,8 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
       nombre: await nombreEnAttente(base, utilisateurId, maintenant()),
       /** Actions des tâches automatisées à faire (#147). */
       actions: await nombreActionsEnAttente(base, utilisateurId),
+      /** Lecture des commandes terminées sur Vinted à faire (#148). */
+      lectureCommandes: await lectureCommandesDue(base, utilisateurId, maintenant()),
     };
   });
 

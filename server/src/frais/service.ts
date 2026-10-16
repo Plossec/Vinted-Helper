@@ -91,6 +91,13 @@ export const REGLAGES_DEFAUT = {
   dormantsPauseRepublication: 600,
   dormantsPlafondBaisses: 20,
   dormantsPlafondRepublications: 10,
+  // Tâche « Vérification vente finalisée » (#148, ADR-0074) : désactivée par défaut, liste à valider (manuel).
+  finalisationActive: false,
+  finalisationMode: "manuel" as "automatique" | "manuel",
+  finalisationFrequenceHeures: 24,
+  /** Secondes. */
+  finalisationPause: 60,
+  finalisationPlafond: 50,
 };
 
 export type Reglages = typeof REGLAGES_DEFAUT;
@@ -117,6 +124,11 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     dormantsPauseRepublication: r.dormantsPauseRepublication,
     dormantsPlafondBaisses: r.dormantsPlafondBaisses,
     dormantsPlafondRepublications: r.dormantsPlafondRepublications,
+    finalisationActive: r.finalisationActive,
+    finalisationMode: r.finalisationMode,
+    finalisationFrequenceHeures: r.finalisationFrequenceHeures,
+    finalisationPause: r.finalisationPause,
+    finalisationPlafond: r.finalisationPlafond,
   };
 }
 

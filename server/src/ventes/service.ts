@@ -45,7 +45,7 @@ async function passer(
   }
 }
 
-async function chargerVente(tx: Base | Transaction, utilisateurId: string, id: string) {
+export async function chargerVente(tx: Base | Transaction, utilisateurId: string, id: string) {
   const [v] = await tx
     .select()
     .from(vente)
@@ -127,14 +127,24 @@ export async function avancerVente(
   maintenant: Date,
 ) {
   verifierDate(date, maintenant);
-  await base.transaction(async (tx) => {
-    const { actifs } = await chargerVente(tx, utilisateurId, venteId);
-    await passer(tx, utilisateurId, actifs, vers, date, maintenant);
-    await tx
-      .update(vente)
-      .set(vers === "envoye" ? { dateEnvoi: date } : { dateFinalisation: date })
-      .where(eq(vente.id, venteId));
-  });
+  await base.transaction((tx) => avancerVenteDans(tx, utilisateurId, venteId, vers, date, maintenant));
+}
+
+/** Envoyé / Finalisé dans une transaction déjà ouverte (aussi pour la tâche « Vérification vente finalisée », #148). */
+export async function avancerVenteDans(
+  tx: Transaction,
+  utilisateurId: string,
+  venteId: string,
+  vers: "envoye" | "finalise",
+  date: Date,
+  maintenant: Date,
+) {
+  const { actifs } = await chargerVente(tx, utilisateurId, venteId);
+  await passer(tx, utilisateurId, actifs, vers, date, maintenant);
+  await tx
+    .update(vente)
+    .set(vers === "envoye" ? { dateEnvoi: date } : { dateFinalisation: date })
+    .where(eq(vente.id, venteId));
 }
 
 /** Annulation par l'acheteur (À expédier → En ligne) : la vente est annulée et sort de tous les calculs (§4.3). */

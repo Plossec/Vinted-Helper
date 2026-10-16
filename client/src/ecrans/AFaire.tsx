@@ -5,7 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api } from "../api.js";
 import { ActionsAValider } from "../composants/ActionsTaches.js";
-import { type AlertesServeur, type LigneAFaire, type SectionAFaire, sectionsAFaire } from "../outils/alertes.js";
+import { CommandesVinted } from "../composants/CommandesVinted.js";
+import {
+  type AlertesServeur,
+  type LigneAFaire,
+  nombreCommandes,
+  type SectionAFaire,
+  sectionsAFaire,
+} from "../outils/alertes.js";
 import { chargerAlertes } from "../outils/alertesCache.js";
 import { formatDate } from "../outils/dates.js";
 import { demanderPublication } from "../publication.js";
@@ -134,7 +141,9 @@ export function AFaire() {
       {alertes === null && !erreur && <p className="statut">Chargement…</p>}
       {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
       {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}
-      {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && (
+      {/* Tâche « Vérification vente finalisée » (#148) : commandes lues sur Vinted. */}
+      {alertes !== null && nombreCommandes(alertes) > 0 && <CommandesVinted onChangement={() => void charger()} />}
+      {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && nombreCommandes(alertes) === 0 && (
         <p className="a-faire__vide">Rien à faire 🎉</p>
       )}
       {sections.map((s) => (

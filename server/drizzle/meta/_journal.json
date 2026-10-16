@@ -134,6 +134,13 @@
       "when": 1792088757613,
       "tag": "0018_taches_dormants",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792144832564,
+      "tag": "0019_taches_finalisation",
+      "breakpoints": true
     }
   ]
 }

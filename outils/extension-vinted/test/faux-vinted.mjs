@@ -152,7 +152,7 @@ const PAGE_BLOCAGE = `<!doctype html><html><body><h1>Ta session a été bloquée
   <p>Nous avons détecté une activité inhabituelle ou automatisée.</p></body></html>`;
 
 export function demarrerFauxVinted(options = {}) {
-  const etat = { clics: 0, chargements: 0, clicsCategorie: 0, pagesAnnonce: 0, pagesModifier: 0 };
+  const etat = { clics: 0, chargements: 0, clicsCategorie: 0, pagesAnnonce: 0, pagesModifier: 0, pagesVentes: 0 };
   const serveur = createServer((req, res) => {
     if (req.url === "/clic-categorie") {
       etat.clicsCategorie++;
@@ -168,6 +168,17 @@ export function demarrerFauxVinted(options = {}) {
       etat.chargements++;
       res.setHeader("content-type", "text/html; charset=utf-8");
       res.end(options.bloque ? PAGE_BLOCAGE : pageFormulaire(options));
+      return;
+    }
+    // « Mes commandes › Ventes » (#148) : rédigée SANS relevé de Vinted (à remplacer par la structure relevée).
+    if (req.url?.startsWith("/my_orders/sold")) {
+      etat.pagesVentes++;
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(
+        options.bloque
+          ? PAGE_BLOCAGE
+          : '<!doctype html><html><body><h1>Mes commandes</h1><div data-testid="order-list"><a href="/transactions/1">Commande</a></div></body></html>',
+      );
       return;
     }
     if (/^\/items\/\d+\/edit/.test(req.url ?? "")) {
@@ -198,8 +209,9 @@ const PNG = Buffer.from(
 );
 
 /** Fausse application : une demande en file, des actions de tâches automatiques (#147), résultats enregistrés. */
-export function demarrerFausseApplication(demande, actions = []) {
-  const etat = { resultats: [], prises: 0, resultatsActions: [], actionsPrises: 0 };
+export function demarrerFausseApplication(demande, actions = [], { lectureCommandes = false } = {}) {
+  const etat = { resultats: [], prises: 0, resultatsActions: [], actionsPrises: 0, commandes: [] };
+  let lecture = lectureCommandes;
   let enFile = demande ? [demande] : [];
   const actionsEnFile = [...actions];
   const serveur = createServer((req, res) => {
@@ -210,7 +222,19 @@ export function demarrerFausseApplication(demande, actions = []) {
     }
     res.setHeader("content-type", "application/json");
     if (req.url === "/api/programme/attente")
-      return res.end(JSON.stringify({ nombre: enFile.length, actions: actionsEnFile.length }));
+      return res.end(
+        JSON.stringify({ nombre: enFile.length, actions: actionsEnFile.length, lectureCommandes: lecture }),
+      );
+    if (req.url === "/api/programme/commandes") {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.commandes.push(JSON.parse(corps));
+        lecture = false;
+        res.end(JSON.stringify({ nouvelles: 0 }));
+      });
+      return;
+    }
     if (req.url === "/api/programme/action-suivante") {
       etat.actionsPrises++;
       return res.end(JSON.stringify({ action: actionsEnFile.shift() ?? null }));

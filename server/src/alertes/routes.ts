@@ -10,6 +10,7 @@ import { lireReglages } from "../frais/service.js";
 import { calculerAlertes, GROUPES_VU, type GroupeVu, masquerVus } from "../metier/alertes.js";
 import { erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
+import { nombresCommandes } from "../taches/finalisation.js";
 import { annulerActionsPerimees, nombreAValider } from "../taches/service.js";
 
 const SURVEILLES = [
@@ -119,6 +120,8 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
     return {
       ...alertes,
       aValider: await nombreAValider(base, utilisateurId),
+      /** Tâche « Vérification vente finalisée » (#148) : commandes à valider, à rattacher, montants corrigés. */
+      commandes: await nombresCommandes(base, utilisateurId),
       aExpedier: alertes.aExpedier.map((a) => ({
         ...a,
         urlConversation: conversations.get(a.id) ?? null,
