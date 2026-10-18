@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.19.1] — 18/10/2026
+
+### Modifié
+- Tâche « Vérification vente finalisée » : l'extension (**1.11.1**) lit le **« Porte-monnaie »** de Vinted
+  (`/wallet/balance`) au lieu de « Mes commandes › Ventes », page indiquée par l'utilisateur (#148).
+
 ## [1.19.0] — 16/10/2026
 
 ### Ajouté
