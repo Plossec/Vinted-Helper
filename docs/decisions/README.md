@@ -89,7 +89,7 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0071](0071-delais-de-l-extension.md) | 14/10/2026 | Délais de l'extension | Publication Vinted | Accepté |  |
 | [0072](0072-taches-automatisees-socle-commun.md) | 14/10/2026 | Tâches automatisées : socle commun | Tâches automatisées | Accepté |  |
 | [0073](0073-tache-articles-dormants.md) | 14/10/2026 | Tâche « Articles dormants » | Tâches automatisées | Accepté |  |
-| [0074](0074-tache-verification-vente-finalisee.md) | 14/10/2026 | Tâche « Vérification vente finalisée » | Tâches automatisées | Accepté |  |
+| [0074](0074-tache-verification-vente-finalisee.md) | 14/10/2026 | Tâche « Vérification vente finalisée » | Tâches automatisées | Accepté · source : voir [ADR-0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) |  |
 | [0075](0075-tache-negociation-favoris.md) | 14/10/2026 | Tâche « Négociation favoris » | Tâches automatisées | Accepté |  |
 | [0076](0076-tache-validee-prix-propose.md) | 14/10/2026 | Tâche « Validée prix proposé » | Tâches automatisées | Accepté |  |
 | [0077](0077-tache-recuperation-du-bon-de-livraison.md) | 14/10/2026 | Tâche « Récupération du bon de livraison » | Tâches automatisées | Accepté |  |
@@ -111,4 +111,5 @@ numéroté `NNNN-titre.md`, rédigé d'après le modèle [`0000-modele.md`](0000
 | [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Publication Vinted | Accepté |  |
 | [0094](0094-articles-dormants-realisation-cote-application.md) | 15/10/2026 | Articles dormants : réalisation côté application (étape 1 sur 3) | Tâches automatisées | Accepté |  |
 | [0095](0095-articles-dormants-execution-en-mode-essai.md) | 15/10/2026 | Articles dormants : exécution par l'extension, en mode essai (étape 2 sur 3) | Tâches automatisées | Accepté |  |
-| [0096](0096-ventes-finalisees-realisation-etape-1.md) | 16/10/2026 | Vérification vente finalisée : réalisation, étape 1 sur 2 | Tâches automatisées | Accepté |  |
+| [0096](0096-ventes-finalisees-realisation-etape-1.md) | 16/10/2026 | Vérification vente finalisée : réalisation, étape 1 sur 2 | Tâches automatisées | Accepté · page lue : voir [ADR-0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) |  |
+| [0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) | 18/10/2026 | Ventes finalisées : lues dans le « Porte-monnaie » | Tâches automatisées | Accepté |  |

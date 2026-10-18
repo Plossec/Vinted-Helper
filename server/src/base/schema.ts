@@ -403,7 +403,7 @@ export const reglages = pgTable(
     dormantsPlafondRepublications: integer("dormants_plafond_republications").notNull().default(10),
     /** Dernier passage de la tâche (planification des actions). */
     dormantsDernierPassage: horodatage("dormants_dernier_passage"),
-    // Tâche « Vérification vente finalisée » (#148, ADR-0074) : lecture de « Mes commandes › Ventes » sur Vinted.
+    // Tâche « Vérification vente finalisée » (#148, ADR-0074) : lecture du « Porte-monnaie » sur Vinted.
     finalisationActive: boolean("finalisation_active").notNull().default(false),
     finalisationMode: modeTache("finalisation_mode").notNull().default("manuel"),
     finalisationFrequenceHeures: integer("finalisation_frequence_heures").notNull().default(24),

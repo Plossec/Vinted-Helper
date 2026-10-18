@@ -1,5 +1,4 @@
-// Tâche « Vérification vente finalisée » (#148, ADR-0074) : l'extension lit les commandes terminées de « Mes commandes
-// › Ventes » sur Vinted ; chaque commande est rattachée à une vente de l'application par le lien de ses annonces, puis
+// Tâche « Vérification vente finalisée » (#148, ADR-0074) : l'extension lit les commandes terminées du « Porte-monnaie » sur Vinted ; chaque commande est rattachée à une vente de l'application par le lien de ses annonces, puis
 // le colis passe « Finalisé » à la date de fin lue sur Vinted (automatique, ou à valider en mode manuel). Un montant
 // différent est corrigé par celui de Vinted et signalé. Une commande non retrouvée est « à rattacher ».
 import { and, desc, eq, gte, inArray, isNull } from "drizzle-orm";

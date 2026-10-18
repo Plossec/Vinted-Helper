@@ -7,8 +7,7 @@
 // Tâches automatiques (#147) : sans annonce à publier (la publication passe d'abord), l'extension demande l'action
 // suivante (baisse de prix ou republication d'un article dormant) ; l'application règle les pauses entre actions.
 // Cette version ne fait les actions qu'en MODE ESSAI : elle ouvre et relève les pages, sans rien modifier.
-// Vérification vente finalisée (#148) : après la publication et avant les actions, lecture de « Mes commandes ›
-// Ventes » quand l'application la demande ; cette version ne fait que l'ouvrir et la relever (essai).
+// Vérification vente finalisée (#148) : après la publication et avant les actions, lecture du « Porte-monnaie » quand l'application la demande ; cette version ne fait que l'ouvrir et la relever (essai).
 
 /* global SELECTEURS */
 importScripts("selecteurs.js");
@@ -325,12 +324,12 @@ async function executerAction(api, action, vinted) {
 }
 
 /**
- * Lecture de « Mes commandes › Ventes » (#148), en essai : la page est ouverte et relevée (« Dernier relevé ») pour
+ * Lecture du « Porte-monnaie » (#148), en essai : la page est ouverte et relevée (« Dernier relevé ») pour
  * calibrer la lecture des commandes ; aucune commande n'est encore envoyée à l'application.
  */
 async function lireCommandes(api, vinted) {
-  await journal("Ventes finalisées : lecture de « Mes commandes › Ventes » (essai)…");
-  const onglet = await ouvrirOnglet(`${vinted}${SELECTEURS.pageVentes}`);
+  await journal("Ventes finalisées : lecture du « Porte-monnaie » (essai)…");
+  const onglet = await ouvrirOnglet(`${vinted}${SELECTEURS.pagePorteMonnaie}`);
   await verifierPage(onglet);
   const releve = await releverPage(onglet, "ventes");
   await chrome.storage.local.set({

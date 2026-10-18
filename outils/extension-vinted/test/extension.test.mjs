@@ -292,7 +292,7 @@ test("action sur une page « session bloquée » : pause", async () => {
 
 // --- Vérification vente finalisée (#148) : lecture des commandes en essai ---
 
-test("lecture des commandes en essai : « Mes commandes › Ventes » ouverte et relevée, liste vide envoyée", async () => {
+test("lecture des commandes en essai : « Porte-monnaie » ouvert et relevé, liste vide envoyée", async () => {
   const { app, vinted, diagnostic: d } = await lancer({ demande: null, lectureCommandes: true });
   assert.equal(vinted.pagesVentes, 1);
   assert.deepEqual(app.commandes, [{ essai: true, commandes: [] }]);
