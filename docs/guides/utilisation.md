@@ -36,8 +36,7 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 
 ## Tâche automatique « Vérification vente finalisée »
 
-**Réglages → Tâches automatiques → Ventes finalisées** (désactivée par défaut) : l'extension lit « Mes commandes ›
-Ventes » sur Vinted ; une commande terminée fait passer **Finalisé** le colis Envoyé correspondant (retrouvé par le
+**Réglages → Tâches automatiques → Ventes finalisées** (désactivée par défaut) : l'extension lit le « Porte-monnaie » sur Vinted ; une commande terminée fait passer **Finalisé** le colis Envoyé correspondant (retrouvé par le
 lien de l'annonce), à la **date de fin lue sur Vinted**.
 
 - **Mode** : *manuel* (« Ventes finalisées sur Vinted : à valider » dans « À faire » → **Finaliser** ou **Refuser**)

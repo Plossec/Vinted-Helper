@@ -1,7 +1,7 @@
 # ADR-0096 — Vérification vente finalisée : réalisation, étape 1 sur 2
 
 - **Date** : 16/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · page lue : voir [ADR-0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md)
 - **Décideurs** : Claude, dans le cadre validé par l'utilisateur ([ADR-0074](0074-tache-verification-vente-finalisee.md), [ADR-0078](0078-rythme-des-taches-automatisees.md))
 - **Issue** : #148
 - **Thème** : Tâches automatisées

@@ -170,14 +170,14 @@ export function demarrerFauxVinted(options = {}) {
       res.end(options.bloque ? PAGE_BLOCAGE : pageFormulaire(options));
       return;
     }
-    // « Mes commandes › Ventes » (#148) : rédigée SANS relevé de Vinted (à remplacer par la structure relevée).
-    if (req.url?.startsWith("/my_orders/sold")) {
+    // « Porte-monnaie » (#148, adresse donnée par l'utilisateur) : page rédigée SANS relevé de Vinted (à remplacer par la structure relevée).
+    if (req.url?.startsWith("/wallet/balance")) {
       etat.pagesVentes++;
       res.setHeader("content-type", "text/html; charset=utf-8");
       res.end(
         options.bloque
           ? PAGE_BLOCAGE
-          : '<!doctype html><html><body><h1>Mes commandes</h1><div data-testid="order-list"><a href="/transactions/1">Commande</a></div></body></html>',
+          : '<!doctype html><html><body><h1>Porte-monnaie</h1><div data-testid="order-list"><a href="/transactions/1">Commande</a></div></body></html>',
       );
       return;
     }

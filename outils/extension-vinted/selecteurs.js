@@ -83,10 +83,11 @@ const SELECTEURS = {
   },
 
   /**
-   * Tâche « Vérification vente finalisée » (#148) : adresse de « Mes commandes › Ventes ». Rédigé SANS relevé (valeur
-   * probable) : le mode essai ouvre et relève cette page pour la calibrer.
+   * Tâche « Vérification vente finalisée » (#148) : adresse du « Porte-monnaie ». Structure de la page
+   * inconnue : le mode essai ouvre et relève cette page pour la calibrer.
    */
-  pageVentes: "/my_orders/sold",
+  // Adresse donnée par l'utilisateur le 18/10/2026 (« /my_orders/sold » supposé auparavant).
+  pagePorteMonnaie: "/wallet/balance",
 
   /** Page d'une annonce créée : https://www.vinted.fr/items/1234567890-titre */
   motifAnnonceCreee: "^/items/\\d+",

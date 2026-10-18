@@ -194,8 +194,8 @@ export function TachesAutomatiques() {
             checked={form.finalisationActive}
             onChange={(e) => modifier({ finalisationActive: e.target.checked })}
           />{" "}
-          Tâche activée : lire « Mes commandes › Ventes » sur Vinted et passer « Finalisé » les colis dont la commande
-          est terminée
+          Tâche activée : lire le « Porte-monnaie » sur Vinted et passer « Finalisé » les colis dont la commande est
+          terminée
         </label>
         <label className="champ">
           <span>Mode</span>

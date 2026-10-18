@@ -104,7 +104,7 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
     return { ok: true };
   });
 
-  // Extension Chrome (jeton) : commandes terminées lues sur « Mes commandes › Ventes ».
+  // Extension Chrome (jeton) : commandes terminées lues sur le « Porte-monnaie ».
   app.post("/api/programme/commandes", async (requete) => {
     const c = objet(requete.body);
     if (!Array.isArray(c.commandes) || c.commandes.length > 500)

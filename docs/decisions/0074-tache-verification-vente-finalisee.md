@@ -1,7 +1,7 @@
 # ADR-0074 — Tâche « Vérification vente finalisée »
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · source : voir [ADR-0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md)
 - **Décideurs** : utilisateur
 - **Issue** : #148
 - **Thème** : Tâches automatisées

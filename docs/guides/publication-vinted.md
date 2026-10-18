@@ -96,7 +96,7 @@ l'extension (« Mode réel des tâches pas encore disponible »), sans rien touc
 ## 6 ter. Tâches automatiques : ventes finalisées (extension 1.11, en essai)
 
 Activée dans l'application (**Réglages → Tâches automatiques → Ventes finalisées**). Une fois par jour (réglable),
-après les publications, l'extension ouvre **« Mes commandes › Ventes »** sur Vinted et la relève, **sans rien lire ni
+après les publications, l'extension ouvre **le « Porte-monnaie »** sur Vinted et la relève, **sans rien lire ni
 modifier** dans cette version. Envoyez ensuite le **Dernier relevé** à Claude : la version suivante lira les commandes
 terminées pour finaliser les colis dans l'application.
 
