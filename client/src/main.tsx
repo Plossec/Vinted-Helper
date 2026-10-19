@@ -7,6 +7,7 @@ import { Disposition } from "./ecrans/Disposition.js";
 import { ErreurAffichage } from "./ecrans/ErreurAffichage.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
+import { MentionsLegales } from "./ecrans/MentionsLegales.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
 import { FicheVente } from "./ecrans/FicheVente.js";
 import { Listes } from "./ecrans/Listes.js";
@@ -21,6 +22,8 @@ import "./styles.css";
 
 const routeur = createBrowserRouter([
   { path: "/connexion", element: <Connexion />, errorElement: <ErreurAffichage /> },
+  // Accessible sans connexion (#216).
+  { path: "/mentions-legales", element: <MentionsLegales />, errorElement: <ErreurAffichage /> },
   {
     element: <Disposition />,
     errorElement: <ErreurAffichage />,

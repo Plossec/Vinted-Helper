@@ -102,6 +102,11 @@ export async function creerApp({
     return utilisateur;
   };
 
+  // Application privée : jamais indexée par les moteurs de recherche (#216, avec robots.txt et la balise noindex).
+  app.addHook("onSend", async (_requete, reponse) => {
+    reponse.header("X-Robots-Tag", "noindex, nofollow");
+  });
+
   // Contrôle de connexion pour toute l'API (sauf les routes publiques).
   app.addHook("onRequest", async (requete, reponse) => {
     const chemin = cheminControle(requete);

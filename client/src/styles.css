@@ -107,6 +107,16 @@ body {
   padding-top: 3rem;
 }
 
+/* Pied de l'écran de connexion et page de texte (mentions légales, #216). */
+.connexion__pied {
+  margin-top: var(--e-4);
+  text-align: center;
+}
+
+.page--texte {
+  max-width: 40rem;
+}
+
 h1,
 h2,
 h3 {

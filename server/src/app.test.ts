@@ -23,6 +23,19 @@ describe("GET /api/sante (accessible sans connexion)", () => {
     expect(reponse.json()).toEqual({ application: "Vinted Helper", version: "0.0.1", base: "connectée" });
   });
 
+  it("demande aux moteurs de recherche de ne pas indexer l'application (#216)", async () => {
+    const app = await creerApp({
+      version: "0.0.1",
+      base: base.base,
+      verifierBase: async () => true,
+      dossierPhotos: "/inexistant",
+    });
+    for (const url of ["/api/sante", "/api/articles"]) {
+      const reponse = await app.inject({ method: "GET", url });
+      expect(reponse.headers["x-robots-tag"]).toBe("noindex, nofollow");
+    }
+  });
+
   it("indique une base indisponible quand elle ne répond pas", async () => {
     const app = await creerApp({
       version: "0.0.1",

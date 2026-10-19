@@ -1,6 +1,6 @@
 // Écran de connexion (compte unique créé à l'installation : pas d'inscription).
 import { type FormEvent, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { api } from "../api.js";
 
 export function Connexion() {
@@ -56,6 +56,11 @@ export function Connexion() {
           {envoi ? "Connexion…" : "Se connecter"}
         </button>
       </form>
+      <p className="connexion__pied">
+        <Link className="lien" to="/mentions-legales">
+          Mentions légales
+        </Link>
+      </p>
     </main>
   );
 }
