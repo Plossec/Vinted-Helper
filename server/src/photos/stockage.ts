@@ -1,16 +1,26 @@
 // Fichiers des photos : data/photos/<utilisateur>/<photo>.<ext> + une vignette légère pour les listes.
-// L'original est conservé en pleine qualité (§5.10) ; la réduction à ~1600 px arrive au lot 7.
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+// Photo enregistrée en JPEG sans métadonnées (#216), en pleine taille tant que l'article est actif (§5.10).
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import sharp from "sharp";
 import { erreurSaisie } from "../outils/erreurs.js";
 
-const EXTENSIONS: Record<string, string> = { jpeg: "jpg", png: "png", webp: "webp", heif: "heic" };
+const FORMATS_ACCEPTES = new Set(["jpeg", "png", "webp", "heif"]);
 const COTE_VIGNETTE = 400;
 /** Taille des photos conservées après la vente ou la sortie du stock (§5.10). */
 export const COTE_REDUIT = 1600;
 
 export const nomVignette = (photoId: string) => `${photoId}-vignette.webp`;
+
+/** Photo en JPEG et sa vignette, orientation appliquée, sans aucune métadonnée (sharp ne les recopie pas). */
+async function sansMetadonnees(contenu: Buffer): Promise<{ photo: Buffer; vignette: Buffer }> {
+  const image = sharp(contenu).autoOrient();
+  const [photo, vignette] = await Promise.all([
+    image.clone().jpeg({ quality: 90 }).toBuffer(),
+    image.clone().resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" }).webp({ quality: 75 }).toBuffer(),
+  ]);
+  return { photo, vignette };
+}
 
 export function creerStockagePhotos(dossier: string) {
   const chemin = (utilisateurId: string, fichier: string) => resolve(dossier, utilisateurId, fichier);
@@ -18,7 +28,11 @@ export function creerStockagePhotos(dossier: string) {
   return {
     chemin,
 
-    /** Vérifie que le contenu est une image, l'enregistre et crée sa vignette. Renvoie le nom du fichier. */
+    /**
+     * Vérifie que le contenu est une image, l'enregistre et crée sa vignette. Renvoie le nom du fichier.
+     * La photo est réécrite en JPEG, orientation de l'appareil photo appliquée et **sans métadonnées** (position GPS,
+     * modèle du téléphone… : issue #216).
+     */
     async enregistrer(utilisateurId: string, photoId: string, contenu: Buffer): Promise<string> {
       let format: string | undefined;
       try {
@@ -26,18 +40,40 @@ export function creerStockagePhotos(dossier: string) {
       } catch {
         throw erreurSaisie("Le fichier envoyé n'est pas une image lisible.");
       }
-      const extension = format ? EXTENSIONS[format] : undefined;
-      if (!extension) throw erreurSaisie("Format de photo non pris en charge (JPEG, PNG, WebP ou HEIC).");
-      const fichier = `${photoId}.${extension}`;
+      if (!format || !FORMATS_ACCEPTES.has(format)) {
+        throw erreurSaisie("Format de photo non pris en charge (JPEG, PNG, WebP ou HEIC).");
+      }
+      const { photo, vignette } = await sansMetadonnees(contenu);
+      const fichier = `${photoId}.jpg`;
       await mkdir(resolve(dossier, utilisateurId), { recursive: true });
-      await writeFile(chemin(utilisateurId, fichier), contenu);
-      const vignette = await sharp(contenu)
-        .rotate() // respecte l'orientation de l'appareil photo
-        .resize(COTE_VIGNETTE, COTE_VIGNETTE, { fit: "cover" })
-        .webp({ quality: 75 })
-        .toBuffer();
+      await writeFile(chemin(utilisateurId, fichier), photo);
       await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
       return fichier;
+    },
+
+    /** Vrai si la photo porte encore des métadonnées (EXIF, XMP, IPTC) ou n'est pas un JPEG (photos d'avant #216). */
+    async aDesMetadonnees(utilisateurId: string, fichier: string): Promise<boolean> {
+      const lu = await sharp(await readFile(chemin(utilisateurId, fichier))).metadata();
+      return Boolean(lu.exif || lu.xmp || lu.iptc) || lu.orientation !== undefined || !fichier.endsWith(".jpg");
+    },
+
+    /**
+     * Réécrit une photo déjà enregistrée en JPEG sans métadonnées (photos d'avant l'issue #216) et recrée sa
+     * vignette ; renvoie le nouveau nom de fichier.
+     */
+    async retirerMetadonnees(utilisateurId: string, photoId: string, fichier: string): Promise<string> {
+      const { photo, vignette } = await sansMetadonnees(await readFile(chemin(utilisateurId, fichier)));
+      const nouveau = `${photoId}.jpg`;
+      if (nouveau === fichier) {
+        // Même nom : fichier temporaire puis renommage, pour ne jamais laisser une photo à moitié écrite.
+        const temporaire = chemin(utilisateurId, `${photoId}.tmp`);
+        await writeFile(temporaire, photo);
+        await rename(temporaire, chemin(utilisateurId, nouveau));
+      } else {
+        await writeFile(chemin(utilisateurId, nouveau), photo);
+      }
+      await writeFile(chemin(utilisateurId, nomVignette(photoId)), vignette);
+      return nouveau;
     },
 
     /** Réduit la photo à ~1600 px (JPEG) ; renvoie le nouveau nom de fichier. */
