@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
-/* global chrome, cycle, diagnostic */
+/* global chrome, cycle, diagnostic, releverOnglet */
 
 const CHROME = process.env.VH_CHROME_TEST ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const SOURCE = join(import.meta.dirname, "..");
@@ -170,6 +170,43 @@ test("diagnostic (#56) : relevé du formulaire et de la liste des catégories, a
   assert.equal(d.selecteursTrouves.titre, '[data-testid="title--input"]');
   assert.ok(d.apparusApresClicCategorie.some((e) => e.texte === "hommes"));
   assert.ok(d["options « Femmes »"].length >= 1);
+});
+
+test("« Relever cet onglet » (#224) : page ouverte relevée telle quelle, boîte de dialogue comprise, aucun clic", async () => {
+  const {
+    app,
+    vinted,
+    diagnostic: d,
+    reponse,
+  } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const { vinted: adresse } = await chrome.storage.local.get("vinted");
+      const onglet = await chrome.tabs.create({ url: `${adresse}/items/555-confirmation` });
+      await new Promise((r) => setTimeout(r, 1500));
+      return releverOnglet(onglet.id);
+    },
+  });
+  assert.equal(reponse.ok, true);
+  assert.equal(app.prises, 0);
+  assert.equal(vinted.clics, 0);
+  assert.equal(d.etape, "relevé de l'onglet");
+  assert.equal(d.dialogues.length, 1);
+  assert.equal(d.dialogues[0].role, "dialog");
+  assert.ok(d.dialogues[0].elements.some((e) => e.testid === "confirmer" && e.texte === "confirmer"));
+  assert.equal(d.boutonsTrouves.supprimer, true);
+});
+
+test("« Relever cet onglet » sur une page qui n'est pas Vinted : refusé avec un message", async () => {
+  const { reponse } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const onglet = await chrome.tabs.create({ url: "about:blank" });
+      return releverOnglet(onglet.id);
+    },
+  });
+  assert.equal(reponse.ok, false);
+  assert.match(reponse.message, /page Vinted/);
 });
 
 test("catégorie déjà remplie par Vinted avec la bonne valeur : on n'y touche pas (#56)", async () => {

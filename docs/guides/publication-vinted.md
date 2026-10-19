@@ -93,6 +93,15 @@ Après chaque essai, les pages sont relevées : **Dernier relevé → Téléchar
 pour le calibrage (étape 3, mode réel). Décochée trop tôt, la case « Mode essai » fait refuser l'action par
 l'extension (« Mode réel des tâches pas encore disponible »), sans rien toucher sur Vinted.
 
+**Relever la confirmation de suppression** (extension 1.12, une seule fois, pour le calibrage) : l'extension n'ouvre
+jamais elle-même la fenêtre « Supprimer cet article ? ». Pour la relever :
+
+1. Sur Vinted, ouvrez une de vos annonces et cliquez **Supprimer**. **Ne confirmez pas.**
+2. La fenêtre de confirmation ouverte, cliquez l'icône de l'extension → **Relever cet onglet**. L'extension lit la
+   page telle quelle, sans rien cliquer, puis ouvre la page du relevé : **Télécharger le fichier**.
+3. Revenez sur Vinted et cliquez **Annuler** : l'annonce reste en ligne.
+4. Envoyez le fichier à Claude, avec une capture de la fenêtre si possible.
+
 ## 6 ter. Tâches automatiques : ventes finalisées (extension 1.11, en essai)
 
 Activée dans l'application (**Réglages → Tâches automatiques → Ventes finalisées**). Une fois par jour (réglable),

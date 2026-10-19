@@ -379,6 +379,17 @@ function releve() {
   return [...document.querySelectorAll(ELEMENTS_UTILES)].filter(visible).slice(0, 1200).map(decrire);
 }
 
+const DIALOGUES = '[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open]';
+
+/** Boîtes de dialogue ouvertes (ex. confirmation de suppression, #224) : leur texte et tous leurs éléments. */
+function dialogues() {
+  return [...document.querySelectorAll(DIALOGUES)].filter(visible).map((d) => ({
+    ...decrire(d),
+    texteComplet: normaliser(d.textContent).slice(0, 300) || null,
+    elements: [...d.querySelectorAll(ELEMENTS_UTILES)].map(decrire),
+  }));
+}
+
 function selecteursTrouves() {
   return Object.fromEntries(
     Object.entries(SELECTEURS.champs).map(([nom, liste]) => [
@@ -470,6 +481,10 @@ function relevePage(nom) {
 
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
+
+  // « Relever cet onglet » (#224) : la page telle quelle, quel que soit son état, sans rien cliquer.
+  if (message.type === "releve-onglet")
+    return { ok: true, releve: { ...relevePage("onglet"), dialogues: dialogues() } };
 
   if (message.type === "releve-page") {
     const etat = etatPage();

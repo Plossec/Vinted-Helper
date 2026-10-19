@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.22.0] — 19/10/2026
+
+### Ajouté
+- Extension 1.12.0 : bouton **« Relever cet onglet »**, qui relève la page Vinted ouverte telle quelle (boîte de
+  dialogue comprise), sans rien cliquer : pour calibrer la confirmation de suppression d'une annonce (#224).
+
 ## [1.21.1] — 19/10/2026
 
 ### Modifié
