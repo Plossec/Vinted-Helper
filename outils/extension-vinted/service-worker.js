@@ -478,6 +478,28 @@ async function diagnostic() {
   }
 }
 
+/**
+ * « Relever cet onglet » (#224) : relève la page Vinted ouverte telle quelle (boîte de dialogue comprise), sans rien
+ * cliquer, pour calibrer ce que l'extension n'ouvre jamais seule (ex. confirmation de suppression d'une annonce).
+ */
+async function releverOnglet(ongletId) {
+  const { vinted } = await lire();
+  const onglet =
+    ongletId === undefined
+      ? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]
+      : await chrome.tabs.get(ongletId);
+  if (!onglet?.url?.startsWith(vinted))
+    return { ok: false, message: "Ouvrez d'abord la page Vinted à relever, puis cliquez « Relever cet onglet »." };
+  const r = await envoyer(onglet.id, { type: "releve-onglet" });
+  if (!r?.ok) return { ok: false, message: "La page Vinted ne répond pas : rechargez-la, puis réessayez." };
+  await chrome.storage.local.set({
+    diagnostic: { ...r.releve, date: new Date().toISOString(), etape: "relevé de l'onglet", erreur: null },
+  });
+  await journal("Onglet relevé : fenêtre de l'extension → « Dernier relevé ».");
+  await chrome.tabs.create({ url: chrome.runtime.getURL("diagnostic.html") });
+  return { ok: true };
+}
+
 /** Un passage : appelé par l'alarme, par « Vérifier maintenant » (manuel) et par les tests. */
 async function cycle(manuel = false) {
   if (occupe) {
@@ -531,6 +553,8 @@ async function action(message) {
       return { ok: true };
     case "diagnostic":
       return diagnostic();
+    case "releverOnglet":
+      return releverOnglet();
     case "tester": {
       const { config } = await lire();
       if (!config) return { ok: false, message: "Adresse et jeton à saisir." };

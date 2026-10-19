@@ -147,6 +147,14 @@ const pageModifier = ({ sansPrixModifier = false } = {}) => `<!doctype html><htm
   ${sansPrixModifier ? "" : '<input data-testid="price-input--input" value="11.00 €">'}
   <button data-testid="upload-form-save-button" type="button">Enregistrer</button></form></body></html>`;
 
+/** Annonce avec une boîte de confirmation ouverte (#224) : structure rédigée SANS relevé de Vinted. */
+const PAGE_CONFIRMATION = PAGE_ANNONCE.replace(
+  "</body>",
+  `<div role="dialog" aria-modal="true"><h2>Supprimer cet article ?</h2>
+  <button data-testid="confirmer" type="button">Confirmer</button>
+  <button data-testid="annuler" type="button">Annuler</button></div></body>`,
+);
+
 /** Page « session bloquée » affichée par Vinted à la place du formulaire. */
 const PAGE_BLOCAGE = `<!doctype html><html><body><h1>Ta session a été bloquée</h1>
   <p>Nous avons détecté une activité inhabituelle ou automatisée.</p></body></html>`;
@@ -185,6 +193,11 @@ export function demarrerFauxVinted(options = {}) {
       etat.pagesModifier++;
       res.setHeader("content-type", "text/html; charset=utf-8");
       res.end(options.bloque ? PAGE_BLOCAGE : pageModifier(options));
+      return;
+    }
+    if (req.url === "/items/555-confirmation") {
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(PAGE_CONFIRMATION);
       return;
     }
     if (/^\/items\/555/.test(req.url ?? "")) {
