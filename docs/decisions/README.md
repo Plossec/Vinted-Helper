@@ -169,6 +169,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0061](0061-fiche-article-organisee-autour-du-statut.md) | 13/10/2026 | Fiche article organisée autour du statut | Accepté |
 | [0086](0086-couleurs-des-badges-de-statut.md) | 14/10/2026 | Couleurs des badges de statut | Modifié |
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Accepté |
+| [0102](0102-accessibilite-de-l-interface.md) | 19/10/2026 | Accessibilité de l'interface : contrastes, lecteurs d'écran, contrôle automatique | Accepté |
 
 ## Tâches automatisées
 

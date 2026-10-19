@@ -5,6 +5,18 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.21.0] — 19/10/2026
+
+### Ajouté
+- Contrôle automatique de l'accessibilité de l'interface à chaque vérification (`eslint-plugin-jsx-a11y-x`) (#215).
+
+### Modifié
+- Accessibilité (#215) : articles incomplets de la sélection Vinted lisibles (cadre en pointillés et mention
+  « Incomplet » au lieu du grisé) ; texte d'aide des champs lisible en thème sombre (application et extension 1.11.2) ;
+  emojis et flèches masqués aux lecteurs d'écran, ouverture dans un nouvel onglet annoncée ; boutons répétés nommés en
+  entier ; champs obligatoires signalés ; messages et bandeaux annoncés ; graphique du tableau de bord lisible au
+  clavier et à la voix (mois avec l'année) ; élément atteint au clavier jamais caché sous les barres du bas.
+
 ## [1.20.1] — 19/10/2026
 
 ### Modifié

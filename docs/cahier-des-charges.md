@@ -51,6 +51,8 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
   - La **référence** `#0127` est attribuée **par le serveur** à la réception ; d'ici là, l'article affiche « Réf. en attente ».
   - Si la **session expire** alors que des éléments sont en attente, ils sont **conservés** sur le téléphone et envoyés après reconnexion.
 - Interface **claire / sombre automatique**, sobre, gros boutons utilisables à une main.
+- **Accessible** : contrastes WCAG 2.2 AA, lisible par les lecteurs d'écran (et les agents IA), contrôle automatique à
+  chaque PR (ADR-0102).
 
 ### 2.3 Format français (obligatoire partout)
 - Montants : `3,33 €` (virgule décimale, symbole après). Saisie acceptée avec virgule **ou** point.
