@@ -77,7 +77,7 @@ export function Disposition() {
   return (
     <div className="disposition">
       {nouvelleVersion && (
-        <p className="bandeau bandeau--version">
+        <p className="bandeau bandeau--version" role="status">
           Nouvelle version disponible —{" "}
           <button className="lien" type="button" onClick={mettreAJour}>
             Mettre à jour
@@ -85,7 +85,7 @@ export function Disposition() {
         </p>
       )}
       {etat === "hors-ligne" && (
-        <p className="bandeau bandeau--hors-ligne">
+        <p className="bandeau bandeau--hors-ligne" role="status">
           Hors ligne (ou serveur injoignable) : la saisie terrain reste possible, elle sera envoyée plus tard.
         </p>
       )}
@@ -105,8 +105,9 @@ export function Disposition() {
             <span className="navigation__icone">
               <Icone />
               {onglet === "a-faire" && alertes > 0 && (
-                <span className="pastille" aria-label={`${alertes} à faire`}>
+                <span className="pastille">
                   {alertes}
+                  <span className="visuellement-masque"> à faire</span>
                 </span>
               )}
             </span>

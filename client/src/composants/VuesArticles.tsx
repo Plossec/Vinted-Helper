@@ -241,7 +241,7 @@ function Tableau(props: Props) {
     <th scope="col" className={classe} aria-sort={tri === t ? (croissant ? "ascending" : "descending") : undefined}>
       <button type="button" className="tableau-articles__tri" onClick={() => onTri(t)}>
         {libelle}
-        {tri === t ? (croissant ? " ↑" : " ↓") : ""}
+        {tri === t ? <span aria-hidden="true">{croissant ? " ↑" : " ↓"}</span> : null}
       </button>
     </th>
   );

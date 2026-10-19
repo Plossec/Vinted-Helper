@@ -280,7 +280,8 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
       ) : (
         <div className="encadre">
           <p>
-            {libelleAction(article.statut, choix)} → <strong>{LIBELLES_STATUT[choix]}</strong>
+            {libelleAction(article.statut, choix)} <span aria-hidden="true">→</span>
+            <span className="visuellement-masque">vers</span> <strong>{LIBELLES_STATUT[choix]}</strong>
             {tailleColis > 1 &&
             article.statut !== "en_ligne" &&
             article.statut !== "invendu" &&

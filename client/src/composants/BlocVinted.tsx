@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { api, type Article } from "../api.js";
 import { demanderPublication, lireModeEssai } from "../publication.js";
 import { useSignalerModification } from "../outils/modifications.js";
+import { NouvelOnglet } from "./NouvelOnglet.js";
 
 interface ReponseLien {
   article: Article;
@@ -88,7 +89,8 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
       {article.urlVinted && (
         <p>
           <a href={article.urlVinted} target="_blank" rel="noreferrer">
-            Voir l'annonce sur Vinted ↗
+            Voir l'annonce sur Vinted
+            <NouvelOnglet />
           </a>
         </p>
       )}
@@ -131,7 +133,8 @@ export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseA
           {article.urlConversation && (
             <p>
               <a href={article.urlConversation} target="_blank" rel="noreferrer">
-                💬 Ouvrir la conversation avec l'acheteur ↗
+                <span aria-hidden="true">💬</span> Ouvrir la conversation avec l'acheteur
+                <NouvelOnglet />
               </a>
             </p>
           )}

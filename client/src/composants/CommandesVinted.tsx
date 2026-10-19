@@ -6,6 +6,7 @@ import { api, type CommandeVinted, type ResumeArticle } from "../api.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
+import { NouvelOnglet } from "./NouvelOnglet.js";
 
 interface Commandes {
   aValider: CommandeVinted[];
@@ -66,7 +67,12 @@ export function CommandesVinted({ onChangement }: { onChangement: () => void }) 
     }
   }
 
-  if (!commandes) return retour ? <p className="message message--erreur">{retour.texte}</p> : null;
+  if (!commandes)
+    return retour ? (
+      <p className="message message--erreur" role="alert">
+        {retour.texte}
+      </p>
+    ) : null;
   const { aValider, aRattacher, montantsCorriges } = commandes;
   if (aValider.length + aRattacher.length + montantsCorriges.length === 0 && !retour) return null;
 
@@ -80,7 +86,14 @@ export function CommandesVinted({ onChangement }: { onChangement: () => void }) 
 
   return (
     <>
-      {retour && <p className={retour.ok ? "message message--ok" : "message message--erreur"}>{retour.texte}</p>}
+      {retour && (
+        <p
+          className={retour.ok ? "message message--ok" : "message message--erreur"}
+          role={retour.ok ? "status" : "alert"}
+        >
+          {retour.texte}
+        </p>
+      )}
 
       {aValider.length > 0 && (
         <section className="a-faire__section a-faire__section--a-traiter">
@@ -156,7 +169,8 @@ export function CommandesVinted({ onChangement }: { onChangement: () => void }) 
                       <span key={n}>
                         {i > 0 ? ", " : ""}
                         <a href={`https://www.vinted.fr/items/${n}`} target="_blank" rel="noreferrer">
-                          annonce {n} ↗
+                          annonce {n}
+                          <NouvelOnglet />
                         </a>
                       </span>
                     ))}

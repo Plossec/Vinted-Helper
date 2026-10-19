@@ -226,7 +226,7 @@ function DemarrerSortie({
       </form>
       <div className="section actions">
         <button className="bouton" type="button" onClick={onMaison}>
-          📷 Article de la maison (0 €, sans sortie)
+          <span aria-hidden="true">📷</span> Article de la maison (0 €, sans sortie)
         </button>
         <Link to="/sorties" className="bouton">
           Toutes les sorties

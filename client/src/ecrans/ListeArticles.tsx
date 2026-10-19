@@ -292,7 +292,11 @@ export function ListeArticles() {
         )}
       </div>
 
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {resultats === null && !erreur && <p className="statut">Chargement…</p>}
       {selectionPossible && resultats && resultats.length > 0 && (
         <p className="section">
@@ -320,7 +324,10 @@ export function ListeArticles() {
         </p>
       )}
       {retour && (
-        <p className={`message message--lignes ${retour.ok ? "message--ok" : "message--erreur"}`}>
+        <p
+          className={`message message--lignes ${retour.ok ? "message--ok" : "message--erreur"}`}
+          role={retour.ok ? "status" : "alert"}
+        >
           {retour.texte}{" "}
           <Link to="/publication" className="lien">
             Suivre la publication

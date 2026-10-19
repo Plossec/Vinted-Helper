@@ -170,7 +170,11 @@ export function TableauDeBord() {
           </select>
         </label>
       </div>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {!tableau && !erreur && <p className="statut">Chargement…</p>}
       {tableau && (
         <>

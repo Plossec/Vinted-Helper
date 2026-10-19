@@ -27,7 +27,11 @@ export function ListeSorties() {
         ← Terrain
       </Link>
       <h1>Sorties</h1>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {sorties === null && !erreur && <p className="statut">Chargement…</p>}
       {sorties?.length === 0 && <p className="vide">Aucune sortie pour l'instant.</p>}
       <ul className="liste">
@@ -121,7 +125,9 @@ export function FicheSortie() {
       <h1>{sortie ? `${sortie.lieu} — ${formatDate(sortie.date)}` : "Sortie"}</h1>
       {sortie === null ? (
         message ? (
-          <p className="message message--erreur">{message.texte}</p>
+          <p className="message message--erreur" role="alert">
+            {message.texte}
+          </p>
         ) : (
           <p className="statut">Chargement…</p>
         )

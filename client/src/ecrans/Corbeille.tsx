@@ -47,7 +47,11 @@ export function Corbeille() {
         Les articles supprimés n'entrent dans aucun calcul. Ils sont restaurables pendant 30 jours, puis supprimés
         définitivement avec leurs photos. Leur numéro de référence n'est jamais réattribué.
       </p>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {articles?.length === 0 && <p className="vide">La corbeille est vide.</p>}
       <ul className="liste">
         {articles?.map((a) => (

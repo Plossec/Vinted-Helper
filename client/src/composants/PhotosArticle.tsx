@@ -76,13 +76,14 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
     }
   }
 
-  const boutonsRotation = (id: string) => (
+  // Noms accessibles complets (#215) : les mêmes boutons se répètent sous chaque photo.
+  const boutonsRotation = (id: string, nom: string) => (
     <>
       <button
         type="button"
         onClick={() => void pivoter(id, "gauche")}
         disabled={rotation !== null}
-        aria-label="Tourner vers la gauche"
+        aria-label={`Tourner la ${nom} vers la gauche`}
       >
         ↺
       </button>
@@ -90,7 +91,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         type="button"
         onClick={() => void pivoter(id, "droite")}
         disabled={rotation !== null}
-        aria-label="Tourner vers la droite"
+        aria-label={`Tourner la ${nom} vers la droite`}
       >
         ↻
       </button>
@@ -113,11 +114,16 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         {terrain.map((p) => (
           <li key={p.id}>
             <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id) + version(p.id)} style={style(p.id)} alt="Vue terrain en grand (nouvel onglet)" loading="lazy" />
+              <img
+                src={urlVignette(p.id) + version(p.id)}
+                style={style(p.id)}
+                alt="Vue terrain en grand (nouvel onglet)"
+                loading="lazy"
+              />
             </a>
             <span className="photos__legende">Photo terrain</span>
             <div className="photos__actions">
-              {boutonsRotation(p.id)}
+              {boutonsRotation(p.id, "photo terrain")}
               <button type="button" onClick={() => retirer(p.id, p.type)} aria-label="Retirer la photo terrain">
                 🗑
               </button>
@@ -135,13 +141,22 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
               />
             </a>
             <span className="photos__legende">{p.estPrincipale ? "★ Principale" : `Photo ${i + 1}`}</span>
-            <div className="photos__actions">{boutonsRotation(p.id)}</div>
+            <div className="photos__actions">{boutonsRotation(p.id, `photo ${i + 1}`)}</div>
             <div className="photos__actions">
-              <button type="button" onClick={() => deplacer(i, -1)} disabled={i === 0} aria-label="Avancer">
+              <button
+                type="button"
+                onClick={() => deplacer(i, -1)}
+                disabled={i === 0}
+                aria-label={`Avancer la photo ${i + 1}`}
+              >
                 ←
               </button>
               {!p.estPrincipale && (
-                <button type="button" onClick={() => rendrePrincipale(p.id)} aria-label="Photo principale">
+                <button
+                  type="button"
+                  onClick={() => rendrePrincipale(p.id)}
+                  aria-label={`Faire de la photo ${i + 1} la photo principale`}
+                >
                   ★
                 </button>
               )}
@@ -149,11 +164,11 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
                 type="button"
                 onClick={() => deplacer(i, 1)}
                 disabled={i === annonces.length - 1}
-                aria-label="Reculer"
+                aria-label={`Reculer la photo ${i + 1}`}
               >
                 →
               </button>
-              <button type="button" onClick={() => retirer(p.id, p.type)} aria-label="Supprimer">
+              <button type="button" onClick={() => retirer(p.id, p.type)} aria-label={`Supprimer la photo ${i + 1}`}>
                 🗑
               </button>
             </div>
@@ -172,10 +187,10 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
       />
       <div className="actions">
         <button className="bouton" type="button" disabled={envoi !== null} onClick={() => galerie.current?.click()}>
-          🖼 Galerie
+          <span aria-hidden="true">🖼</span> Galerie
         </button>
         <button className="bouton" type="button" disabled={envoi !== null} onClick={() => appareil.current?.click()}>
-          📷 Appareil photo
+          <span aria-hidden="true">📷</span> Appareil photo
         </button>
       </div>
       {envoi && <p className="secondaire">{envoi}</p>}

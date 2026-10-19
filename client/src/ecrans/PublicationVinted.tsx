@@ -7,6 +7,7 @@ import { ecrireModeEssai, lireModeEssai } from "../publication.js";
 import { formatReference } from "../statuts.js";
 import { JournalActions } from "../composants/ActionsTaches.js";
 import { confirmer } from "../composants/Dialogue.js";
+import { NouvelOnglet } from "../composants/NouvelOnglet.js";
 
 const LIBELLES: Record<EtatPublication, string> = {
   en_attente: "En attente",
@@ -102,7 +103,11 @@ export function PublicationVinted() {
         </p>
       </section>
 
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
 
       <section className="section">
         <h2>File de publication</h2>
@@ -127,7 +132,8 @@ export function PublicationVinted() {
                   <>
                     {" "}
                     <a href={p.urlVinted} target="_blank" rel="noreferrer">
-                      Voir l'annonce ↗
+                      Voir l'annonce
+                      <NouvelOnglet />
                     </a>
                   </>
                 )}
@@ -151,7 +157,7 @@ export function PublicationVinted() {
           publication et les photos.
         </p>
         {jeton ? (
-          <p className="message message--ok">
+          <p className="message message--ok" role="status">
             Jeton (affiché une seule fois, copiez-le maintenant) : <code className="jeton">{jeton}</code>
           </p>
         ) : (

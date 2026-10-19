@@ -369,7 +369,13 @@ export function FicheArticle() {
   if (refs === null || options === null) {
     return (
       <main className="page">
-        {message ? <p className="message message--erreur">{message.texte}</p> : <p className="statut">Chargement…</p>}
+        {message ? (
+          <p className="message message--erreur" role="alert">
+            {message.texte}
+          </p>
+        ) : (
+          <p className="statut">Chargement…</p>
+        )}
       </main>
     );
   }
@@ -402,7 +408,13 @@ export function FicheArticle() {
                 onChange={(e) => void lireEtiquette(e)}
               />
               <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
-                {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
+                {lecture ? (
+                  "Lecture de l'étiquette…"
+                ) : (
+                  <>
+                    <span aria-hidden="true">🏷</span> Lire l'étiquette
+                  </>
+                )}
               </button>
 
               <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
