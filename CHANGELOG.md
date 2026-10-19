@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.20.1] — 19/10/2026
+
+### Modifié
+- Index des décisions (`docs/decisions/README.md`) allégé : groupé par thème, statut en un mot, détail dans l'en-tête
+  de chaque décision (#221).
+
 ## [1.20.0] — 19/10/2026
 
 ### Ajouté
