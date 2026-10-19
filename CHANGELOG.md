@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.21.1] — 19/10/2026
+
+### Modifié
+- Serveur : après chaque mise en ligne réussie, le cache de construction Docker est vidé (22 Go accumulés) (#225).
+
 ## [1.21.0] — 19/10/2026
 
 ### Ajouté

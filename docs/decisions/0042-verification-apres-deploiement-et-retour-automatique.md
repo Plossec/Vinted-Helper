@@ -1,7 +1,7 @@
 # ADR-0042 — Vérification après déploiement et retour automatique
 
 - **Date** : 13/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · nettoyage complété par [ADR-0103](0103-cache-de-construction-vide-apres-mise-en-ligne.md)
 - **Décideurs** : utilisateur
 - **Issue** : #119
 - **Thème** : Serveur

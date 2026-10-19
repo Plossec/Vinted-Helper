@@ -153,7 +153,10 @@ Une fois activé, **chaque fusion dans `main`** met le serveur à jour toute seu
 (types, lint, tests, construction) ; si tout est vert, il lance sur le serveur le script de mise à jour ci-dessous
 (sauvegarde de la base, nouvelle version, redémarrage), puis vérifie que l'application répond. Suivi : onglet
 **Actions** du dépôt GitHub. Si la nouvelle version ne répond pas, le serveur **remet tout seul la version
-précédente** en ligne et GitHub envoie un e-mail d'échec : voir « Si une mise à jour échoue » ci-dessous.
+précédente** en ligne et GitHub envoie un e-mail d'échec : voir « Si une mise à jour échoue » ci-dessous. Après une
+mise en ligne réussie, le script efface aussi les anciennes images et le **cache de construction** Docker (place
+disque). Pour le vider à la main : `sudo docker builder prune -f` (ni la base, ni les photos, ni les sauvegardes ne
+sont touchées ; **jamais** `docker system prune --volumes`).
 
 Activation (une seule fois) :
 

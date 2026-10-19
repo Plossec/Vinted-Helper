@@ -73,6 +73,9 @@ mettre_en_ligne() {
   echo "==> Reconstruction et redémarrage"
   if reconstruire; then
     docker image prune -f > /dev/null
+    # Cache de construction vidé après une mise en ligne réussie (#225 : 22 Go accumulés) ; jamais après un refus,
+    # le cache pouvant servir au correctif. Un échec du nettoyage ne fait pas échouer la mise à jour.
+    docker builder prune -f > /dev/null || echo "!!! Nettoyage du cache de construction impossible (sans conséquence)."
     relancer_sauvegarde_si_besoin
     docker compose ps
     echo "$nouvelle" > "$VERSION_SAINE"

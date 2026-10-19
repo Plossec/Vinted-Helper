@@ -130,11 +130,12 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0018](0018-mise-en-ligne-ovh.md) | 06/10/2026 | Mise en ligne OVH | Modifié |
 | [0019](0019-rapatriement-automatique-des-sauvegardes.md) | 06/10/2026 | Rapatriement automatique des sauvegardes | Modifié |
 | [0022](0022-deploiement-a-chaque-fusion-dans-main.md) | 07/10/2026 | Déploiement à chaque fusion dans main | Modifié |
-| [0042](0042-verification-apres-deploiement-et-retour-automatique.md) | 13/10/2026 | Vérification après déploiement et retour automatique | Accepté |
+| [0042](0042-verification-apres-deploiement-et-retour-automatique.md) | 13/10/2026 | Vérification après déploiement et retour automatique | Modifié |
 | [0043](0043-ci-completee.md) | 13/10/2026 | CI complétée | Modifié |
 | [0044](0044-dependabot-typescript-7-ignore-pour-l-instant.md) | 13/10/2026 | Dependabot : TypeScript 7 ignoré pour l'instant | Accepté |
 | [0081](0081-fusions-dans-main-par-claude-et-dependabot.md) | 14/10/2026 | Fusions dans main par Claude et Dependabot | Modifié |
 | [0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | 14/10/2026 | Serveur OVH : connexion SSH par clé | Accepté |
+| [0103](0103-cache-de-construction-vide-apres-mise-en-ligne.md) | 19/10/2026 | Cache de construction Docker vidé après chaque mise en ligne réussie | Accepté |
 
 ## Publication Vinted
 
