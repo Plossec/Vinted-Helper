@@ -38,6 +38,8 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
 - **Un seul utilisateur** en V1.
 - Le compte est **créé à l'installation** (identifiant + mot de passe dans le fichier de configuration). **Pas de page d'inscription**, pas de « mot de passe oublié » par e-mail.
 - Mot de passe **modifiable dans les Réglages** ; en cas d'oubli, **réinitialisation par une commande** sur le serveur (expliquée dans le guide).
+- Application **privée** : jamais indexée par les moteurs de recherche (`robots.txt`, `noindex`) ; page **« Mentions
+  légales »** accessible sans connexion depuis l'écran de connexion (éditeur particulier, hébergeur OVH ; ADR-0100).
 - Session mémorisée sur le téléphone.
 - **Préparation de l'avenir** : toutes les données (articles, sorties, photos, ventes, référentiels, réglages…) sont rattachées à un utilisateur dans la base, pour permettre une ouverture future au public sans restructuration ([issue #4](https://github.com/Plossec/Vinted-Helper/issues/4)). Aucune fonction multi-utilisateur n'est développée en V1.
 
@@ -206,6 +208,8 @@ manque. La catégorie « Autre » est admise (publication à la main).
 
 ### 5.6 Ventes
 - Passage **En ligne → À expédier** : création d'une **vente** (= un colis) avec 1 ou plusieurs articles, montant crédité, date de vente, lien facultatif de la conversation Vinted (ADR-0026).
+- **Conservation** : le lien de la conversation et les commandes lues sur Vinted sont **effacés 6 mois après la
+  finalisation** ; la vente et ses montants restent (ADR-0100).
 - **Emballage** : 0,08 € par colis par défaut (modifiable dans la vente et dans les Réglages).
 - Dates d'envoi et de finalisation saisies au passage aux statuts Envoyé et Finalisé (appliquées à tout le colis).
 - **Retour partiel** : sélection des articles renvoyés + saisie du **nouveau montant réellement crédité** pour le colis.
@@ -243,7 +247,8 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **Analyse par catégorie / marque / gamme** : **marge moyenne en € et en %**, **délai moyen de vente** (mise en ligne → vente **et** achat → vente).
 
 ### 5.10 Photos : stockage
-- Pleine qualité tant que l'article est actif.
+- Enregistrées en **JPEG sans métadonnées** (position GPS, modèle du téléphone…), orientation de l'appareil photo
+  appliquée (ADR-0100) ; pleine taille tant que l'article est actif.
 - Au passage en **Finalisé** ou en **Sortie du stock** : on conserve uniquement la **photo principale** et la **photo terrain**, **réduites** (~1600 px) ; les autres sont supprimées.
 - **Photo terrain partagée** (lot) : elle n'est réduite que lorsque **tous** les articles qui l'utilisent sont Finalisés ou Sortis du stock, et n'est supprimée que lorsque **plus aucun** article ne l'utilise.
 

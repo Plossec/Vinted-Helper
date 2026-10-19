@@ -119,3 +119,4 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) | 18/10/2026 | Ventes finalisées : lues dans le « Porte-monnaie » | Tâches automatisées | Accepté |
 | [0098](0098-cahier-des-charges-tenu-a-jour.md) | 19/10/2026 | Cahier des charges tenu à jour, règles en vigueur par thème | Méthode | Accepté |
 | [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Méthode | Accepté · à relire |
+| [0100](0100-donnees-personnelles-minimisation-et-non-indexation.md) | 19/10/2026 | Données personnelles : minimisation, conservation et non-indexation | Photos et sauvegardes | Accepté |

@@ -68,7 +68,9 @@ une de ces règles met cette page à jour dans la même PR ([ADR-0098](decisions
 
 | Sujet | Règle en vigueur | Référence | État |
 |---|---|---|---|
-| Photos | Rotation définitive d'un quart de tour ; réduction au passage Finalisé / Sortie du stock (cahier §5.10), sauf « À vendre hors Vinted » qui garde ses photos jusqu'au motif suivant | [0024](decisions/0024-rotation-des-photos.md), [0080](decisions/0080-photos-d-un-article-revendu-hors-vinted.md) | réalisé |
+| Photos | Enregistrées en JPEG sans métadonnées (position GPS…) ; rotation définitive d'un quart de tour ; réduction au passage Finalisé / Sortie du stock (cahier §5.10), sauf « À vendre hors Vinted » qui garde ses photos jusqu'au motif suivant | [0100](decisions/0100-donnees-personnelles-minimisation-et-non-indexation.md), [0024](decisions/0024-rotation-des-photos.md), [0080](decisions/0080-photos-d-un-article-revendu-hors-vinted.md) | réalisé |
+| Données des acheteurs | Lien de la conversation et commandes Vinted effacés 6 mois après la finalisation ; aucun nom ni adresse d'acheteur | [0100](decisions/0100-donnees-personnelles-minimisation-et-non-indexation.md) | réalisé |
+| Indexation, mentions légales | Application jamais indexée (`robots.txt`, `noindex`, `X-Robots-Tag`) ; page « Mentions légales » sans connexion | [0100](decisions/0100-donnees-personnelles-minimisation-et-non-indexation.md) | réalisé |
 | Sauvegardes | Chaque jour sur le serveur (base 30 j ; photos 7 j + dimanches 30 j), rapatriées chaque jour sur le PC | [0018](decisions/0018-mise-en-ligne-ovh.md), [0019](decisions/0019-rapatriement-automatique-des-sauvegardes.md) | réalisé |
 | Mise en production | À chaque fusion dans `main`, vérification puis retour automatique à la version précédente si elle ne répond pas ; la base n'est jamais restaurée automatiquement | [0022](decisions/0022-deploiement-a-chaque-fusion-dans-main.md), [0042](decisions/0042-verification-apres-deploiement-et-retour-automatique.md) | réalisé |
 | HTTPS | Local (Caddy, Wi-Fi de la maison) et sur OVH (Let's Encrypt) | [0009](decisions/0009-https-local-pour-le-telephone.md), [0018](decisions/0018-mise-en-ligne-ovh.md) | réalisé |

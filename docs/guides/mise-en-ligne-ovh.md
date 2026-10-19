@@ -245,6 +245,30 @@ Après chaque mise à jour, le script vérifie pendant 3 minutes que l'applicati
 
 ⚠️ Comme sur le PC : **jamais** `docker compose down -v` (efface la base).
 
+### Retirer la position GPS des anciennes photos (une seule fois, version 1.20.0)
+
+Depuis la version 1.20.0, chaque photo envoyée est enregistrée **sans ses métadonnées** (position GPS, modèle du
+téléphone…). Les photos envoyées avant gardent les leurs : cette commande les nettoie (issue #216).
+
+1. Vérifiez dans les **Réglages** de l'application que la version affichée est **1.20.0** ou plus.
+2. Connectez-vous au serveur, puis placez-vous dans le dossier de l'application :
+   ```
+   ssh ubuntu@vps-1234abcd.vps.ovh.net
+   cd /opt/vinted-helper
+   ```
+3. **Essai** (rien n'est modifié) :
+   ```
+   sudo docker compose exec app npm run photos:sans-metadonnees -w server
+   ```
+   Résultat attendu : `N photo(s) vérifiée(s), M avec des métadonnées.` puis `Mode essai : rien n'a été modifié.`
+4. **Nettoyage** (les photos concernées sont réenregistrées en JPEG, sans différence visible) :
+   ```
+   sudo docker compose exec app npm run photos:sans-metadonnees -w server -- --appliquer
+   ```
+   Résultat attendu : `M photo(s) nettoyée(s).` Relancée, la commande indique `0 avec des métadonnées`.
+
+La sauvegarde quotidienne des photos (étape 5) permet de revenir en arrière si besoin.
+
 ## Utiliser un nom de domaine (plus tard, facultatif)
 
 1. Achetez un domaine (ex. `vinted-helper.fr`, ≈ 10 €/an) chez OVH.

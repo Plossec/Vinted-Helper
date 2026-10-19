@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.20.0] — 19/10/2026
+
+### Ajouté
+- Page « Mentions légales », accessible sans connexion depuis l'écran de connexion (#216).
+- Commande `npm run photos:sans-metadonnees -w server` pour retirer la position GPS des photos déjà enregistrées, à
+  lancer une fois sur le serveur (guide OVH) (#216).
+
+### Modifié
+- Les photos envoyées sont enregistrées en JPEG **sans métadonnées** (position GPS, modèle du téléphone) (#216).
+- Le lien de la conversation Vinted et les commandes lues sur Vinted sont effacés 6 mois après la finalisation de la
+  vente (#216).
+- L'application demande aux moteurs de recherche de ne pas l'indexer (`robots.txt`, `noindex`) (#216).
+
 ## [1.19.3] — 19/10/2026
 
 ### Modifié
