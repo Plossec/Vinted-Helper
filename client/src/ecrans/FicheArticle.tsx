@@ -384,7 +384,7 @@ export function FicheArticle() {
     <ContexteModifications value={modifications}>
       <main className={article ? "page page--fiche" : "page"}>
         <Link to="/articles" className="lien-retour">
-          ← Articles
+          <span aria-hidden="true">←</span> Articles
         </Link>
         <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
         {article && <EnteteArticle article={article} />}

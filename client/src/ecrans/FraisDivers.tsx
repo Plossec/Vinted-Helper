@@ -49,7 +49,7 @@ export function FraisDivers() {
   return (
     <main className="page">
       <Link to="/reglages" className="lien-retour">
-        ← Réglages
+        <span aria-hidden="true">←</span> Réglages
       </Link>
       <h1>Frais divers</h1>
       <p className="secondaire">

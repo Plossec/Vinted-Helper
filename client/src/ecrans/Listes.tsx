@@ -71,7 +71,7 @@ export function Listes() {
   return (
     <main className="page">
       <Link to="/reglages" className="lien-retour">
-        ← Réglages
+        <span aria-hidden="true">←</span> Réglages
       </Link>
       <h1>Marques et lieux</h1>
       <div className="actions" role="group" aria-label="Liste affichée">

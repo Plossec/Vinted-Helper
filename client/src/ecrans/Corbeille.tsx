@@ -40,7 +40,7 @@ export function Corbeille() {
   return (
     <main className="page">
       <Link to="/articles" className="lien-retour">
-        ← Articles
+        <span aria-hidden="true">←</span> Articles
       </Link>
       <h1>Corbeille</h1>
       <p className="secondaire">

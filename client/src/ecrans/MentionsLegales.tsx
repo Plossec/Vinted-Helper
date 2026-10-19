@@ -42,7 +42,7 @@ export function MentionsLegales() {
 
       <p>
         <Link className="lien" to="/connexion">
-          ← Connexion
+          <span aria-hidden="true">←</span> Connexion
         </Link>
       </p>
     </main>

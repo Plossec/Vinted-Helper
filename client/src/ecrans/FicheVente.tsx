@@ -41,7 +41,7 @@ export function FicheVente() {
   return (
     <main className="page">
       <Link to="/articles" className="lien-retour">
-        ← Articles
+        <span aria-hidden="true">←</span> Articles
       </Link>
       <h1>Colis</h1>
       {!vente ? (

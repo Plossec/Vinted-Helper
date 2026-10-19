@@ -24,7 +24,7 @@ export function ListeSorties() {
   return (
     <main className="page">
       <Link to="/terrain" className="lien-retour">
-        ← Terrain
+        <span aria-hidden="true">←</span> Terrain
       </Link>
       <h1>Sorties</h1>
       {erreur && (
@@ -120,7 +120,7 @@ export function FicheSortie() {
   return (
     <main className="page">
       <Link to="/sorties" className="lien-retour">
-        ← Sorties
+        <span aria-hidden="true">←</span> Sorties
       </Link>
       <h1>{sortie ? `${sortie.lieu} — ${formatDate(sortie.date)}` : "Sortie"}</h1>
       {sortie === null ? (

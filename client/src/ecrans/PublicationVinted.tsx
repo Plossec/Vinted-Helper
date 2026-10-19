@@ -69,7 +69,7 @@ export function PublicationVinted() {
   return (
     <main className="page">
       <Link to="/reglages" className="lien-retour">
-        ← Réglages
+        <span aria-hidden="true">←</span> Réglages
       </Link>
       <h1>Publication Vinted</h1>
 
