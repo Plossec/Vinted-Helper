@@ -180,7 +180,7 @@ export function TableauDeBord() {
         <>
           <div className="tuiles tuiles--larges">
             {(["chiffreAffaires", "beneficeRealise"] as const).map((m) => (
-              <div key={m} className="tuile">
+              <div key={m} className="tuile" role="group" aria-label={MESURES[m]}>
                 <span className="tuile__titre">{MESURES[m]}</span>
                 {/* Le gros chiffre est le réalisé du mois : libellé au-dessus, sans le répéter dessous (#97). */}
                 <span className="tuile__detail">{libelleMoisMajuscule} réalisé</span>
@@ -192,7 +192,7 @@ export function TableauDeBord() {
                 </span>
               </div>
             ))}
-            <div className="tuile">
+            <div className="tuile" role="group" aria-label={MESURES.tresorerie}>
               <span className="tuile__titre">{MESURES.tresorerie}</span>
               <strong className="tuile__valeur">
                 <Montant centimes={tableau.duMois.tresorerie} />

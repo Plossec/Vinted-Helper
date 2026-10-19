@@ -16,6 +16,8 @@ export interface PointMensuel {
 
 const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const libelleMois = (cle: string) => MOIS[Number(cle.slice(5, 7)) - 1] ?? cle;
+/** « octobre 2026 » : le mois avec son année, pour la bulle, le tableau et les lecteurs d'écran (#215). */
+const moisAnnee = (cle: string) => `${libelleMois(cle)} ${cle.slice(0, 4)}`;
 
 const LARGEUR = 360;
 const HAUTEUR = 180;
@@ -54,8 +56,8 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
         </p>
       )}
       <div className="graphique__zone">
-        <svg viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} role="img" aria-label={`${titre} par mois`}>
-          <line x1={0} x2={LARGEUR} y1={zero} y2={zero} className="graphique__zero" />
+        <svg viewBox={`0 0 ${LARGEUR} ${HAUTEUR}`} role="group" aria-label={`${titre} par mois`}>
+          <line x1={0} x2={LARGEUR} y1={zero} y2={zero} className="graphique__zero" aria-hidden="true" />
           {points.map((p, i) => {
             const realise = entre(0, p.valeur);
             // Partie claire : seulement là où le théorique dépasse le réalisé vers le haut.
@@ -73,13 +75,14 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
             return (
               <g
                 key={p.mois}
+                role="img"
                 tabIndex={0}
                 onPointerEnter={() => setActif(i)}
                 onPointerLeave={() => setActif(null)}
                 onFocus={() => setActif(i)}
                 onBlur={() => setActif(null)}
                 aria-label={
-                  `${libelleMois(p.mois)} : réalisé ${formatEuros(p.valeur)}` +
+                  `${moisAnnee(p.mois)} : réalisé ${formatEuros(p.valeur)}` +
                   (aUnTheorique(p) ? `, théorique ${formatEuros(p.theorique)}` : "")
                 }
               >
@@ -131,7 +134,7 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
         </svg>
         {pointActif && (
           <div className="graphique__bulle" role="status">
-            <span>{libelleMois(pointActif.mois)}</span> <strong>{formatEuros(pointActif.valeur)}</strong>
+            <span>{moisAnnee(pointActif.mois)}</span> <strong>{formatEuros(pointActif.valeur)}</strong>
             {aUnTheorique(pointActif) && (
               <>
                 {" "}
@@ -156,7 +159,7 @@ export function GraphiqueMensuel({ titre, points }: { titre: string; points: Poi
           <tbody>
             {points.map((p) => (
               <tr key={p.mois}>
-                <td>{libelleMois(p.mois)}</td>
+                <td>{moisAnnee(p.mois)}</td>
                 <td>{formatEuros(p.valeur)}</td>
                 {avecTheorique && <td>{formatEuros(p.theorique ?? p.valeur)}</td>}
               </tr>
