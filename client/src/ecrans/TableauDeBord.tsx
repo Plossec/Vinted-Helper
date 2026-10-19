@@ -237,12 +237,13 @@ export function TableauDeBord() {
           </div>
 
           <section className="section">
-            <div className="segments">
+            <div className="segments" role="group" aria-label="Mesure du graphique">
               {(Object.keys(MESURES) as Mesure[]).map((m) => (
                 <button
                   key={m}
                   type="button"
                   className={m === mesure ? "bouton bouton--principal" : "bouton"}
+                  aria-pressed={m === mesure}
                   onClick={() => setMesure(m)}
                 >
                   {MESURES[m]}
@@ -304,12 +305,13 @@ export function TableauDeBord() {
 
           <section className="section">
             <h2>Rentabilité</h2>
-            <div className="segments">
+            <div className="segments" role="group" aria-label="Rentabilité par">
               {(["sorties", "lieux"] as const).map((r) => (
                 <button
                   key={r}
                   type="button"
                   className={r === rentaPar ? "bouton bouton--principal" : "bouton"}
+                  aria-pressed={r === rentaPar}
                   onClick={() => setRentaPar(r)}
                 >
                   Par {r === "sorties" ? "sortie" : "lieu"}
@@ -331,7 +333,7 @@ export function TableauDeBord() {
 
           <section className="section">
             <h2>Analyse des ventes</h2>
-            <div className="segments">
+            <div className="segments" role="group" aria-label="Analyse par">
               {(
                 [
                   ["categories", "Catégorie"],
@@ -343,6 +345,7 @@ export function TableauDeBord() {
                   key={cle}
                   type="button"
                   className={cle === analyse ? "bouton bouton--principal" : "bouton"}
+                  aria-pressed={cle === analyse}
                   onClick={() => setAnalyse(cle)}
                 >
                   {libelle}

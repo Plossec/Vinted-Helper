@@ -74,12 +74,13 @@ export function Listes() {
         ← Réglages
       </Link>
       <h1>Marques et lieux</h1>
-      <div className="actions">
+      <div className="actions" role="group" aria-label="Liste affichée">
         {(["marques", "lieux"] as const).map((t) => (
           <button
             key={t}
             type="button"
             className={t === type ? "bouton bouton--principal" : "bouton"}
+            aria-pressed={t === type}
             onClick={() => changerType(t)}
           >
             {t === "marques" ? "Marques" : "Lieux"}
