@@ -5,6 +5,7 @@ import { creerConnexion } from "./base/connexion.js";
 import { appliquerMigrations } from "./base/migrer.js";
 import { config } from "./config.js";
 import { purgerSessionsExpirees } from "./compte/sessions.js";
+import { purgerDonneesAcheteurs } from "./ventes/conservation.js";
 import { purgerCorbeille } from "./corbeille/service.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 
@@ -49,6 +50,13 @@ async function purger(): Promise<void> {
     const nombre = await purgerCorbeille(connexion.db, stockagePhotos, new Date());
     if (nombre > 0) console.info(`Corbeille : ${nombre} article(s) supprimé(s) définitivement.`);
     await purgerSessionsExpirees(connexion.db, new Date());
+    // Lien de la conversation et commandes Vinted : effacés 6 mois après la finalisation (#216).
+    const acheteurs = await purgerDonneesAcheteurs(connexion.db, new Date());
+    if (acheteurs.conversations + acheteurs.commandes > 0) {
+      console.info(
+        `Conservation : ${acheteurs.conversations} lien(s) de conversation et ${acheteurs.commandes} commande(s) Vinted effacé(s).`,
+      );
+    }
   } catch (erreur) {
     console.error("Purge de la corbeille impossible :", erreur instanceof Error ? erreur.message : erreur);
   }

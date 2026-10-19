@@ -8,6 +8,7 @@ import { verifierDate } from "../articles/service.js";
 import { jourParis } from "../calculs/indicateurs.js";
 import { passageDu } from "../metier/taches.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { limiteConservation } from "../ventes/conservation.js";
 import { avancerVenteDans, chargerVente } from "../ventes/service.js";
 
 export interface CommandeLue {
@@ -112,7 +113,8 @@ async function appliquer(
 
 /**
  * Commandes terminées envoyées par l'extension. En mode essai (réglages ou extension), rien n'est enregistré : seule
- * la date de la lecture l'est. Une commande déjà connue est ignorée.
+ * la date de la lecture l'est. Une commande déjà connue est ignorée, comme une commande plus ancienne que la durée de
+ * conservation (#216 : déjà effacée, elle n'est jamais relue).
  */
 export async function recevoirCommandes(
   base: Base,
@@ -141,7 +143,9 @@ export async function recevoirCommandes(
     const aujourdhui = jourParis(maintenant.toISOString());
     let faites = recentes.filter((x) => x.traiteLe && jourParis(x.traiteLe.toISOString()) === aujourdhui).length;
     let nouvelles = 0;
+    const limite = limiteConservation(maintenant);
     for (const c of d.commandes) {
+      if (c.dateFin < limite) continue;
       const [cree] = await tx
         .insert(commandeVinted)
         .values({
