@@ -4,7 +4,7 @@ Vous choisissez des articles « À publier » dans l'application. Une **extensio
 Chrome habituel**, ouvre alors un onglet Vinted, remplit le formulaire article par article, vérifie chaque champ,
 puis clique « Ajouter ». L'article passe ensuite **En ligne** et le lien de l'annonce est gardé sur sa fiche.
 
-> **Risques acceptés** (décisions des 06 et 07/10/2026, ADR 0020 et 0034 de `docs/decisions/`) : Vinted peut
+> **Risques acceptés** (décisions des 07 et 14/10/2026, ADR 0034, 0068 et 0082 de `docs/decisions/`) : Vinted peut
 > suspendre un compte qui publie automatiquement, et l'extension cessera de fonctionner si Vinted modifie son site.
 > Si Vinted affiche une vérification (captcha), une page « session bloquée », ou si vous n'êtes pas connecté,
 > l'extension **se met en pause** : rien n'est rechargé ni publié tant que vous n'avez pas cliqué « Reprendre ».
@@ -69,7 +69,7 @@ Une publication interrompue (Chrome fermé, PC éteint…) passe en **erreur** e
 automatiquement**, pour éviter une annonce en double : vérifiez sur Vinted avant de la redemander.
 
 Quand une **vraie** publication échoue (pas un essai), l'article passe au statut **Erreur** : badge rouge, alerte
-sur l'écran Articles et message de l'échec dans la section Vinted de la fiche. Depuis la fiche : **Publier sur
+dans l'écran « À faire » et message de l'échec dans la section Vinted de la fiche. Depuis la fiche : **Publier sur
 Vinted** (l'article repasse À publier et retourne dans la file) ou **Revenir à « À publier »**.
 
 ## 6. Mode essai (activé par défaut)

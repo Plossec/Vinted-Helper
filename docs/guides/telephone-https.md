@@ -57,5 +57,5 @@ Ce certificat est créé sur **votre** PC : il ne sert qu'à reconnaître votre 
 | L'adresse IP du PC a changé | Mettez à jour `IP_PC` dans `.env`, `docker compose up -d`, et utilisez la nouvelle adresse |
 
 En vide-grenier (hors Wi-Fi de la maison), les achats saisis sont **gardés sur le téléphone** et envoyés
-automatiquement au retour sur le Wi-Fi de la maison. L'accès depuis partout viendra avec l'hébergement OVH
-([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)).
+automatiquement au retour sur le Wi-Fi de la maison. Pour un accès depuis partout, utilisez l'application en ligne sur
+le serveur OVH ([`mise-en-ligne-ovh.md`](mise-en-ligne-ovh.md)).

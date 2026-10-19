@@ -1,7 +1,7 @@
 # ADR-0034 — Publication par une extension Chrome
 
 - **Date** : 07/10/2026
-- **Statut** : Accepté · garde-fous de périmètre remplacés par [ADR-0082](0082-extension-garde-fous-de-perimetre-supprimes.md) ; rythme aléatoire retiré par [ADR-0071](0071-delais-de-l-extension.md)
+- **Statut** : Accepté · garde-fous de périmètre remplacés par [ADR-0082](0082-extension-garde-fous-de-perimetre-supprimes.md) ; rythme aléatoire retiré par [ADR-0071](0071-delais-de-l-extension.md) ; règle n° 4 de CLAUDE.md retirée par [ADR-0068](0068-suppression-de-la-regle-n-4-automatisation-de-vinted.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude
 - **Issue** : #54
 - **Thème** : Publication Vinted

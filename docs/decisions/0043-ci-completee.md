@@ -1,7 +1,7 @@
 # ADR-0043 — CI complétée
 
 - **Date** : 13/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · « rien n'est fusionné automatiquement » : remplacé par [ADR-0044](0044-dependabot-typescript-7-ignore-pour-l-instant.md) et [ADR-0081](0081-fusions-dans-main-par-claude-et-dependabot.md) (mises à jour Dependabot mineures fusionnées)
 - **Décideurs** : utilisateur
 - **Issue** : #124
 - **Thème** : Serveur

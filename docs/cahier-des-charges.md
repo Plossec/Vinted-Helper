@@ -1,21 +1,24 @@
 # Vinted Helper — Cahier des charges (V4)
 
-> Statut : **en attente de validation**. Aucun développement avant le feu vert.
+> Statut : **en vigueur** — application en production sur le serveur OVH depuis la version 1.0.0. Les décisions de
+> [`decisions/`](decisions/README.md) le précisent ; une décision qui le modifie le met à jour **dans la même PR**
+> ([ADR-0098](decisions/0098-cahier-des-charges-tenu-a-jour.md)). Vue d'ensemble par thème :
+> [`regles-en-vigueur.md`](regles-en-vigueur.md).
 
 ## Sommaire
 
-1. Contexte
-2. Utilisateur, appareils, technique
-3. Glossaire
-4. Statuts et transitions
-5. Fonctionnalités
-6. Règles de calcul
-7. Modèle de données
-8. Critères d'acceptation
-9. Découpage en lots livrables
-10. Hors périmètre
-11. Annexe — Cas chiffrés (tests automatiques)
-12. Organisation du projet, outillage IA et versions
+1. [Contexte](#1-contexte)
+2. [Utilisateur, appareils, technique](#2-utilisateur-appareils-technique)
+3. [Glossaire](#3-glossaire)
+4. [Statuts et transitions](#4-statuts-et-transitions)
+5. [Fonctionnalités](#5-fonctionnalités)
+6. [Règles de calcul](#6-règles-de-calcul)
+7. [Modèle de données](#7-modèle-de-données)
+8. [Critères d'acceptation](#8-critères-dacceptation)
+9. [Découpage en lots livrables](#9-découpage-en-lots-livrables) (historique)
+10. [Hors périmètre](#10-hors-périmètre)
+11. [Annexe — Cas chiffrés (tests automatiques)](#11-annexe--cas-chiffrés-tests-automatiques)
+12. [Organisation du projet](#12-organisation-du-projet)
 
 ---
 
@@ -62,14 +65,13 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
 | Photos | Fichiers dans un dossier du serveur |
 | Lancement | **Docker Compose** : identique sur PC Windows (Docker Desktop) et VPS |
 | IA | **Google Gemini, offre gratuite**, appelé **uniquement depuis le serveur** (la clé API n'est jamais dans l'appli téléphone) |
+| Publication sur Vinted | **Extension Chrome** (`outils/extension-vinted/`) dans le Chrome habituel de l'utilisateur, avec sa session Vinted (§5.14) |
 | Montants | **Tous les montants sont stockés et calculés en centimes (entiers)** et convertis en euros uniquement à l'affichage |
 | Tests | Tests automatiques obligatoires sur le module de calcul (annexe §11) |
-| Hébergement cible | **VPS OVH** (offre précise : [issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)) |
+| Hébergement | **VPS OVH**, en ligne depuis la 1.0.0 (ADR-0018) ; mise en production automatique à chaque fusion dans `main`, avec retour à la version précédente si elle ne répond pas (ADR-0022, ADR-0042) |
 
-Démarche :
-1. Développement **en local sur PC Windows**. Le lot 1 est testé sur le PC.
-2. **Juste avant le lot 2** : mise en place du HTTPS local pour tester sur le téléphone ([issue #3](https://github.com/Plossec/Vinted-Helper/issues/3)) — indispensable pour l'installation PWA et la mise en attente des achats.
-3. Mise en ligne OVH (issue #2).
+Démarche suivie : développement **en local sur PC Windows** (Docker Desktop) ; HTTPS local pour le téléphone sur le
+Wi-Fi de la maison (ADR-0009, issue #3) ; mise en ligne OVH (ADR-0018, issue #2).
 
 Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installation guidée pas-à-pas.
 
@@ -93,6 +95,13 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **Boost** | Option payante Vinted pour mettre un article en avant ; coût rattaché à l'article. |
 | **Référence** | Numéro court unique et automatique de l'article (`#0127`), **numéroté par utilisateur** (chacun commence à `#0001`), attribué par le serveur, jamais réutilisé. |
 | **Article dormant** | Article En ligne depuis N jours ou plus sans vente ni baisse de prix. |
+| **Prix vente minimum** | Prix le plus bas accepté pour un article (facultatif, jamais au-dessus du prix affiché) ; plancher des tâches automatisées (ADR-0048, ADR-0091). |
+| **Bénéfice attendu** | Bénéfice d'un article vendu mais pas encore finalisé (À expédier, Envoyé) : prix vendu − coût total (§6.5, ADR-0090). |
+| **Ventes en cours / théorique** | Ventes À expédier ou Envoyé ; le CA et le bénéfice **théoriques** les ajoutent au réalisé (§6.6). |
+| **Extension** | Extension Chrome qui agit sur Vinted à la place de l'utilisateur : publication, tâches automatisées (§5.14). |
+| **Tâche automatisée** | Action répétée par l'extension sur le compte Vinted (articles dormants, ventes finalisées…), en mode **automatique** ou **manuel** (liste à valider) (§5.15). |
+| **Mode essai** | L'extension ouvre les pages Vinted sans rien modifier ; l'application n'enregistre rien. |
+| **À faire** | Écran qui regroupe tout ce qui demande l'attention de l'utilisateur (§5.8). |
 
 ## 4. Statuts et transitions
 
@@ -156,22 +165,23 @@ manque. La catégorie « Autre » est admise (publication à la main).
 ### 5.2 Fiche article
 - **Référence** automatique (`#0001`, `#0002`…), **numérotée par utilisateur**, attribuée par le serveur, **jamais réutilisée** (même après corbeille ou suppression définitive), recherche directe par numéro.
 - Nom, **catégorie** \*, **marque** \*, **état** \*, gamme, taille, matière, notes (\* obligatoires à chaque enregistrement de la fiche ; seule la saisie terrain du lot 2 peut créer un brouillon sans) :
-  - **Catégorie** : choix dans l'**arbre des catégories calqué sur Vinted** (`docs/categories-vinted.md`, 440 catégories), fixe ; seules les catégories du dernier niveau sont sélectionnables ; recherche par mots (« jean slim »).
+  - **Catégorie** : choix dans l'**arbre des catégories recopié de vinted.fr** (`docs/categories-vinted.md` : rayons Femmes, Hommes, Sport, Loisirs et collections, 1 001 catégories sélectionnables, « Autre » comprise pour tout le reste ; ADR-0065), fixe ; seules les catégories du dernier niveau sont sélectionnables ; recherche par mots (« jean slim »). Un article « Autre » se publie à la main sur Vinted.
   - **Marque** : liste de départ des marques courantes sur Vinted (≈ 360, dont « Sans marque »), complétée à la volée.
   - **État** : liste fixe — Neuf avec étiquette · Neuf sans étiquette · Très bon état · Bon état · Satisfaisant · Abîmé.
   - **Gamme** : texte libre, facultatif ([issue #6](https://github.com/Plossec/Vinted-Helper/issues/6)).
   - Listes déroulantes avec recherche, aussi larges que le champ, aux couleurs de l'application.
 - Lieu, sortie, lot éventuel, prix d'achat, date d'achat.
-- **Photos** : photo terrain + photos annonce, ajoutées **depuis la galerie (sélection multiple) ou l'appareil photo**, réordonnables, une photo **principale**.
-- **Prix affiché** + **historique complet** des changements de prix.
+- **Photos** : photo terrain + photos annonce, ajoutées **depuis la galerie (sélection multiple) ou l'appareil photo**, réordonnables, une photo **principale**, **tournables** d'un quart de tour (définitif ; ADR-0024).
+- **Prix affiché** + **historique complet** des changements de prix ; **prix vente minimum** facultatif, jamais au-dessus du prix affiché (verrou dans la base ; ADR-0048, ADR-0091) ; règle de baisse de l'article pour la tâche « Articles dormants » (§5.15).
+- **Section Vinted** : lien de l'annonce (saisi à la main ou enregistré par l'extension ; un article Brouillon ou À publier avec un prix affiché passe alors En ligne, ADR-0031), lien de la conversation avec l'acheteur (saisi à la vente, ADR-0026), couleurs et format du colis (pour la publication).
 - **Frais de boost** (0 ou plusieurs, montant + date).
 - Titre et description de l'annonce (générés par IA ou saisis), **enregistrés et modifiables**, bouton **Copier**.
 - Historique des statuts avec dates.
 - Indicateurs : coût total, bénéfice (réel ou provisoire), délais de vente.
 
 ### 5.3 Liste et recherche (écran principal)
-- Liste des articles avec vignette, référence, nom, statut, prix affiché.
-- **Filtres** : statut, catégorie, marque, gamme, lieu, sortie.
+- Liste des articles avec vignette, référence, nom, statut, prix affiché ; 4 **modes d'affichage** (Vignettes, Liste compacte, Mosaïque, Détaillé en tableau), mémorisés par appareil (ADR-0029) ; repère « ↗ » vers l'annonce Vinted.
+- **Filtres** à choix multiples : statut, catégorie, marque, gamme, lieu, sortie (ADR-0030 ; En stock et À vendre hors Vinted masqués par défaut, ADR-0067, ADR-0083).
 - **Recherche texte** (nom, marque, référence…).
 - **Tri** : date d'achat, date de mise en ligne, prix, ancienneté dans le statut.
 
@@ -179,7 +189,7 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **Marques et lieux** : listes de l'utilisateur, pré-remplies, avec recherche à la saisie et ajout à la volée.
   - **Renommer** une valeur → tous les articles concernés sont mis à jour.
   - **Fusionner** deux valeurs (ex. « Levis » + « Levi's ») → une seule valeur, articles mis à jour.
-  - Lieux : écran de gestion et création automatique depuis la saisie terrain à étudier ([issue #7](https://github.com/Plossec/Vinted-Helper/issues/7)).
+  - Lieux : le lieu d'une sortie se saisit en **texte libre**, avec les lieux connus proposés ; un nom nouveau est ajouté à la liste, même saisi sans réseau (ADR-0011, issue #7).
 - **Catégories et états** : listes fixes calquées sur Vinted, non modifiables dans l'application (correction dans le code).
 
 ### 5.5 IA (Gemini)
@@ -191,13 +201,11 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **« Lire l'étiquette »** : à partir d'une photo d'étiquette, pré-remplit marque, taille, catégorie, matière ; l'utilisateur vérifie avant d'enregistrer.
 - **Prompts modifiables** dans les Réglages.
 - **Secours** : bouton **« Copier le prompt »** (texte prêt à coller dans une IA gratuite : Claude.ai, ChatGPT, Gemini) si le quota est dépassé ou le service indisponible.
-- Pas d'API publique Vinted. **Exception décidée le 06/10/2026** (`docs/decisions/`, ADR 0020 et 0034) : publication
-  des annonces depuis le PC par un programme qui pilote le navigateur, risques acceptés par l'utilisateur (CGU de
-  Vinted : suspension possible du compte). La limite « aucune autre automatisation de Vinted » a été retirée le
-  14/10/2026 à la demande de l'utilisateur (#185, `docs/decisions/`, ADR 0068 et 0082).
+- Quota : **30 appels par heure** (annonce et étiquette), message « Réessayez dans N min » (ADR-0049) ; modèle de
+  secours si le modèle principal est retiré ou surchargé (ADR-0032, ADR-0033, ADR-0088).
 
 ### 5.6 Ventes
-- Passage **En ligne → À expédier** : création d'une **vente** (= un colis) avec 1 ou plusieurs articles, montant crédité, date de vente.
+- Passage **En ligne → À expédier** : création d'une **vente** (= un colis) avec 1 ou plusieurs articles, montant crédité, date de vente, lien facultatif de la conversation Vinted (ADR-0026).
 - **Emballage** : 0,08 € par colis par défaut (modifiable dans la vente et dans les Réglages).
 - Dates d'envoi et de finalisation saisies au passage aux statuts Envoyé et Finalisé (appliquées à tout le colis).
 - **Retour partiel** : sélection des articles renvoyés + saisie du **nouveau montant réellement crédité** pour le colis.
@@ -213,12 +221,19 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **Article dormant** : En ligne depuis **7 jours ou plus**, comptés **depuis la dernière baisse de prix** (ou la mise en ligne s'il n'y a pas eu de baisse) ; une republication par la tâche « Articles dormants » relance aussi le délai (#147).
 - **Invendu** (#147) : tout article dans ce statut.
 - **À expédier** : tout article dans ce statut.
-- Délais modifiables dans les Réglages. Affichage : bandeau / pastilles sur l'écran d'accueil.
+- **À récupérer** et **publications en erreur** : tout article dans ces statuts (ADR-0028, ADR-0037).
+- Délais modifiables dans les Réglages.
+- Affichage : écran **« À faire »** (1er onglet, pastille du nombre de choses à faire), classé par urgence —
+  **Urgent** (publications en erreur), **À traiter** (à expédier, à récupérer, invendus, actions et ventes des tâches
+  automatisées à valider ou à rattacher), **Pour info** (dormants, brouillons anciens, montants corrigés par Vinted,
+  fermés par « Vu ») ; chaque ligne a ses boutons et mène à la fiche (ADR-0079, ADR-0089). L'écran d'ouverture de
+  l'application (Terrain par défaut, ou À faire) se choisit dans les Réglages, par appareil.
 
 ### 5.9 Tableau de bord
 - **Chiffre d'affaires**, **bénéfice réalisé** et **trésorerie** du mois / de l'année + graphique mensuel (§6.6).
-  Affichage revu le 08/10/2026 (issue #88) : tuiles CA et bénéfice avec « *Mois Année* réalisé : X € » et
-  « *Mois Année* théorique : Y € » (le théorique ajoute les ventes À expédier et Envoyé, issue #85) ; tuile trésorerie
+  Affichage revu (issue #88, ADR-0041, ADR-0051) : tuiles CA et bénéfice avec le libellé « *Mois Année* réalisé »
+  au-dessus du gros chiffre et la ligne « *Mois Année* théorique : Y € » dessous (le théorique ajoute les ventes
+  À expédier et Envoyé, issue #85) ; tuile trésorerie
   avec son **calcul** (encaissé − achats − essence − emballages − boosts − frais divers) ; frais généraux du mois avec
   explication en info-bulle et bouton « Ajouter des frais divers » ; graphique en **barres empilées** réalisé +
   théorique (trésorerie : + crédits attendus des ventes en cours) ; seules les **années d'activité** sont proposées.
@@ -242,8 +257,41 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - Comptés comme **frais généraux** du mois de leur date (bénéfice réalisé et trésorerie, §6.6).
 
 ### 5.13 Sauvegarde
-- Sauvegarde automatique **quotidienne** (base + photos).
-- **Copie hors serveur**, conservation **30 jours**, **restauration testée une fois** et documentée. Destination à choisir dans l'issue #2.
+- Sauvegarde automatique **quotidienne** (base + photos) sur le serveur : base gardée **30 jours** ; photos **7 jours**,
+  plus l'archive du dimanche gardée 30 jours (ADR-0018).
+- **Copie hors serveur** : rapatriement automatique chaque jour sur le PC de l'utilisateur (ADR-0019) ;
+  **restauration testée une fois** et documentée (`docs/guides/sauvegarde-restauration.md`, `docs/guides/mise-en-ligne-ovh.md`).
+- Une **sauvegarde de la base** précède chaque mise à jour du serveur (ADR-0042).
+
+### 5.14 Publication sur Vinted (extension Chrome)
+- Pas d'API publique Vinted. **Décision de l'utilisateur** (ADR-0034, ADR-0036) : une **extension Chrome**
+  (`outils/extension-vinted/`), dans le Chrome habituel et avec la session Vinted de l'utilisateur (aucun mot de passe
+  Vinted stocké), remplit le formulaire « Vendre un article » des articles **À publier** mis dans la file (« Publier
+  sur Vinted »). Risques acceptés par l'utilisateur : CGU de Vinted, suspension possible du compte. La limite
+  « aucune autre automatisation de Vinted » a été retirée le 14/10/2026 (ADR-0068, ADR-0082).
+- **Une annonce à la fois**, 10 minutes entre deux annonces, 5 secondes entre deux étapes, passage toutes les
+  5 minutes, seulement quand Chrome est ouvert (ADR-0071). Vérification (captcha), blocage ou déconnexion →
+  **pause**, reprise à la main uniquement ; aucun contournement.
+- **Mode essai** : le formulaire est rempli sans être envoyé.
+- Réussite : l'article passe **En ligne** avec le lien de l'annonce. Échec d'une vraie publication : statut
+  **Erreur** avec le message (§4, ADR-0037, ADR-0052).
+- Catégorie « Autre » refusée par la file (publication à la main). Diagnostic et relevés de l'extension pour la
+  recaler quand Vinted change ses pages (`docs/guides/publication-vinted.md`).
+
+### 5.15 Tâches automatisées
+- Exécutées par l'**extension** pendant ses passages, une action à la fois sur Vinted, de **8 h à 22 h** (plage
+  réglable) ; chaque tâche est **désactivée** par défaut, en mode **manuel** par défaut (liste à valider dans
+  « À faire ») ou **automatique**, avec fréquence, pauses et plafonds réglables dans des limites (ADR-0072, ADR-0078).
+  Un **mode essai** commun ouvre les pages sans rien modifier. Résultats dans le journal de l'écran « Publication
+  Vinted ».
+
+| Tâche | Ce qu'elle fait | État |
+|---|---|---|
+| **Articles dormants** (#147) | Baisse le prix d'un article dormant (règle du compte ou de l'article, arrondie vers le haut au 0,50 €, jamais sous le prix vente minimum), sinon le republie ; après 3 republications sans vente → **Invendu** (ADR-0073, ADR-0094, ADR-0095) | réalisée, en mode essai jusqu'au calibrage |
+| **Ventes finalisées** (#148) | Lit le **Porte-monnaie** de Vinted ; une commande terminée finalise le colis Envoyé correspondant à la date Vinted ; montant différent → le montant Vinted remplace l'ancien, avec un signalement ; commande non retrouvée → « à rattacher » (ADR-0074, ADR-0096, ADR-0097) | application réalisée, lecture par l'extension à calibrer |
+| **Négociation favoris** (#149) | Une offre réduite unique aux personnes qui ont mis l'article en favori (ADR-0075) | décidée |
+| **Validée prix proposé** (#150) | Répond aux offres reçues et crée la vente quand une offre est acceptée et payée (ADR-0076) | décidée |
+| **Bon de livraison** (#151) | Récupère bordereau, code de dépôt, suivi et date limite d'envoi des articles À expédier (ADR-0077) | décidée |
 
 ## 6. Règles de calcul
 
@@ -308,7 +356,7 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 | *Catégories, états* | *listes fixes dans le code (`server/src/catalogue/`), pas de table* |
 | **Sortie** | id (UUID généré sur le téléphone), date, lieu, montant_essence, notes |
 | **LotAchat** | sortie, prix_total *(le nombre d'articles est déduit, jamais stocké)* |
-| **Article** | id (UUID généré sur le téléphone), reference (séquence **par utilisateur**, attribuée par le serveur, jamais réutilisée), nom, categorie (code de l'arbre), marque, etat (code fixe), gamme (texte libre), taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, titre_annonce, description_annonce, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
+| **Article** | id (UUID généré sur le téléphone), reference (séquence **par utilisateur**, attribuée par le serveur, jamais réutilisée), nom, categorie (code de l'arbre), marque, etat (code fixe), gamme (texte libre), taille, matiere, notes, lieu, sortie (facultatif), lot (facultatif), prix_achat (saisi si hors lot), date_achat, statut, prix_affiche_actuel, prix_vente_minimum, baisse_regle et baisse_valeur (tâche « Articles dormants »), titre_annonce, description_annonce, couleurs, format_colis, url_vinted (lien de l'annonce), url_conversation, motif_sortie, canal_revente, prix_revente, date_sortie_stock, supprime_le (corbeille) |
 | **Photo** | type (terrain / annonce), fichier, est_reduite ; liée à un ou plusieurs articles (photo terrain partagée d'un lot) ; ordre et est_principale par article |
 | **HistoriqueStatut** | article, de, vers, date |
 | **HistoriquePrix** | article, prix, date |
@@ -316,7 +364,14 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 | **Vente** (= colis) | montant_credite, emballage, date_vente, date_envoi, date_finalisation, annulee |
 | **VenteArticle** | vente, article, prix_affiche_au_moment, retourne (oui/non) |
 | **FraisGeneral** | date, montant, libellé *(frais divers saisis à la main via l'écran §5.12 ; l'essence des sorties vides est calculée, pas stockée ici)* |
-| **Reglages** | emballage_defaut, delai_brouillon, delai_dormant, prompt_annonce, prompt_etiquette |
+| **Reglages** | emballage_defaut, delai_brouillon, delai_dormant, prompt_annonce, prompt_etiquette, format_colis_defaut, jeton de l'extension (empreinte), réglages des tâches automatisées (plage horaire, mode essai ; par tâche : activée, mode, fréquence, pauses, plafonds) |
+| **Session** | empreinte du jeton de connexion, date d'expiration |
+| **PublicationVinted** | article, état de la publication dans la file, essai, message, dates |
+| **ActionVinted** | article, type (baisse de prix ou republication), état, prix avant / après, essai, message, lien |
+| **CommandeVinted** | identifiant de la commande Vinted, annonces, date de fin, montant, état (à valider, à rattacher, appliquée…), vente rattachée, montant avant correction |
+| **SignalementVu** | type d'alerte, article, date de départ de l'alerte, date du « Vu » |
+
+Détail à jour des tables : [`architecture.md`](architecture.md) §3 et `server/src/base/schema.ts`.
 
 Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne sont **pas stockées** : elles sont recalculées à partir de ces données (ou mises en cache de façon transparente).
 
@@ -333,7 +388,7 @@ Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne 
 - Étant donné un article Finalisé, alors aucune transition de statut n'est proposée.
 - Étant donné un article Brouillon sans prix affiché, quand je le passe En ligne, alors l'application me demande le prix affiché avant d'accepter.
 - Étant donné un colis de 2 articles À expédier, quand je le marque Envoyé, alors les 2 articles passent Envoyé avec la même date.
-- Étant donné un colis de 2 articles Envoyé, quand l'acheteur renvoie l'un des deux, alors cet article repasse À publier et je saisis le nouveau montant crédité pour l'autre.
+- Étant donné un colis de 2 articles Envoyé, quand l'acheteur renvoie l'un des deux, alors cet article passe À récupérer et je saisis le nouveau montant crédité pour l'autre.
 - Étant donné un changement de statut, quand je modifie la date proposée, alors la date saisie est enregistrée dans l'historique.
 
 **Ventes et calculs**
@@ -360,6 +415,9 @@ Les parts calculées (prix d'achat d'un lot, essence, emballage, prix vendu) ne 
 
 ## 9. Découpage en lots livrables
 
+*Historique* : les lots 0 à 7 sont réalisés (V1). Depuis le 08/10/2026, chaque évolution suit une issue GitHub
+réalisée par une PR, avec sa propre version (ADR-0039, ADR-0045).
+
 Chaque lot est testable avant de passer au suivant.
 
 0. **Mise en place** : dépôt, Docker Compose (application + PostgreSQL), premier test du module de calcul, CLAUDE.md, `.claude/`, README, CHANGELOG (§12.1).
@@ -375,7 +433,8 @@ Chaque lot est testable avant de passer au suivant.
 ## 10. Hors périmètre
 
 ### Exclus (non prévus)
-- Aucune possibilité d'**import** de données (départ de zéro).
+- Aucune possibilité d'**import** de données dans l'application. Seule exception : l'import unique, par une commande du
+  serveur, du tableur « compte 2026 - Vinted » de l'utilisateur (ADR-0023).
 - Pas d'**export** de données.
 - Pas de **mode d'envoi**.
 - Pas de **pseudo acheteur**.
@@ -387,9 +446,10 @@ Chaque lot est testable avant de passer au suivant.
 
 ### Reportés à plus tard
 - Emplacement de rangement / QR codes → [issue #1](https://github.com/Plossec/Vinted-Helper/issues/1).
-- Déploiement OVH (offre, domaine, destination de la sauvegarde hors serveur) → [issue #2](https://github.com/Plossec/Vinted-Helper/issues/2).
-- HTTPS pour les tests locaux sur téléphone (avant le lot 2) → [issue #3](https://github.com/Plossec/Vinted-Helper/issues/3).
 - Ouverture au grand public (multi-utilisateurs) → [issue #4](https://github.com/Plossec/Vinted-Helper/issues/4).
+
+Reports déjà réalisés : déploiement OVH ([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2), ADR-0018,
+ADR-0019) et HTTPS local pour le téléphone ([issue #3](https://github.com/Plossec/Vinted-Helper/issues/3), ADR-0009).
 
 ## 11. Annexe — Cas chiffrés (tests automatiques)
 
@@ -433,79 +493,17 @@ Chaque cas devient un test automatique.
 | 34 | Article acheté 2 €, vendu le 28/09 à 12,50 € (emballage 0,08 €), envoyé le 01/10, pas encore finalisé (ajouté le 08/10/2026, issue #85) | En cours **septembre** : CA **12,50 €**, bénéfice 12,50 − 2 − 0,08 = **10,42 €** ; rien en octobre ; CA et bénéfice réalisés de septembre inchangés (**0 €**) |
 | 35 | Colis A + B (prix affichés 10 € et 5 €) vendu le 02/10 15 € (emballage 0,10 €), Envoyé ; B renvoyé, nouveau montant 9 € ; A acheté 3 €, B 2 € ; un autre article C finalisé en octobre (bénéfice 4 €) ; frais divers 1 € en octobre (issue #85) | En cours oct. : A seul, CA **9,00 €**, bénéfice 9 − 3 − 0,10 = **5,90 €** ; théorique oct. : bénéfice = (4 − 1) + 5,90 = **8,90 €** |
 
-## 12. Organisation du projet, outillage IA et versions
+## 12. Organisation du projet
 
-### 12.1 Lot 0 — Mise en place (avant le lot 1)
-À la fin du lot 0 :
-- dépôt Git sur GitHub avec l'arborescence ci-dessous ;
-- Docker Compose (application + PostgreSQL) qui démarre ;
-- un premier test du module de calcul qui passe (règle d'arrondi) ;
-- `CLAUDE.md`, `.claude/`, `README.md` et `CHANGELOG.md` présents.
+L'organisation d'origine (lot 0, arborescence, outillage Claude prévu, versions 0.N.0) est dans l'historique Git de
+ce document. Ce qui est en vigueur :
 
-Version : **0.0.1**.
-
-### 12.2 Arborescence
-```
-vinted-helper/
-├─ CLAUDE.md                 instructions permanentes pour Claude
-├─ README.md                 guide utilisateur (installation, usage, dépannage)
-├─ CHANGELOG.md              historique des versions
-├─ docs/
-│  ├─ cahier-des-charges.md  ce document = source de vérité
-│  ├─ README.md              sommaire de la documentation
-│  ├─ categories-vinted.md   annexe : arbre des catégories
-│  ├─ decisions/             décisions numérotées (ADR), un fichier par décision
-│  └─ guides/                modes d'emploi de l'utilisateur (téléphone, sauvegardes, IA, OVH…)
-├─ .claude/
-│  ├─ settings.json          permissions + formatage automatique
-│  ├─ hooks/formater.mjs     formatage Prettier après chaque modification (compatible Windows)
-│  ├─ rules/                 consignes chargées selon les fichiers modifiés (calculs, interface, migrations, déploiement)
-│  ├─ skills/                commandes /lot, /verifier, /version
-│  └─ agents/relecteur.md    sous-agent de relecture
-├─ client/                   interface React (PWA)
-├─ server/                   API, base de données, module de calcul
-├─ docker-compose.yml
-└─ .env.example              modèle de configuration (sans secrets)
-```
-
-### 12.3 CLAUDE.md
-Moins de 200 lignes, en français : le projet en 5 lignes avec renvoi vers ce document (qui fait foi ; en cas d'ambiguïté, Claude pose la question) ; les commandes ; les conventions (TypeScript strict, termes métier du glossaire, centimes, dates UTC affichées en Europe/Paris, interface en français) ; les règles non négociables (une seule fonction de répartition, parts calculées jamais stockées, clé Gemini côté serveur, aucune automatisation de Vinted, rien du §10 sans demande explicite) ; la méthode (un lot à la fois, plan validé avant de coder, tests avant le code pour les calculs, migrations appliquées jamais modifiées, README / CHANGELOG / decisions.md mis à jour à chaque fin de lot) ; le profil de l'utilisateur (intermédiaire, commandes expliquées pas à pas).
-
-### 12.4 Architecture Claude (projet solo de 8 lots)
-| Élément | Contenu |
+| Sujet | Où |
 |---|---|
-| `settings.json` | Trois listes appliquées par Claude Code : **autorisé** (tests, scripts npm, `docker compose up/ps/logs/build/restart/stop`, git local), **avec confirmation** (push, merge, installation de dépendances, scripts `db…`, `docker compose down/exec`, modification des migrations, du test de l'annexe, de `docker-compose.yml`, de `CLAUDE.md` et du cahier des charges), **interdit** (réécriture d'historique, `--no-verify`, `drizzle-kit push/drop`, `compose down -v` et toute suppression de volume, `DROP`/`TRUNCATE`, `rm -rf`, `curl`/`wget`, installations globales, lecture de `.env` et des clés, modification de `/data`, de `settings.json` et des hooks, requêtes vers Vinted, mode « bypass »). Formatage Prettier automatique après chaque modification. |
-| `rules/calculs.md` | Chargée uniquement pour `server/src/calculs/` : règle d'arrondi, centimes, renvoi à l'annexe §11. |
-| `rules/interface.md` | Chargée uniquement pour `client/` : format français, mobile d'abord, gros boutons, clair / sombre, hors réseau. |
-| `/lot N` | Relit le lot N et ses critères, propose un plan, attend la validation, crée la branche `lot-N`. |
-| `/verifier` | Types, lint, tests, build Docker ; résumé en français. |
-| `/version` | Propose le numéro, met à jour CHANGELOG et version, crée le tag Git. |
-| `agents/relecteur.md` | Sous-agent en lecture seule, lancé en fin de lot ; compare le code au cahier des charges et aux critères §8. |
-
-Les trois skills ne se déclenchent que sur demande de l'utilisateur (`disable-model-invocation: true`).
-Volontairement exclus (surdimensionnés) : serveurs MCP, équipes d'agents, workflows, plusieurs sous-agents, sandbox.
-
-**Deux niveaux de protection** : `CLAUDE.md` contient les **consignes** (Claude les suit) ; `.claude/settings.json` contient les **interdictions** (Claude Code les applique, la commande est bloquée). Limites :
-- Les règles portent sur le **texte** de la commande : une commande écrite autrement ou un script peut passer à côté. D'où le blocage de `git -C` / `git -c`, la confirmation pour `bash -c` et `npm run db…`, et l'interdiction de scripts destructeurs dans `package.json`.
-- Les interdictions gagnent toujours. Répondre « Oui, ne plus demander » enregistre une règle dans `.claude/settings.local.json` qui peut élargir ce qui passe sans confirmation (jamais lever une interdiction) : vérifier `/permissions` de temps en temps.
-- Sous Windows, **Git pour Windows** est requis : Claude utilise son terminal Bash et les règles `Bash(...)` s'appliquent ; les règles `PowerShell(...)` couvrent les cas les plus graves.
-- Le vrai filet de sécurité reste les **commits fréquents**, la **sauvegarde quotidienne** et le **pg_dump avant chaque migration**.
-
-### 12.5 README.md
-En français, mis à jour à chaque lot : présentation et prérequis (Docker Desktop, **Git pour Windows**) ; installation pas à pas et configuration du `.env` (identifiant, mot de passe initial, clé Gemini, **nom du modèle Gemini**, modifiable sans toucher au code car Google retire régulièrement ses anciens modèles) ; démarrage et arrêt ; accès depuis le téléphone (après l'issue #3) ; réinitialisation du mot de passe ; sauvegarde et restauration ; mise à jour ; lancement des tests ; dépannage courant.
-
-### 12.6 Versionnage
-- **Git** : `main` toujours fonctionnelle ; chaque lot a sa branche `lot-N`, fusionnée après validation.
-- **SemVer** :
-
-| Étape | Version |
-|---|---|
-| Lot 0 | 0.0.1 |
-| Lot N validé | 0.N.0 |
-| Correctifs | 0.N.1, 0.N.2… |
-| Mise en ligne OVH validée | 1.0.0 |
-
-- Source unique : `version` du `package.json` racine, affichée dans les Réglages (« Version 0.3.0 »).
-- À chaque version : tag Git `vX.Y.Z` + entrée dans le CHANGELOG, en français (Ajouté / Modifié / Corrigé).
-- **Base de données** : migrations Drizzle versionnées, appliquées automatiquement au démarrage ; une mise à jour ne perd jamais de données.
-- **PWA** : à chaque nouvelle version, le téléphone affiche « Nouvelle version disponible — Mettre à jour ».
+| Consignes de Claude, commandes, garde-fous | [`CLAUDE.md`](../CLAUDE.md) ; `.claude/` : `settings.json` (interdictions appliquées par Claude Code), `rules/` (consignes chargées selon les fichiers touchés), `skills/` (`/lot`, `/verifier`, `/version`, `/calibrer-vinted`), `agents/` (`relecteur`, `analyste-releve`), `hooks/` |
+| Où écrire quoi (décision, architecture, guide, consigne) | [`README.md`](README.md) de `docs/` |
+| Méthode | Une issue GitHub → une branche → une PR `#N — …`, fusionnée quand la CI est verte ; une fusion dans `main` part en production (ADR-0039, ADR-0022, ADR-0081) |
+| Versions | Une version par PR (SemVer, règle 1.x), source unique `version` du `package.json` racine, affichée dans les Réglages ; entrée dans le `CHANGELOG.md` en français (Ajouté / Modifié / Corrigé) ; tag `vX.Y.Z` créé par GitHub après la mise en production (ADR-0045) |
+| Base de données | Migrations Drizzle versionnées, appliquées automatiquement au démarrage ; une mise à jour ne perd jamais de données (`.claude/rules/migrations.md`) |
+| Application installée (PWA) | À chaque nouvelle version, le téléphone affiche « Nouvelle version disponible — Mettre à jour » |
+| Sécurité du dépôt | Deux niveaux : `CLAUDE.md` contient les **consignes** (Claude les suit) ; `.claude/settings.json` et ESLint les **interdictions** (appliquées quoi que Claude décide) ; le vrai filet reste les commits fréquents, la sauvegarde quotidienne et la sauvegarde avant chaque mise à jour (ADR-0046) |

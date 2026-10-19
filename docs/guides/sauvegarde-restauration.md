@@ -12,9 +12,11 @@ est allumé ensuite :
 Les sauvegardes de plus de 30 jours sont effacées automatiquement. Vérifier : `docker compose logs sauvegarde`
 (dernière ligne « Sauvegarde terminée »).
 
-> **Copie hors du PC** : en attendant l'hébergement OVH ([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2)),
-> copiez régulièrement le dossier `sauvegardes\auto` sur une clé USB ou un cloud (OneDrive, Google Drive…).
-> Une sauvegarde qui reste sur le même PC ne protège pas d'une panne de disque.
+> **Copie hors du PC** : les données de l'application en ligne sont sauvegardées sur le serveur OVH et rapatriées
+> chaque jour sur ce PC ([`mise-en-ligne-ovh.md`](mise-en-ligne-ovh.md)). Les sauvegardes de l'installation **locale**
+> (ce guide) restent sur le PC : si vous y gardez des données, copiez régulièrement le dossier `sauvegardes\auto` sur
+> une clé USB ou un cloud (OneDrive, Google Drive…). Une sauvegarde qui reste sur le même PC ne protège pas d'une
+> panne de disque.
 
 ## Sauvegarde manuelle (avant une mise à jour)
 

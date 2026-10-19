@@ -1,7 +1,7 @@
 # ADR-0019 — Rapatriement automatique des sauvegardes
 
 - **Date** : 06/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · « connexion par mot de passe inchangée » : remplacé par [ADR-0087](0087-serveur-ovh-connexion-ssh-par-cle.md) (à réaliser, #127)
 - **Décideurs** : utilisateur
 - **Issue** : #2
 - **Thème** : Serveur
