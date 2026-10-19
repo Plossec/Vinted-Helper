@@ -72,6 +72,7 @@ export function Corbeille() {
                 <button
                   type="button"
                   className="bouton"
+                  aria-label={`Restaurer ${formatReference(a.reference)}`}
                   onClick={() => void agir(api.post(`/api/corbeille/${a.id}/restauration`))}
                 >
                   Restaurer
@@ -79,6 +80,7 @@ export function Corbeille() {
                 <button
                   type="button"
                   className="bouton bouton--danger"
+                  aria-label={`Supprimer définitivement ${formatReference(a.reference)}`}
                   onClick={() => {
                     void confirmer("Supprimer définitivement cet article et ses photos ? C'est irréversible.", {
                       action: "Supprimer définitivement",

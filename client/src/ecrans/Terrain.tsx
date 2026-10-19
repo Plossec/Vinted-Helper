@@ -217,7 +217,7 @@ function DemarrerSortie({
         />
         <label className="champ">
           <span>Date *</span>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input aria-required="true" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <Message message={message} />
         <button className="bouton bouton--principal" type="submit">
@@ -458,6 +458,7 @@ function FormulaireAchat({
         <label className="champ">
           <span>Prix payé (€) *</span>
           <input
+            aria-required="true"
             className="champ-grand"
             inputMode="decimal"
             autoFocus

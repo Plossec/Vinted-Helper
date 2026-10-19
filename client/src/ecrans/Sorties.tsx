@@ -146,6 +146,7 @@ export function FicheSortie() {
               <label className="champ">
                 <span>Date *</span>
                 <input
+                  aria-required="true"
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}

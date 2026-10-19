@@ -126,7 +126,12 @@ export function Listes() {
                       ))}
                   </select>
                 )}
-                <button type="button" className="bouton bouton--principal" onClick={() => void valider()}>
+                <button
+                  type="button"
+                  className="bouton bouton--principal"
+                  aria-label={action.type === "renommer" ? `Renommer « ${v.nom} »` : `Fusionner « ${v.nom} »`}
+                  onClick={() => void valider()}
+                >
                   OK
                 </button>
                 <button type="button" className="bouton" onClick={() => setAction(null)}>
@@ -145,6 +150,7 @@ export function Listes() {
                   <button
                     type="button"
                     className="lien"
+                    aria-label={`Renommer « ${v.nom} »`}
                     onClick={() => setAction({ type: "renommer", valeur: v, nom: v.nom })}
                   >
                     Renommer
@@ -152,6 +158,7 @@ export function Listes() {
                   <button
                     type="button"
                     className="lien"
+                    aria-label={`Fusionner « ${v.nom} »`}
                     onClick={() => setAction({ type: "fusionner", valeur: v, cibleId: "" })}
                   >
                     Fusionner

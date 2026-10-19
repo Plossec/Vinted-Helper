@@ -112,6 +112,7 @@ export function ListeDeroulante({
         <input
           id={id}
           role="combobox"
+          aria-required={obligatoire || undefined}
           aria-expanded={ouvert}
           aria-controls={idListe}
           aria-autocomplete="list"

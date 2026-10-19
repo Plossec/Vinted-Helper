@@ -299,6 +299,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
             <label className="champ">
               <span>Prix affiché sur Vinted (€) *</span>
               <input
+                aria-required="true"
                 inputMode="decimal"
                 value={saisie.prix}
                 onChange={(e) => modifier({ prix: e.target.value })}
@@ -313,6 +314,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                 <label className="champ">
                   <span>Montant crédité (€) *</span>
                   <input
+                    aria-required="true"
                     inputMode="decimal"
                     value={saisie.montant}
                     onChange={(e) => modifier({ montant: e.target.value })}
@@ -384,6 +386,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                 <label className="champ">
                   <span>Nouveau montant crédité pour les articles restants (€) *</span>
                   <input
+                    aria-required="true"
                     inputMode="decimal"
                     value={saisie.montant}
                     onChange={(e) => modifier({ montant: e.target.value })}
@@ -404,7 +407,11 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
               )}
               <label className="champ">
                 <span>Motif *</span>
-                <select value={saisie.motif} onChange={(e) => modifier({ motif: e.target.value as MotifSortie })}>
+                <select
+                  aria-required="true"
+                  value={saisie.motif}
+                  onChange={(e) => modifier({ motif: e.target.value as MotifSortie })}
+                >
                   <option value="">Choisir…</option>
                   {Object.entries(LIBELLES_MOTIF)
                     .filter(([code]) => !(aVendre && code === "a_vendre"))
@@ -421,6 +428,7 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                     <label className="champ">
                       <span>Prix de revente (€) *</span>
                       <input
+                        aria-required="true"
                         inputMode="decimal"
                         value={saisie.prixRevente}
                         onChange={(e) => modifier({ prixRevente: e.target.value })}
@@ -429,7 +437,11 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                   )}
                   <label className="champ">
                     <span>Canal *</span>
-                    <select value={saisie.canal} onChange={(e) => modifier({ canal: e.target.value as CanalRevente })}>
+                    <select
+                      aria-required="true"
+                      value={saisie.canal}
+                      onChange={(e) => modifier({ canal: e.target.value as CanalRevente })}
+                    >
                       <option value="">Choisir…</option>
                       {Object.entries(LIBELLES_CANAL).map(([code, libelle]) => (
                         <option key={code} value={code}>
@@ -484,12 +496,14 @@ export function BlocStatut({ article, onMiseAJour }: Props) {
                   <span className="historique__correction">
                     <input
                       type="datetime-local"
+                      aria-label="Nouvelle date du changement"
                       value={correction.date}
                       onChange={(e) => setCorrection({ id: h.id, date: e.target.value })}
                     />
                     <button
                       type="button"
                       className="bouton bouton--principal"
+                      aria-label="Enregistrer la nouvelle date"
                       onClick={() => void enregistrerCorrection()}
                     >
                       OK
