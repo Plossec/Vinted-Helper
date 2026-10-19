@@ -41,14 +41,20 @@ export function FicheVente() {
   return (
     <main className="page">
       <Link to="/articles" className="lien-retour">
-        ← Articles
+        <span aria-hidden="true">←</span> Articles
       </Link>
       <h1>Colis</h1>
       {!vente ? (
-        <p className={message ? "message message--erreur" : "statut"}>{message?.texte ?? "Chargement…"}</p>
+        <p className={message ? "message message--erreur" : "statut"} role={message ? "alert" : undefined}>
+          {message?.texte ?? "Chargement…"}
+        </p>
       ) : (
         <>
-          {vente.annulee && <p className="message message--erreur">Vente annulée : exclue de tous les calculs.</p>}
+          {vente.annulee && (
+            <p className="message message--erreur" role="alert">
+              Vente annulée : exclue de tous les calculs.
+            </p>
+          )}
           <p className="secondaire">
             Vendu le {formatDateHeure(vente.dateVente)}
             {vente.dateEnvoi ? ` · envoyé le ${formatDateHeure(vente.dateEnvoi)}` : ""}

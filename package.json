@@ -1,6 +1,6 @@
 {
   "name": "vinted-helper",
-  "version": "1.20.1",
+  "version": "1.21.0",
   "private": true,
   "description": "Aide à la gestion des achats et ventes Vinted",
   "type": "module",
@@ -32,6 +32,7 @@
     "@vitest/coverage-v8": "^5.0.3",
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.12.0",
+    "eslint-plugin-jsx-a11y-x": "^0.2.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
     "prettier": "^3.9.10",

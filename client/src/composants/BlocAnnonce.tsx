@@ -94,7 +94,13 @@ export function BlocAnnonce({ article, onMiseAJour }: { article: Article; onMise
         )}
         <div className="actions">
           <button type="button" className="bouton bouton--principal" disabled={enCours} onClick={() => void generer()}>
-            {enCours ? "Génération…" : "✨ Générer l'annonce"}
+            {enCours ? (
+              "Génération…"
+            ) : (
+              <>
+                <span aria-hidden="true">✨</span> Générer l'annonce
+              </>
+            )}
           </button>
           <button type="button" className="bouton" onClick={() => void enregistrer()}>
             Enregistrer

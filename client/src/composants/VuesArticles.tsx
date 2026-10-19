@@ -87,9 +87,10 @@ interface Props {
 
 /**
  * Repère « ↗ » qui ouvre l'annonce Vinted (issue #46). Placé dans le lien de la carte : un élément cliquable
- * (et non un second lien imbriqué), qui empêche l'ouverture de la fiche.
+ * (et non un second lien imbriqué), qui empêche l'ouverture de la fiche. Dans un lien (`dansUnLien`), il est réservé
+ * à la souris et masqué aux lecteurs d'écran (#215) : l'annonce reste accessible depuis la fiche.
  */
-function LienVinted({ a }: { a: ResumeArticle }) {
+function LienVinted({ a, dansUnLien = false }: { a: ResumeArticle; dansUnLien?: boolean }) {
   const url = a.urlVinted;
   if (!url) return null;
   const ouvrir = (e: { preventDefault: () => void; stopPropagation: () => void }) => {
@@ -97,6 +98,13 @@ function LienVinted({ a }: { a: ResumeArticle }) {
     e.stopPropagation();
     window.open(url, "_blank", "noopener,noreferrer");
   };
+  if (dansUnLien) {
+    return (
+      <span className="lien-vinted" aria-hidden="true" title="Voir l'annonce sur Vinted" onClick={ouvrir}>
+        ↗
+      </span>
+    );
+  }
   return (
     <span
       className="lien-vinted"
@@ -116,7 +124,7 @@ function LienVinted({ a }: { a: ResumeArticle }) {
 
 const prixAffiche = (a: ResumeArticle) => (a.prixAffiche === null ? "—" : formatEuros(a.prixAffiche));
 
-/** Sélection pour Vinted (#196) : un article incomplet reste visible, grisé et non cochable. */
+/** Sélection pour Vinted (#196) : un article incomplet reste visible, encadré en pointillés et non cochable. */
 const incomplet = (a: ResumeArticle, props: Props) => props.selection !== null && a.manquesPublication.length > 0;
 const texteManques = (a: ResumeArticle) => `Il manque : ${a.manquesPublication.join(", ")}`;
 
@@ -136,7 +144,11 @@ function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
 }
 
 function Manques({ a, props }: { a: ResumeArticle; props: Props }) {
-  return incomplet(a, props) ? <span className="manques-publication">{texteManques(a)}</span> : null;
+  return incomplet(a, props) ? (
+    <span className="manques-publication">
+      <strong>Incomplet</strong> — {texteManques(a)}
+    </span>
+  ) : null;
 }
 
 const classeSelection = (a: ResumeArticle, props: Props, base?: string) =>
@@ -167,7 +179,7 @@ export function VuesArticles(props: Props) {
               {/* Repère ↗ sur la photo, hors de la ligne de texte : toutes les cartes gardent la même hauteur (#145). */}
               {a.urlVinted && (
                 <span className="mosaique__vinted">
-                  <LienVinted a={a} />
+                  <LienVinted a={a} dansUnLien />
                 </span>
               )}
               <span className="mosaique__texte">
@@ -192,7 +204,7 @@ export function VuesArticles(props: Props) {
             <Link to={`/articles/${a.id}`} className="ligne-article">
               <span className="reference">{formatReference(a.reference)}</span>
               <span className="ligne-article__nom">{a.nom ?? "(sans nom)"}</span>
-              <LienVinted a={a} />
+              <LienVinted a={a} dansUnLien />
               <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
               <span className="ligne-article__prix">{prixAffiche(a)}</span>
             </Link>
@@ -203,7 +215,7 @@ export function VuesArticles(props: Props) {
                 <span className="carte-article__ligne">
                   <span className="reference">{formatReference(a.reference)}</span>
                   <span className="carte-article__reperes">
-                    <LienVinted a={a} />
+                    <LienVinted a={a} dansUnLien />
                     <span className={`badge badge--${a.statut}`}>{LIBELLES_STATUT[a.statut]}</span>
                   </span>
                 </span>
@@ -241,7 +253,7 @@ function Tableau(props: Props) {
     <th scope="col" className={classe} aria-sort={tri === t ? (croissant ? "ascending" : "descending") : undefined}>
       <button type="button" className="tableau-articles__tri" onClick={() => onTri(t)}>
         {libelle}
-        {tri === t ? (croissant ? " ↑" : " ↓") : ""}
+        {tri === t ? <span aria-hidden="true">{croissant ? " ↑" : " ↓"}</span> : null}
       </button>
     </th>
   );

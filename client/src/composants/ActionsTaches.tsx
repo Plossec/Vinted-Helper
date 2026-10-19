@@ -6,6 +6,7 @@ import { type ActionVinted, api } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
+import { NouvelOnglet } from "./NouvelOnglet.js";
 
 interface Actions {
   aValider: ActionVinted[];
@@ -65,7 +66,12 @@ export function ActionsAValider({ onChangement }: { onChangement: () => void }) 
   const [envoi, setEnvoi] = useState(false);
   const [retour, setRetour] = useState<string | null>(null);
   const liste = actions?.aValider ?? [];
-  if (liste.length === 0 && !retour) return erreur ? <p className="message message--erreur">{erreur}</p> : null;
+  if (liste.length === 0 && !retour)
+    return erreur ? (
+      <p className="message message--erreur" role="alert">
+        {erreur}
+      </p>
+    ) : null;
 
   const basculer = (id: string) =>
     setCoches((c) => {
@@ -101,7 +107,11 @@ export function ActionsAValider({ onChangement }: { onChangement: () => void }) 
       <h2>
         Articles dormants : à valider <span className="pastille">{liste.length}</span>
       </h2>
-      {retour && <p className="message message--ok">{retour}</p>}
+      {retour && (
+        <p className="message message--ok" role="status">
+          {retour}
+        </p>
+      )}
       {liste.length > 0 && (
         <>
           <ul className="cases">
@@ -156,7 +166,11 @@ export function JournalActions() {
   return (
     <section className="section">
       <h2>Tâches automatiques</h2>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {actions && actions.journal.length === 0 && <p className="vide">Aucune action pour l'instant.</p>}
       <ul className="historique">
         {actions?.journal.map((a) => (
@@ -178,7 +192,8 @@ export function JournalActions() {
                 <>
                   {" "}
                   <a href={a.url} target="_blank" rel="noreferrer">
-                    Voir l'annonce ↗
+                    Voir l'annonce
+                    <NouvelOnglet />
                   </a>
                 </>
               )}

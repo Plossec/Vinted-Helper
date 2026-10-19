@@ -24,10 +24,14 @@ export function ListeSorties() {
   return (
     <main className="page">
       <Link to="/terrain" className="lien-retour">
-        ← Terrain
+        <span aria-hidden="true">←</span> Terrain
       </Link>
       <h1>Sorties</h1>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {sorties === null && !erreur && <p className="statut">Chargement…</p>}
       {sorties?.length === 0 && <p className="vide">Aucune sortie pour l'instant.</p>}
       <ul className="liste">
@@ -116,12 +120,14 @@ export function FicheSortie() {
   return (
     <main className="page">
       <Link to="/sorties" className="lien-retour">
-        ← Sorties
+        <span aria-hidden="true">←</span> Sorties
       </Link>
       <h1>{sortie ? `${sortie.lieu} — ${formatDate(sortie.date)}` : "Sortie"}</h1>
       {sortie === null ? (
         message ? (
-          <p className="message message--erreur">{message.texte}</p>
+          <p className="message message--erreur" role="alert">
+            {message.texte}
+          </p>
         ) : (
           <p className="statut">Chargement…</p>
         )
@@ -140,6 +146,7 @@ export function FicheSortie() {
               <label className="champ">
                 <span>Date *</span>
                 <input
+                  aria-required="true"
                   type="date"
                   value={form.date}
                   onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}

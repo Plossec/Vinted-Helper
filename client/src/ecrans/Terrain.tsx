@@ -217,7 +217,7 @@ function DemarrerSortie({
         />
         <label className="champ">
           <span>Date *</span>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input aria-required="true" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
         <Message message={message} />
         <button className="bouton bouton--principal" type="submit">
@@ -226,7 +226,7 @@ function DemarrerSortie({
       </form>
       <div className="section actions">
         <button className="bouton" type="button" onClick={onMaison}>
-          📷 Article de la maison (0 €, sans sortie)
+          <span aria-hidden="true">📷</span> Article de la maison (0 €, sans sortie)
         </button>
         <Link to="/sorties" className="bouton">
           Toutes les sorties
@@ -453,11 +453,12 @@ function FormulaireAchat({
           Annuler
         </button>
       </div>
-      {achat.apercu && <img className="apercu-photo" src={achat.apercu} alt="Photo de l'achat" />}
+      {achat.apercu && <img className="apercu-photo" src={achat.apercu} alt="Aperçu de l'achat" />}
       {!maison && (
         <label className="champ">
           <span>Prix payé (€) *</span>
           <input
+            aria-required="true"
             className="champ-grand"
             inputMode="decimal"
             autoFocus

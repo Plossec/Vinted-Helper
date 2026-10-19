@@ -77,8 +77,15 @@ export function AFaire() {
   function actions(l: LigneAFaire) {
     const cle = `${l.type}:${l.id}`;
     const occupe = enCours !== null;
+    // Nom accessible complet (#215) : le même bouton se répète sur chaque ligne.
     const bouton = (libelle: string, action: () => Promise<{ ok: boolean; texte: string } | null>) => (
-      <button type="button" className="bouton" disabled={occupe} onClick={() => void agir(cle, action)}>
+      <button
+        type="button"
+        className="bouton"
+        disabled={occupe}
+        aria-label={`${libelle.replace(" → ", " : ")} (${formatReference(l.reference)})`}
+        onClick={() => void agir(cle, action)}
+      >
         {enCours === cle ? "…" : libelle}
       </button>
     );
@@ -136,8 +143,19 @@ export function AFaire() {
   return (
     <main className="page">
       <h1>À faire</h1>
-      {retour && <p className={retour.ok ? "message message--ok" : "message message--erreur"}>{retour.texte}</p>}
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {retour && (
+        <p
+          className={retour.ok ? "message message--ok" : "message message--erreur"}
+          role={retour.ok ? "status" : "alert"}
+        >
+          {retour.texte}
+        </p>
+      )}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {alertes === null && !erreur && <p className="statut">Chargement…</p>}
       {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
       {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}

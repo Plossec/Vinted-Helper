@@ -49,7 +49,7 @@ export function FraisDivers() {
   return (
     <main className="page">
       <Link to="/reglages" className="lien-retour">
-        ← Réglages
+        <span aria-hidden="true">←</span> Réglages
       </Link>
       <h1>Frais divers</h1>
       <p className="secondaire">
@@ -59,6 +59,7 @@ export function FraisDivers() {
         <label className="champ">
           <span>Libellé *</span>
           <input
+            aria-required="true"
             value={form.libelle}
             onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
             placeholder="Vitrine Vinted, rouleau d'étiquettes…"
@@ -68,6 +69,7 @@ export function FraisDivers() {
           <label className="champ">
             <span>Montant (€) *</span>
             <input
+              aria-required="true"
               inputMode="decimal"
               value={form.montant}
               onChange={(e) => setForm((f) => ({ ...f, montant: e.target.value }))}
@@ -75,7 +77,12 @@ export function FraisDivers() {
           </label>
           <label className="champ">
             <span>Date *</span>
-            <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
+            <input
+              aria-required="true"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+            />
           </label>
         </div>
         {erreur && (
@@ -104,13 +111,19 @@ export function FraisDivers() {
               <button
                 type="button"
                 className="lien"
+                aria-label={`Modifier le frais « ${f.libelle} » du ${formatDate(f.date)}`}
                 onClick={() =>
                   setForm({ id: f.id, date: f.date, montant: centimesVersSaisie(f.montant), libelle: f.libelle })
                 }
               >
                 Modifier
               </button>{" "}
-              <button type="button" className="lien" onClick={() => void supprimer(f.id)}>
+              <button
+                type="button"
+                className="lien"
+                aria-label={`Supprimer le frais « ${f.libelle} » du ${formatDate(f.date)}`}
+                onClick={() => void supprimer(f.id)}
+              >
                 Supprimer
               </button>
             </span>

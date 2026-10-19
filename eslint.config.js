@@ -1,6 +1,7 @@
 // Configuration ESLint (format « flat config »).
 import js from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
+import jsxA11y from "eslint-plugin-jsx-a11y-x";
 import reactHooks from "eslint-plugin-react-hooks";
 import globals from "globals";
 import tseslint from "typescript-eslint";
@@ -65,5 +66,22 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
     plugins: { "react-hooks": reactHooks },
     rules: reactHooks.configs.recommended.rules,
+  },
+  {
+    // Accessibilité de l'interface (#215) : images, libellés, rôles ARIA, éléments interactifs.
+    ...jsxA11y.configs.recommended,
+    files: ["client/**/*.tsx"],
+    rules: {
+      ...jsxA11y.configs.recommended.rules,
+      // Focus voulu : clavier numérique ouvert d'emblée sur le terrain (.claude/rules/interface.md) et premier champ
+      // des boîtes de dialogue (ADR-0059).
+      "jsx-a11y-x/no-autofocus": "off",
+    },
+  },
+  {
+    // Liste déroulante en « combobox » ARIA : le clavier est géré par le champ (aria-activedescendant), les options
+    // ne reçoivent que le clic.
+    files: ["client/src/composants/ListeDeroulante.tsx"],
+    rules: { "jsx-a11y-x/click-events-have-key-events": "off" },
   },
 );

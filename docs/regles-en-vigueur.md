@@ -56,6 +56,7 @@ une de ces règles met cette page à jour dans la même PR ([ADR-0098](decisions
 |---|---|---|---|
 | Écran « À faire » | 1er onglet avec la pastille ; Urgent / À traiter / Pour info (« Vu » mémorisé sur le serveur) ; écran d'ouverture au choix par appareil (Terrain par défaut) | [0089](decisions/0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | réalisé |
 | Apparence | Design tokens « Techno », couleurs des badges, mise en page PC dès 1024 px | [0053](decisions/0053-refonte-de-l-interface-design-tokens-techno.md), [0086](decisions/0086-couleurs-des-badges-de-statut.md), [0058](decisions/0058-mise-en-page-pc-a-partir-de-1024-px.md) | réalisé |
+| Accessibilité | Contrastes WCAG 2.2 AA, emojis masqués, boutons nommés en entier, messages annoncés ; `eslint-plugin-jsx-a11y-x` à chaque PR | [0102](decisions/0102-accessibilite-de-l-interface.md) | réalisé |
 | Fiche article | Organisée autour du statut ; avertissement des saisies non enregistrées | [0061](decisions/0061-fiche-article-organisee-autour-du-statut.md), [0054](decisions/0054-fiche-article-avertissement-des-saisies-non-enregistrees.md) | réalisé |
 
 ## IA Gemini

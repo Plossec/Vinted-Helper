@@ -25,6 +25,12 @@
   --rayon-rond: 999px;
 }
 
+/* Texte d'aide des champs lisible dans les deux thèmes (#215) : couleur du texte secondaire. */
+::placeholder {
+  color: var(--texte-secondaire);
+  opacity: 1;
+}
+
 body {
   margin: 0;
   padding: 16px;

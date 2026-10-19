@@ -369,7 +369,13 @@ export function FicheArticle() {
   if (refs === null || options === null) {
     return (
       <main className="page">
-        {message ? <p className="message message--erreur">{message.texte}</p> : <p className="statut">Chargement…</p>}
+        {message ? (
+          <p className="message message--erreur" role="alert">
+            {message.texte}
+          </p>
+        ) : (
+          <p className="statut">Chargement…</p>
+        )}
       </main>
     );
   }
@@ -378,7 +384,7 @@ export function FicheArticle() {
     <ContexteModifications value={modifications}>
       <main className={article ? "page page--fiche" : "page"}>
         <Link to="/articles" className="lien-retour">
-          ← Articles
+          <span aria-hidden="true">←</span> Articles
         </Link>
         <h1>{article ? `${formatReference(article.reference)} ${article.nom ?? ""}` : "Nouvel article"}</h1>
         {article && <EnteteArticle article={article} />}
@@ -402,13 +408,20 @@ export function FicheArticle() {
                 onChange={(e) => void lireEtiquette(e)}
               />
               <button type="button" className="bouton" disabled={lecture} onClick={() => etiquette.current?.click()}>
-                {lecture ? "Lecture de l'étiquette…" : "🏷 Lire l'étiquette"}
+                {lecture ? (
+                  "Lecture de l'étiquette…"
+                ) : (
+                  <>
+                    <span aria-hidden="true">🏷</span> Lire l'étiquette
+                  </>
+                )}
               </button>
 
               <form className="formulaire section" onSubmit={(e) => void enregistrer(e)} noValidate>
+                <p className="secondaire">* champ obligatoire</p>
                 <label className="champ">
                   <span>Nom *</span>
-                  <input value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
+                  <input aria-required="true" value={form.nom} onChange={(e) => modifier("nom")(e.target.value)} />
                 </label>
                 <ListeDeroulante
                   libelle="Catégorie"
@@ -474,6 +487,7 @@ export function FicheArticle() {
                     <label className="champ">
                       <span>Prix total du lot (€) *</span>
                       <input
+                        aria-required="true"
                         inputMode="decimal"
                         value={form.prixLot}
                         onChange={(e) => modifier("prixLot")(e.target.value)}
@@ -483,6 +497,7 @@ export function FicheArticle() {
                     <label className="champ">
                       <span>Prix d'achat (€) *</span>
                       <input
+                        aria-required="true"
                         inputMode="decimal"
                         value={form.prixAchat}
                         onChange={(e) => modifier("prixAchat")(e.target.value)}
@@ -492,7 +507,12 @@ export function FicheArticle() {
                   )}
                   <label className="champ">
                     <span>Date d'achat *</span>
-                    <input type="date" value={form.dateAchat} onChange={(e) => modifier("dateAchat")(e.target.value)} />
+                    <input
+                      aria-required="true"
+                      type="date"
+                      value={form.dateAchat}
+                      onChange={(e) => modifier("dateAchat")(e.target.value)}
+                    />
                   </label>
                 </div>
                 <label className="champ">

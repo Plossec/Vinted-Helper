@@ -40,14 +40,18 @@ export function Corbeille() {
   return (
     <main className="page">
       <Link to="/articles" className="lien-retour">
-        ← Articles
+        <span aria-hidden="true">←</span> Articles
       </Link>
       <h1>Corbeille</h1>
       <p className="secondaire">
         Les articles supprimés n'entrent dans aucun calcul. Ils sont restaurables pendant 30 jours, puis supprimés
         définitivement avec leurs photos. Leur numéro de référence n'est jamais réattribué.
       </p>
-      {erreur && <p className="message message--erreur">{erreur}</p>}
+      {erreur && (
+        <p className="message message--erreur" role="alert">
+          {erreur}
+        </p>
+      )}
       {articles?.length === 0 && <p className="vide">La corbeille est vide.</p>}
       <ul className="liste">
         {articles?.map((a) => (
@@ -68,6 +72,7 @@ export function Corbeille() {
                 <button
                   type="button"
                   className="bouton"
+                  aria-label={`Restaurer ${formatReference(a.reference)}`}
                   onClick={() => void agir(api.post(`/api/corbeille/${a.id}/restauration`))}
                 >
                   Restaurer
@@ -75,6 +80,7 @@ export function Corbeille() {
                 <button
                   type="button"
                   className="bouton bouton--danger"
+                  aria-label={`Supprimer définitivement ${formatReference(a.reference)}`}
                   onClick={() => {
                     void confirmer("Supprimer définitivement cet article et ses photos ? C'est irréversible.", {
                       action: "Supprimer définitivement",
