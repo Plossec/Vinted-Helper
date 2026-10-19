@@ -453,7 +453,7 @@ function FormulaireAchat({
           Annuler
         </button>
       </div>
-      {achat.apercu && <img className="apercu-photo" src={achat.apercu} alt="Photo de l'achat" />}
+      {achat.apercu && <img className="apercu-photo" src={achat.apercu} alt="Aperçu de l'achat" />}
       {!maison && (
         <label className="champ">
           <span>Prix payé (€) *</span>

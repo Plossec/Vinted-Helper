@@ -113,7 +113,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
         {terrain.map((p) => (
           <li key={p.id}>
             <a href={urlPhoto(p.id) + version(p.id)} target="_blank" rel="noreferrer">
-              <img src={urlVignette(p.id) + version(p.id)} style={style(p.id)} alt="Photo terrain" loading="lazy" />
+              <img src={urlVignette(p.id) + version(p.id)} style={style(p.id)} alt="Vue terrain en grand (nouvel onglet)" loading="lazy" />
             </a>
             <span className="photos__legende">Photo terrain</span>
             <div className="photos__actions">
@@ -130,7 +130,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
               <img
                 src={urlVignette(p.id) + version(p.id)}
                 style={style(p.id)}
-                alt={`Photo d'annonce ${i + 1}`}
+                alt={`Annonce, vue ${i + 1} en grand (nouvel onglet)`}
                 loading="lazy"
               />
             </a>
