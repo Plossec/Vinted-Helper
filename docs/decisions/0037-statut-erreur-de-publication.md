@@ -1,7 +1,7 @@
 # ADR-0037 — Statut « Erreur » de publication
 
 - **Date** : 08/10/2026
-- **Statut** : Accepté · précisé par [ADR-0052](0052-statut-erreur-precisions-apres-la-revue-de-code.md)
+- **Statut** : Accepté · précisé par [ADR-0052](0052-statut-erreur-precisions-apres-la-revue-de-code.md) ; alerte de l'écran Articles : déplacée dans « À faire » par [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md)
 - **Décideurs** : utilisateur
 - **Issue** : #72
 - **Thème** : Publication Vinted

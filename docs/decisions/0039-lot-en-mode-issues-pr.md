@@ -1,7 +1,7 @@
 # ADR-0039 — `/lot` en mode issues / PR
 
 - **Date** : 08/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · « une décision va dans le fichier de son sujet » : remplacé par un fichier par décision (#197, index ci-dessous)
 - **Décideurs** : utilisateur
 - **Issue** : #82
 - **Thème** : Méthode

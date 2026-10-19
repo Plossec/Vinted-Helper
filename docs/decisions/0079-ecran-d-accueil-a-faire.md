@@ -1,7 +1,7 @@
 # ADR-0079 — Écran d'accueil « À faire »
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté · réalisation précisée par [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md)
+- **Statut** : Accepté · ouverture au démarrage remplacée par un choix par appareil (Terrain par défaut) et réalisation précisée par [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md)
 - **Décideurs** : utilisateur
 - **Issue** : #191
 - **Thème** : Tâches automatisées

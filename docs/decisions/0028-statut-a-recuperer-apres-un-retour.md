@@ -1,7 +1,7 @@
 # ADR-0028 — Statut « À récupérer » après un retour
 
 - **Date** : 07/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · alerte de l'écran Articles : déplacée dans « À faire » par [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md)
 - **Décideurs** : utilisateur
 - **Issue** : #52
 - **Thème** : Ventes

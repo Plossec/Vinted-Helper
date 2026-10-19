@@ -1,7 +1,7 @@
 # ADR-0055 — Barre de navigation : icônes, pastille, onglet parent
 
 - **Date** : 13/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · pastille déplacée sur l'onglet « À faire » par [ADR-0079](0079-ecran-d-accueil-a-faire.md) et [ADR-0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #103
 - **Thème** : Interface

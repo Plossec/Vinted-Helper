@@ -11,7 +11,7 @@
 ## Contexte
 
 Décisions sur les tâches que l'extension exécute seule sur le compte Vinted de l'utilisateur. Possibles depuis la
-suppression de la règle n° 4 (#185, `publication-vinted.md`) ; les risques déjà acceptés (CGU de Vinted : suspension
+suppression de la règle n° 4 (#185, [ADR-0068](0068-suppression-de-la-regle-n-4-automatisation-de-vinted.md)) ; les risques déjà acceptés (CGU de Vinted : suspension
 possible du compte) valent pour chacune.
 
 ## Décision

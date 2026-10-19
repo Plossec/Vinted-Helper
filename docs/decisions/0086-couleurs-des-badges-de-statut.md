@@ -1,7 +1,7 @@
 # ADR-0086 — Couleurs des badges de statut
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · 11e statut « Invendu » ajouté par [ADR-0094](0094-articles-dormants-realisation-cote-application.md)
 - **Décideurs** : utilisateur
 - **Issue** : #197
 - **Thème** : Interface

@@ -96,7 +96,7 @@ En cas d'oubli, l'application doit être démarrée, puis dans PowerShell (dossi
 docker compose exec -it app npm run reset-password -w server
 ```
 
-Tapez deux fois le nouveau mot de passe (8 caractères minimum ; il s'affiche sous forme d'étoiles), puis Entrée.
+Tapez deux fois le nouveau mot de passe (12 caractères minimum ; il s'affiche sous forme d'étoiles), puis Entrée.
 Résultat attendu : `Mot de passe modifié. Toutes les sessions ont été fermées : reconnectez-vous.`
 
 ---
