@@ -210,3 +210,43 @@ export async function supprimerSiOrpheline(tx: Base | Transaction, photoId: stri
   const [supprimee] = await tx.delete(photo).where(eq(photo.id, photoId)).returning({ fichier: photo.fichier });
   return supprimee ?? null;
 }
+
+export interface BilanMetadonnees {
+  verifiees: number;
+  aNettoyer: number;
+  nettoyees: number;
+  illisibles: number;
+}
+
+/**
+ * Retire les métadonnées (position GPS…) des photos enregistrées avant l'issue #216. En essai, compte seulement les
+ * photos concernées sans rien écrire. Le nom de fichier est mis à jour en base avant d'effacer l'ancien fichier.
+ */
+export async function retirerMetadonneesDesPhotos(
+  base: Base,
+  stockage: StockagePhotos,
+  essai: boolean,
+): Promise<BilanMetadonnees> {
+  const bilan: BilanMetadonnees = { verifiees: 0, aNettoyer: 0, nettoyees: 0, illisibles: 0 };
+  const photos = await base
+    .select({ id: photo.id, utilisateurId: photo.utilisateurId, fichier: photo.fichier })
+    .from(photo);
+  for (const p of photos) {
+    bilan.verifiees += 1;
+    let concernee: boolean;
+    try {
+      concernee = await stockage.aDesMetadonnees(p.utilisateurId, p.fichier);
+    } catch {
+      bilan.illisibles += 1;
+      continue;
+    }
+    if (!concernee) continue;
+    bilan.aNettoyer += 1;
+    if (essai) continue;
+    const nouveau = await stockage.retirerMetadonnees(p.utilisateurId, p.id, p.fichier);
+    if (nouveau !== p.fichier) await base.update(photo).set({ fichier: nouveau }).where(eq(photo.id, p.id));
+    await stockage.retirerAncien(p.utilisateurId, p.fichier, nouveau);
+    bilan.nettoyees += 1;
+  }
+  return bilan;
+}

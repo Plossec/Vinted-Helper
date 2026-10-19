@@ -1,6 +1,6 @@
 {
   "name": "@vinted-helper/server",
-  "version": "1.19.3",
+  "version": "1.20.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,6 +14,7 @@
     "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts",
     "reset-password": "node dist/outils/reinitialiser-mot-de-passe.js",
     "import-tableur": "node dist/outils/importer-tableur.js",
+    "photos:sans-metadonnees": "node dist/outils/photos-sans-metadonnees.js",
     "doc:categories": "node --import tsx src/outils/generer-doc-categories.ts"
   },
   "dependencies": {
