@@ -1,7 +1,7 @@
 # ADR-0038 — Calibrage de l'extension : sous-agent et skill
 
 - **Date** : 08/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · fusion de `/calibrer-vinted` : précisée par [ADR-0099](0099-consignes-de-claude-autonomie-et-decisions.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #73, #74
 - **Thème** : Méthode

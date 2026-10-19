@@ -1,7 +1,7 @@
 # ADR-0081 — Fusions dans main par Claude et Dependabot
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · fusion après le « oui » de l'utilisateur : précisée par [ADR-0099](0099-consignes-de-claude-autonomie-et-decisions.md)
 - **Décideurs** : utilisateur
 - **Issue** : #197
 - **Thème** : Serveur
