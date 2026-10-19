@@ -10,13 +10,14 @@ disable-model-invocation: true
 Entrée : `$ARGUMENTS`.
 
 Le travail se fait par **issue → branche → PR → fusion**. Une fusion dans `main` **part en production**
-(déploiement continu) : ne fusionne que du code prêt. Invoquer `/lot` (ou `/calibrer-vinted`) **vaut demande** de
-pousser et de fusionner (dans les limites de l'étape 7) : c'est l'exception à « aucun push sans demande ».
+(déploiement continu) : ne fusionne que du code prêt. Invoquer `/lot`, ou répondre « oui » à « faut-il la réaliser
+maintenant ? », **vaut demande** de pousser et de fusionner (dans les limites de l'étape 7 ; `CLAUDE.md`, Git).
 
 ## 0. Pas encore d'issue ?
 Si l'entrée n'est pas un numéro d'issue, c'est une nouvelle demande : crée l'issue (titre `[Évolution] …` ou
 `[Correctif] …` ; contexte, demande de l'utilisateur citée, points à préciser), donne son lien et **demande s'il faut
-la réaliser maintenant**. Arrête-toi là tant que l'utilisateur n'a pas répondu oui.
+la réaliser maintenant**. Arrête-toi là tant que l'utilisateur n'a pas répondu oui. Une simple question (audit,
+conseil) n'ouvre pas d'issue : réponds directement.
 
 ## 1. Point de départ
 - `git status` propre ; sinon, arrête-toi et explique ce qui reste.
@@ -35,7 +36,8 @@ la réaliser maintenant**. Arrête-toi là tant que l'utilisateur n'a pas répon
 ## 3. Lever les ambiguïtés
 Point flou, contradiction avec le cahier des charges, choix qui change le comportement : pose la question, **une à la
 fois**. Note les réponses en commentaire sur l'issue. Si l'utilisateur a dit de trancher, tranche et note le choix
-« *à relire* » dans la décision.
+« *à relire* » dans la décision. Tout choix qui n'est écrit ni dans l'issue ni dans une réponse est une décision :
+ADR **Proposé** (« à relire »), jamais passé à **Accepté** par Claude.
 
 ## 4. Plan
 Plan court : fichiers touchés, migration éventuelle, tests prévus, documentation.
@@ -51,25 +53,27 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
 - Commits petits, en français, à l'impératif, avec le numéro de l'issue.
 
 ## 6. Vérifier et documenter
-- `/verifier` (`npm run verifier`, mêmes étapes que la CI) vert, et l'extension si elle a changé
-  (`.claude/rules/extension-vinted.md` : sa version aussi).
+- Procédure de `.claude/skills/verifier/SKILL.md` (`npm run verifier` = job « Vérifier » de la CI) verte, et
+  l'extension si elle a changé (`.claude/rules/extension-vinted.md` : sa version aussi). Ici, corrige ce qui échoue.
+  (`/verifier`, `/version` et `/lot` ne se lancent que par l'utilisateur : lis directement leur `SKILL.md`.)
 - Documentation, selon le cas :
   - guide utilisateur concerné (`docs/guides/`) ;
   - `CHANGELOG.md`, section `[Non publié]`, en langage simple, avec le numéro de l'issue ;
-  - **version de la PR** : procédure `/version` (numéro selon la règle 1.x, CHANGELOG daté, `package.json`,
-    architecture), en dernier commit de la PR ;
+  - **version de la PR** : procédure de `.claude/skills/version/SKILL.md` (numéro selon la règle 1.x, CHANGELOG
+    daté, `package.json`, architecture), en dernier commit de la PR ;
   - décision : nouvel ADR `docs/decisions/NNNN-titre.md` (modèle `0000-modele.md`, numéro suivant) ajouté à
     l'index `docs/decisions/README.md` ; une décision remplacée prend le statut « Remplacé par ADR-NNNN » ;
-  - cahier des charges, **avec l'accord de l'utilisateur** ;
+  - cahier des charges et `docs/regles-en-vigueur.md` **dans la même PR** que la décision qui les change
+    (ADR-0098), avec l'accord de l'utilisateur (validation du plan) ;
   - `docs/architecture.md` si une table, un module, un service ou un outil externe change.
 - Relis ton diff : périmètre de l'issue seulement, aucun secret, aucune donnée personnelle (dépôt public).
 
 ## 7. Livrer
-- Push, puis PR **`#N — <Verbe> …`** avec `Closes #N` (une PR pour plusieurs issues : `#A, #B — …`, un `Closes`
-  par issue).
-- Surveille la PR ; CI rouge → corrige et repousse. **Fusionne** quand la CI est verte, **sauf** si la PR touche
-  une migration (`server/drizzle/`), `docker-compose*`, `Dockerfile`, `.github/` ou `.claude/` : demande d'abord
-  l'accord de l'utilisateur (choix du 13/10/2026, issue #110).
+- Push, puis PR **`#N — <Verbe> …`** avec `Closes #N` (plusieurs petites issues liées dans une PR, **si
+  l'utilisateur l'accepte** : `#A, #B — …`, un `Closes` par issue).
+- Surveille la PR ; CI rouge → corrige et repousse. **Fusionne** quand toutes les vérifications GitHub sont vertes
+  (« Vérifier », image Docker, CodeQL, extension si elle a changé), **sauf fusion sensible** (liste de `CLAUDE.md`,
+  Git) : demande d'abord l'accord de l'utilisateur.
 - Message court à l'utilisateur : ce qui change, la version (le tag `vX.Y.Z` est créé par GitHub après la mise en
   production), ce qu'il doit faire (mettre à jour l'application, `git pull`, recharger l'extension…), étapes pas à
   pas.

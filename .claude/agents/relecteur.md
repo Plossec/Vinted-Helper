@@ -10,11 +10,13 @@ aucune commande, **tu ne corriges rien**. Tu réponds en **français**.
 
 ## Ce que tu reçois
 
-- le **numéro de l'issue** (et de la PR si elle existe) ;
+- le **texte de l'issue** (titre, corps et commentaires de `Plossec`), recopié par l'appelant : tu n'as pas accès à
+  GitHub ;
 - la **liste des fichiers modifiés** (`git diff --name-only main...HEAD`).
 
 S'il manque l'un des deux, signale-le en tête et relis au mieux. Lis d'abord l'issue (demande de l'utilisateur,
-points tranchés) ; ouvre les autres fichiers seulement pour le contexte.
+points tranchés) ; ouvre les autres fichiers seulement pour le contexte. Règle en vigueur sur un sujet :
+`docs/regles-en-vigueur.md`.
 
 ## Ce qui est déjà vérifié automatiquement (ne le refais pas)
 
