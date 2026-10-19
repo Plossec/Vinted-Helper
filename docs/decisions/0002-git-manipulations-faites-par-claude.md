@@ -1,7 +1,7 @@
 # ADR-0002 — Git : manipulations faites par Claude
 
 - **Date** : 05/10/2026
-- **Statut** : Accepté · fusions précisées par [ADR-0046](0046-securite-du-depot-reglages-hooks-fusions.md) et [ADR-0081](0081-fusions-dans-main-par-claude-et-dependabot.md) ; tags poussés depuis le PC : remplacé par [ADR-0045](0045-une-version-par-pr-tag-automatique.md)
+- **Statut** : Accepté · fusions précisées par [ADR-0046](0046-securite-du-depot-reglages-hooks-fusions.md) et [ADR-0081](0081-fusions-dans-main-par-claude-et-dependabot.md) ; tags poussés depuis le PC : remplacé par [ADR-0045](0045-une-version-par-pr-tag-automatique.md) ; push : précisé par [ADR-0099](0099-consignes-de-claude-autonomie-et-decisions.md)
 - **Décideurs** : utilisateur
 - **Issue** : —
 - **Thème** : Méthode

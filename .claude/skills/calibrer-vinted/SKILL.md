@@ -40,12 +40,15 @@ Correction minimale : ne retouche pas les autres étapes.
 
 ## 6. Version
 Version de l'extension (`manifest.json` + `package.json`, voir la règle), ligne « Corrigé » dans `CHANGELOG.md`, puis
-`/version` pour l'application.
+la procédure de `.claude/skills/version/SKILL.md` pour l'application (`/version` ne se lance que par l'utilisateur).
 
 ## 7. Livraison
-Commit en français à l'impératif, push, PR `#N — Corrige …` avec `Closes #N`. Fusionne quand les vérifications
-GitHub sont vertes (accord de l'utilisateur d'abord si la PR touche `.github/`, `.claude/`, `docker-compose*`, `Dockerfile`
-ou une migration) (l'extension n'est pas déployée sur le serveur : elle se met à jour par `git pull` sur le PC).
+Commit en français à l'impératif, push, PR `#N — Corrige …` avec `Closes #N`. Quand les vérifications GitHub sont
+vertes (ADR-0099) :
+- skill **lancé par Claude** (relevé ou erreur reçus) : **demande l'accord de l'utilisateur avant de fusionner** ;
+- skill **invoqué par l'utilisateur** (`/calibrer-vinted`) : fusionne, sauf fusion sensible (liste de `CLAUDE.md`).
+
+L'extension n'est pas déployée sur le serveur : elle se met à jour par `git pull` sur le PC.
 
 ## 8. Message à l'utilisateur (court)
 Ce qui était en cause (une phrase), puis :

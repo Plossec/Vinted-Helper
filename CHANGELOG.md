@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.19.3] — 19/10/2026
+
+### Modifié
+- Consignes de Claude précisées (#217, ADR-0099) : une question reçoit une réponse directe, sans issue ; un « oui »
+  à « faut-il la réaliser maintenant ? » va jusqu'à la fusion ; `/calibrer-vinted` lancé par Claude demande avant de
+  fusionner ; plusieurs petites issues liées peuvent partager une PR si l'utilisateur l'accepte ; un choix non écrit
+  devient une décision « Proposé » ; une seule liste des fusions sensibles.
+- `npm run verifier` n'affiche plus que le détail des étapes en échec (`VERIFIER_DETAIL=1` pour tout voir) (#217).
+
 ## [1.19.2] — 19/10/2026
 
 ### Modifié
