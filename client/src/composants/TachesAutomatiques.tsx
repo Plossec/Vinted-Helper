@@ -4,6 +4,7 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { api, type ReglagesUtilisateur } from "../api.js";
 import { centimesVersSaisie, lireMontant } from "../outils/montants.js";
+import { LancerTache } from "./LancerTache.js";
 
 interface Formulaire {
   active: boolean;
@@ -186,6 +187,11 @@ export function TachesAutomatiques() {
             <input inputMode="numeric" {...texte("plafondRepublications")} />
           </label>
         </div>
+        <LancerTache tache="dormants" libelle="Lancer maintenant les articles dormants" />
+        <p className="secondaire">
+          « Lancer maintenant » : à toute heure, même tâche désactivée, sans plafond du jour (pauses, validation et mode
+          essai inchangés).
+        </p>
 
         <h3>Ventes finalisées</h3>
         <label className="case">
@@ -218,6 +224,7 @@ export function TachesAutomatiques() {
           Date de finalisation : celle de la commande sur Vinted. Montant crédité différent : celui de Vinted le
           remplace, avec une alerte. Commande non retrouvée : « à rattacher » dans « À faire ».
         </p>
+        <LancerTache tache="finalisation" libelle="Lancer maintenant la lecture des ventes" />
 
         <h3>Toutes les tâches</h3>
         <div className="champs-ligne">

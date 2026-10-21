@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { api } from "../api.js";
 import { ActionsAValider } from "../composants/ActionsTaches.js";
 import { CommandesVinted } from "../composants/CommandesVinted.js";
+import { LancerTache } from "../composants/LancerTache.js";
 import {
   type AlertesServeur,
   type LigneAFaire,
@@ -187,6 +188,12 @@ export function AFaire() {
           </ul>
         </section>
       ))}
+      {/* « Lancer maintenant » (#230) : chaque tâche à la demande, à toute heure. */}
+      <section className="section">
+        <h2>Lancer une tâche</h2>
+        <LancerTache tache="dormants" libelle="Articles dormants" onLance={() => void charger()} />
+        <LancerTache tache="finalisation" libelle="Ventes finalisées" />
+      </section>
     </main>
   );
 }
