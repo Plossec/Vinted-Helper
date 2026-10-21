@@ -1,7 +1,7 @@
 # ADR-0095 — Articles dormants : exécution par l'extension, en mode essai (étape 2 sur 3)
 
 - **Date** : 15/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · mode réel : [ADR-0106](0106-articles-dormants-mode-reel.md) (proposé)
 - **Décideurs** : Claude, dans le cadre validé par l'utilisateur ([ADR-0073](0073-tache-articles-dormants.md), [ADR-0078](0078-rythme-des-taches-automatisees.md), [ADR-0094](0094-articles-dormants-realisation-cote-application.md))
 - **Issue** : #147
 - **Thème** : Tâches automatisées

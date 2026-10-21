@@ -302,7 +302,7 @@ manque. La catégorie « Autre » est admise (publication à la main).
 
 | Tâche | Ce qu'elle fait | État |
 |---|---|---|
-| **Articles dormants** (#147) | Baisse le prix d'un article dormant (règle du compte ou de l'article, arrondie vers le haut au 0,50 €, jamais sous le prix vente minimum), sinon le republie ; après 3 republications sans vente → **Invendu** (ADR-0073, ADR-0094, ADR-0095) | réalisée, en mode essai jusqu'au calibrage |
+| **Articles dormants** (#147) | Baisse le prix d'un article dormant (règle du compte ou de l'article, arrondie vers le haut au 0,50 €, jamais sous le prix vente minimum), sinon le republie ; après 3 republications sans vente → **Invendu** (ADR-0073, ADR-0094, ADR-0095) ; en mode réel, chaque action est vérifiée après coup et rien n'est modifié si le prix sur Vinted diffère (ADR-0106) | réalisée ; mode réel (extension 1.14) à confirmer au premier essai |
 | **Ventes finalisées** (#148) | Lit le **Porte-monnaie** de Vinted ; une commande terminée finalise le colis Envoyé correspondant à la date Vinted ; montant différent → le montant Vinted remplace l'ancien, avec un signalement ; commande non retrouvée → « à rattacher » (ADR-0074, ADR-0096, ADR-0097) | application réalisée, lecture par l'extension à calibrer |
 | **Négociation favoris** (#149) | Une offre réduite unique aux personnes qui ont mis l'article en favori (ADR-0075) | décidée |
 | **Validée prix proposé** (#150) | Répond aux offres reçues et crée la vente quand une offre est acceptée et payée (ADR-0076) | décidée |

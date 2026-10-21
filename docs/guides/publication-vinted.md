@@ -78,23 +78,34 @@ Case **Mode essai** de l'écran Publication Vinted. En essai, l'extension rempli
 clique pas « Ajouter »** : l'onglet reste ouvert, vous pouvez relire. Rien n'est publié et l'article reste À publier.
 Décochez la case seulement quand plusieurs essais sont parfaits.
 
-## 6 bis. Tâches automatiques : articles dormants (extension 1.10, en essai)
+## 6 bis. Tâches automatiques : articles dormants (extension 1.14 : essai ou réel)
 
 Activées dans l'application (**Réglages → Tâches automatiques**, voir `utilisation.md`). Quand aucune annonce n'est
 à publier (la publication passe toujours d'abord), l'extension fait l'action suivante, **une à la fois**, avec les
-pauses réglées dans l'application. **Cette version ne fait que des essais** (case « Mode essai » des tâches cochée) :
+pauses réglées dans l'application.
+
+**Mode essai** (case « Mode essai » de la carte « Articles dormants » cochée) : rien n'est modifié sur Vinted.
 
 - **Baisse de prix** : ouvre l'annonce, puis « Modifier l'annonce », et lit le prix affiché ; **rien n'est saisi ni
   enregistré**.
 - **Republication** : ouvre l'annonce (le bouton « Supprimer » est repéré, **jamais cliqué**), puis remplit
   « Vendre un article » avec l'annonce, **sans cliquer « Ajouter »**.
 
-Après chaque essai, les pages sont relevées : **Dernier relevé → Télécharger le fichier**, et envoyez-le à Claude
-pour le calibrage (étape 3, mode réel). Décochée trop tôt, la case « Mode essai » fait refuser l'action par
-l'extension (« Mode réel des tâches pas encore disponible »), sans rien toucher sur Vinted.
+**Mode réel** (case décochée, extension 1.14 au moins) :
 
-**Relever la confirmation de suppression** (extension 1.12, une seule fois, pour le calibrage) : l'extension n'ouvre
-jamais elle-même la fenêtre « Supprimer cet article ? ». Pour la relever :
+- **Baisse de prix** : « Modifier l'annonce » ; si le prix affiché n'est pas celui de l'application, **rien n'est
+  modifié** (erreur au journal). Sinon le nouveau prix est saisi, seul **« Valider »** est cliqué (jamais
+  « Pousser »), puis la page est rouverte pour vérifier le prix enregistré.
+- **Republication** : « Supprimer » sur l'annonce, puis « Supprimer » **dans la fenêtre de confirmation** ; l'annonce
+  est rouverte pour vérifier qu'elle a disparu (sinon rien n'est republié), puis la nouvelle annonce est publiée
+  (contrôle, « Ajouter ») et son lien enregistré. Si la nouvelle annonce échoue, l'article passe **Erreur** : à
+  republier d'un clic.
+- **Premier essai réel** : sur **un seul article** (mode manuel, une seule ligne cochée dans « À faire »), puis
+  vérifiez l'annonce sur Vinted. Une page inattendue arrête l'action avec un relevé : **Dernier relevé →
+  Télécharger le fichier**, et envoyez-le à Claude.
+
+**Relever une page** (extension 1.12, pour le calibrage) : « Relever cet onglet » relève la page Vinted ouverte telle
+quelle, sans rien cliquer. Exemple, la fenêtre de suppression :
 
 1. Sur Vinted, ouvrez une de vos annonces et cliquez **Supprimer**. **Ne confirmez pas.**
 2. La fenêtre de confirmation ouverte, cliquez l'icône de l'extension → **Relever cet onglet**. L'extension lit la
