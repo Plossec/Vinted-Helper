@@ -193,7 +193,10 @@ test("« Relever cet onglet » (#224) : page ouverte relevée telle quelle, boî
   assert.equal(d.etape, "relevé de l'onglet");
   assert.equal(d.dialogues.length, 1);
   assert.equal(d.dialogues[0].role, "dialog");
-  assert.ok(d.dialogues[0].elements.some((e) => e.testid === "confirmer" && e.texte === "confirmer"));
+  assert.equal(d.dialogues[0].testid, "item-delete-modal");
+  assert.ok(
+    d.dialogues[0].elements.some((e) => e.testid === "item-delete-confirmation-button" && e.texte === "supprimer"),
+  );
   assert.equal(d.boutonsTrouves.supprimer, true);
 });
 
@@ -274,7 +277,7 @@ test("baisse en essai : annonce et « Modifier l'annonce » ouvertes et relevée
   assert.deepEqual(app.resultatsActions, [{ resultat: "essai" }]);
   assert.equal(vinted.pagesAnnonce, 1);
   assert.equal(vinted.pagesModifier, 1);
-  assert.equal(vinted.clics, 0);
+  assert.equal(vinted.clics + vinted.clicsValider, 0);
   assert.equal(d.etape, "tâche : baisse");
   assert.deepEqual(d.pages.annonce.boutonsTrouves, { modifier: true, supprimer: true });
   assert.equal(d.pages.modifier.selecteursTrouves.prix, '[data-testid="price-input--input"]');
@@ -308,12 +311,73 @@ test("republication en essai : annonce relevée, formulaire « Vendre un article
   assert.equal(d.pages.annonce.boutonsTrouves.supprimer, true);
 });
 
-test("action hors mode essai : refusée par cette version, aucune page Vinted ouverte", async () => {
-  const { app, vinted } = await lancer({ demande: null, actions: [ACTION("baisse", false)] });
+// --- Mode réel des tâches automatiques (#147, étape 3 ; relevés du 21/10/2026) ---
+
+test("baisse réelle : prix vérifié, nouveau prix saisi, seul « Valider » cliqué, prix relu après coup", async () => {
+  const { app, vinted, etat } = await lancer({ demande: null, actions: [ACTION("baisse", false)] });
+  assert.deepEqual(app.resultatsActions, [{ resultat: "fait" }]);
+  assert.equal(vinted.clicsValider, 1);
+  assert.equal(Number(vinted.prix.replace(/[^\d,.]/g, "").replace(",", ".")), 10);
+  assert.equal(vinted.clicsPousser + vinted.clicsPhoto + vinted.clicsSupprimerPage + vinted.clics, 0);
+  assert.equal(etat.pause, false);
+});
+
+test("baisse réelle, prix sur Vinted différent de celui de l'application : rien n'est modifié", async () => {
+  const { app, vinted } = await lancer({
+    demande: null,
+    actions: [ACTION("baisse", false)],
+    vinted: { prixVinted: "12,00 €" },
+  });
   assert.equal(app.resultatsActions[0].resultat, "erreur");
-  assert.match(app.resultatsActions[0].message, /Mode réel des tâches pas encore disponible/);
-  assert.equal(app.resultatsActions[0].releve, false); // aucune page ouverte, aucun relevé
-  assert.equal(vinted.pagesAnnonce + vinted.pagesModifier + vinted.chargements, 0);
+  assert.match(app.resultatsActions[0].message, /12,00 €.*11,00/);
+  assert.equal(vinted.clicsValider, 0);
+});
+
+test("baisse réelle, nouveau prix pas enregistré par Vinted : erreur et relevé", async () => {
+  const { app, vinted } = await lancer({
+    demande: null,
+    actions: [ACTION("baisse", false)],
+    vinted: { validerSansEffet: true },
+  });
+  assert.equal(vinted.clicsValider, 1);
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.match(app.resultatsActions[0].message, /Après « Valider »/);
+  assert.equal(app.resultatsActions[0].releve, true);
+});
+
+test("republication réelle : suppression confirmée dans la fenêtre, annonce disparue, nouvelle annonce publiée", async () => {
+  const { app, vinted } = await lancer({ demande: null, actions: [ACTION("republication", false)] });
+  assert.equal(vinted.clicsSupprimerPage, 1);
+  assert.equal(vinted.clicsConfirmerSuppression, 1);
+  assert.equal(vinted.clicsAnnulerSuppression, 0);
+  assert.equal(vinted.supprimee, true);
+  assert.equal(vinted.clics, 1); // « Ajouter » de la nouvelle annonce
+  assert.equal(app.resultatsActions[0].resultat, "fait");
+  assert.match(app.resultatsActions[0].url, /\/items\/987654/);
+});
+
+test("republication réelle, annonce toujours en ligne après la suppression : rien n'est republié", async () => {
+  const { app, vinted } = await lancer({
+    demande: null,
+    actions: [ACTION("republication", false)],
+    vinted: { suppressionSansEffet: true },
+  });
+  assert.equal(vinted.clicsConfirmerSuppression, 1);
+  assert.equal(vinted.chargements + vinted.clics, 0); // « Vendre un article » jamais ouvert
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.equal(app.resultatsActions[0].annonceSupprimee, false);
+  assert.match(app.resultatsActions[0].message, /toujours en ligne/);
+});
+
+test("republication réelle, nouvelle annonce impossible après la suppression : signalé « annonce supprimée »", async () => {
+  const action = ACTION("republication", false);
+  action.annonce.taille = "S"; // absente de la liste de Vinted
+  const { app, vinted } = await lancer({ demande: null, actions: [action] });
+  assert.equal(vinted.supprimee, true);
+  assert.equal(vinted.clics, 0);
+  assert.equal(app.resultatsActions[0].resultat, "erreur");
+  assert.equal(app.resultatsActions[0].annonceSupprimee, true);
+  assert.match(app.resultatsActions[0].message, /« S » introuvable/);
 });
 
 test("la publication passe avant les tâches automatiques", async () => {

@@ -6,7 +6,9 @@
 // Aucun contournement : vérification, page de blocage ou déconnexion → PAUSE, reprise uniquement à la main.
 // Tâches automatiques (#147) : sans annonce à publier (la publication passe d'abord), l'extension demande l'action
 // suivante (baisse de prix ou republication d'un article dormant) ; l'application règle les pauses entre actions.
-// Cette version ne fait les actions qu'en MODE ESSAI : elle ouvre et relève les pages, sans rien modifier.
+// Mode essai (case de la tâche) : l'extension ouvre et relève les pages, sans rien modifier. Mode réel (1.14, relevés
+// du 21/10/2026) : nouveau prix saisi puis « Valider », ou annonce supprimée (confirmée dans la fenêtre) puis recréée ;
+// chaque action est vérifiée après coup (prix relu, annonce disparue).
 // Vérification vente finalisée (#148) : après la publication et avant les actions, lecture du « Porte-monnaie » quand l'application la demande ; cette version ne fait que l'ouvrir et la relever (essai).
 
 /* global SELECTEURS */
@@ -276,14 +278,10 @@ const LIBELLES_ACTION = {
  * Les relevés sont enregistrés (« Dernier relevé ») pour calibrer le mode réel. Rien n'est modifié sur Vinted.
  */
 async function executerAction(api, action, vinted) {
-  if (!action.essai)
-    return {
-      resultat: "erreur",
-      message:
-        "Mode réel des tâches pas encore disponible dans cette version de l'extension (calibrage à faire) : laissez « Mode essai » coché (Réglages → Tâches automatiques).",
-    };
   const id = /\/items\/(\d+)/.exec(new URL(action.url).pathname)?.[1];
   if (!id) return { resultat: "erreur", message: `Lien d'annonce illisible : ${action.url}` };
+  if (!action.essai)
+    return action.type === "baisse" ? baisseReelle(action, vinted, id) : republicationReelle(api, action, vinted, id);
   const pages = {};
   const enregistrer = async (erreur = null) => {
     const derniere = pages.modifier ?? pages.annonce ?? {};
@@ -321,6 +319,101 @@ async function executerAction(api, action, vinted) {
   await verifierPage(onglet);
   await publier(onglet, api, { essai: true, article: action.annonce });
   return { resultat: "essai" };
+}
+
+/** Erreur renvoyée par le script de contenu pour une action réelle : relevé enregistré, puis erreur (ou pause). */
+async function demandeReelle(onglet, message, etapeReleve) {
+  const r = await envoyer(onglet, message);
+  if (!r) throw new Arret(RAISONS.inconnu);
+  if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+  if (!r.ok) {
+    if (r.releve) await enregistrerReleve(r.releve, etapeReleve, r.message);
+    throw new Error(r.message);
+  }
+}
+
+async function enregistrerReleve(releve, etapeReleve, erreur) {
+  await chrome.storage.local.set({
+    diagnostic: { ...releve, date: new Date().toISOString(), etape: etapeReleve, erreur },
+  });
+  await journal("Relevé de la page enregistré : fenêtre de l'extension → « Dernier relevé ».");
+}
+
+/** Attend que l'onglet quitte l'adresse en cours (après un clic qui change de page), 20 s au plus. */
+async function attendreDepart(onglet, adresse) {
+  const fin = Date.now() + 20_000;
+  while (Date.now() < fin) {
+    await attendreMs(500);
+    const t = await chrome.tabs.get(onglet).catch(() => null);
+    if (!t) throw new Error("Onglet Vinted fermé pendant l'action.");
+    if (t.url !== adresse && t.status === "complete") return;
+  }
+}
+
+/**
+ * Baisse réelle (#147, relevé du 21/10/2026) : « Modifier l'annonce » ouvert, prix vérifié puis remplacé, « Valider »,
+ * puis la page est rouverte pour relire le prix enregistré par Vinted.
+ */
+async function baisseReelle(action, vinted, id) {
+  const adresse = `${vinted}/items/${id}/edit`;
+  let onglet = await ouvrirOnglet(adresse);
+  await verifierPage(onglet);
+  await demandeReelle(
+    onglet,
+    { type: "baisser-prix", avant: action.prixAvant, apres: action.prixApres },
+    "tâche : baisse",
+  );
+  await attendreDepart(onglet, (await chrome.tabs.get(onglet)).url);
+  await pauseEntreEtapes(onglet);
+  onglet = await ouvrirOnglet(adresse);
+  await verifierPage(onglet);
+  const r = await envoyer(onglet, { type: "lire-prix" });
+  if (!r) throw new Arret(RAISONS.inconnu);
+  if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+  const attendu = Number(action.prixApres.replace(",", "."));
+  if (!r.ok || r.prix !== attendu) {
+    const message = `Après « Valider », Vinted affiche ${r.ok ? `${r.prix} €` : "un prix illisible"} au lieu de ${action.prixApres} € : vérifiez l'annonce sur Vinted.`;
+    if (r.releve) await enregistrerReleve(r.releve, "tâche : baisse (vérification)", message);
+    return { resultat: "erreur", message };
+  }
+  return { resultat: "fait" };
+}
+
+/** Erreur survenue après la suppression de l'ancienne annonce : l'application passe l'article « Erreur » (#72). */
+class ApresSuppression extends Error {
+  constructor(erreur) {
+    super(erreur instanceof Error ? erreur.message : String(erreur));
+    this.arret = erreur instanceof Arret;
+  }
+}
+
+/**
+ * Republication réelle (#147, ADR-0073 : supprimer, puis recréer) : « Supprimer » confirmé dans la fenêtre, annonce
+ * rouverte pour vérifier qu'elle a disparu, puis nouvelle annonce publiée comme une publication (contrôle, « Ajouter »).
+ */
+async function republicationReelle(api, action, vinted, id) {
+  const adresse = `${vinted}/items/${id}`;
+  let onglet = await ouvrirOnglet(adresse);
+  await verifierPage(onglet);
+  await demandeReelle(onglet, { type: "supprimer-annonce" }, "tâche : republication (suppression)");
+  await attendreDepart(onglet, (await chrome.tabs.get(onglet)).url);
+  await pauseEntreEtapes(onglet);
+  onglet = await ouvrirOnglet(adresse);
+  await verifierPage(onglet);
+  const releve = await releverPage(onglet, "annonce");
+  if (releve.boutonsTrouves.supprimer || releve.boutonsTrouves.modifier) {
+    const message = "Annonce toujours en ligne après la suppression : rien n'est republié. Vérifiez sur Vinted.";
+    await enregistrerReleve(releve, "tâche : republication (vérification)", message);
+    return { resultat: "erreur", message, annonceSupprimee: false };
+  }
+  try {
+    onglet = await ouvrirOnglet(`${vinted}/items/new`);
+    await verifierPage(onglet);
+    const r = await publier(onglet, api, { essai: false, article: action.annonce });
+    return { resultat: "fait", url: r.url };
+  } catch (erreur) {
+    throw new ApresSuppression(erreur);
+  }
 }
 
 /** Empreinte du « Dernier relevé » : comparée avant et après une opération, elle dit si un relevé a été enregistré. */
@@ -370,8 +463,9 @@ async function faireActionSuivante(api, vinted, signaler) {
     resultat = await executerAction(api, action, vinted);
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : String(erreur);
-    resultat = { resultat: "erreur", message };
-    if (erreur instanceof Arret) arret = message;
+    // Après la suppression de l'ancienne annonce (#147) : l'application passe l'article « Erreur », à republier.
+    resultat = { resultat: "erreur", message, annonceSupprimee: erreur instanceof ApresSuppression };
+    if (erreur instanceof Arret || (erreur instanceof ApresSuppression && erreur.arret)) arret = message;
   }
   // Erreur : l'application indique si un relevé a été enregistré (journal des tâches, #233).
   if (resultat.resultat === "erreur") resultat.releve = (await empreinteReleve()) !== avant;

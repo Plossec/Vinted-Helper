@@ -218,7 +218,8 @@ function CarteDormants({
         </label>
         <label className="case">
           <input type="checkbox" checked={form.essai} onChange={(e) => modifier({ essai: e.target.checked })} /> Mode
-          essai : l'extension ouvre les pages Vinted sans rien modifier (à garder tant que le calibrage n'est pas fait)
+          essai : l'extension ouvre les pages Vinted sans rien modifier. Décoché (extension 1.14 au moins) : le prix est
+          vraiment baissé, l'annonce vraiment supprimée puis recréée
         </label>
         <label className="champ">
           <span>Mode</span>

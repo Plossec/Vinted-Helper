@@ -135,32 +135,92 @@ function pageFormulaire({
 }
 
 /**
- * Page d'une annonce publiée et « Modifier l'annonce » (#147) : rédigées SANS relevé de Vinted (à remplacer par la
- * structure relevée en mode essai). Option : sans le champ prix sur « Modifier l'annonce ».
+ * Page d'une annonce publiée (#147). Relevé du 21/10/2026 : boutons `item-edit-button`, `item-delete-button` ; la
+ * fenêtre de confirmation de suppression (`item-delete-modal`) s'ouvre par-dessus, le bouton de la page reste dessous.
+ * Le clic sur « Supprimer » de la fenêtre supprime l'annonce (sauf option) puis quitte la page (destination réelle
+ * inconnue). Une annonce supprimée renvoie une page introuvable.
  */
+const FENETRE_SUPPRESSION = `<div data-testid="item-delete-modal--overlay">
+    <div role="dialog" data-testid="item-delete-modal">
+      <div role="presentation">Supprimer l'article ?</div>
+      <div role="presentation">En supprimant l'article, tu confirmes que tu ne l'as pas vendu sur Vinted.</div>
+      <button type="button" data-testid="item-delete-cancelation-button">Annuler</button>
+      <button type="button" data-testid="item-delete-confirmation-button">Supprimer</button>
+    </div>
+  </div>`;
+
 const PAGE_ANNONCE = `<!doctype html><html><body><h1>Jean Levi's 501</h1>
-  <a data-testid="item-edit-button" href="#">Modifier l'annonce</a>
-  <button data-testid="item-delete-button" type="button">Supprimer</button></body></html>`;
+  <button data-testid="item-edit-button" type="button">Modifier l'annonce</button>
+  <button data-testid="item-delete-button" type="button">Supprimer</button>
+  <div id="fenetre"></div>
+  <script>
+    const signaler = (quoi) => fetch("/" + quoi, { method: "POST" });
+    document.querySelector('[data-testid="item-delete-button"]').addEventListener("click", () => {
+      signaler("clic-supprimer-page");
+      document.querySelector("#fenetre").innerHTML = ${JSON.stringify(FENETRE_SUPPRESSION)};
+      document.querySelector('[data-testid="item-delete-cancelation-button"]').addEventListener("click", () => {
+        signaler("clic-annuler-suppression");
+        document.querySelector("#fenetre").innerHTML = "";
+      });
+      document.querySelector('[data-testid="item-delete-confirmation-button"]').addEventListener("click", () => {
+        signaler("clic-confirmer-suppression").then(() => location.assign("/member/1-vendeur"));
+      });
+    });
+  </script></body></html>`;
 
-const pageModifier = ({ sansPrixModifier = false } = {}) => `<!doctype html><html><body><form onsubmit="return false">
-  <input data-testid="title--input" value="Jean Levi's 501">
-  ${sansPrixModifier ? "" : '<input data-testid="price-input--input" value="11.00 €">'}
-  <button data-testid="upload-form-save-button" type="button">Enregistrer</button></form></body></html>`;
+const PAGE_INTROUVABLE = `<!doctype html><html><body><h1>Page introuvable</h1></body></html>`;
 
-/** Annonce avec une boîte de confirmation ouverte (#224) : structure rédigée SANS relevé de Vinted. */
-const PAGE_CONFIRMATION = PAGE_ANNONCE.replace(
-  "</body>",
-  `<div role="dialog" aria-modal="true"><h2>Supprimer cet article ?</h2>
-  <button data-testid="confirmer" type="button">Confirmer</button>
-  <button data-testid="annuler" type="button">Annuler</button></div></body>`,
-);
+/**
+ * « Modifier l'annonce » (#147). Relevé du 21/10/2026 : prix `price-input--input` (« 9,00 € » au chargement), bouton
+ * « Valider » (`upload-form-save-button`, comme « Ajouter » de la publication), case « Pousser » (payante) et boutons
+ * des photos à ne jamais toucher. « Valider » enregistre le prix saisi (sauf option) puis revient à l'annonce.
+ * Option : sans le champ prix.
+ */
+const pageModifier = ({ sansPrixModifier = false } = {}, prix = "11,00 €") => `<!doctype html><html><body>
+  <form onsubmit="return false">
+  <input id="title" name="title" data-testid="title--input" type="text" value="Jean Levi's 501">
+  <button type="button" data-testid="media-select-grid-delete-button-0" aria-label="Supprimer la photo sélectionnée"></button>
+  ${sansPrixModifier ? "" : `<input id="price" name="price" data-testid="price-input--input" type="text" placeholder="0,00 €" value="${prix}">`}
+  <button type="button">Modifier les paramètres de réductions</button>
+  <input type="checkbox" id="bump" name="bump" data-testid="bump-checkbox--input" value="1">
+  <button data-testid="upload-form-save-button" type="button">Valider</button></form>
+  <script>
+    const signaler = (quoi, corps) => fetch("/" + quoi, { method: "POST", body: corps });
+    document.querySelector("#bump").addEventListener("click", () => signaler("clic-pousser"));
+    document.querySelector('[data-testid="media-select-grid-delete-button-0"]').addEventListener("click", () =>
+      signaler("clic-photo"),
+    );
+    document.querySelector('[data-testid="upload-form-save-button"]').addEventListener("click", () => {
+      const prix = document.querySelector('[data-testid="price-input--input"]')?.value ?? "";
+      signaler("clic-valider", prix).then(() => location.assign("/items/555-jean-levis"));
+    });
+  </script></body></html>`;
+
+/** Annonce avec la fenêtre de confirmation ouverte (#224) : structure relevée le 21/10/2026. */
+const PAGE_CONFIRMATION = PAGE_ANNONCE.replace('<div id="fenetre"></div>', FENETRE_SUPPRESSION);
 
 /** Page « session bloquée » affichée par Vinted à la place du formulaire. */
 const PAGE_BLOCAGE = `<!doctype html><html><body><h1>Ta session a été bloquée</h1>
   <p>Nous avons détecté une activité inhabituelle ou automatisée.</p></body></html>`;
 
 export function demarrerFauxVinted(options = {}) {
-  const etat = { clics: 0, chargements: 0, clicsCategorie: 0, pagesAnnonce: 0, pagesModifier: 0, pagesVentes: 0 };
+  const etat = {
+    clics: 0,
+    chargements: 0,
+    clicsCategorie: 0,
+    pagesAnnonce: 0,
+    pagesModifier: 0,
+    pagesVentes: 0,
+    // Mode réel des tâches (#147) : prix de l'annonce sur « Modifier », annonce supprimée, clics par bouton.
+    prix: options.prixVinted ?? "11,00 €",
+    supprimee: false,
+    clicsValider: 0,
+    clicsPousser: 0,
+    clicsPhoto: 0,
+    clicsSupprimerPage: 0,
+    clicsConfirmerSuppression: 0,
+    clicsAnnulerSuppression: 0,
+  };
   const serveur = createServer((req, res) => {
     if (req.url === "/clic-categorie") {
       etat.clicsCategorie++;
@@ -189,10 +249,43 @@ export function demarrerFauxVinted(options = {}) {
       );
       return;
     }
+    // Mode réel (#147) : clics notés ; « Valider » enregistre le prix, « Supprimer » (fenêtre) supprime l'annonce.
+    const clics = {
+      "/clic-supprimer-page": "clicsSupprimerPage",
+      "/clic-annuler-suppression": "clicsAnnulerSuppression",
+      "/clic-pousser": "clicsPousser",
+      "/clic-photo": "clicsPhoto",
+    };
+    if (req.url && clics[req.url]) {
+      etat[clics[req.url]]++;
+      res.end("ok");
+      return;
+    }
+    if (req.url === "/clic-confirmer-suppression") {
+      etat.clicsConfirmerSuppression++;
+      if (!options.suppressionSansEffet) etat.supprimee = true;
+      res.end("ok");
+      return;
+    }
+    if (req.url === "/clic-valider") {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.clicsValider++;
+        if (!options.validerSansEffet) etat.prix = corps;
+        res.end("ok");
+      });
+      return;
+    }
+    if (/^\/member\//.test(req.url ?? "")) {
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end("<!doctype html><html><body><h1>Mes articles</h1></body></html>");
+      return;
+    }
     if (/^\/items\/\d+\/edit/.test(req.url ?? "")) {
       etat.pagesModifier++;
       res.setHeader("content-type", "text/html; charset=utf-8");
-      res.end(options.bloque ? PAGE_BLOCAGE : pageModifier(options));
+      res.end(options.bloque ? PAGE_BLOCAGE : pageModifier(options, etat.prix));
       return;
     }
     if (req.url === "/items/555-confirmation") {
@@ -203,7 +296,8 @@ export function demarrerFauxVinted(options = {}) {
     if (/^\/items\/555/.test(req.url ?? "")) {
       etat.pagesAnnonce++;
       res.setHeader("content-type", "text/html; charset=utf-8");
-      res.end(options.bloque ? PAGE_BLOCAGE : PAGE_ANNONCE);
+      if (etat.supprimee) res.statusCode = 404;
+      res.end(options.bloque ? PAGE_BLOCAGE : etat.supprimee ? PAGE_INTROUVABLE : PAGE_ANNONCE);
       return;
     }
     res.setHeader("content-type", "text/html; charset=utf-8");
