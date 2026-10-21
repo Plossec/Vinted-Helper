@@ -289,7 +289,9 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - Exécutées par l'**extension** pendant ses passages, une action à la fois sur Vinted, de **8 h à 22 h** (plage
   réglable) ; chaque tâche est **désactivée** par défaut, en mode **manuel** par défaut (liste à valider dans
   « À faire ») ou **automatique**, avec fréquence, pauses et plafonds réglables dans des limites (ADR-0072, ADR-0078).
-  Un **mode essai** commun ouvre les pages sans rien modifier. Résultats dans le journal de l'écran « Publication
+  **« Lancer maintenant »** (Réglages et « À faire ») : chaque tâche à la demande, à toute heure, même désactivée et
+  sans plafond du jour ; l'extension s'en charge à son prochain passage (ADR-0104). Un **mode essai** commun ouvre les
+  pages sans rien modifier. Résultats dans le journal de l'écran « Publication
   Vinted ».
 
 | Tâche | Ce qu'elle fait | État |

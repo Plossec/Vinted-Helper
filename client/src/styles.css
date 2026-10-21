@@ -114,6 +114,13 @@ html {
   padding: var(--e-6) var(--e-4);
 }
 
+/* « Lancer maintenant » d'une tâche automatisée (#230). */
+.lancer-tache {
+  display: grid;
+  gap: var(--e-2);
+  margin-block: var(--e-2);
+}
+
 /* Texte lu par les lecteurs d'écran mais invisible à l'écran (#215). */
 .visuellement-masque {
   position: absolute;

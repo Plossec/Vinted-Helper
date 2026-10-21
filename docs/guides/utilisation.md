@@ -29,6 +29,9 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 - **Mode** : *manuel* (liste à valider dans « À faire ») ou *automatique*.
 - **Rythme** : un passage par jour (6 h au moins entre deux), pauses entre deux actions, plafonds par jour, de 8 h à
   22 h ; tout se fait par l'extension Chrome, seulement quand Chrome est ouvert.
+- **Lancer maintenant** (Réglages → Tâches automatiques, ou section « Lancer une tâche » de « À faire ») : la tâche
+  passe tout de suite, **à toute heure**, même désactivée et sans plafond du jour. L'extension fait le travail à son
+  prochain passage (5 minutes au plus, Chrome ouvert), ou tout de suite avec **Vérifier maintenant** dans l'extension.
 - **Mode essai** (coché par défaut) : l'extension ouvre les pages Vinted sans rien modifier. À garder tant que
   l'extension n'a pas été calibrée sur les pages « Modifier l'annonce » et « Supprimer » (envoyez le « Dernier
   relevé » de l'extension après un essai, voir `publication-vinted.md`).

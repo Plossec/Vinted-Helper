@@ -413,6 +413,8 @@ export const reglages = pgTable(
     finalisationPlafond: integer("finalisation_plafond").notNull().default(50),
     /** Dernière lecture des commandes (résultat reçu de l'extension). */
     finalisationDernierPassage: horodatage("finalisation_dernier_passage"),
+    /** « Lancer maintenant » (#230) : lecture des commandes demandée, faite au prochain passage, à toute heure. */
+    finalisationLancementDemande: horodatage("finalisation_lancement_demande"),
   },
   // Le programme du PC s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
@@ -464,6 +466,8 @@ export const actionVinted = pgTable(
     prixApres: integer("prix_apres"),
     /** Mode essai : l'extension ouvre les pages mais ne modifie rien. */
     essai: boolean("essai").notNull().default(true),
+    /** Prévue par « Lancer maintenant » (#230) : exécutée à toute heure, hors de la plage horaire. */
+    manuelle: boolean("manuelle").notNull().default(false),
     message: text("message"),
     /** Republication : lien de la nouvelle annonce. */
     url: text("url"),

@@ -7,6 +7,7 @@ import {
   appliquerCommandes,
   type CommandeLue,
   ecarterCommandes,
+  lancerFinalisation,
   listerCommandes,
   marquerMontantVu,
   rattacherCommande,
@@ -15,6 +16,7 @@ import {
 import {
   actionSuivante,
   enregistrerResultatAction,
+  lancerDormants,
   listerActions,
   type ResultatAction,
   validerActions,
@@ -28,6 +30,15 @@ function idsObligatoires(valeur: unknown): string[] {
 
 export function routesTaches(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/taches/actions", async (requete) => listerActions(base, utilisateurDe(requete).id, maintenant()));
+
+  // « Lancer maintenant » (#230) : à toute heure, même tâche désactivée ; les dormants ignorent aussi les plafonds.
+  app.post("/api/taches/dormants/lancer", async (requete) => ({
+    actions: await lancerDormants(base, utilisateurDe(requete).id, maintenant()),
+  }));
+  app.post("/api/taches/finalisation/lancer", async (requete) => {
+    await lancerFinalisation(base, utilisateurDe(requete).id, maintenant());
+    return { ok: true };
+  });
 
   app.post("/api/taches/actions/appliquer", async (requete) => ({
     nombre: await validerActions(
