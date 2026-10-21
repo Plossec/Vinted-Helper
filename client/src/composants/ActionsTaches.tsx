@@ -1,19 +1,16 @@
-// Actions des tâches automatisées (#147) : liste à valider (mode manuel, écran « À faire ») et journal (écran
-// « Publication Vinted »). Les actions sont prévues par le serveur et exécutées une à une par l'extension Chrome.
+// Actions des tâches automatisées (#147) : liste à valider (mode manuel, écran « À faire »). Les actions sont prévues
+// par le serveur et exécutées une à une par l'extension Chrome ; leur journal est celui de toutes les tâches (#233).
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { type ActionVinted, api } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
-import { NouvelOnglet } from "./NouvelOnglet.js";
 
 interface Actions {
   aValider: ActionVinted[];
-  journal: ActionVinted[];
 }
 
-const ETATS: Record<ActionVinted["etat"], string> = {
+export const ETATS: Record<ActionVinted["etat"], string> = {
   a_valider: "À valider",
   en_attente: "En attente de l'extension",
   en_cours: "En cours",
@@ -25,7 +22,7 @@ const ETATS: Record<ActionVinted["etat"], string> = {
 };
 
 /** Classe de l'étiquette, partagée avec la file de publication. */
-const CLASSES: Partial<Record<ActionVinted["etat"], string>> = {
+export const CLASSES: Partial<Record<ActionVinted["etat"], string>> = {
   faite: "publie",
   essai: "essai",
   erreur: "erreur",
@@ -34,7 +31,7 @@ const CLASSES: Partial<Record<ActionVinted["etat"], string>> = {
 };
 
 /** « Baisse 11,00 € → 10,00 € » ou « Republication (11,00 €) ». */
-export const libelleAction = (a: ActionVinted) =>
+export const libelleAction = (a: Pick<ActionVinted, "type" | "prixAvant" | "prixApres">) =>
   a.type === "baisse" && a.prixApres !== null
     ? `Baisse ${formatEuros(a.prixAvant)} → ${formatEuros(a.prixApres)}`
     : `Republication (${formatEuros(a.prixAvant)})`;
@@ -156,51 +153,6 @@ export function ActionsAValider({ onChangement }: { onChangement: () => void }) 
           </div>
         </>
       )}
-    </section>
-  );
-}
-
-/** Journal des dernières actions et de leur résultat. */
-export function JournalActions() {
-  const { actions, erreur } = useActions();
-  return (
-    <section className="section">
-      <h2>Tâches automatiques</h2>
-      {erreur && (
-        <p className="message message--erreur" role="alert">
-          {erreur}
-        </p>
-      )}
-      {actions && actions.journal.length === 0 && <p className="vide">Aucune action pour l'instant.</p>}
-      <ul className="historique">
-        {actions?.journal.map((a) => (
-          <li key={a.id}>
-            <span>
-              <Link to={`/articles/${a.articleId}`}>
-                {formatReference(a.reference)} {a.nom ?? "(sans nom)"}
-              </Link>{" "}
-              <span className={`etiquette-publication etiquette-publication--${CLASSES[a.etat] ?? a.etat}`}>
-                {ETATS[a.etat]}
-                {a.essai && a.etat !== "essai" ? " (essai)" : ""}
-              </span>
-              <br />
-              <span className="secondaire">
-                {libelleAction(a)} — prévue le {formatDateHeure(a.creeLe)}
-                {a.message ? ` — ${a.message}` : ""}
-              </span>
-              {a.url && (
-                <>
-                  {" "}
-                  <a href={a.url} target="_blank" rel="noreferrer">
-                    Voir l'annonce
-                    <NouvelOnglet />
-                  </a>
-                </>
-              )}
-            </span>
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }

@@ -121,6 +121,32 @@ html {
   margin-block: var(--e-2);
 }
 
+/* Carte d'une tâche automatisée (#232) : nom, étiquettes et état visibles, tâche repliée. */
+.carte-tache__entete {
+  display: grid;
+  gap: var(--e-1);
+}
+
+.carte-tache__titre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.carte-tache .repli__contenu h4 {
+  margin-block: var(--e-4) var(--e-2);
+}
+
+/* Journal des tâches (#233) : filtres, raison des erreurs. */
+.journal-taches__filtres {
+  margin-bottom: var(--e-3);
+}
+
+.journal-taches__erreur {
+  color: var(--erreur);
+}
+
 /* Texte lu par les lecteurs d'écran mais invisible à l'écran (#215). */
 .visuellement-masque {
   position: absolute;

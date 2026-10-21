@@ -353,11 +353,12 @@ export interface ReglagesUtilisateur {
   promptAnnonce: string | null;
   promptEtiquette: string | null;
   formatColisDefaut: string;
-  // Tâches automatisées (#147) : plage horaire (heure de Paris), mode essai, tâche « Articles dormants ».
-  tachesHeureDebut: number;
-  tachesHeureFin: number;
-  tachesEssai: boolean;
+  // Tâches automatisées (#147) ; plage horaire (heure de Paris) et mode essai propres à chaque tâche (#232).
+  // Tâche « Articles dormants ».
   dormantsActive: boolean;
+  dormantsHeureDebut: number;
+  dormantsHeureFin: number;
+  dormantsEssai: boolean;
   dormantsMode: "automatique" | "manuel";
   dormantsBaisseType: "pourcentage" | "montant";
   /** Pourcentage entier ou centimes. */
@@ -370,6 +371,9 @@ export interface ReglagesUtilisateur {
   dormantsPlafondRepublications: number;
   // Tâche « Vérification vente finalisée » (#148).
   finalisationActive: boolean;
+  finalisationHeureDebut: number;
+  finalisationHeureFin: number;
+  finalisationEssai: boolean;
   finalisationMode: "automatique" | "manuel";
   finalisationFrequenceHeures: number;
   /** Secondes. */
@@ -412,6 +416,58 @@ export interface ActionVinted {
   creeLe: string;
   finLe: string | null;
 }
+
+/** État de chaque tâche automatisée (#232) : dates ISO, passage automatique prévu (null : désactivée). */
+export interface EtatTaches {
+  dormants: {
+    active: boolean;
+    essai: boolean;
+    dernierPassage: string | null;
+    prochainPassage: string | null;
+    aujourdhui: { baisses: number; republications: number; plafondBaisses: number; plafondRepublications: number };
+  };
+  finalisation: {
+    active: boolean;
+    essai: boolean;
+    dernierPassage: string | null;
+    prochainPassage: string | null;
+    /** « Lancer maintenant » en attente du passage de l'extension. */
+    lancementDemande: string | null;
+    aujourdhui: { finalisees: number; plafond: number };
+  };
+}
+
+export type TacheAutomatique = "dormants" | "finalisation";
+export type EtatJournal = Exclude<ActionVinted["etat"], "a_valider">;
+
+/** Ligne du journal des tâches (#233) : une action des articles dormants, ou une lecture des ventes finalisées. */
+export type LigneJournal = {
+  id: string;
+  etat: EtatJournal;
+  date: string;
+  essai: boolean;
+  /** Lancée avec « Lancer maintenant ». */
+  manuelle: boolean;
+  /** Raison d'une erreur, ou message de l'action. */
+  message: string | null;
+  /** Un relevé de la page a été enregistré dans l'extension (« Dernier relevé »). */
+  releve: boolean;
+} & (
+  | {
+      tache: "dormants";
+      action: {
+        type: "baisse" | "republication";
+        prixAvant: number;
+        prixApres: number | null;
+        url: string | null;
+        article: { id: string; reference: number; nom: string | null };
+      };
+    }
+  | {
+      tache: "finalisation";
+      lecture: { lues: number; nouvelles: number; finalisees: number; aValider: number; aRattacher: number };
+    }
+);
 
 export type EtatPublication = "en_attente" | "en_cours" | "publie" | "essai" | "erreur" | "annule";
 
