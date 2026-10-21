@@ -384,13 +384,13 @@ export const reglages = pgTable(
     jetonPublication: text("jeton_publication"),
     /** Dernier contact du programme de publication. */
     programmeVuLe: horodatage("programme_vu_le"),
-    // Tâches automatisées (#147, ADR-0072, ADR-0078) : plage horaire (heure de Paris), mode essai commun.
-    tachesHeureDebut: integer("taches_heure_debut").notNull().default(8),
-    tachesHeureFin: integer("taches_heure_fin").notNull().default(22),
-    /** Mode essai : l'extension ouvre les pages Vinted mais ne modifie rien (jusqu'au calibrage). */
-    tachesEssai: boolean("taches_essai").notNull().default(true),
+    // Tâches automatisées (#147, ADR-0072, ADR-0078) ; plage horaire (heure de Paris) et mode essai propres à chaque
+    // tâche (#232, ADR-0105). Mode essai : l'extension ouvre les pages Vinted mais ne modifie rien (jusqu'au calibrage).
     // Tâche « Articles dormants » (#147, ADR-0073).
     dormantsActive: boolean("dormants_active").notNull().default(false),
+    dormantsHeureDebut: integer("dormants_heure_debut").notNull().default(8),
+    dormantsHeureFin: integer("dormants_heure_fin").notNull().default(22),
+    dormantsEssai: boolean("dormants_essai").notNull().default(true),
     dormantsMode: modeTache("dormants_mode").notNull().default("manuel"),
     dormantsBaisseType: typeBaisse("dormants_baisse_type").notNull().default("pourcentage"),
     /** Pourcentage entier (10 = 10 %) ou centimes. */
@@ -405,6 +405,9 @@ export const reglages = pgTable(
     dormantsDernierPassage: horodatage("dormants_dernier_passage"),
     // Tâche « Vérification vente finalisée » (#148, ADR-0074) : lecture du « Porte-monnaie » sur Vinted.
     finalisationActive: boolean("finalisation_active").notNull().default(false),
+    finalisationHeureDebut: integer("finalisation_heure_debut").notNull().default(8),
+    finalisationHeureFin: integer("finalisation_heure_fin").notNull().default(22),
+    finalisationEssai: boolean("finalisation_essai").notNull().default(true),
     finalisationMode: modeTache("finalisation_mode").notNull().default("manuel"),
     finalisationFrequenceHeures: integer("finalisation_frequence_heures").notNull().default(24),
     /** Secondes entre deux pages lues sur Vinted. */
@@ -469,6 +472,8 @@ export const actionVinted = pgTable(
     /** Prévue par « Lancer maintenant » (#230) : exécutée à toute heure, hors de la plage horaire. */
     manuelle: boolean("manuelle").notNull().default(false),
     message: text("message"),
+    /** Erreur : l'extension a enregistré un relevé de la page (fenêtre de l'extension → « Dernier relevé »). */
+    releve: boolean("releve").notNull().default(false),
     /** Republication : lien de la nouvelle annonce. */
     url: text("url"),
     creeLe: horodatage("cree_le").notNull(),
@@ -514,6 +519,35 @@ export const commandeVinted = pgTable(
     uniqueIndex("commande_vinted_unique").on(t.utilisateurId, t.idCommande),
     index("commande_vinted_etat_idx").on(t.utilisateurId, t.etat),
   ],
+);
+
+/**
+ * Journal de la tâche « Ventes finalisées » (#233) : une ligne par lecture du « Porte-monnaie » faite par l'extension,
+ * avec ses nombres ou la raison de l'erreur. Effacée après 3 mois (ADR-0105).
+ */
+export const lectureCommandes = pgTable(
+  "lecture_commandes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    date: horodatage("date").notNull(),
+    /** Mode essai : la page est lue, rien n'est enregistré. */
+    essai: boolean("essai").notNull(),
+    /** Demandée par « Lancer maintenant » (#230). */
+    manuelle: boolean("manuelle").notNull().default(false),
+    /** Commandes reçues, dont les nouvelles, finalisées, à valider et à rattacher. */
+    lues: integer("lues").notNull().default(0),
+    nouvelles: integer("nouvelles").notNull().default(0),
+    finalisees: integer("finalisees").notNull().default(0),
+    aValider: integer("a_valider").notNull().default(0),
+    aRattacher: integer("a_rattacher").notNull().default(0),
+    /** Raison de l'échec de la lecture, signalée par l'extension. */
+    erreur: text("erreur"),
+    releve: boolean("releve").notNull().default(false),
+  },
+  (t) => [index("lecture_commandes_utilisateur_idx").on(t.utilisateurId, t.date)],
 );
 
 /**

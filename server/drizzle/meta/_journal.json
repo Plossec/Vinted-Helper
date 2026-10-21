@@ -148,6 +148,13 @@
       "when": 1792576921771,
       "tag": "0020_taches_lancement_manuel",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792579292236,
+      "tag": "0021_taches_reglages_par_tache_journal",
+      "breakpoints": true
     }
   ]
 }

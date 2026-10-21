@@ -217,3 +217,51 @@ describe("migration 0017 — verrou prix vente minimum ≤ prix affiché (#195)"
     await expect(client.exec("UPDATE article SET prix_affiche = 800 WHERE reference = 2")).resolves.toBeDefined();
   });
 });
+
+describe("migration 0021 — plage horaire et mode essai propres à chaque tâche (#232)", { timeout: DELAI }, () => {
+  const client = new PGlite();
+  afterAll(() => client.close());
+
+  it("recopie les réglages communs dans chaque tâche, puis les retire", async () => {
+    const fichiers = readdirSync(dossier)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    for (const fichier of fichiers.filter((f) => f < "0021")) await appliquer(client, fichier);
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES
+        ('00000000-0000-4000-8000-000000000001', 'u', 'x'), ('00000000-0000-4000-8000-000000000002', 'v', 'x');
+      INSERT INTO reglages (utilisateur_id, taches_heure_debut, taches_heure_fin, taches_essai) VALUES
+        ('00000000-0000-4000-8000-000000000001', 9, 20, false), ('00000000-0000-4000-8000-000000000002', 8, 22, true);
+    `);
+    await appliquer(client, "0021_taches_reglages_par_tache_journal.sql");
+    const lignes = (
+      await client.query(
+        `SELECT dormants_heure_debut, dormants_heure_fin, dormants_essai,
+                finalisation_heure_debut, finalisation_heure_fin, finalisation_essai
+         FROM reglages ORDER BY utilisateur_id`,
+      )
+    ).rows;
+    expect(lignes).toEqual([
+      {
+        dormants_heure_debut: 9,
+        dormants_heure_fin: 20,
+        dormants_essai: false,
+        finalisation_heure_debut: 9,
+        finalisation_heure_fin: 20,
+        finalisation_essai: false,
+      },
+      {
+        dormants_heure_debut: 8,
+        dormants_heure_fin: 22,
+        dormants_essai: true,
+        finalisation_heure_debut: 8,
+        finalisation_heure_fin: 22,
+        finalisation_essai: true,
+      },
+    ]);
+    const colonnes = await client.query<{ column_name: string }>(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'reglages'",
+    );
+    expect(colonnes.rows.map((c) => c.column_name)).not.toContain("taches_essai");
+  });
+});
