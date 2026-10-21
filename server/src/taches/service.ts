@@ -148,37 +148,61 @@ export async function planifierTaches(base: Base, utilisateurId: string, mainten
       )
       .returning({ id: reglages.utilisateurId });
     if (pris.length === 0) return;
-    const candidats = await candidatsDormants(tx, utilisateurId, r.delaiDormant, maintenant);
-    const { actions, invendus } = planifierDormants(candidats, {
-      regleCompte: { type: r.dormantsBaisseType, valeur: r.dormantsBaisseValeur },
-      plafondBaisses: r.dormantsPlafondBaisses,
-      plafondRepublications: r.dormantsPlafondRepublications,
-      dejaAujourdhui: await actionsDuJour(tx, utilisateurId, maintenant),
-    });
-    if (actions.length > 0) {
-      await tx.insert(actionVinted).values(
-        actions.map((a) => ({
-          utilisateurId,
-          ...a,
-          etat: r.dormantsMode === "automatique" ? ("en_attente" as const) : ("a_valider" as const),
-          essai: r.tachesEssai,
-          creeLe: maintenant,
-        })),
-      );
-    }
-    // Invendu : passage fait par la tâche seule (absent du tableau du §4.2 proposé à l'utilisateur).
-    for (const articleId of invendus) {
-      const modifies = await tx
-        .update(article)
-        .set({ statut: "invendu", modifieLe: maintenant })
-        .where(and(eq(article.id, articleId), eq(article.statut, "en_ligne")))
-        .returning({ id: article.id });
-      if (modifies.length > 0)
-        await tx
-          .insert(historiqueStatut)
-          .values({ utilisateurId, articleId, de: "en_ligne", vers: "invendu", date: maintenant });
-    }
+    await prevoirDormants(tx, utilisateurId, r, maintenant, false);
   });
+}
+
+/**
+ * « Lancer maintenant » (#230) : prévoit tout de suite les actions des articles dormants, quels que soient l'heure, la
+ * fréquence, les plafonds du jour et l'activation de la tâche. Les actions sont marquées « manuelles » : l'extension
+ * les exécute à toute heure. Renvoie le nombre d'actions prévues.
+ */
+export async function lancerDormants(base: Base, utilisateurId: string, maintenant: Date): Promise<number> {
+  const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
+  if (!r) return 0;
+  return base.transaction((tx) => prevoirDormants(tx, utilisateurId, r, maintenant, true));
+}
+
+/** Actions d'un passage (automatique, dans les plafonds du jour ; ou manuel, sans plafond) et passages Invendu. */
+async function prevoirDormants(
+  tx: Transaction,
+  utilisateurId: string,
+  r: typeof reglages.$inferSelect,
+  maintenant: Date,
+  manuelle: boolean,
+): Promise<number> {
+  const candidats = await candidatsDormants(tx, utilisateurId, r.delaiDormant, maintenant);
+  const { actions, invendus } = planifierDormants(candidats, {
+    regleCompte: { type: r.dormantsBaisseType, valeur: r.dormantsBaisseValeur },
+    plafondBaisses: manuelle ? Number.POSITIVE_INFINITY : r.dormantsPlafondBaisses,
+    plafondRepublications: manuelle ? Number.POSITIVE_INFINITY : r.dormantsPlafondRepublications,
+    dejaAujourdhui: await actionsDuJour(tx, utilisateurId, maintenant),
+  });
+  if (actions.length > 0) {
+    await tx.insert(actionVinted).values(
+      actions.map((a) => ({
+        utilisateurId,
+        ...a,
+        etat: r.dormantsMode === "automatique" ? ("en_attente" as const) : ("a_valider" as const),
+        essai: r.tachesEssai,
+        manuelle,
+        creeLe: maintenant,
+      })),
+    );
+  }
+  // Invendu : passage fait par la tâche seule (absent du tableau du §4.2 proposé à l'utilisateur).
+  for (const articleId of invendus) {
+    const modifies = await tx
+      .update(article)
+      .set({ statut: "invendu", modifieLe: maintenant })
+      .where(and(eq(article.id, articleId), eq(article.statut, "en_ligne")))
+      .returning({ id: article.id });
+    if (modifies.length > 0)
+      await tx
+        .insert(historiqueStatut)
+        .values({ utilisateurId, articleId, de: "en_ligne", vers: "invendu", date: maintenant });
+  }
+  return actions.length;
 }
 
 /**
@@ -300,7 +324,8 @@ export async function nombreActionsEnAttente(base: Base, utilisateurId: string):
 const DELAI_INTERRUPTION_MS = 15 * 60_000;
 
 /**
- * Action suivante pour l'extension (#147, ADR-0078), passée « en cours » : une seule à la fois, dans la plage horaire,
+ * Action suivante pour l'extension (#147, ADR-0078), passée « en cours » : une seule à la fois, dans la plage horaire
+ * (sauf actions lancées à la main, #230),
  * après la pause réglée depuis la dernière action du même type, la plus ancienne d'abord. Le mode essai est celui des
  * réglages au moment où l'action est confiée. Une action interrompue n'est jamais relancée seule.
  */
@@ -330,7 +355,8 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
     const [r] = await tx.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
     if (!r) return null;
     const heure = heureParis(maintenant);
-    if (heure < r.tachesHeureDebut || heure >= r.tachesHeureFin) return null;
+    // Hors de la plage horaire, seules les actions lancées à la main (#230) sont confiées à l'extension.
+    const horsPlage = heure < r.tachesHeureDebut || heure >= r.tachesHeureFin;
     await annulerActionsPerimees(tx, utilisateurId, maintenant);
     const pauses = { baisse: r.dormantsPauseBaisse, republication: r.dormantsPauseRepublication };
     const fins = await tx
@@ -358,7 +384,13 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
       })
       .from(actionVinted)
       .innerJoin(article, eq(article.id, actionVinted.articleId))
-      .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_attente")))
+      .where(
+        and(
+          eq(actionVinted.utilisateurId, utilisateurId),
+          eq(actionVinted.etat, "en_attente"),
+          horsPlage ? eq(actionVinted.manuelle, true) : undefined,
+        ),
+      )
       .orderBy(asc(actionVinted.creeLe), asc(article.reference));
     for (const a of attente) {
       if (!pret(a.type)) continue;

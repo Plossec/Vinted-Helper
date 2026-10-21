@@ -86,6 +86,18 @@ describe("tâche « Vérification vente finalisée »", () => {
     montant,
   });
 
+  it("« Lancer maintenant » (#230) : lecture due à toute heure, même désactivée, une seule fois", async () => {
+    const attente = async () =>
+      (await programme("GET", "/api/programme/attente")).json<{ lectureCommandes: boolean }>().lectureCommandes;
+    t.horloge.avancer(11 * 3_600_000); // 23 h à Paris, tâche désactivée
+    expect(await attente()).toBe(false);
+    const r = await requete("POST", "/api/taches/finalisation/lancer");
+    expect(r.statusCode).toBe(200);
+    expect(await attente()).toBe(true);
+    await envoyer([], true); // lecture faite (essai)
+    expect(await attente()).toBe(false);
+  });
+
   it("lecture due au passage de l'extension une fois activée ; en essai, rien n'est enregistré", async () => {
     const a = await envoye("111");
     await colis([a], 1000);

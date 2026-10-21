@@ -214,6 +214,54 @@ describe("tâche « Articles dormants »", () => {
     expect(refus.statusCode).toBe(400);
   });
 
+  describe("« Lancer maintenant » (#230)", () => {
+    const suivante = async () =>
+      (
+        await t.app.inject({
+          method: "GET",
+          url: "/api/programme/action-suivante",
+          headers: { authorization: `Bearer ${t.jeton}` },
+        })
+      ).json<{ action: { id: string; type: string } | null }>().action;
+    const lancer = () => requete("POST", "/api/taches/dormants/lancer");
+
+    it("tâche désactivée, hors plage horaire, au-delà du plafond : actions prévues, à valider, exécutées de nuit", async () => {
+      const a = await enLigne();
+      const b = await enLigne();
+      await requete("PUT", "/api/reglages", { dormantsPlafondBaisses: 1 });
+      t.horloge.avancer(8 * JOUR_MS + 11 * 3_600_000); // 23 h à Paris, tâche désactivée
+      const r = await lancer();
+      expect(r.statusCode).toBe(200);
+      expect(r.json()).toEqual({ actions: 2 });
+      const liste = (await actions()).aValider;
+      expect(liste.map((l) => l.articleId).sort()).toEqual([a, b].sort());
+      await requete("POST", "/api/taches/actions/appliquer", { ids: liste.map((l) => l.id) });
+      expect((await suivante())?.type).toBe("baisse"); // exécutée à 23 h
+      // Relancé aussitôt : rien de plus (une action est déjà prévue pour chaque article).
+      expect((await lancer()).json()).toEqual({ actions: 0 });
+    });
+
+    it("de nuit, seules les actions lancées à la main sont confiées à l'extension", async () => {
+      const a = await enLigne();
+      const b = await enLigne();
+      await reglerTache({ dormantsMode: "automatique", dormantsPlafondBaisses: 1 });
+      t.horloge.avancer(8 * JOUR_MS); // midi : passage automatique, plafond d'une baisse
+      await t.app.inject({
+        method: "GET",
+        url: "/api/programme/attente",
+        headers: { authorization: `Bearer ${t.jeton}` },
+      });
+      const auto = (await actions()).journal;
+      expect(auto.map((l) => l.articleId)).toHaveLength(1);
+      t.horloge.avancer(11 * 3_600_000); // 23 h
+      expect(await suivante()).toBeNull(); // action du passage automatique : attend la plage horaire
+      expect((await lancer()).json()).toEqual({ actions: 1 }); // l'autre article, en attente directement
+      const manuelle = (await actions()).journal.find((l) => l.articleId !== auto[0]?.articleId);
+      expect(manuelle?.articleId).toBe(auto[0]?.articleId === a ? b : a);
+      expect((await suivante())?.id).toBe(manuelle?.id);
+    });
+  });
+
   describe("exécution par l'extension (étape 2)", () => {
     const programme = (method: "GET" | "POST", url: string, payload?: object) =>
       t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });

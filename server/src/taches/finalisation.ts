@@ -25,10 +25,14 @@ export interface CommandeLue {
 export const numeroAnnonce = (url: string | null): string | null =>
   url === null ? null : (/\/items\/(\d+)/.exec(url)?.[1] ?? null);
 
-/** La lecture des commandes est-elle due (tâche activée, plage horaire, fréquence) ? */
+/**
+ * La lecture des commandes est-elle due : demandée par « Lancer maintenant » (#230, à toute heure, même désactivée),
+ * ou tâche activée, dans la plage horaire et à sa fréquence ?
+ */
 export async function lectureCommandesDue(base: Base, utilisateurId: string, maintenant: Date): Promise<boolean> {
   const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
   if (!r) return false;
+  if (r.finalisationLancementDemande) return true;
   return passageDu(
     {
       active: r.finalisationActive,
@@ -111,6 +115,14 @@ async function appliquer(
     .where(eq(commandeVinted.id, c.id));
 }
 
+/** « Lancer maintenant » (#230) : la lecture des commandes est demandée, faite au prochain passage de l'extension. */
+export async function lancerFinalisation(base: Base, utilisateurId: string, maintenant: Date): Promise<void> {
+  await base
+    .update(reglages)
+    .set({ finalisationLancementDemande: maintenant })
+    .where(eq(reglages.utilisateurId, utilisateurId));
+}
+
 /**
  * Commandes terminées envoyées par l'extension. En mode essai (réglages ou extension), rien n'est enregistré : seule
  * la date de la lecture l'est. Une commande déjà connue est ignorée, comme une commande plus ancienne que la durée de
@@ -125,7 +137,7 @@ export async function recevoirCommandes(
   return base.transaction(async (tx) => {
     const [r] = await tx
       .update(reglages)
-      .set({ finalisationDernierPassage: maintenant })
+      .set({ finalisationDernierPassage: maintenant, finalisationLancementDemande: null })
       .where(eq(reglages.utilisateurId, utilisateurId))
       .returning();
     if (!r || d.essai || r.tachesEssai) return { nouvelles: 0 };
