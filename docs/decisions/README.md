@@ -182,12 +182,13 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0075](0075-tache-negociation-favoris.md) | 14/10/2026 | Tâche « Négociation favoris » | Accepté |
 | [0076](0076-tache-validee-prix-propose.md) | 14/10/2026 | Tâche « Validée prix proposé » | Accepté |
 | [0077](0077-tache-recuperation-du-bon-de-livraison.md) | 14/10/2026 | Tâche « Récupération du bon de livraison » | Accepté |
-| [0078](0078-rythme-des-taches-automatisees.md) | 14/10/2026 | Rythme des tâches automatisées | Accepté |
+| [0078](0078-rythme-des-taches-automatisees.md) | 14/10/2026 | Rythme des tâches automatisées | Modifié |
 | [0079](0079-ecran-d-accueil-a-faire.md) | 14/10/2026 | Écran d'accueil « À faire » | Modifié |
 | [0094](0094-articles-dormants-realisation-cote-application.md) | 15/10/2026 | Articles dormants : réalisation côté application (étape 1 sur 3) | Accepté |
 | [0095](0095-articles-dormants-execution-en-mode-essai.md) | 15/10/2026 | Articles dormants : exécution par l'extension, en mode essai (étape 2 sur 3) | Accepté |
 | [0096](0096-ventes-finalisees-realisation-etape-1.md) | 16/10/2026 | Vérification vente finalisée : réalisation, étape 1 sur 2 | Modifié |
 | [0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) | 18/10/2026 | Ventes finalisées : lues dans le « Porte-monnaie » | Accepté |
+| [0104](0104-lancement-manuel-des-taches-automatisees.md) | 21/10/2026 | Lancement manuel des tâches automatisées, à toute heure | Accepté |
 
 ## Import
 

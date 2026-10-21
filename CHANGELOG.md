@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.23.0] — 21/10/2026
+
+### Ajouté
+- Bouton **« Lancer maintenant »** pour chaque tâche automatisée (articles dormants, ventes finalisées), dans les
+  Réglages et dans « À faire » : à toute heure, même tâche désactivée, sans plafond du jour ; l'extension s'en charge à
+  son prochain passage (#230).
+
 ## [1.22.0] — 19/10/2026
 
 ### Ajouté
