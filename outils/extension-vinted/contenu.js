@@ -5,6 +5,8 @@
 //   « ajouter » → clique « Ajouter » (publication réelle)
 //   « releve-page » → relevé d'une page (annonce, « Modifier l'annonce ») pour la tâche « Articles dormants » (#147)
 //   « lire-prix » → prix affiché dans le formulaire « Modifier l'annonce » (lecture seule, rien n'est saisi)
+//   « baisser-prix » → mode réel (#147) : vérifie le prix, saisit le nouveau, clique « Valider » (seul bouton touché)
+//   « supprimer-annonce » → mode réel (#147) : « Supprimer », puis « Supprimer » DANS la fenêtre de confirmation
 // Aucun contournement : pas de camouflage, pas de captcha. Au moindre doute (champ introuvable, valeur différente,
 // vérification), on s'arrête SANS cliquer « Ajouter ».
 /* global SELECTEURS */
@@ -337,14 +339,58 @@ async function controler(article, nombrePhotos) {
   return ecarts;
 }
 
-function boutonAjouter() {
+function boutonAjouter(texte = SELECTEURS.texteBoutonAjouter) {
   return (
     trouver(SELECTEURS.boutonAjouter) ??
-    [...document.querySelectorAll("button")].find(
-      (b) => normaliser(b.textContent) === normaliser(SELECTEURS.texteBoutonAjouter),
-    ) ??
+    [...document.querySelectorAll("button")].find((b) => normaliser(b.textContent) === normaliser(texte)) ??
     null
   );
+}
+
+/**
+ * Baisse réelle (#147) sur « Modifier l'annonce » : le prix affiché doit être celui que l'application connaît (sinon
+ * rien n'est touché), le nouveau prix est saisi puis relu, et seul « Valider » est cliqué (jamais « Pousser » ni les
+ * photos). Le clic part après la réponse : la page change d'adresse.
+ */
+async function baisserPrix(avant, apres) {
+  const el = await attendre(SELECTEURS.champs.prix);
+  if (!el) throw new ErreurPublication("Prix introuvable sur « Modifier l'annonce ». Rien n'a été modifié.");
+  if (montant(el.value) !== montant(avant))
+    throw new ErreurPublication(
+      `Prix sur Vinted « ${el.value} » différent de celui de l'application (${avant} €). Rien n'a été modifié.`,
+    );
+  // Saisie avec un point, comme à la publication (#176).
+  saisir(el, apres.replace(",", "."));
+  await attendreMs(500);
+  if (montant(el.value) !== montant(apres))
+    throw new ErreurPublication(`Prix : Vinted affiche « ${el.value} » au lieu de « ${apres} ». Rien n'a été validé.`);
+  const bouton = boutonAjouter(SELECTEURS.texteBoutonValider);
+  if (!bouton) throw new ErreurPublication("Bouton « Valider » introuvable. Rien n'a été modifié.");
+  setTimeout(() => cliquer(bouton), 100);
+}
+
+/**
+ * Suppression réelle (#147) : « Supprimer » de l'annonce, puis le bouton de confirmation cherché DANS la fenêtre
+ * (le bouton de la page, de même texte, reste dessous). Sans fenêtre ou sans confirmation : « Annuler », erreur.
+ */
+async function supprimerAnnonce() {
+  const bouton = boutonAnnonce(SELECTEURS.annonce.supprimer, SELECTEURS.annonce.texteSupprimer);
+  if (!bouton) throw new ErreurPublication("Bouton « Supprimer » introuvable sur l'annonce. Rien n'a été supprimé.");
+  cliquer(bouton);
+  const fenetre = await attendre(SELECTEURS.annonce.fenetreSuppression, 5000);
+  const confirmer =
+    fenetre &&
+    (SELECTEURS.annonce.confirmerSuppression.map((s) => fenetre.querySelector(s)).find(Boolean) ??
+      [...fenetre.querySelectorAll("button")].find(
+        (b) => normaliser(b.textContent) === normaliser(SELECTEURS.annonce.texteSupprimer),
+      ));
+  if (!confirmer) {
+    // Fenêtre ouverte mais confirmation non reconnue : seul le bouton « Annuler » connu est cliqué, sinon rien.
+    const annuler = fenetre && SELECTEURS.annonce.annulerSuppression.map((s) => fenetre.querySelector(s)).find(Boolean);
+    if (annuler) cliquer(annuler);
+    throw new ErreurPublication("Fenêtre de confirmation de la suppression introuvable. Rien n'a été supprimé.");
+  }
+  setTimeout(() => cliquer(confirmer), 100);
 }
 
 /** Description courte d'un élément pour le diagnostic (aucune valeur saisie n'est relevée). */
@@ -499,6 +545,21 @@ async function traiter(message) {
     const releve = relevePage("modifier");
     if (!el) return { ok: false, message: "Prix introuvable sur « Modifier l'annonce » (à calibrer).", releve };
     return { ok: true, prix: montant(el.value), releve };
+  }
+
+  if (message.type === "baisser-prix" || message.type === "supprimer-annonce") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    try {
+      if (message.type === "baisser-prix") await baisserPrix(message.avant, message.apres);
+      else await supprimerAnnonce();
+      return { ok: true };
+    } catch (erreur) {
+      const apres = etatPage();
+      if (apres !== "pret") return { ok: false, etat: apres };
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      return { ok: false, message: texte, releve: { ...releveErreur(message.type, texte), dialogues: dialogues() } };
+    }
   }
 
   if (message.type === "etape") {

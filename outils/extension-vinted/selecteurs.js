@@ -69,10 +69,13 @@ const SELECTEURS = {
 
   boutonAjouter: ['[data-testid="upload-form-save-button"]'],
   texteBoutonAjouter: "Ajouter",
+  /** « Modifier l'annonce » (#147) : relevé du 21/10/2026, même repère que « Ajouter », texte « Valider ». */
+  texteBoutonValider: "Valider",
 
   /**
-   * Tâche « Articles dormants » (#147) : pages d'une annonce publiée et « Modifier l'annonce ». Rédigé SANS relevé
-   * (valeurs probables) : le mode essai relève ces pages pour les calibrer avant tout clic réel.
+   * Tâche « Articles dormants » (#147) : page d'une annonce publiée. Relevé du 21/10/2026 : boutons
+   * `item-edit-button` et `item-delete-button` ; « Supprimer » ouvre la fenêtre `item-delete-modal` (« Supprimer
+   * l'article ? »), le bouton de la page restant dessous : la confirmation se cherche TOUJOURS dans la fenêtre.
    */
   annonce: {
     modifier: ['[data-testid="item-edit-button"]', 'a[href$="/edit"]'],
@@ -80,6 +83,10 @@ const SELECTEURS = {
     /** Texte des boutons cherchés quand aucun repère ne correspond. */
     texteModifier: "Modifier l'annonce",
     texteSupprimer: "Supprimer",
+    fenetreSuppression: ['[data-testid="item-delete-modal"]'],
+    /** Dans la fenêtre seulement. */
+    confirmerSuppression: ['[data-testid="item-delete-confirmation-button"]'],
+    annulerSuppression: ['[data-testid="item-delete-cancelation-button"]'],
   },
 
   /**

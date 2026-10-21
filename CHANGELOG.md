@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.25.0] — 21/10/2026
+
+### Ajouté
+- Tâche « Articles dormants » en **mode réel** (extension 1.14.0) : case « Mode essai » décochée, le prix est
+  vraiment baissé (seul « Valider » est cliqué) et l'annonce vraiment supprimée (confirmée dans la fenêtre de Vinted)
+  puis recréée ; chaque action est vérifiée après coup, et rien n'est modifié si le prix sur Vinted diffère de celui
+  de l'application (#147).
+
 ## [1.24.0] — 21/10/2026
 
 ### Ajouté
