@@ -18,6 +18,18 @@ Touchez le nom d'un article pour ouvrir sa fiche. « Rien à faire 🎉 » quand
 **Articles dormants : à valider** (en tête de l'écran, si la tâche automatique est en mode manuel) : les baisses de
 prix et republications prévues ; cochez-les puis **Appliquer** (l'extension Chrome les fera) ou **Refuser**.
 
+## Tâches automatiques : l'écran
+
+**Réglages → Tâches automatiques** : une **carte par tâche**. Fermée, elle montre si la tâche est **activée**, en
+**essai** ou en **réel**, son dernier et son prochain passage, et ses actions du jour. Touchez-la pour l'ouvrir : ses
+réglages (dont sa **plage horaire** et son **mode essai**, propres à chaque tâche), **Réglages avancés** (pauses et
+plafonds), **Enregistrer**, **Lancer maintenant** et ses dernières lignes de journal.
+
+**Journal de toutes les tâches** (en bas de Réglages → Tâches automatiques, et dans Publication Vinted) : une ligne
+par action ou par lecture des ventes, filtrable par tâche, état et jour. Une erreur affiche sa **raison** ; « Relevé
+enregistré » : la page Vinted a été relevée, ouvrez la fenêtre de l'extension → **Dernier relevé** pour l'envoyer à
+Claude. Les lignes de plus de **3 mois** sont effacées.
+
 ## Tâche automatique « Articles dormants »
 
 **Réglages → Tâches automatiques** (désactivée par défaut) : un article dormant voit son prix baissé (pourcentage ou
@@ -28,14 +40,14 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 
 - **Mode** : *manuel* (liste à valider dans « À faire ») ou *automatique*.
 - **Rythme** : un passage par jour (6 h au moins entre deux), pauses entre deux actions, plafonds par jour, de 8 h à
-  22 h ; tout se fait par l'extension Chrome, seulement quand Chrome est ouvert.
+  22 h par défaut (plage de la tâche) ; tout se fait par l'extension Chrome, seulement quand Chrome est ouvert.
 - **Lancer maintenant** (Réglages → Tâches automatiques, ou section « Lancer une tâche » de « À faire ») : la tâche
   passe tout de suite, **à toute heure**, même désactivée et sans plafond du jour. L'extension fait le travail à son
   prochain passage (5 minutes au plus, Chrome ouvert), ou tout de suite avec **Vérifier maintenant** dans l'extension.
 - **Mode essai** (coché par défaut) : l'extension ouvre les pages Vinted sans rien modifier. À garder tant que
   l'extension n'a pas été calibrée sur les pages « Modifier l'annonce » et « Supprimer » (envoyez le « Dernier
   relevé » de l'extension après un essai, voir `publication-vinted.md`).
-- **Journal** : Réglages → Publication Vinted, section « Tâches automatiques ».
+- **Journal** : sous la tâche, et dans le journal de toutes les tâches (voir plus haut).
 
 ## Tâche automatique « Vérification vente finalisée »
 

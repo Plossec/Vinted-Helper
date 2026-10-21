@@ -109,6 +109,11 @@ après les publications, l'extension ouvre **le « Porte-monnaie »** sur Vinted
 modifier** dans cette version. Envoyez ensuite le **Dernier relevé** à Claude : la version suivante lira les commandes
 terminées pour finaliser les colis dans l'application.
 
+**Erreurs** (extension 1.13) : une lecture ou une action qui échoue est signalée à l'application, avec sa raison, dans
+le **journal des tâches** (Réglages → Tâches automatiques, ou Publication Vinted) ; « Relevé enregistré » indique
+qu'un **Dernier relevé** est disponible dans la fenêtre de l'extension. Après une erreur de lecture, la suivante
+attend la fréquence réglée (ou **Lancer maintenant**).
+
 ## 7. La fenêtre de l'extension
 
 Cliquez l'icône de l'extension :
