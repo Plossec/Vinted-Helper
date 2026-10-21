@@ -75,12 +75,13 @@ export const REGLAGES_DEFAUT = {
   promptAnnonce: null as string | null,
   promptEtiquette: null as string | null,
   formatColisDefaut: "petit" as FormatColis,
-  // Tâches automatisées (#147, ADR-0072, ADR-0078) : plage horaire (heure de Paris) et mode essai communs.
-  tachesHeureDebut: 8,
-  tachesHeureFin: 22,
-  tachesEssai: true,
+  // Tâches automatisées (#147, ADR-0072, ADR-0078) : plage horaire (heure de Paris) et mode essai propres à chaque
+  // tâche (#232, ADR-0105).
   // Tâche « Articles dormants » (ADR-0073) : désactivée par défaut, liste à valider (manuel).
   dormantsActive: false,
+  dormantsHeureDebut: 8,
+  dormantsHeureFin: 22,
+  dormantsEssai: true,
   dormantsMode: "manuel" as "automatique" | "manuel",
   dormantsBaisseType: "pourcentage" as "pourcentage" | "montant",
   /** Pourcentage entier ou centimes. */
@@ -93,6 +94,9 @@ export const REGLAGES_DEFAUT = {
   dormantsPlafondRepublications: 10,
   // Tâche « Vérification vente finalisée » (#148, ADR-0074) : désactivée par défaut, liste à valider (manuel).
   finalisationActive: false,
+  finalisationHeureDebut: 8,
+  finalisationHeureFin: 22,
+  finalisationEssai: true,
   finalisationMode: "manuel" as "automatique" | "manuel",
   finalisationFrequenceHeures: 24,
   /** Secondes. */
@@ -112,10 +116,10 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     promptAnnonce: r.promptAnnonce,
     promptEtiquette: r.promptEtiquette,
     formatColisDefaut: r.formatColisDefaut,
-    tachesHeureDebut: r.tachesHeureDebut,
-    tachesHeureFin: r.tachesHeureFin,
-    tachesEssai: r.tachesEssai,
     dormantsActive: r.dormantsActive,
+    dormantsHeureDebut: r.dormantsHeureDebut,
+    dormantsHeureFin: r.dormantsHeureFin,
+    dormantsEssai: r.dormantsEssai,
     dormantsMode: r.dormantsMode,
     dormantsBaisseType: r.dormantsBaisseType,
     dormantsBaisseValeur: r.dormantsBaisseValeur,
@@ -125,6 +129,9 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     dormantsPlafondBaisses: r.dormantsPlafondBaisses,
     dormantsPlafondRepublications: r.dormantsPlafondRepublications,
     finalisationActive: r.finalisationActive,
+    finalisationHeureDebut: r.finalisationHeureDebut,
+    finalisationHeureFin: r.finalisationHeureFin,
+    finalisationEssai: r.finalisationEssai,
     finalisationMode: r.finalisationMode,
     finalisationFrequenceHeures: r.finalisationFrequenceHeures,
     finalisationPause: r.finalisationPause,

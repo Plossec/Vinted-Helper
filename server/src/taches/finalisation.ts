@@ -1,14 +1,14 @@
 // Tâche « Vérification vente finalisée » (#148, ADR-0074) : l'extension lit les commandes terminées du « Porte-monnaie » sur Vinted ; chaque commande est rattachée à une vente de l'application par le lien de ses annonces, puis
 // le colis passe « Finalisé » à la date de fin lue sur Vinted (automatique, ou à valider en mode manuel). Un montant
 // différent est corrigé par celui de Vinted et signalé. Une commande non retrouvée est « à rattacher ».
-import { and, desc, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { article, commandeVinted, reglages, vente, venteArticle } from "../base/schema.js";
+import { article, commandeVinted, lectureCommandes, reglages, vente, venteArticle } from "../base/schema.js";
 import { verifierDate } from "../articles/service.js";
-import { jourParis } from "../calculs/indicateurs.js";
 import { passageDu } from "../metier/taches.js";
 import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { limiteConservation } from "../ventes/conservation.js";
+import { finaliseesDuJour } from "./journal.js";
 import { avancerVenteDans, chargerVente } from "../ventes/service.js";
 
 export interface CommandeLue {
@@ -36,8 +36,8 @@ export async function lectureCommandesDue(base: Base, utilisateurId: string, mai
   return passageDu(
     {
       active: r.finalisationActive,
-      heureDebut: r.tachesHeureDebut,
-      heureFin: r.tachesHeureFin,
+      heureDebut: r.finalisationHeureDebut,
+      heureFin: r.finalisationHeureFin,
       frequenceHeures: r.finalisationFrequenceHeures,
       dernierPassage: r.finalisationDernierPassage,
     },
@@ -124,37 +124,48 @@ export async function lancerFinalisation(base: Base, utilisateurId: string, main
 }
 
 /**
- * Commandes terminées envoyées par l'extension. En mode essai (réglages ou extension), rien n'est enregistré : seule
- * la date de la lecture l'est. Une commande déjà connue est ignorée, comme une commande plus ancienne que la durée de
- * conservation (#216 : déjà effacée, elle n'est jamais relue).
+ * Lecture des commandes envoyée par l'extension, notée au journal (#233) avec ses nombres ou la raison de son échec.
+ * En mode essai (réglages ou extension), aucune commande n'est enregistrée. Une commande déjà connue est ignorée, comme
+ * une commande plus ancienne que la durée de conservation (#216 : déjà effacée, elle n'est jamais relue). Une lecture
+ * en erreur compte comme un passage : la suivante attend la fréquence réglée (ADR-0105).
  */
 export async function recevoirCommandes(
   base: Base,
   utilisateurId: string,
-  d: { essai: boolean; commandes: CommandeLue[] },
+  d: { essai: boolean; commandes: CommandeLue[]; erreur?: string | null; releve?: boolean },
   maintenant: Date,
 ): Promise<{ nouvelles: number }> {
   return base.transaction(async (tx) => {
+    const [avant] = await tx
+      .select({ lancementDemande: reglages.finalisationLancementDemande })
+      .from(reglages)
+      .where(eq(reglages.utilisateurId, utilisateurId))
+      .for("update");
     const [r] = await tx
       .update(reglages)
       .set({ finalisationDernierPassage: maintenant, finalisationLancementDemande: null })
       .where(eq(reglages.utilisateurId, utilisateurId))
       .returning();
-    if (!r || d.essai || r.tachesEssai) return { nouvelles: 0 };
-    const debutJour = new Date(maintenant.getTime() - 2 * 86_400_000);
-    const recentes = await tx
-      .select({ traiteLe: commandeVinted.traiteLe })
-      .from(commandeVinted)
-      .where(
-        and(
-          eq(commandeVinted.utilisateurId, utilisateurId),
-          eq(commandeVinted.etat, "appliquee"),
-          gte(commandeVinted.traiteLe, debutJour),
-        ),
-      );
-    const aujourdhui = jourParis(maintenant.toISOString());
-    let faites = recentes.filter((x) => x.traiteLe && jourParis(x.traiteLe.toISOString()) === aujourdhui).length;
-    let nouvelles = 0;
+    if (!r) return { nouvelles: 0 };
+    const essai = d.essai || r.finalisationEssai;
+    const lecture = {
+      utilisateurId,
+      date: maintenant,
+      essai,
+      manuelle: avant?.lancementDemande != null,
+      lues: d.commandes.length,
+      releve: d.releve === true,
+    };
+    if (d.erreur) {
+      await tx.insert(lectureCommandes).values({ ...lecture, erreur: d.erreur });
+      return { nouvelles: 0 };
+    }
+    if (essai) {
+      await tx.insert(lectureCommandes).values(lecture);
+      return { nouvelles: 0 };
+    }
+    let faites = await finaliseesDuJour(tx, utilisateurId, maintenant);
+    const compte = { nouvelles: 0, finalisees: 0, aValider: 0, aRattacher: 0 };
     const limite = limiteConservation(maintenant);
     for (const c of d.commandes) {
       if (c.dateFin < limite) continue;
@@ -172,17 +183,21 @@ export async function recevoirCommandes(
         .onConflictDoNothing()
         .returning({ id: commandeVinted.id });
       if (!cree) continue; // déjà lue
-      nouvelles++;
+      compte.nouvelles++;
       const trouvee = await venteDeLaCommande(tx, utilisateurId, c.annonces);
       if ("raison" in trouvee) {
         await tx.update(commandeVinted).set({ message: trouvee.raison }).where(eq(commandeVinted.id, cree.id));
+        compte.aRattacher++;
         continue;
       }
       await tx
         .update(commandeVinted)
         .set({ etat: "a_valider", venteId: trouvee.venteId })
         .where(eq(commandeVinted.id, cree.id));
-      if (r.finalisationMode !== "automatique" || faites >= r.finalisationPlafond) continue;
+      if (r.finalisationMode !== "automatique" || faites >= r.finalisationPlafond) {
+        compte.aValider++;
+        continue;
+      }
       // Échec d'une finalisation automatique (date dans le futur…) : la commande reste à valider, avec la raison.
       try {
         await tx.transaction((sp) =>
@@ -194,14 +209,17 @@ export async function recevoirCommandes(
           ),
         );
         faites++;
+        compte.finalisees++;
       } catch (erreur) {
         await tx
           .update(commandeVinted)
           .set({ message: erreur instanceof Error ? erreur.message : String(erreur) })
           .where(eq(commandeVinted.id, cree.id));
+        compte.aValider++;
       }
     }
-    return { nouvelles };
+    await tx.insert(lectureCommandes).values({ ...lecture, ...compte });
+    return { nouvelles: compte.nouvelles };
   });
 }
 

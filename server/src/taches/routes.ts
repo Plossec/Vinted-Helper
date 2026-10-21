@@ -13,6 +13,7 @@ import {
   rattacherCommande,
   recevoirCommandes,
 } from "./finalisation.js";
+import { ETATS_JOURNAL, etatTaches, type FiltresJournal, listerJournal, TACHES } from "./journal.js";
 import {
   actionSuivante,
   enregistrerResultatAction,
@@ -30,6 +31,12 @@ function idsObligatoires(valeur: unknown): string[] {
 
 export function routesTaches(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/taches/actions", async (requete) => listerActions(base, utilisateurDe(requete).id, maintenant()));
+
+  // Refonte (#232, #233) : état de chaque tâche, journal de toutes les tâches avec ses filtres.
+  app.get("/api/taches/etat", async (requete) => etatTaches(base, utilisateurDe(requete).id, maintenant()));
+  app.get("/api/taches/journal", async (requete) => ({
+    lignes: await listerJournal(base, utilisateurDe(requete).id, lireFiltres(requete.query), maintenant()),
+  }));
 
   // « Lancer maintenant » (#230) : à toute heure, même tâche désactivée ; les dormants ignorent aussi les plafonds.
   app.post("/api/taches/dormants/lancer", async (requete) => ({
@@ -77,6 +84,7 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
         resultat: "erreur",
         message: texteObligatoire(c.message, "Message", 1000),
         annonceSupprimee: c.annonceSupprimee === true,
+        releve: c.releve === true,
       };
     else throw erreurSaisie("Résultat inconnu.");
     await enregistrerResultatAction(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());
@@ -121,8 +129,36 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
     if (!Array.isArray(c.commandes) || c.commandes.length > 500)
       throw erreurSaisie("Commandes : liste attendue (500 au plus).");
     const commandes: CommandeLue[] = c.commandes.map((brut: unknown, i: number) => lireCommande(brut, i));
-    return recevoirCommandes(base, utilisateurDe(requete).id, { essai: c.essai !== false, commandes }, maintenant());
+    const erreur = c.erreur === undefined || c.erreur === null ? null : texteObligatoire(c.erreur, "Erreur", 1000);
+    return recevoirCommandes(
+      base,
+      utilisateurDe(requete).id,
+      { essai: c.essai !== false, commandes, erreur, releve: c.releve === true },
+      maintenant(),
+    );
   });
+}
+
+/** Filtres du journal : tâche, état, jour (AAAA-MM-JJ) ; une valeur inconnue est refusée. */
+function lireFiltres(brut: unknown): FiltresJournal {
+  const q = objet(brut ?? {});
+  const f: FiltresJournal = {};
+  if (q.tache !== undefined && q.tache !== "") {
+    const tache = TACHES.find((x) => x === q.tache);
+    if (!tache) throw erreurSaisie("Journal : tâche inconnue.");
+    f.tache = tache;
+  }
+  if (q.etat !== undefined && q.etat !== "") {
+    const etat = ETATS_JOURNAL.find((x) => x === q.etat);
+    if (!etat) throw erreurSaisie("Journal : état inconnu.");
+    f.etat = etat;
+  }
+  if (q.jour !== undefined && q.jour !== "") {
+    if (typeof q.jour !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(q.jour))
+      throw erreurSaisie("Journal : jour invalide.");
+    f.jour = q.jour;
+  }
+  return f;
 }
 
 /** Une commande envoyée par l'extension : identifiant, annonces (numéros), date de fin, montant facultatif (centimes). */

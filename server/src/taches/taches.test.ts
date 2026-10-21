@@ -185,7 +185,9 @@ describe("tâche « Articles dormants »", () => {
     expect((await requete("PUT", "/api/reglages", { dormantsFrequenceHeures: 5 })).statusCode).toBe(400);
     expect((await requete("PUT", "/api/reglages", { dormantsPauseRepublication: 300 })).statusCode).toBe(400);
     expect((await requete("PUT", "/api/reglages", { dormantsPlafondBaisses: 41 })).statusCode).toBe(400);
-    expect((await requete("PUT", "/api/reglages", { tachesHeureDebut: 22, tachesHeureFin: 8 })).statusCode).toBe(400);
+    expect((await requete("PUT", "/api/reglages", { dormantsHeureDebut: 22, dormantsHeureFin: 8 })).statusCode).toBe(
+      400,
+    );
     expect((await requete("PUT", "/api/reglages", { dormantsBaisseValeur: 95 })).statusCode).toBe(400);
     const ok = await requete("PUT", "/api/reglages", { dormantsBaisseType: "montant", dormantsBaisseValeur: 150 });
     expect(ok.json()).toMatchObject({
@@ -305,7 +307,7 @@ describe("tâche « Articles dormants »", () => {
 
     it("hors mode essai : baisse faite → nouveau prix et historique ; « fait » refusé pour un essai", async () => {
       const a = await enLigne();
-      await reglerTache({ dormantsMode: "automatique", tachesEssai: false });
+      await reglerTache({ dormantsMode: "automatique", dormantsEssai: false });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const x = await suivante();
@@ -320,7 +322,7 @@ describe("tâche « Articles dormants »", () => {
       expect((await actions()).journal.filter((l) => l.etat === "en_attente")).toEqual([]);
 
       const b = await enLigne();
-      await requete("PUT", "/api/reglages", { tachesEssai: true });
+      await requete("PUT", "/api/reglages", { dormantsEssai: true });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const y = await suivante();
@@ -334,7 +336,7 @@ describe("tâche « Articles dormants »", () => {
       const b = await enLigne({ baisseRegle: "aucune" });
       const c = await enLigne({ baisseRegle: "aucune" });
       for (const id of [a, b]) await completerAnnonce(t.base, id);
-      await reglerTache({ dormantsMode: "automatique", tachesEssai: false, dormantsPauseRepublication: 600 });
+      await reglerTache({ dormantsMode: "automatique", dormantsEssai: false, dormantsPauseRepublication: 600 });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const x = await suivante();

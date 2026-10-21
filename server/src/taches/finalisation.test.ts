@@ -51,7 +51,7 @@ describe("tâche « Vérification vente finalisée »", () => {
   const envoyer = (commandes: object[], essai = false) =>
     programme("POST", "/api/programme/commandes", { essai, commandes });
   const regler = (extra: object = {}) =>
-    requete("PUT", "/api/reglages", { finalisationActive: true, tachesEssai: false, ...extra });
+    requete("PUT", "/api/reglages", { finalisationActive: true, finalisationEssai: false, ...extra });
 
   /** Article En ligne (annonce n° `annonce`), vendu et envoyé ; renvoie l'article et sa vente. */
   async function envoye(annonce: string | null, prix = 1000) {

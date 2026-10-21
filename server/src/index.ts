@@ -7,6 +7,7 @@ import { config } from "./config.js";
 import { purgerSessionsExpirees } from "./compte/sessions.js";
 import { purgerDonneesAcheteurs } from "./ventes/conservation.js";
 import { purgerCorbeille } from "./corbeille/service.js";
+import { purgerJournalTaches } from "./taches/journal.js";
 import { creerStockagePhotos } from "./photos/stockage.js";
 
 const connexion = creerConnexion();
@@ -57,6 +58,10 @@ async function purger(): Promise<void> {
         `Conservation : ${acheteurs.conversations} lien(s) de conversation et ${acheteurs.commandes} commande(s) Vinted effacé(s).`,
       );
     }
+    // Journal des tâches automatisées : lignes de plus de 3 mois effacées (#233).
+    const journal = await purgerJournalTaches(connexion.db, new Date());
+    if (journal.actions + journal.lectures > 0)
+      console.info(`Journal des tâches : ${journal.actions + journal.lectures} ligne(s) de plus de 3 mois effacée(s).`);
   } catch (erreur) {
     console.error("Purge de la corbeille impossible :", erreur instanceof Error ? erreur.message : erreur);
   }
