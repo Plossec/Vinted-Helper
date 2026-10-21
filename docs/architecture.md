@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.23.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.24.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -109,6 +109,7 @@ erDiagram
   article ||--o{ signalement_vu : "alerte vue"
   article ||--o{ action_vinted : "baissé / republié"
   vente ||--o{ commande_vinted : "finalisée par"
+  utilisateur ||--o{ lecture_commandes : "journal des lectures"
   utilisateur ||--o{ frais_general : paie
 ```
 
@@ -125,4 +126,5 @@ erDiagram
 | `signalement_vu` | Alertes « Pour info » de l'écran « À faire » marquées « Vu » (#191), avec leur date de départ |
 | `action_vinted` | Actions des tâches automatiques (#147) : baisse de prix ou republication d'un article dormant, à valider, puis faites par l'extension |
 | `commande_vinted` | Commandes terminées lues sur Vinted (#148), rattachées à une vente (à valider, à rattacher, appliquées) |
+| `lecture_commandes` | Journal des lectures du « Porte-monnaie » (#233) : nombres lus et traités, ou raison de l'erreur ; effacé après 3 mois |
 | `reglages`, `session`, `marque` | Paramètres de calcul et des tâches automatiques, connexions, marques |

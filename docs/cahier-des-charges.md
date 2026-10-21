@@ -286,13 +286,19 @@ manque. La catégorie « Autre » est admise (publication à la main).
   recaler quand Vinted change ses pages (`docs/guides/publication-vinted.md`).
 
 ### 5.15 Tâches automatisées
-- Exécutées par l'**extension** pendant ses passages, une action à la fois sur Vinted, de **8 h à 22 h** (plage
-  réglable) ; chaque tâche est **désactivée** par défaut, en mode **manuel** par défaut (liste à valider dans
-  « À faire ») ou **automatique**, avec fréquence, pauses et plafonds réglables dans des limites (ADR-0072, ADR-0078).
+- Exécutées par l'**extension** pendant ses passages, une action à la fois sur Vinted, dans la **plage horaire** de
+  chaque tâche (**8 h à 22 h** par défaut) ; chaque tâche est **désactivée** par défaut, en mode **manuel** par défaut
+  (liste à valider dans « À faire ») ou **automatique**, avec fréquence, pauses et plafonds réglables dans des limites
+  (ADR-0072, ADR-0078). Chaque tâche a son **mode essai** (coché par défaut) : l'extension ouvre les pages sans rien
+  modifier (ADR-0105).
   **« Lancer maintenant »** (Réglages et « À faire ») : chaque tâche à la demande, à toute heure, même désactivée et
-  sans plafond du jour ; l'extension s'en charge à son prochain passage (ADR-0104). Un **mode essai** commun ouvre les
-  pages sans rien modifier. Résultats dans le journal de l'écran « Publication
-  Vinted ».
+  sans plafond du jour ; l'extension s'en charge à son prochain passage (ADR-0104).
+- **Réglages → Tâches automatiques** : une **carte repliable par tâche** montrant si elle est activée, en essai ou en
+  réel, son dernier et son prochain passage et ses actions du jour ; pauses et plafonds dans « Réglages avancés »
+  (ADR-0105).
+- **Journal de toutes les tâches** (une ligne par action, une par lecture des ventes) : filtres par tâche, état et
+  jour, raison des erreurs ; sous chaque tâche, en entier dans Réglages et dans « Publication Vinted » ; lignes
+  effacées après **3 mois** (ADR-0105).
 
 | Tâche | Ce qu'elle fait | État |
 |---|---|---|

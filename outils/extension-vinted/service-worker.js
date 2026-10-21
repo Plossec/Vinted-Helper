@@ -323,18 +323,34 @@ async function executerAction(api, action, vinted) {
   return { resultat: "essai" };
 }
 
+/** Empreinte du « Dernier relevé » : comparée avant et après une opération, elle dit si un relevé a été enregistré. */
+async function empreinteReleve() {
+  const { diagnostic } = await chrome.storage.local.get("diagnostic");
+  return JSON.stringify(diagnostic ?? null);
+}
+
 /**
  * Lecture du « Porte-monnaie » (#148), en essai : la page est ouverte et relevée (« Dernier relevé ») pour
- * calibrer la lecture des commandes ; aucune commande n'est encore envoyée à l'application.
+ * calibrer la lecture des commandes ; aucune commande n'est encore envoyée à l'application. Un échec est signalé à
+ * l'application (journal des tâches, #233), avec l'indication d'un relevé enregistré.
  */
 async function lireCommandes(api, vinted) {
   await journal("Ventes finalisées : lecture du « Porte-monnaie » (essai)…");
-  const onglet = await ouvrirOnglet(`${vinted}${SELECTEURS.pagePorteMonnaie}`);
-  await verifierPage(onglet);
-  const releve = await releverPage(onglet, "ventes");
-  await chrome.storage.local.set({
-    diagnostic: { ...releve, date: new Date().toISOString(), etape: "tâche : ventes finalisées", erreur: null },
-  });
+  const avant = await empreinteReleve();
+  try {
+    const onglet = await ouvrirOnglet(`${vinted}${SELECTEURS.pagePorteMonnaie}`);
+    await verifierPage(onglet);
+    const releve = await releverPage(onglet, "ventes");
+    await chrome.storage.local.set({
+      diagnostic: { ...releve, date: new Date().toISOString(), etape: "tâche : ventes finalisées", erreur: null },
+    });
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    await api.commandes({ essai: true, commandes: [], erreur: message, releve: (await empreinteReleve()) !== avant });
+    await journal(`Ventes finalisées : erreur — ${message}`);
+    if (erreur instanceof Arret) await mettreEnPause(message);
+    return;
+  }
   await api.commandes({ essai: true, commandes: [] });
   await journal("Ventes finalisées : page relevée, rien n'est modifié. Fenêtre de l'extension → « Dernier relevé ».");
 }
@@ -347,6 +363,7 @@ async function faireActionSuivante(api, vinted, signaler) {
   const reference = `#${String(action.reference).padStart(4, "0")}`;
   const libelle = LIBELLES_ACTION[action.type]?.(action) ?? action.type;
   await journal(`${reference} : ${libelle}${action.essai ? " (essai)" : ""}…`);
+  const avant = await empreinteReleve();
   let resultat;
   let arret = null;
   try {
@@ -356,6 +373,8 @@ async function faireActionSuivante(api, vinted, signaler) {
     resultat = { resultat: "erreur", message };
     if (erreur instanceof Arret) arret = message;
   }
+  // Erreur : l'application indique si un relevé a été enregistré (journal des tâches, #233).
+  if (resultat.resultat === "erreur") resultat.releve = (await empreinteReleve()) !== avant;
   await api.resultatAction(action.id, resultat);
   await ecrireEtat({ actionEnCours: null });
   await journal(

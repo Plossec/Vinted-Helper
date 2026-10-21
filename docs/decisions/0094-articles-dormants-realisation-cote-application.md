@@ -1,7 +1,7 @@
 # ADR-0094 — Articles dormants : réalisation côté application (étape 1 sur 3)
 
 - **Date** : 15/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · mode essai et journal : [ADR-0105](0105-taches-reglages-par-tache-et-journal.md) (proposé)
 - **Décideurs** : Claude, dans le cadre validé par l'utilisateur ([ADR-0072](0072-taches-automatisees-socle-commun.md), [ADR-0073](0073-tache-articles-dormants.md), [ADR-0078](0078-rythme-des-taches-automatisees.md))
 - **Issue** : #147
 - **Thème** : Tâches automatisées

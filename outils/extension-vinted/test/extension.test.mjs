@@ -294,6 +294,7 @@ test("baisse en essai, prix introuvable sur « Modifier l'annonce » : erreur et
   });
   assert.equal(app.resultatsActions[0].resultat, "erreur");
   assert.match(app.resultatsActions[0].message, /Prix introuvable/);
+  assert.equal(app.resultatsActions[0].releve, true); // signalé à l'application (#233)
   assert.match(d.erreur, /Prix introuvable/);
   assert.equal(etat.pause, false);
 });
@@ -311,6 +312,7 @@ test("action hors mode essai : refusée par cette version, aucune page Vinted ou
   const { app, vinted } = await lancer({ demande: null, actions: [ACTION("baisse", false)] });
   assert.equal(app.resultatsActions[0].resultat, "erreur");
   assert.match(app.resultatsActions[0].message, /Mode réel des tâches pas encore disponible/);
+  assert.equal(app.resultatsActions[0].releve, false); // aucune page ouverte, aucun relevé
   assert.equal(vinted.pagesAnnonce + vinted.pagesModifier + vinted.chargements, 0);
 });
 
@@ -336,6 +338,16 @@ test("lecture des commandes en essai : « Porte-monnaie » ouvert et relevé, li
   assert.equal(d.etape, "tâche : ventes finalisées");
   assert.equal(d.page, "ventes");
   assert.ok(d.elements.some((e) => e.testid === "order-list"));
+});
+
+test("lecture des commandes sur une page « session bloquée » : erreur signalée à l'application (#233), pause", async () => {
+  const { app, etat } = await lancer({ demande: null, lectureCommandes: true, vinted: { bloque: true } });
+  assert.equal(app.commandes.length, 1);
+  assert.equal(app.commandes[0].essai, true);
+  assert.deepEqual(app.commandes[0].commandes, []);
+  assert.match(app.commandes[0].erreur, /bloqué la session/);
+  assert.equal(typeof app.commandes[0].releve, "boolean");
+  assert.equal(etat.pause, true);
 });
 
 test("ordre : publication, puis lecture des commandes, puis actions ; une seule opération par passage", async () => {

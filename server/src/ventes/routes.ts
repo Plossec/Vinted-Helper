@@ -71,10 +71,10 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
   const poser = <K extends keyof Reglages>(cle: K, valeur: Reglages[K] | undefined) => {
     if (valeur !== undefined) m[cle] = valeur;
   };
-  poser("tachesHeureDebut", entierFacultatif(c.tachesHeureDebut, "Tâches : heure de début", 0, 23));
-  poser("tachesHeureFin", entierFacultatif(c.tachesHeureFin, "Tâches : heure de fin", 1, 24));
-  poser("tachesEssai", booleenFacultatif(c.tachesEssai, "Tâches : mode essai"));
   poser("dormantsActive", booleenFacultatif(c.dormantsActive, "Articles dormants : activée"));
+  poser("dormantsHeureDebut", entierFacultatif(c.dormantsHeureDebut, "Articles dormants : heure de début", 0, 23));
+  poser("dormantsHeureFin", entierFacultatif(c.dormantsHeureFin, "Articles dormants : heure de fin", 1, 24));
+  poser("dormantsEssai", booleenFacultatif(c.dormantsEssai, "Articles dormants : mode essai"));
   // Valeurs fixes enregistrées (jamais la chaîne reçue telle quelle).
   if (c.dormantsMode !== undefined) {
     if (c.dormantsMode !== "automatique" && c.dormantsMode !== "manuel")
@@ -114,6 +114,12 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
   );
   // Tâche « Vérification vente finalisée » (#148) : valeur fixe enregistrée pour le mode.
   poser("finalisationActive", booleenFacultatif(c.finalisationActive, "Ventes finalisées : activée"));
+  poser(
+    "finalisationHeureDebut",
+    entierFacultatif(c.finalisationHeureDebut, "Ventes finalisées : heure de début", 0, 23),
+  );
+  poser("finalisationHeureFin", entierFacultatif(c.finalisationHeureFin, "Ventes finalisées : heure de fin", 1, 24));
+  poser("finalisationEssai", booleenFacultatif(c.finalisationEssai, "Ventes finalisées : mode essai"));
   if (c.finalisationMode !== undefined) {
     if (c.finalisationMode !== "automatique" && c.finalisationMode !== "manuel")
       throw erreurSaisie("Ventes finalisées : mode inconnu.");
@@ -301,8 +307,10 @@ export function routesVentes(
     const utilisateurId = utilisateurDe(requete).id;
     const actuels = await lireReglages(base, utilisateurId);
     const fusion = { ...actuels, ...modif };
-    if (fusion.tachesHeureDebut >= fusion.tachesHeureFin)
-      throw erreurSaisie("Tâches automatiques : l'heure de début doit précéder l'heure de fin.");
+    if (fusion.dormantsHeureDebut >= fusion.dormantsHeureFin)
+      throw erreurSaisie("Articles dormants : l'heure de début doit précéder l'heure de fin.");
+    if (fusion.finalisationHeureDebut >= fusion.finalisationHeureFin)
+      throw erreurSaisie("Ventes finalisées : l'heure de début doit précéder l'heure de fin.");
     if (fusion.dormantsBaisseType === "pourcentage" && fusion.dormantsBaisseValeur > 90)
       throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
     await modifierReglages(base, utilisateurId, modif);

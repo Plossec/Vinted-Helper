@@ -1,7 +1,7 @@
 # ADR-0078 — Rythme des tâches automatisées
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté · lancement manuel à toute heure : précisé par [ADR-0104](0104-lancement-manuel-des-taches-automatisees.md)
+- **Statut** : Accepté · lancement manuel à toute heure : précisé par [ADR-0104](0104-lancement-manuel-des-taches-automatisees.md) · plage horaire propre à chaque tâche : [ADR-0105](0105-taches-reglages-par-tache-et-journal.md) (proposé)
 - **Décideurs** : utilisateur et Claude
 - **Issue** : #190
 - **Thème** : Tâches automatisées

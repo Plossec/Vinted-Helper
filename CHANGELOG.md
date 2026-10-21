@@ -5,6 +5,18 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.24.0] — 21/10/2026
+
+### Ajouté
+- **Réglages → Tâches automatiques** : une carte par tâche, repliable, qui montre si elle est activée, en essai ou en
+  réel, son dernier et son prochain passage et ses actions du jour ; pauses et plafonds rangés dans « Réglages
+  avancés » ; chaque tâche a sa propre **plage horaire** et son propre **mode essai** (#232).
+- **Journal de toutes les tâches** (articles dormants et lectures des ventes finalisées), sous chaque tâche, en entier
+  dans les Réglages et dans Publication Vinted : filtres par tâche, état et jour, **raison des erreurs**, relevé
+  signalé ; lignes effacées après 3 mois (#233).
+- Extension 1.13.0 : une lecture des ventes qui échoue est signalée à l'application, et une erreur indique si un
+  relevé a été enregistré (#233).
+
 ## [1.23.0] — 21/10/2026
 
 ### Ajouté

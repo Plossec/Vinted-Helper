@@ -93,7 +93,7 @@ describe("conservation des données des acheteurs", () => {
     expect(restantes.map((c) => c.id)).toEqual(["RECENTE"]);
 
     // Relue plus tard sur Vinted, une commande trop ancienne est ignorée.
-    await t.base.update(reglages).set({ tachesEssai: false }).where(eq(reglages.utilisateurId, utilisateurId));
+    await t.base.update(reglages).set({ finalisationEssai: false }).where(eq(reglages.utilisateurId, utilisateurId));
     const lue = {
       idCommande: "ANCIENNE",
       annonces: ["111"],

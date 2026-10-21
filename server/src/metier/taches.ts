@@ -23,6 +23,25 @@ export function passageDu(
   );
 }
 
+/**
+ * Prochain passage prévu d'une tâche activée (#232) : à sa fréquence après le dernier passage (maintenant s'il est déjà
+ * dû), ramené au début de la plage horaire de Paris. Désactivée : aucun. L'extension le fait à son passage suivant.
+ */
+export function prochainPassage(
+  r: { active: boolean; heureDebut: number; heureFin: number; frequenceHeures: number; dernierPassage: Date | null },
+  maintenant: Date,
+): Date | null {
+  if (!r.active) return null;
+  const du = r.dernierPassage === null ? 0 : r.dernierPassage.getTime() + r.frequenceHeures * 3_600_000;
+  let instant = new Date(Math.max(maintenant.getTime(), du));
+  const dansLaPlage = (d: Date) => heureParis(d) >= r.heureDebut && heureParis(d) < r.heureFin;
+  if (dansLaPlage(instant)) return instant;
+  // Les décalages de Paris sont des heures entières : la plage commune une heure ronde.
+  instant = new Date(Math.ceil(instant.getTime() / 3_600_000) * 3_600_000);
+  for (let i = 0; i < 48 && !dansLaPlage(instant); i++) instant = new Date(instant.getTime() + 3_600_000);
+  return instant;
+}
+
 export interface CandidatDormant {
   id: string;
   prixAffiche: number | null;

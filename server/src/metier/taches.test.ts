@@ -1,6 +1,6 @@
 // Tâche « Articles dormants » (#147) : moment du passage et actions prévues.
 import { describe, expect, it } from "vitest";
-import { type CandidatDormant, passageDu, planifierDormants } from "./taches.js";
+import { type CandidatDormant, passageDu, planifierDormants, prochainPassage } from "./taches.js";
 
 describe("passage de la tâche", () => {
   const base = { active: true, heureDebut: 8, heureFin: 22, frequenceHeures: 24, dernierPassage: null };
@@ -14,6 +14,28 @@ describe("passage de la tâche", () => {
     expect(passageDu({ ...base, active: false }, midi)).toBe(false);
     expect(passageDu({ ...base, dernierPassage: new Date("2026-10-14T11:00:00Z") }, midi)).toBe(false);
     expect(passageDu({ ...base, dernierPassage: new Date("2026-10-14T10:00:00Z") }, midi)).toBe(true);
+  });
+});
+
+describe("prochain passage (#232)", () => {
+  const base = { active: true, heureDebut: 8, heureFin: 22, frequenceHeures: 24, dernierPassage: null };
+  const midi = new Date("2026-10-15T10:00:00Z");
+  it("désactivée : aucun ; jamais passée, dans la plage : maintenant", () => {
+    expect(prochainPassage({ ...base, active: false }, midi)).toBeNull();
+    expect(prochainPassage(base, midi)).toEqual(midi);
+  });
+  it("à sa fréquence après le dernier passage, ramené au début de la plage horaire de Paris", () => {
+    const hier = new Date("2026-10-14T10:00:00Z");
+    expect(prochainPassage({ ...base, dernierPassage: new Date("2026-10-15T08:00:00Z") }, midi)).toEqual(
+      new Date("2026-10-16T08:00:00Z"),
+    );
+    expect(prochainPassage({ ...base, dernierPassage: hier }, midi)).toEqual(midi); // déjà dû
+    // 12 h après un passage à 12 h : minuit à Paris, hors plage → 8 h le lendemain.
+    expect(prochainPassage({ ...base, frequenceHeures: 12, dernierPassage: midi }, midi)).toEqual(
+      new Date("2026-10-16T06:00:00Z"),
+    );
+    // Dû la nuit (2 h à Paris) : 8 h le matin.
+    expect(prochainPassage(base, new Date("2026-10-15T00:00:00Z"))).toEqual(new Date("2026-10-15T06:00:00Z"));
   });
 });
 

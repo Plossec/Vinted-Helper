@@ -125,8 +125,8 @@ export async function planifierTaches(base: Base, utilisateurId: string, mainten
   const du = passageDu(
     {
       active: r.dormantsActive,
-      heureDebut: r.tachesHeureDebut,
-      heureFin: r.tachesHeureFin,
+      heureDebut: r.dormantsHeureDebut,
+      heureFin: r.dormantsHeureFin,
       frequenceHeures: r.dormantsFrequenceHeures,
       dernierPassage: r.dormantsDernierPassage,
     },
@@ -184,7 +184,7 @@ async function prevoirDormants(
         utilisateurId,
         ...a,
         etat: r.dormantsMode === "automatique" ? ("en_attente" as const) : ("a_valider" as const),
-        essai: r.tachesEssai,
+        essai: r.dormantsEssai,
         manuelle,
         creeLe: maintenant,
       })),
@@ -356,7 +356,7 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
     if (!r) return null;
     const heure = heureParis(maintenant);
     // Hors de la plage horaire, seules les actions lancées à la main (#230) sont confiées à l'extension.
-    const horsPlage = heure < r.tachesHeureDebut || heure >= r.tachesHeureFin;
+    const horsPlage = heure < r.dormantsHeureDebut || heure >= r.dormantsHeureFin;
     await annulerActionsPerimees(tx, utilisateurId, maintenant);
     const pauses = { baisse: r.dormantsPauseBaisse, republication: r.dormantsPauseRepublication };
     const fins = await tx
@@ -408,14 +408,14 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
       }
       const prise = await tx
         .update(actionVinted)
-        .set({ etat: "en_cours", debutLe: maintenant, essai: r.tachesEssai })
+        .set({ etat: "en_cours", debutLe: maintenant, essai: r.dormantsEssai })
         .where(and(eq(actionVinted.id, a.id), eq(actionVinted.etat, "en_attente")))
         .returning({ id: actionVinted.id });
       if (prise.length === 0) return null;
       return {
         id: a.id,
         type: a.type,
-        essai: r.tachesEssai,
+        essai: r.dormantsEssai,
         reference: a.reference,
         titre: a.titre ?? "",
         /** Lien de l'annonce actuelle. */
@@ -434,7 +434,7 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
 export type ResultatAction =
   | { resultat: "essai" }
   | { resultat: "fait"; url: string | null }
-  | { resultat: "erreur"; message: string; annonceSupprimee: boolean };
+  | { resultat: "erreur"; message: string; annonceSupprimee: boolean; releve: boolean };
 
 /**
  * Résultat d'une action renvoyé par l'extension. Faite : une baisse change le prix affiché (et son historique, qui
@@ -462,6 +462,7 @@ export async function enregistrerResultatAction(
               ? "Essai : pages Vinted ouvertes, rien n'a été modifié."
               : null,
         url: r.resultat === "fait" ? r.url : null,
+        releve: r.resultat === "erreur" && r.releve,
       })
       .where(
         and(eq(actionVinted.id, id), eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "en_cours")),
