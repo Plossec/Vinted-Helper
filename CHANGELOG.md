@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.25.1] — 22/10/2026
+
+### Corrigé
+- Extension 1.14.1 : baisse réelle d'un article dormant, le nouveau prix était relu vide sur « Modifier l'annonce »
+  (prix déjà rempli effacé par Vinted) ; le champ est désormais vidé puis saisi (#147).
+
 ## [1.25.0] — 21/10/2026
 
 ### Ajouté

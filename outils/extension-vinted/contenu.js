@@ -359,11 +359,29 @@ async function baisserPrix(avant, apres) {
     throw new ErreurPublication(
       `Prix sur Vinted « ${el.value} » différent de celui de l'application (${avant} €). Rien n'a été modifié.`,
     );
-  // Saisie avec un point, comme à la publication (#176).
-  saisir(el, apres.replace(",", "."));
-  await attendreMs(500);
-  if (montant(el.value) !== montant(apres))
-    throw new ErreurPublication(`Prix : Vinted affiche « ${el.value} » au lieu de « ${apres} ». Rien n'a été validé.`);
+  // Saisie avec un point, comme à la publication (#176). Essai réel du 22/10/2026 : le prix déjà rempli, remplacé
+  // d'un coup, est relu vide ; le champ est donc vidé d'abord, puis saisi, et relu (champ recherché à nouveau, au cas
+  // où Vinted l'a redessiné). En dernier recours, saisie comme au clavier (texte sélectionné puis remplacé).
+  const valeur = apres.replace(",", ".");
+  const relire = async () => {
+    await attendreMs(500);
+    return (await attendre(SELECTEURS.champs.prix, 2000)) ?? el;
+  };
+  saisir(el, "");
+  await attendreMs(300);
+  let champPrix = await relire();
+  saisir(champPrix, valeur);
+  champPrix = await relire();
+  if (montant(champPrix.value) !== montant(apres)) {
+    champPrix.focus();
+    champPrix.select();
+    document.execCommand("insertText", false, valeur);
+    champPrix = await relire();
+  }
+  if (montant(champPrix.value) !== montant(apres))
+    throw new ErreurPublication(
+      `Prix : Vinted affiche « ${champPrix.value} » au lieu de « ${apres} ». Rien n'a été validé.`,
+    );
   const bouton = boutonAjouter(SELECTEURS.texteBoutonValider);
   if (!bouton) throw new ErreurPublication("Bouton « Valider » introuvable. Rien n'a été modifié.");
   setTimeout(() => cliquer(bouton), 100);

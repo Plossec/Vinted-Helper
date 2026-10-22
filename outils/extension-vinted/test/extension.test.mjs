@@ -322,6 +322,17 @@ test("baisse réelle : prix vérifié, nouveau prix saisi, seul « Valider » cl
   assert.equal(etat.pause, false);
 });
 
+test("baisse réelle, prix déjà rempli que Vinted efface s'il est remplacé d'un coup : champ vidé puis saisi", async () => {
+  const { app, vinted } = await lancer({
+    demande: null,
+    actions: [ACTION("baisse", false)],
+    vinted: { prixMasque: true },
+  });
+  assert.deepEqual(app.resultatsActions, [{ resultat: "fait" }]);
+  assert.equal(vinted.clicsValider, 1);
+  assert.equal(Number(vinted.prix.replace(/[^\d,.]/g, "").replace(",", ".")), 10);
+});
+
 test("baisse réelle, prix sur Vinted différent de celui de l'application : rien n'est modifié", async () => {
   const { app, vinted } = await lancer({
     demande: null,
