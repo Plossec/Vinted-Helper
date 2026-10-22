@@ -176,7 +176,10 @@ const PAGE_INTROUVABLE = `<!doctype html><html><body><h1>Page introuvable</h1></
  * des photos à ne jamais toucher. « Valider » enregistre le prix saisi (sauf option) puis revient à l'annonce.
  * Option : sans le champ prix.
  */
-const pageModifier = ({ sansPrixModifier = false } = {}, prix = "11,00 €") => `<!doctype html><html><body>
+const pageModifier = (
+  { sansPrixModifier = false, prixMasque = false } = {},
+  prix = "11,00 €",
+) => `<!doctype html><html><body>
   <form onsubmit="return false">
   <input id="title" name="title" data-testid="title--input" type="text" value="Jean Levi's 501">
   <button type="button" data-testid="media-select-grid-delete-button-0" aria-label="Supprimer la photo sélectionnée"></button>
@@ -186,6 +189,14 @@ const pageModifier = ({ sansPrixModifier = false } = {}, prix = "11,00 €") => 
   <button data-testid="upload-form-save-button" type="button">Valider</button></form>
   <script>
     const signaler = (quoi, corps) => fetch("/" + quoi, { method: "POST", body: corps });
+    // Option « prixMasque » (essai réel du 22/10/2026, #147 ; comportement supposé) : un prix déjà rempli, remplacé
+    // d'un coup, est effacé par le champ ; vidé d'abord, il accepte la nouvelle valeur.
+    const prix = document.querySelector('[data-testid="price-input--input"]');
+    let precedent = prix?.value ?? "";
+    if (${prixMasque} && prix) prix.addEventListener("input", () => {
+      if (precedent !== "" && prix.value !== "") prix.value = "";
+      precedent = prix.value;
+    });
     document.querySelector("#bump").addEventListener("click", () => signaler("clic-pousser"));
     document.querySelector('[data-testid="media-select-grid-delete-button-0"]').addEventListener("click", () =>
       signaler("clic-photo"),
