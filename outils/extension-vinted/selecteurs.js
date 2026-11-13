@@ -12,8 +12,20 @@ const SELECTEURS = {
     // Listes de choix : on clique le champ, puis l'option dont le texte correspond.
     categorie: ['[data-testid="catalog-select-dropdown-input"]', 'input[name="category"]', "#category"],
     marque: ['[data-testid="brand-select-dropdown-input"]', 'input[name="brand"]', "#brand"],
-    taille: ['[data-testid="size-select-dropdown-input"]', 'input[name="size"]', "#size"],
-    etat: ['[data-testid="condition-select-dropdown-input"]', 'input[name="condition"]', "#condition"],
+    // Relevé du 29/10/2026 (#239) : nouvelles listes, bouton `…-input` suivi d'un champ caché `select-proxy`
+    // (name="size", name="condition") qui n'ouvre pas la liste : ces champs cachés ne sont plus utilisés.
+    taille: [
+      '[data-testid="category-size-single-grid-input"]',
+      '[data-testid^="category-size-"][data-testid$="-input"]',
+      '[data-testid="size-select-dropdown-input"]',
+      "#size",
+    ],
+    etat: [
+      '[data-testid="category-condition-single-list-input"]',
+      '[data-testid^="category-condition-"][data-testid$="-input"]',
+      '[data-testid="condition-select-dropdown-input"]',
+      "#condition",
+    ],
     couleur: ['[data-testid="color-select-dropdown-input"]', 'input[name="color"]', "#color"],
     // Format du colis : cases à cocher, pas une liste (relevé du 07/10/2026).
     colis: ['[data-testid$="-package-size--cell"]'],
@@ -55,8 +67,11 @@ const SELECTEURS = {
     '[data-testid$="-option"]',
   ],
 
-  /** Zones où une option n'est jamais cherchée (menu de navigation du site). */
-  horsOptions: 'header, nav, [role="tablist"]',
+  /**
+   * Zones où une option n'est jamais cherchée : menu de navigation du site, cases « format du colis » (relevé du
+   * 29/10/2026, #239 : leur `…--cell--content` contient le bouton « Voir les détails des dimensions et indemnisations »).
+   */
+  horsOptions: 'header, nav, [role="tablist"], [data-testid$="-package-size--cell"]',
 
   /** Vignettes des photos déposées dans le formulaire (leur nombre est contrôlé avant l'envoi). */
   // Relevé du 07/10/2026 : chaque photo déposée est un `[data-testid="image-wrapper-N"]` dans `media-upload-grid`.

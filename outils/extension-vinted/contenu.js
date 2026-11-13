@@ -14,7 +14,13 @@
 const DELAI_MS = 10_000;
 const attendreMs = (ms) => new Promise((r) => setTimeout(r, ms));
 
-class ErreurPublication extends Error {}
+class ErreurPublication extends Error {
+  /** `elements` : relevé pris avant de refermer une liste (#239), sinon la page est relevée après l'erreur. */
+  constructor(message, elements = null) {
+    super(message);
+    this.elements = elements;
+  }
+}
 
 const normaliser = (t) =>
   String(t ?? "")
@@ -95,8 +101,16 @@ async function option(texte, delai = DELAI_MS) {
   return null;
 }
 
-/** Valeur affichée d'un champ (saisie ou liste de choix), normalisée. */
-const valeurDe = (el) => normaliser("value" in el && typeof el.value === "string" ? el.value : el.textContent);
+/**
+ * Valeur affichée d'un champ, normalisée : ce qui est saisi, ou le texte d'une liste de choix. Les nouvelles listes
+ * de Vinted (#239) sont des boutons, dont la propriété `value` est vide : leur texte fait foi.
+ */
+const valeurDe = (el) =>
+  normaliser(
+    el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement
+      ? el.value
+      : el.textContent,
+  );
 
 /** Libellés des options visibles (pour un message d'erreur utile). */
 function optionsVisibles() {
@@ -105,6 +119,29 @@ function optionsVisibles() {
     .map((el) => el.textContent?.replace(/\s+/g, " ").trim())
     .filter(Boolean)
     .slice(0, 15);
+}
+
+/**
+ * Ouvre une liste de choix. Nouvelles listes de Vinted (#239) : bouton portant `aria-expanded`. Si la liste n'est
+ * pas ouverte après le clic complet (appui, relâchement, clic), un « click » seul est tenté, puis la touche Entrée.
+ */
+async function ouvrirListe(el) {
+  cliquer(el);
+  if (!el.hasAttribute("aria-expanded")) return;
+  const ouverte = async () => {
+    const fin = Date.now() + 1000;
+    do {
+      if (el.getAttribute("aria-expanded") === "true") return true;
+      await attendreMs(100);
+    } while (Date.now() < fin);
+    return false;
+  };
+  if (await ouverte()) return;
+  el.click();
+  if (await ouverte()) return;
+  el.focus();
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  await ouverte();
 }
 
 const fermerListe = () =>
@@ -124,16 +161,18 @@ async function choisir(nom, texte, { fermer = false } = {}) {
       .includes(normaliser(texte))
   )
     return;
-  cliquer(el0);
+  await ouvrirListe(el0);
   const recherche = await attendre(SELECTEURS.rechercheDansListe, 800);
   if (recherche && visible(recherche)) saisir(recherche, texte);
   const el = await option(texte);
   if (!el) {
     const proposes = optionsVisibles();
+    const elements = releve(); // liste encore ouverte
     fermerListe();
     throw new ErreurPublication(
       `« ${texte} » introuvable dans la liste « ${nom} » de Vinted.` +
         (proposes.length > 0 ? ` Choix proposés : ${proposes.join(", ")}.` : ""),
+      elements,
     );
   }
   cliquer(el);
@@ -192,7 +231,7 @@ async function choisirCategorie(chemin) {
   const entree = await champ("categorie");
   const finale = chemin.at(-1) ?? "";
   categorieChoisie = null;
-  cliquer(entree);
+  await ouvrirListe(entree);
   const recherche = await attendre(SELECTEURS.rechercheCategorie, 3000);
   if (recherche) {
     saisir(recherche, finale);
@@ -226,11 +265,13 @@ async function choisirCategorie(chemin) {
     }
   }
   const proposes = optionsVisibles();
+  const elements = releve(); // liste encore ouverte
   fermerListe();
   throw new ErreurPublication(
     `Catégorie « ${finale} » introuvable sur Vinted (chemin : ${chemin.join(" › ")}).` +
       (proposes.length > 0 ? ` Choix proposés par Vinted : ${proposes.join(", ")}.` : "") +
       " Corrigez la catégorie de l'article, ou envoyez le Dernier relevé à Claude.",
+    elements,
   );
 }
 
@@ -315,7 +356,7 @@ async function controler(article, nombrePhotos) {
   const attendu = async (nom, texte, mode = "egal") => {
     const el = await champ(nom, false);
     if (!el) return ecarts.push(`${nom} : champ introuvable`);
-    const lu = normaliser("value" in el && typeof el.value === "string" ? el.value : el.textContent);
+    const lu = valeurDe(el);
     const voulu = normaliser(texte);
     if (!(mode === "egal" ? lu === voulu : lu.includes(voulu)))
       ecarts.push(`${nom} : « ${lu} » au lieu de « ${voulu} »`);
@@ -504,7 +545,7 @@ async function diagnostic(niveau) {
 }
 
 /** Relevé automatique de la page au moment d'une erreur (liste éventuellement ouverte) : calibrage de selecteurs.js. */
-function releveErreur(etape, erreur) {
+function releveErreur(etape, erreur, elements = null) {
   return {
     adresse: location.href,
     etat: etatPage(),
@@ -512,7 +553,7 @@ function releveErreur(etape, erreur) {
     etape,
     erreur,
     selecteursTrouves: selecteursTrouves(),
-    elements: releve(),
+    elements: elements ?? releve(),
   };
 }
 
@@ -603,7 +644,7 @@ async function traiter(message) {
       const apres = etatPage();
       if (apres !== "pret") return { ok: false, etat: apres };
       const texte = erreur instanceof Error ? erreur.message : String(erreur);
-      return { ok: false, message: texte, releve: releveErreur(message.nom, texte) };
+      return { ok: false, message: texte, releve: releveErreur(message.nom, texte, erreur?.elements) };
     }
   }
 

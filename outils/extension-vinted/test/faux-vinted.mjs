@@ -10,6 +10,8 @@ function pageFormulaire({
   categoriePreremplie = "",
   genrePrerempli = "Hommes",
   prixFormate = false,
+  listesBloom = false,
+  ouvertureBasculee = false,
 } = {}) {
   const liste = (id, options) =>
     sansChamp === id
@@ -37,6 +39,30 @@ function pageFormulaire({
              <input type="radio"${nom === categoriePreremplie && chemin.startsWith(genrePrerempli) ? " checked" : ""}></div></li>`,
          )
          .join("")}</ul></div></div>`;
+  const etats = [
+    ["Neuf avec étiquette", "Article neuf, jamais porté."],
+    ["Très bon état", "Article très peu porté."],
+    ["Bon état", "Article porté, quelques signes d'usure."],
+  ]
+    .map(
+      ([titre, corps], i) => `<li><div role="radio" data-testid="condition-${i}">
+        <div class="web_ui__Cell__title">${titre}</div><div class="web_ui__Cell__body">${corps}</div></div></li>`,
+    )
+    .join("");
+  // Relevé du 29/10/2026 (#239) et capture : grille des tailles, « Suggestions » puis « Tailles hommes », en boutons.
+  const grilleTailles = `<div>Choisis la taille qui correspond à l'étiquette de l'article.</div>
+    <div>Suggestions</div><button type="button">M</button>
+    <div>Tailles hommes</div><a href="/guide">Guide des tailles</a>
+    ${["XS", "M", "L", "W32"].map((t) => `<button type="button">${t}</button>`).join("")}`;
+  // Nouvelles listes de Vinted (relevé du 29/10/2026, #239) : bouton « select-root » (`…-input`, aria-expanded) dont
+  // le texte est la valeur, suivi d'un champ caché « select-proxy » (name="size"…) qui n'ouvre rien quand on le clique.
+  const listeBloom = (id, nom, contenu) =>
+    sansChamp === nom
+      ? ""
+      : `<div><button type="button" class="select-root" data-testid="${id}-input" aria-expanded="false">
+           <span data-testid="${id}-input--value">Sélectionne</span></button>
+         <input class="select-proxy" name="${nom}" style="width:1px;height:1px">
+         <div class="options bloom" data-testid="${id}-content" hidden>${contenu}</div></div>`;
   return `<!doctype html><html><body>
   ${deconnecte ? '<a data-testid="header--login-button" href="/login">Se connecter</a>' : ""}
   ${captcha ? '<iframe src="/captcha" title="captcha"></iframe>' : ""}
@@ -48,21 +74,14 @@ function pageFormulaire({
     <input data-testid="title--input"${titreCourt ? ' oninput="this.value = this.value.slice(0, 5)"' : ""}><textarea data-testid="description--input"></textarea>
     ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
-    ${liste("size", ["W32", "M", "XS"])}
+    ${listesBloom ? listeBloom("category-size-single-grid", "size", grilleTailles) : liste("size", ["W32", "M", "XS"])}
     ${
       sansChamp === "condition"
         ? ""
-        : `<div><input data-testid="condition-select-dropdown-input" readonly value="">
-           <div class="options" data-testid="category-condition-single-list-content" hidden>${[
-             ["Neuf avec étiquette", "Article neuf, jamais porté."],
-             ["Très bon état", "Article très peu porté."],
-             ["Bon état", "Article porté, quelques signes d'usure."],
-           ]
-             .map(
-               ([titre, corps], i) => `<li><div role="radio" data-testid="condition-${i}">
-                 <div class="web_ui__Cell__title">${titre}</div><div class="web_ui__Cell__body">${corps}</div></div></li>`,
-             )
-             .join("")}</div></div>`
+        : listesBloom
+          ? listeBloom("category-condition-single-list", "condition", etats)
+          : `<div><input data-testid="condition-select-dropdown-input" readonly value="">
+           <div class="options" data-testid="category-condition-single-list-content" hidden>${etats}</div></div>`
     }
     ${liste("color", ["Bleu", "Noir"])}
     ${
@@ -75,6 +94,8 @@ function pageFormulaire({
       .map(
         (o, i) => `<div data-testid="${i + 1}-package-size--cell" role="button">
           <div data-testid="${i + 1}-package-size--cell--title">${o === "Moyen" ? "<span>Recommandé</span>" : ""}${o}</div>
+          <div data-testid="${i + 1}-package-size--cell--content">Convient pour un article…
+            <button type="button">Voir les détails des dimensions et indemnisations</button></div>
           <input type="radio" name="package_type_selector_${i + 1}"></div>`,
       )
       .join("")}
@@ -101,6 +122,23 @@ function pageFormulaire({
           ? (champ.value ? champ.value + ", " : "") + texte
           : texte;
         if (!champ.dataset.testid.startsWith("catalog")) ul.hidden = true;
+      }));
+    });
+    // Listes « bloom » (#239) : le bouton ouvre ou ferme la liste ; un choix remplit la valeur et ferme la liste.
+    // Option « ouvertureBasculee » (comportement supposé) : la liste s'ouvre à l'appui (pointerdown) et le « click »
+    // qui suit la referme ; un « click » seul l'ouvre.
+    document.querySelectorAll(".select-root").forEach((bouton) => {
+      const contenu = bouton.parentElement.querySelector(".bloom");
+      const basculer = (ouvrir) => {
+        document.querySelectorAll(".options").forEach((u) => (u.hidden = true));
+        contenu.hidden = !ouvrir;
+        bouton.setAttribute("aria-expanded", String(ouvrir));
+      };
+      if (${ouvertureBasculee}) bouton.addEventListener("pointerdown", () => basculer(true));
+      bouton.addEventListener("click", () => basculer(contenu.hidden));
+      contenu.querySelectorAll('button, [role="radio"]').forEach((o) => o.addEventListener("click", () => {
+        bouton.firstElementChild.textContent = (o.querySelector(".web_ui__Cell__title") ?? o).textContent;
+        basculer(false);
       }));
     });
     // Catégories : arbre (cases « button ») ou, dès qu'une recherche est tapée, résultats (cases « radio »).

@@ -270,6 +270,33 @@ test("taille absente de la liste de Vinted : erreur, aucun clic sur « Ajouter �
   assert.match(app.resultats[0].message, /« S » introuvable dans la liste « taille »/);
 });
 
+test("nouvelles listes de Vinted (#239) : taille et état choisis par leur bouton, pas par le champ caché", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(false), vinted: { listesBloom: true } });
+  assert.equal(app.resultats[0].resultat, "publie", app.resultats[0].message);
+  assert.equal(vinted.clics, 1);
+});
+
+test("liste qui se referme au « click » après s'être ouverte à l'appui : rouverte, valeur choisie (#239)", async () => {
+  const { app } = await lancer({
+    demande: DEMANDE(false),
+    vinted: { listesBloom: true, ouvertureBasculee: true },
+  });
+  assert.equal(app.resultats[0].resultat, "publie", app.resultats[0].message);
+});
+
+test("taille absente (#239) : choix proposés pris dans la liste, pas dans le colis ; relevé liste ouverte", async () => {
+  const demande = DEMANDE(false);
+  demande.article.taille = "S";
+  const { app, vinted, diagnostic: d } = await lancer({ demande, vinted: { listesBloom: true } });
+  assert.equal(vinted.clics, 0);
+  const message = app.resultats[0].message;
+  assert.match(message, /« S » introuvable dans la liste « taille »/);
+  assert.match(message, /Choix proposés : M, XS/);
+  assert.doesNotMatch(message, /dimensions et indemnisations/);
+  // Relevé pris AVANT de refermer la liste : son contenu y figure.
+  assert.ok(d.elements.some((e) => e.testid === "category-size-single-grid-content"));
+});
+
 // --- Tâches automatiques (#147) : actions en mode essai ---
 
 test("baisse en essai : annonce et « Modifier l'annonce » ouvertes et relevées, prix lu, rien n'est saisi", async () => {
