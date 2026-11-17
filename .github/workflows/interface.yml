@@ -1,0 +1,42 @@
+# Tests de l'interface dans Chromium (#243, ADR-0108) : quatre parcours sur l'application construite et un serveur de
+# test (base PGlite en mémoire, Gemini simulé, aucun appel vers l'extérieur). Lancés seulement quand l'interface, le
+# serveur ou les dépendances changent.
+name: Interface
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+      - "server/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/interface.yml"
+  push:
+    branches: [main]
+    paths:
+      - "client/**"
+      - "server/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/interface.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parcours:
+    name: Tests de l'interface (parcours dans Chromium)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Chromium de test
+        run: |
+          npx playwright-core install --with-deps chromium
+          echo "VH_CHROME_TEST=$(ls -d ~/.cache/ms-playwright/chromium-*/chrome-linux*/chrome | head -n 1)" >> "$GITHUB_ENV"
+      - run: npm run test:navigateur
