@@ -124,7 +124,7 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
             <span className="photos__legende">Photo terrain</span>
             <div className="photos__actions">
               {boutonsRotation(p.id, "photo terrain")}
-              <button type="button" onClick={() => retirer(p.id, p.type)} aria-label="Retirer la photo terrain">
+              <button type="button" onClick={() => void retirer(p.id, p.type)} aria-label="Retirer la photo terrain">
                 🗑
               </button>
             </div>
@@ -168,7 +168,11 @@ export function PhotosArticle({ article, onMiseAJour }: { article: Article; onMi
               >
                 →
               </button>
-              <button type="button" onClick={() => retirer(p.id, p.type)} aria-label={`Supprimer la photo ${i + 1}`}>
+              <button
+                type="button"
+                onClick={() => void retirer(p.id, p.type)}
+                aria-label={`Supprimer la photo ${i + 1}`}
+              >
                 🗑
               </button>
             </div>
