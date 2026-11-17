@@ -104,6 +104,13 @@ renvoyés + nouveau montant crédité). L'article passe **À récupérer** (lign
 conversation est connue). Une fois l'article récupéré : « Récupéré : à publier », « Récupéré : remettre en ligne »
 (prix affiché demandé) ou « Sortir du stock ».
 
+**Points relais** (Réglages → « Points relais ») : ajoutez vos points de dépôt et de retrait (Vinted Go, Mondial Relay,
+La Poste, Relais Colis) avec leurs horaires, un jour par ligne (« 9h-12h, 14h-19h » ; vide = fermé). Chaque point
+affiche **Ouvert / Fermé** d'après ces horaires, la prochaine ouverture, et les liens « Page officielle » (pour une
+fermeture exceptionnelle) et « Itinéraire ». Sur la fiche d'un article **À expédier** ou **Envoyé**, choisissez le
+« Point de dépôt du colis » ; sur un article **À récupérer**, le « Point de retrait du retour ». Un point qui ne sert
+plus s'archive (case « Archivé ») : il n'est plus proposé, les anciennes ventes le gardent.
+
 **Publication Vinted en erreur** : si l'extension Chrome échoue sur une vraie publication (pas en mode essai),
 l'article passe **Erreur** (badge rouge, ligne « Urgent » de l'écran **À faire**). Le message
 de l'échec est dans la section Vinted de la fiche. Vérifiez sur Vinted qu'aucune annonce n'a été créée, puis :

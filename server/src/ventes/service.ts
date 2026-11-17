@@ -229,6 +229,8 @@ export async function lireVente(base: Base, utilisateurId: string, venteId: stri
     dateEnvoi: v.dateEnvoi,
     dateFinalisation: v.dateFinalisation,
     annulee: v.annulee,
+    pointDepotId: v.pointDepotId,
+    pointRetraitId: v.pointRetraitId,
     articles: lignes.map((l) => {
       const d = details.get(l.id);
       const actif = !v.annulee && !l.retourne;

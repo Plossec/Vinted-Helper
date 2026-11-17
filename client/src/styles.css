@@ -2073,3 +2073,39 @@ h1[tabindex="-1"]:focus {
     scroll-behavior: auto !important;
   }
 }
+
+/* --- Points relais (#210) --- */
+.point-relais {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-1);
+}
+
+.point-relais__liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-4);
+}
+
+.badge--ouvert {
+  background: var(--ok);
+}
+
+.badge--ferme {
+  background: var(--erreur);
+}
+
+.horaires {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-carte);
+  padding: var(--e-3);
+  margin: 0;
+}
+
+.horaires legend {
+  font-weight: 600;
+  padding: 0 var(--e-1);
+}

@@ -155,6 +155,13 @@
       "when": 1792579292236,
       "tag": "0021_taches_reglages_par_tache_journal",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794950969936,
+      "tag": "0022_points_relais",
+      "breakpoints": true
     }
   ]
 }
