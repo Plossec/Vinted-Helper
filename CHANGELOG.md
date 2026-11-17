@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Documentation : `.env.example` indiquait 8 caractères minimum pour le mot de passe au lieu de 12 ; le README ne
+  promet plus « found 0 vulnerabilities » après `npm ci` (#245).
+
 ## [1.25.1] — 22/10/2026
 
 ### Corrigé
