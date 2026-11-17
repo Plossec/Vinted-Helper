@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.27.2] — 17/11/2026
+
 ### Modifié
 - Les types des réponses de l'API sont écrits une seule fois, dans le serveur (`server/src/api/types.ts`), et
   l'interface les réutilise : un champ renommé ou retiré d'un côté est désormais une erreur de compilation, plus une
