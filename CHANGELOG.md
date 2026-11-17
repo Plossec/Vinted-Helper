@@ -5,9 +5,22 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.25.3] — 17/11/2026
+
 ### Corrigé
 - Documentation : `.env.example` indiquait 8 caractères minimum pour le mot de passe au lieu de 12 ; le README ne
   promet plus « found 0 vulnerabilities » après `npm ci` (#245).
+
+## [1.25.2] — 17/11/2026
+
+### Corrigé
+- Alertes de sécurité des dépendances corrigées (`fastify`, `@fastify/static`, `fast-uri`, `glob`, `minimatch`) : elles
+  bloquaient toutes les mises en production depuis le 09/11/2026 (#242).
+
+### Modifié
+- Seules les alertes de sécurité **élevées ou critiques** bloquent une mise en production ; les autres sont contrôlées
+  chaque lundi et ouvrent une issue. `npm run verifier` fait aussi ce contrôle (sans réseau : simple avertissement)
+  (#242, ADR-0107).
 
 ## [1.25.1] — 22/10/2026
 
