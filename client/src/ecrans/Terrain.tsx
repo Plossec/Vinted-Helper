@@ -261,7 +261,7 @@ function SortieActive({
   useEffect(() => {
     let actif = true;
     const charger = () =>
-      api
+      void api
         .get<Sortie>(`/api/sorties/${sortie.id}`)
         .then((s) => actif && setServeur(s))
         .catch(() => undefined);

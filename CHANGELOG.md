@@ -12,6 +12,18 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   jusqu'à la finalisation et tableau de bord (`npm run test:navigateur`, vérification « Interface » sur GitHub)
   (#243, ADR-0108).
 
+## [1.25.4] — 17/11/2026
+
+### Modifié
+- Qualité du code : le lint signale désormais une promesse non attendue (`await` oublié), qui laissait passer une erreur
+  en silence ; les 9 cas trouvés dans l'interface sont corrigés, sans changement visible (#247).
+
+## [1.25.3] — 17/11/2026
+
+### Corrigé
+- Documentation : `.env.example` indiquait 8 caractères minimum pour le mot de passe au lieu de 12 ; le README ne
+  promet plus « found 0 vulnerabilities » après `npm ci` (#245).
+
 ## [1.25.2] — 17/11/2026
 
 ### Corrigé
