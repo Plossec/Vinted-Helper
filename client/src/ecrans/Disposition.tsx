@@ -59,14 +59,15 @@ export function Disposition() {
           if (e instanceof ErreurApi && e.statut === 401) void naviguer("/connexion", { replace: true });
           else setEtat("hors-ligne");
         });
-    void verifier();
+    const surEvenement = () => void verifier();
+    surEvenement();
     // Retour du réseau : on revérifie (le bandeau « Hors ligne » disparaît).
-    window.addEventListener("online", verifier);
-    window.addEventListener("file-envoyee", verifier);
+    window.addEventListener("online", surEvenement);
+    window.addEventListener("file-envoyee", surEvenement);
     return () => {
       actif = false;
-      window.removeEventListener("online", verifier);
-      window.removeEventListener("file-envoyee", verifier);
+      window.removeEventListener("online", surEvenement);
+      window.removeEventListener("file-envoyee", surEvenement);
     };
   }, [naviguer]);
 

@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.25.4] — 17/11/2026
+
+### Modifié
+- Qualité du code : le lint signale désormais une promesse non attendue (`await` oublié), qui laissait passer une erreur
+  en silence ; les 9 cas trouvés dans l'interface sont corrigés, sans changement visible (#247).
+
 ## [1.25.3] — 17/11/2026
 
 ### Corrigé
