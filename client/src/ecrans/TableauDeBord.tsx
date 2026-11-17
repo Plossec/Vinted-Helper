@@ -4,56 +4,15 @@
 // Tous les montants sont calculés par le serveur.
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api } from "../api.js";
+import { api, type PostesTresorerie, type Rentabilite, type Tableau } from "../api.js";
 import { GraphiqueMensuel } from "../composants/GraphiqueMensuel.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { Montant } from "../composants/Montant.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
-interface Periode {
-  chiffreAffaires: number;
-  beneficeRealise: number;
-  tresorerie: number;
-  fraisGeneraux: number;
-}
-
-interface Rentabilite {
-  cle: string;
-  libelle?: string;
-  date?: string | null;
-  realise: number;
-  provisoire: number;
-  nombreArticles: number;
-  restants: number;
-}
-
-interface Analyse {
-  cle: string;
-  libelle: string;
-  nombreVendus: number;
-  margeMoyenne: number;
-  tauxMarge: number | null;
-  delaiMiseEnLigneVente: number | null;
-  delaiAchatVente: number | null;
-}
-
-interface EnCours {
-  chiffreAffaires: number;
-  benefice: number;
-}
-
 /** Mesure théorique correspondant à une tuile (CA, bénéfice) ; la trésorerie a son calcul détaillé. */
 const MESURE_EN_COURS = { chiffreAffaires: "chiffreAffaires", beneficeRealise: "benefice" } as const;
-
-interface PostesTresorerie {
-  encaisse: number;
-  achats: number;
-  essence: number;
-  emballages: number;
-  boosts: number;
-  fraisDivers: number;
-}
 
 const POSTES_TRESORERIE: [keyof PostesTresorerie, string][] = [
   ["encaisse", "+ Encaissé (crédits Vinted, reventes)"],
@@ -63,32 +22,6 @@ const POSTES_TRESORERIE: [keyof PostesTresorerie, string][] = [
   ["boosts", "− Boosts"],
   ["fraisDivers", "− Frais divers"],
 ];
-
-interface Tableau {
-  annee: number;
-  /** Années d'activité, de la plus récente à la plus ancienne (issue #88). */
-  annees: number[];
-  mois: string;
-  tresorerieDuMois: PostesTresorerie;
-  duMois: Periode;
-  deLAnnee: Periode;
-  /** Ventes pas encore finalisées (À expédier, Envoyé), à la date de vente (issue #85). */
-  enCours: { duMois: EnCours };
-  /** Réalisé + en cours, calculé par le serveur. */
-  theorique: { duMois: EnCours };
-  serie: (Periode & {
-    mois: string;
-    theorique: { chiffreAffaires: number; beneficeRealise: number; tresorerie: number };
-  })[];
-  stock: {
-    coutTotal: number;
-    prixAffiche: number;
-    detail: Partial<Record<Statut, { nombre: number; coutTotal: number; prixAffiche: number }>>;
-  };
-  rentabiliteSorties: { classement: Rentabilite[]; maison: Rentabilite | null };
-  rentabiliteLieux: { classement: Rentabilite[]; maison: Rentabilite | null };
-  analyse: { categories: Analyse[]; marques: Analyse[]; gammes: Analyse[] };
-}
 
 const MOIS = [
   "janvier",

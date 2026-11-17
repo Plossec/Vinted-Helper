@@ -44,6 +44,8 @@ import {
   retourVente,
   sortirDuStock,
 } from "./service.js";
+import type { FraisDivers, ReglagesUtilisateur } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 const MOTIFS = ["donne", "jete", "revendu", "garde", "perdu", "a_vendre"] as const;
 const CANAUX = ["vide_grenier", "leboncoin", "main_propre", "autre"] as const;
@@ -269,7 +271,9 @@ export function routesVentes(
     return { ok: true };
   });
 
-  app.get("/api/frais", async (requete) => listerFrais(base, utilisateurDe(requete).id));
+  app.get("/api/frais", async (requete) =>
+    conforme<FraisDivers[]>()(await listerFrais(base, utilisateurDe(requete).id)),
+  );
 
   app.post("/api/frais", async (requete, reponse) => {
     const id = await ajouterFrais(base, utilisateurDe(requete).id, lireFrais(requete.body));
@@ -286,7 +290,9 @@ export function routesVentes(
     return { ok: true };
   });
 
-  app.get("/api/reglages", async (requete) => lireReglages(base, utilisateurDe(requete).id));
+  app.get("/api/reglages", async (requete) =>
+    conforme<ReglagesUtilisateur>()(await lireReglages(base, utilisateurDe(requete).id)),
+  );
 
   app.put("/api/reglages", async (requete) => {
     const c = objet(requete.body);
@@ -315,6 +321,6 @@ export function routesVentes(
       throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
     await modifierReglages(base, utilisateurId, modif);
     // Réponse relue en base, jamais construite à partir de la requête (alerte CodeQL, #147).
-    return lireReglages(base, utilisateurId);
+    return conforme<ReglagesUtilisateur>()(await lireReglages(base, utilisateurId));
   });
 }

@@ -1,13 +1,8 @@
 // Horaires d'un point relais (#210) : saisie d'une journée en texte (« 9h-12h, 14h-19h »), affichage, et état
 // « ouvert / fermé » à l'heure de Paris.
+import type { Horaires, Plage } from "../api.js";
 
-export interface Plage {
-  debut: string;
-  fin: string;
-}
-
-/** 7 jours, du lundi au dimanche. */
-export type Horaires = Plage[][];
+export type { Horaires, Plage };
 
 export const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] as const;
 

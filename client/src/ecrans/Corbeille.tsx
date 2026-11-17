@@ -1,19 +1,10 @@
 // Corbeille (§5.11) : articles supprimés, restaurables 30 jours, puis supprimés définitivement.
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api, urlVignette } from "../api.js";
+import { api, type ArticleSupprime, urlVignette } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { formatReference } from "../statuts.js";
 import { confirmer } from "../composants/Dialogue.js";
-
-interface ArticleSupprime {
-  id: string;
-  reference: number;
-  nom: string | null;
-  supprimeLe: string;
-  suppressionLe: string;
-  vignette: string | null;
-}
 
 export function Corbeille() {
   const [articles, setArticles] = useState<ArticleSupprime[] | null>(null);

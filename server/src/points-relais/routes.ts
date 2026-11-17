@@ -19,6 +19,8 @@ import {
   listerPointsRelais,
   modifierPointRelais,
 } from "./service.js";
+import type { ListePointsRelais } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 /** Page officielle du point : adresse web en https. */
 function lienFacultatif(valeur: unknown): string | null {
@@ -57,10 +59,12 @@ function choixPoint(valeur: unknown, champ: string): string | null | undefined {
 }
 
 export function routesPointsRelais(app: FastifyInstance, { base, utilisateurDe }: ContexteRoutes) {
-  app.get("/api/points-relais", async (requete) => ({
-    transporteurs: TRANSPORTEURS,
-    points: await listerPointsRelais(base, utilisateurDe(requete).id),
-  }));
+  app.get("/api/points-relais", async (requete) =>
+    conforme<ListePointsRelais>()({
+      transporteurs: TRANSPORTEURS,
+      points: await listerPointsRelais(base, utilisateurDe(requete).id),
+    }),
+  );
 
   app.post("/api/points-relais", async (requete, reponse) =>
     reponse.code(201).send(await ajouterPointRelais(base, utilisateurDe(requete).id, donnees(requete.body))),

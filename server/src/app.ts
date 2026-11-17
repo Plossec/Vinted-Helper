@@ -23,6 +23,7 @@ import { routesReferentiels } from "./referentiels/routes.js";
 import { routesSorties } from "./sorties/routes.js";
 import { routesTableau } from "./tableau/routes.js";
 import { routesVentes } from "./ventes/routes.js";
+import type { Sante } from "./api/types.js";
 
 export interface DependancesApp {
   version: string;
@@ -42,11 +43,8 @@ export interface DependancesApp {
   surRoute?: (route: RouteOptions) => void;
 }
 
-export interface ReponseSante {
-  application: "Vinted Helper";
-  version: string;
-  base: "connectée" | "indisponible";
-}
+/** Réponse de GET /api/sante : type partagé avec l'interface (#244). */
+export type ReponseSante = Sante;
 
 /** Ce que reçoivent les modules de routes. */
 export interface ContexteRoutes {

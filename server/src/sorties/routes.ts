@@ -24,6 +24,8 @@ import {
   modifierEssence,
   modifierSortie,
 } from "./service.js";
+import type { ResumeSortie, Sortie } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 function lireDonneesSortie(corps: unknown): DonneesSortie {
   const c = objet(corps);
@@ -35,7 +37,9 @@ function lireDonneesSortie(corps: unknown): DonneesSortie {
 }
 
 export function routesSorties(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
-  app.get("/api/sorties", async (requete) => listerSorties(base, utilisateurDe(requete).id));
+  app.get("/api/sorties", async (requete) =>
+    conforme<ResumeSortie[]>()(await listerSorties(base, utilisateurDe(requete).id)),
+  );
 
   app.post("/api/sorties", async (requete, reponse) => {
     const utilisateurId = utilisateurDe(requete).id;
@@ -51,7 +55,9 @@ export function routesSorties(app: FastifyInstance, { base, maintenant, utilisat
     return reponse.code(201).send(await lireSortie(base, utilisateurId, id));
   });
 
-  app.get("/api/sorties/:id", async (requete) => lireSortie(base, utilisateurDe(requete).id, idDe(requete.params)));
+  app.get("/api/sorties/:id", async (requete) =>
+    conforme<Sortie>()(await lireSortie(base, utilisateurDe(requete).id, idDe(requete.params))),
+  );
 
   app.put("/api/sorties/:id", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;

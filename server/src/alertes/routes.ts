@@ -12,6 +12,8 @@ import { erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 import { nombresCommandes } from "../taches/finalisation.js";
 import { annulerActionsPerimees, nombreAValider } from "../taches/service.js";
+import type { AlertesServeur } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 const SURVEILLES = [
   "brouillon",
@@ -117,7 +119,7 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
     const conversations = new Map(articles.map((a) => [a.id, a.urlConversation]));
     // Tâches automatisées en mode manuel (#147) : actions prévues à valider.
     await annulerActionsPerimees(base, utilisateurId, maintenant());
-    return {
+    return conforme<AlertesServeur>()({
       ...alertes,
       aValider: await nombreAValider(base, utilisateurId),
       /** Tâche « Vérification vente finalisée » (#148) : commandes à valider, à rattacher, montants corrigés. */
@@ -128,7 +130,7 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
         venteId: venteDe.get(a.id) ?? null,
       })),
       aRecuperer: alertes.aRecuperer.map((a) => ({ ...a, urlConversation: conversations.get(a.id) ?? null })),
-    };
+    });
   });
   // « Vu » d'une alerte « Pour info » (#191) : masquée tant que sa date de départ ne change pas.
   app.post("/api/alertes/vu", async (requete) => {

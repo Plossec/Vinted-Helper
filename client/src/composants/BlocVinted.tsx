@@ -3,16 +3,10 @@
 // L'application n'interroge jamais Vinted.
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
-import { api, type Article } from "../api.js";
+import { api, type Article, type ReponseLien } from "../api.js";
 import { demanderPublication, lireModeEssai } from "../publication.js";
 import { useSignalerModification } from "../outils/modifications.js";
 import { NouvelOnglet } from "./NouvelOnglet.js";
-
-interface ReponseLien {
-  article: Article;
-  passeEnLigne: boolean;
-  prixManquant: boolean;
-}
 
 export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {
   const [lien, setLien] = useState(article.urlVinted ?? "");

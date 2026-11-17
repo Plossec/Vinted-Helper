@@ -15,6 +15,8 @@ import {
   nombreEnAttente,
   type ResultatProgramme,
 } from "./service.js";
+import type { ReponsePublication, SuiviPublication } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 export function routesPublication(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   // --- Interface ---
@@ -22,10 +24,14 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
     const c = objet(requete.body);
     if (!Array.isArray(c.articleIds)) throw erreurSaisie("Articles : liste attendue.");
     const ids = c.articleIds.map((v: unknown) => uuidObligatoire(v, "Article"));
-    return demanderPublication(base, utilisateurDe(requete).id, ids, c.essai !== false, maintenant());
+    return conforme<ReponsePublication>()(
+      await demanderPublication(base, utilisateurDe(requete).id, ids, c.essai !== false, maintenant()),
+    );
   });
 
-  app.get("/api/publications", async (requete) => listerPublications(base, utilisateurDe(requete).id));
+  app.get("/api/publications", async (requete) =>
+    conforme<SuiviPublication>()(await listerPublications(base, utilisateurDe(requete).id)),
+  );
 
   app.delete("/api/publications/:id", async (requete) => {
     await annulerPublication(base, utilisateurDe(requete).id, idDe(requete.params), maintenant());

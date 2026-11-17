@@ -12,6 +12,8 @@ import {
   renommer,
   type TypeReferentiel,
 } from "./service.js";
+import type { Referentiels } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 function typeDe(params: unknown): TypeReferentiel {
   const type = String(objet(params).type);
@@ -20,7 +22,9 @@ function typeDe(params: unknown): TypeReferentiel {
 }
 
 export function routesReferentiels(app: FastifyInstance, { base, utilisateurDe }: ContexteRoutes) {
-  app.get("/api/referentiels", async (requete) => lireReferentiels(base, utilisateurDe(requete).id));
+  app.get("/api/referentiels", async (requete) =>
+    conforme<Referentiels>()(await lireReferentiels(base, utilisateurDe(requete).id)),
+  );
 
   app.post("/api/referentiels/:type", async (requete, reponse) => {
     const type = String(objet(requete.params).type);

@@ -1,7 +1,7 @@
 // Publication Vinted (décisions du 06 et du 07/10/2026) : mode essai, état de l'extension Chrome, file, jeton.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api, type EtatPublication, type Publication } from "../api.js";
+import { api, type EtatPublication, type SuiviPublication as Suivi } from "../api.js";
 import { formatDateHeure } from "../outils/dates.js";
 import { ecrireModeEssai, lireModeEssai } from "../publication.js";
 import { formatReference } from "../statuts.js";
@@ -17,12 +17,6 @@ const LIBELLES: Record<EtatPublication, string> = {
   erreur: "Erreur",
   annule: "Annulé",
 };
-
-interface Suivi {
-  publications: Publication[];
-  programmeVuLe: string | null;
-  jetonCree: boolean;
-}
 
 /** L'extension interroge l'application toutes les 5 minutes et attend 10 minutes entre deux publications :
  * au-delà de 16 minutes sans contact, elle est considérée inactive. */

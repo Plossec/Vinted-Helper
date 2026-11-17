@@ -2,17 +2,11 @@
 // (mode manuel), à rattacher à un article Envoyé, et montants crédités corrigés par celui de Vinted.
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api, type CommandeVinted, type ResumeArticle } from "../api.js";
+import { api, type CommandeVinted, type CommandesVintedListe as Commandes, type ResumeArticle } from "../api.js";
 import { formatDate } from "../outils/dates.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
 import { NouvelOnglet } from "./NouvelOnglet.js";
-
-interface Commandes {
-  aValider: CommandeVinted[];
-  aRattacher: CommandeVinted[];
-  montantsCorriges: CommandeVinted[];
-}
 
 /** « #0012 Jean, #0013 Pull » : articles du colis rattaché. */
 function articlesDuColis(c: CommandeVinted) {
