@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- **Points relais** (Réglages → « Points relais ») : vos points Vinted Go, Mondial Relay, La Poste et Relais Colis avec
+  leurs horaires, l'état **ouvert / fermé** et la prochaine ouverture, les liens vers la page officielle et l'itinéraire.
+  Sur la fiche d'un article vendu, choix du **point de dépôt** du colis ou du **point de retrait** d'un retour
+  (#210, ADR-0109).
+
 ## [1.26.1] — 17/11/2026
 
 ### Corrigé

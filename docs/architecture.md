@@ -61,7 +61,7 @@ flowchart TB
   end
 
   subgraph serveur["server/ — Fastify + Drizzle (TypeScript strict)"]
-    routes["Routes par sujet<br/>articles, achats, sorties, ventes, frais,<br/>photos, ia, publication, alertes,<br/>taches, corbeille, referentiels, compte, import"]
+    routes["Routes par sujet<br/>articles, achats, sorties, ventes, frais,<br/>photos, ia, publication, alertes,<br/>taches, corbeille, referentiels, points-relais,<br/>compte, import"]
     metier["metier/<br/>statuts, alertes, complétude, tâches"]
     calculs["calculs/<br/>seul module d'argent :<br/>répartitions, coûts, bénéfice, indicateurs, baisse"]
     catalogue["catalogue/<br/>catégories, marques, états, couleurs Vinted"]
@@ -111,6 +111,7 @@ erDiagram
   vente ||--o{ commande_vinted : "finalisée par"
   utilisateur ||--o{ lecture_commandes : "journal des lectures"
   utilisateur ||--o{ frais_general : paie
+  point_relais ||--o{ vente : "dépôt / retrait"
 ```
 
 | Table | Rôle |
@@ -121,6 +122,7 @@ erDiagram
 | `photo`, `article_photo` | Photos (fichiers dans `data/photos`) et leur ordre sur l'article |
 | `historique_statut`, `historique_prix`, `boost` | Suivi dans le temps |
 | `vente`, `vente_article` | Une vente (simple ou groupée), retours compris |
+| `point_relais` | Points relais saisis par l'utilisateur (#210) : horaires, page officielle ; point de dépôt et de retrait d'une vente |
 | `frais_general` | Frais divers hors articles |
 | `publication_vinted` | File d'attente de l'extension et résultat de chaque publication (échec d'une vraie publication → article au statut Erreur) |
 | `signalement_vu` | Alertes « Pour info » de l'écran « À faire » marquées « Vu » (#191), avec leur date de départ |

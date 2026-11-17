@@ -215,6 +215,10 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **Emballage** : 0,08 € par colis par défaut (modifiable dans la vente et dans les Réglages).
 - Dates d'envoi et de finalisation saisies au passage aux statuts Envoyé et Finalisé (appliquées à tout le colis).
 - **Retour partiel** : sélection des articles renvoyés + saisie du **nouveau montant réellement crédité** pour le colis.
+- **Points relais** (ADR-0109) : liste saisie à la main (Vinted Go, Mondial Relay, La Poste / Colissimo, Relais Colis /
+  Chronopost : nom, adresse, numéro, page officielle, horaires), avec l'état « ouvert / fermé » d'après les horaires ;
+  point archivé plutôt que supprimé. Sur la fiche, **point de dépôt** du colis (À expédier, Envoyé) et **point de
+  retrait** d'un retour (À récupérer), valables pour tout le colis. Lecture du statut par l'extension : à venir.
 
 ### 5.7 Sortie du stock
 - Motif obligatoire : **Donné, Jeté, Revendu hors Vinted, Gardé pour moi, Perdu, À vendre hors Vinted**.
@@ -376,7 +380,8 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 | **HistoriqueStatut** | article, de, vers, date |
 | **HistoriquePrix** | article, prix, date |
 | **Boost** | article, montant, date |
-| **Vente** (= colis) | montant_credite, emballage, date_vente, date_envoi, date_finalisation, annulee |
+| **Vente** (= colis) | montant_credite, emballage, date_vente, date_envoi, date_finalisation, annulee, point_depot, point_retrait |
+| **PointRelais** | transporteur, nom, adresse, numero, url (page officielle), horaires (7 jours, plages HH:MM), notes, archive |
 | **VenteArticle** | vente, article, prix_affiche_au_moment, retourne (oui/non) |
 | **FraisGeneral** | date, montant, libellé *(frais divers saisis à la main via l'écran §5.12 ; l'essence des sorties vides est calculée, pas stockée ici)* |
 | **Reglages** | emballage_defaut, delai_brouillon, delai_dormant, prompt_annonce, prompt_etiquette, format_colis_defaut, jeton de l'extension (empreinte), réglages des tâches automatisées (plage horaire, mode essai ; par tâche : activée, mode, fréquence, pauses, plafonds) |
@@ -451,7 +456,8 @@ Chaque lot est testable avant de passer au suivant.
 - Aucune possibilité d'**import** de données dans l'application. Seule exception : l'import unique, par une commande du
   serveur, du tableur « compte 2026 - Vinted » de l'utilisateur (ADR-0023).
 - Pas d'**export** de données.
-- Pas de **mode d'envoi**.
+- Pas de **mode d'envoi** (choix du transporteur, bordereau, suivi du colis). Seule exception : le point relais de
+  dépôt ou de retrait d'une vente (ADR-0109).
 - Pas de **pseudo acheteur**.
 - Pas d'**alerte seuil fiscal** (DAC7).
 - Pas de **suggestion de prix** basée sur l'historique.
