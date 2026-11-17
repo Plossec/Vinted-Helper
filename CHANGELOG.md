@@ -5,13 +5,20 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [1.25.5] — 17/11/2026
+## [1.26.1] — 17/11/2026
 
 ### Corrigé
 - Extension 1.14.2 : publication bloquée sur « Taille » (et bientôt « État ») depuis le nouveau formulaire de Vinted ;
   la liste est ouverte par son bouton et non plus par un champ caché, une liste refermée aussitôt est rouverte, et la
   valeur choisie est bien relue au contrôle avant envoi. Les « choix proposés » d'une erreur ne reprennent plus le
   bouton « Voir les détails des dimensions » du colis, et le relevé est pris liste encore ouverte (#239).
+
+## [1.26.0] — 17/11/2026
+
+### Ajouté
+- Tests automatiques de l'interface dans un navigateur : saisie terrain, fiche jusqu'à « À publier », vente groupée
+  jusqu'à la finalisation et tableau de bord (`npm run test:navigateur`, vérification « Interface » sur GitHub)
+  (#243, ADR-0108).
 
 ## [1.25.4] — 17/11/2026
 

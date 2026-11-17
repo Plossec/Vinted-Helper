@@ -1,6 +1,6 @@
 {
   "name": "vinted-helper",
-  "version": "1.25.5",
+  "version": "1.26.1",
   "private": true,
   "description": "Aide à la gestion des achats et ventes Vinted",
   "type": "module",
@@ -17,6 +17,7 @@
     "build": "npm run build -w client && npm run build -w server",
     "test": "npm test --workspaces --if-present",
     "test:couverture": "npm run test:couverture --workspaces --if-present",
+    "test:navigateur": "npm run build -w client && npm run test:navigateur -w server",
     "verifier": "node scripts/verifier.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
@@ -35,6 +36,7 @@
     "eslint-plugin-jsx-a11y-x": "^0.2.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
+    "playwright-core": "^1.65.1",
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1"

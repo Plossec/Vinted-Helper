@@ -1,7 +1,7 @@
 # ADR-0062 — Tests : couverture, base de test plus rapide
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté, modifié par [ADR-0108](0108-tests-de-l-interface-dans-chromium.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 14/10/2026 (#203)
 - **Issue** : #130
 - **Thème** : Méthode

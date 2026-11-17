@@ -28,6 +28,7 @@ utilisateur, données prêtes pour plusieurs. PC Windows + Docker Desktop en loc
 | **Tout vérifier (job « Vérifier » de la CI)** | `npm run verifier` (détail des étapes réussies : `VERIFIER_DETAIL=1`) |
 | Construire client + serveur | `npm run build` |
 | Tests / calculs seuls / couverture | `npm test` / `npm test -w server -- calculs` / `npm run test:couverture` |
+| Parcours de l'interface dans Chromium (check « Interface » de la CI) | `npm run test:navigateur` (une fois avant : `npx playwright-core install chromium`) |
 | Types / lint / formatage | `npm run typecheck` / `npm run lint` / `npm run format` (`format:check` pour vérifier) |
 | Sauvegarder la base (pg_dump) | `npm run db:sauvegarde` (automatique chaque jour : service `sauvegarde`, `sauvegardes/auto/`) |
 | Générer / appliquer une migration | `npx drizzle-kit generate --name <nom>` dans `server/` / `npm run db:migrate` (aussi au démarrage) |
