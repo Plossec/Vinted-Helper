@@ -57,7 +57,7 @@ async function lire() {
     etat = {},
     vinted = VINTED_DEFAUT,
     delaiEtape = DELAI_ETAPE_MS,
-  } = await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtape"]);
+  } = /** @type {StockageExtension} */ (await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtape"]));
   return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, delaiEtape };
 }
 
@@ -100,6 +100,7 @@ async function mettreEnPause(raison) {
 
 // --- Application Vinted Helper (jeton « Bearer », aucune requête vers Vinted ici) ---
 
+/** @param {ConfigExtension} config */
 function creerApi({ adresse, jeton }) {
   const appeler = async (chemin, options = {}) => {
     const reponse = await fetch(`${adresse}${chemin}`, {
@@ -176,7 +177,11 @@ async function ouvrirOnglet(url) {
   throw new Error("La page Vinted ne se charge pas.");
 }
 
-/** Message au script de contenu (réessayé le temps qu'il se charge). Null s'il ne répond pas. */
+/**
+ * Message au script de contenu (réessayé le temps qu'il se charge). Null s'il ne répond pas.
+ * @param {number} onglet
+ * @param {MessageContenu} message
+ */
 async function envoyer(onglet, message) {
   for (let essai = 0; essai < 20; essai++) {
     try {
@@ -209,7 +214,11 @@ async function pauseEntreEtapes(onglet) {
   await patienter(onglet, delaiEtape);
 }
 
-/** Une étape du remplissage, demandée au script de contenu (qui vérifie d'abord la page). */
+/**
+ * Une étape du remplissage, demandée au script de contenu (qui vérifie d'abord la page).
+ * @param {number} onglet
+ * @param {Omit<Extract<MessageContenu, { type: "etape" }>, "type">} message
+ */
 async function etape(onglet, message) {
   const r = await envoyer(onglet, { type: "etape", ...message });
   if (!r) throw new Arret(RAISONS.inconnu);
@@ -223,6 +232,11 @@ async function etape(onglet, message) {
   }
 }
 
+/**
+ * @param {number} onglet
+ * @param {ReturnType<typeof creerApi>} api
+ * @param {{ id?: string; article: AnnonceVinted; essai: boolean }} demande
+ */
 async function publier(onglet, api, demande) {
   const { article } = demande;
   const photos = await api.photos(article.photos);
@@ -650,7 +664,11 @@ chrome.alarms.onAlarm.addListener((alarme) => {
   if (alarme.name === "cycle") void cycle();
 });
 
-/** Actions de la fenêtre de l'extension (popup) et de la page d'options. */
+/**
+ * Actions de la fenêtre de l'extension (popup) et de la page d'options.
+ * @param {MessagePage} message
+ * @returns {Promise<ReponsePage>}
+ */
 async function action(message) {
   switch (message.type) {
     case "reprendre":

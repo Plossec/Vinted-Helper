@@ -1,5 +1,7 @@
 // Réglages : adresse de l'application et jeton. L'accès à l'adresse est demandé à Chrome au moment de l'enregistrement.
 const $ = (id) => document.getElementById(id);
+/** Champ de saisie du formulaire. */
+const saisie = (/** @type {string} */ id) => /** @type {HTMLInputElement} */ ($(id));
 
 function message(texte, ok) {
   $("message").textContent = texte;
@@ -10,7 +12,7 @@ $("formulaire").addEventListener("submit", async (e) => {
   e.preventDefault();
   let adresse;
   try {
-    adresse = new URL($("adresse").value.trim()).origin;
+    adresse = new URL(saisie("adresse").value.trim()).origin;
   } catch {
     return message("Adresse invalide (exemple : https://vps-1234abcd.vps.ovh.net).", false);
   }
@@ -19,21 +21,21 @@ $("formulaire").addEventListener("submit", async (e) => {
   if (protocol !== "https:" && !(protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1"))) {
     return message("L'adresse doit commencer par https:// (http:// accepté seulement pour localhost).", false);
   }
-  const jeton = $("jeton").value.trim();
+  const jeton = saisie("jeton").value.trim();
   if (!jeton) return message("Jeton manquant.", false);
   // Demande faite tout de suite (geste de l'utilisateur) : Chrome affiche sa propre fenêtre d'autorisation.
   const accorde = await chrome.permissions.request({ origins: [`${adresse}/*`] });
   if (!accorde) return message("Chrome n'a pas autorisé l'accès à l'application.", false);
   await chrome.storage.local.set({ config: { adresse, jeton } });
-  $("adresse").value = adresse;
+  saisie("adresse").value = adresse;
   message("Enregistré. Test de la connexion…", true);
   const r = await chrome.runtime.sendMessage({ type: "tester" });
   message(r.message, r.ok);
 });
 
-void chrome.storage.local.get("config").then(({ config }) => {
+void chrome.storage.local.get("config").then((/** @type {StockageExtension} */ { config }) => {
   if (config) {
-    $("adresse").value = config.adresse;
-    $("jeton").value = config.jeton;
+    saisie("adresse").value = config.adresse;
+    saisie("jeton").value = config.jeton;
   }
 });

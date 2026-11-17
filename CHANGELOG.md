@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.27.2] — 17/11/2026
+
+### Modifié
+- Extension 1.14.3 : son JavaScript est désormais vérifié par un contrôle de types (fautes de noms entre ses parties
+  et l'application repérées avant la mise à jour), sans changement de fonctionnement (#248, ADR-0111).
+
 ## [1.27.1] — 17/11/2026
 
 ### Modifié

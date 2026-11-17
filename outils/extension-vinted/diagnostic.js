@@ -1,7 +1,7 @@
 // Page du diagnostic (issue #56) : résumé et téléchargement du relevé du formulaire Vinted.
 const $ = (id) => document.getElementById(id);
 
-void chrome.storage.local.get("diagnostic").then(({ diagnostic }) => {
+void chrome.storage.local.get("diagnostic").then((/** @type {StockageExtension} */ { diagnostic }) => {
   if (!diagnostic) {
     $("resume").textContent = "Aucun diagnostic : cliquez « Diagnostic » dans la fenêtre de l'extension.";
     return;

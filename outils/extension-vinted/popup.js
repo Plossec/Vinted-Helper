@@ -4,7 +4,9 @@ const heure = (iso) =>
   new Date(iso).toLocaleString("fr-FR", { timeZone: "Europe/Paris", dateStyle: "short", timeStyle: "short" });
 
 async function afficher() {
-  const { config = null, etat = {} } = await chrome.storage.local.get(["config", "etat"]);
+  const { config = null, etat = {} } = /** @type {StockageExtension} */ (
+    await chrome.storage.local.get(["config", "etat"])
+  );
   const p = $("etat");
   if (!config) {
     p.className = "erreur";

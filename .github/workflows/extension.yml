@@ -29,6 +29,8 @@ jobs:
           cache-dependency-path: outils/extension-vinted/package-lock.json
       - run: npm ci
       - run: npm audit --omit=dev
+      # Contrôle de types du JavaScript annoté en JSDoc (#248, ADR-0111).
+      - run: npm run typecheck
       - name: Chromium de test
         run: |
           npx playwright-core install --with-deps chromium
