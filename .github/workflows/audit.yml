@@ -1,0 +1,56 @@
+# Audit complet des dépendances de production, chaque lundi (#242, ADR-0107). Le check « Vérifier » ne bloque que sur
+# les alertes élevées ou critiques ; ici, toute alerte (faible, modérée…) ouvre une issue « Alertes de sécurité des
+# dépendances », sauf si une issue de ce titre est déjà ouverte (elle reçoit alors un commentaire). Rien n'est corrigé
+# automatiquement : la correction passe par une PR (`npm audit fix`, jamais `--force`).
+name: Audit des dépendances
+
+on:
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit complet (alertes faibles et modérées comprises)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write # seulement ce job : ouvrir ou compléter l'issue des alertes
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Audit et issue si alerte
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITRE: Alertes de sécurité des dépendances
+        run: |
+          if npm audit --omit=dev > rapport.txt 2>&1; then
+            echo "Aucune alerte."
+            exit 0
+          fi
+          if ! grep -q "vulnerabilit" rapport.txt; then
+            cat rapport.txt
+            echo "::error::Audit impossible (registre npm injoignable ?)."
+            exit 1
+          fi
+          {
+            echo "Audit du $(date -u +%d/%m/%Y) : \`npm audit --omit=dev\` signale des alertes (#242, ADR-0107)."
+            echo "Correction : une PR avec \`npm audit fix\` (jamais \`--force\`)."
+            echo
+            echo '```'
+            tail -n 80 rapport.txt
+            echo '```'
+          } > corps.md
+          existante="$(gh issue list --state open --search "\"$TITRE\" in:title" --json number,title \
+            --jq "map(select(.title == env.TITRE)) | .[0].number // empty")"
+          if [ -n "$existante" ]; then
+            gh issue comment "$existante" --body-file corps.md
+            echo "Issue #$existante complétée."
+          else
+            gh issue create --title "$TITRE" --body-file corps.md
+          fi

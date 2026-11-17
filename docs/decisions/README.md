@@ -136,6 +136,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0081](0081-fusions-dans-main-par-claude-et-dependabot.md) | 14/10/2026 | Fusions dans main par Claude et Dependabot | Modifié |
 | [0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | 14/10/2026 | Serveur OVH : connexion SSH par clé | Accepté |
 | [0103](0103-cache-de-construction-vide-apres-mise-en-ligne.md) | 19/10/2026 | Cache de construction Docker vidé après chaque mise en ligne réussie | Accepté |
+| [0107](0107-audit-des-dependances-seuil-et-suivi-hebdomadaire.md) | 17/11/2026 | Audit des dépendances : seuil bloquant et suivi hebdomadaire | Accepté · à relire |
 
 ## Publication Vinted
 
