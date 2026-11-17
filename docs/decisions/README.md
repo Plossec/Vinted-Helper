@@ -55,7 +55,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0065](0065-categories-recopiees-de-vinted.md) | 14/10/2026 | Catégories recopiées de Vinted | Modifié |
 | [0085](0085-code-de-categorie-construit-sur-le-chemin.md) | 14/10/2026 | Code de catégorie construit sur le chemin | Accepté |
 | [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Accepté |
-| [0111](0111-types-de-l-api-partages.md) | 17/11/2026 | Types de l'API partagés entre le serveur et l'interface | Accepté · à relire |
+| [0112](0112-types-de-l-api-partages.md) | 17/11/2026 | Types de l'API partagés entre le serveur et l'interface | Accepté · à relire |
 
 ## Calculs
 
@@ -159,6 +159,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0071](0071-delais-de-l-extension.md) | 14/10/2026 | Délais de l'extension | Accepté |
 | [0082](0082-extension-garde-fous-de-perimetre-supprimes.md) | 14/10/2026 | Extension : garde-fous de périmètre supprimés | Accepté |
 | [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Accepté |
+| [0111](0111-controle-de-types-de-l-extension.md) | 17/11/2026 | Contrôle de types de l'extension | Proposé |
 
 ## Interface
 

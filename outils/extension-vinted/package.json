@@ -1,6 +1,6 @@
 {
   "name": "vinted-helper-extension",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "private": true,
   "description": "Tests de l'extension Chrome de publication Vinted (docs/guides/publication-vinted.md)",
   "type": "module",
@@ -8,9 +8,12 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "typecheck": "tsc -p types/tsconfig.service-worker.json && tsc -p types/tsconfig.contenu.json && tsc -p types/tsconfig.popup.json && tsc -p types/tsconfig.options.json && tsc -p types/tsconfig.diagnostic.json"
   },
   "devDependencies": {
-    "playwright-core": "^1.65.1"
+    "@types/chrome": "^0.3.7",
+    "playwright-core": "^1.65.1",
+    "typescript": "^6.0.3"
   }
 }

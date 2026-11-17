@@ -1,4 +1,4 @@
-# ADR-0111 — Types de l'API partagés entre le serveur et l'interface
+# ADR-0112 — Types de l'API partagés entre le serveur et l'interface
 
 - **Date** : 17/11/2026
 - **Statut** : Accepté · à relire

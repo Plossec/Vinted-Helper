@@ -5,16 +5,22 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [1.27.2] — 17/11/2026
+## [1.27.3] — 17/11/2026
 
 ### Modifié
 - Les types des réponses de l'API sont écrits une seule fois, dans le serveur (`server/src/api/types.ts`), et
   l'interface les réutilise : un champ renommé ou retiré d'un côté est désormais une erreur de compilation, plus une
-  surprise à l'écran (#244, ADR-0111).
+  surprise à l'écran (#244, ADR-0112).
 
 ### Corrigé
 - Fiche d'un article sorti du stock sans date enregistrée : « le 01/01/1970 » n'est plus affiché (cas trouvé par ce
   contrôle, #244).
+
+## [1.27.2] — 17/11/2026
+
+### Modifié
+- Extension 1.14.3 : son JavaScript est désormais vérifié par un contrôle de types (fautes de noms entre ses parties
+  et l'application repérées avant la mise à jour), sans changement de fonctionnement (#248, ADR-0111).
 
 ## [1.27.1] — 17/11/2026
 

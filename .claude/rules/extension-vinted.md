@@ -14,6 +14,8 @@ Décisions : `docs/decisions/`, thème « Publication Vinted » de l'index (gard
   (même numéro ; correctif → dernier chiffre, comportement nouveau → chiffre du milieu). Sans cela, Chrome affiche
   l'ancienne version et l'utilisateur ne sait pas si sa mise à jour est prise. La version de l'application suit
   `/version` comme d'habitude.
+- **Types** : `npm run typecheck` dans `outils/extension-vinted` (JSDoc, types communs dans `types/extension.d.ts`,
+  ADR-0111) ; un nouveau message ou champ échangé s'y déclare.
 - **Tests** : `npm test` dans `outils/extension-vinted` (fausse page `test/faux-vinted.mjs`, jamais le vrai site) ;
   une structure relevée sur Vinted se reproduit dans la fausse page, avec un test qui échoue avant la correction.
 - Repères de la page → `selecteurs.js` (commentaire daté « Relevé du JJ/MM/AAAA »), logique de remplissage →
