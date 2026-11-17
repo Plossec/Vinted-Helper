@@ -242,6 +242,7 @@ async function choisirCategorie(chemin) {
       trouve = meilleurResultat(chemin);
     }
     if (trouve) {
+      /** @type {HTMLInputElement | null} */
       const radio = trouve.el.querySelector('input[type="radio"]');
       if (radio?.checked) fermerListe();
       else cliquer(trouve.el);
@@ -285,6 +286,7 @@ async function choisirColis(libelle) {
     return titre === voulu || titre.endsWith(voulu);
   });
   if (!caseColis) throw new ErreurPublication(`Format de colis « ${libelle} » introuvable sur Vinted.`);
+  /** @type {HTMLInputElement | null} */
   const radio = caseColis.querySelector('input[type="radio"]');
   if (radio?.checked) return;
   cliquer(radio ?? caseColis);
@@ -584,6 +586,7 @@ function relevePage(nom) {
   };
 }
 
+/** @param {MessageContenu} message */
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
 
@@ -658,7 +661,8 @@ async function traiter(message) {
     return { ok: true };
   }
 
-  return { ok: false, message: `Demande inconnue : ${message.type}` };
+  // Message imprévu (autre version de l'extension) : refusé.
+  return { ok: false, message: `Demande inconnue : ${/** @type {{ type: string }} */ (message).type}` };
 }
 
 chrome.runtime.onMessage.addListener((message, _expediteur, repondre) => {
