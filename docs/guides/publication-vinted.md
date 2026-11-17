@@ -176,6 +176,8 @@ Pour Claude (agent `analyste-releve`) : contenu du fichier `diagnostic-vinted-�
 - `adresse`, `date`, `etat` (`pret`, `verification`, `bloque`, `deconnecte`).
 - **Relevé automatique** (erreur pendant une publication) : `etape` (photos, titre, description, categorie, marque,
   taille, etat, couleurs, prix, colis), `erreur`, `selecteursTrouves`, `elements`.
+  Quand une valeur est introuvable dans une liste de choix, `elements` est relevé **liste encore ouverte**
+  (extension 1.14.2, #239).
 - **Relevé à la demande** (bouton Diagnostic) : `selecteursTrouves`, `elements`, `apparusApresClicCategorie`,
   `options « Femmes »` (ancêtres des éléments dont le texte est « Femmes »).
 - Chaque élément : `balise`, `type`, `name`, `id`, `testid`, `role`, `aria`, `ariaExpanded`, `placeholder`,
