@@ -28,6 +28,16 @@ export default tseslint.config(
     },
   },
   {
+    // Promesses non attendues (#247) : un `await` oublié laisse passer une erreur en silence. Règles qui lisent les
+    // types (tsconfig de server/ et client/) ; une promesse lancée exprès s'écrit `void …`.
+    files: ["server/**/*.ts", "client/**/*.{ts,tsx}"],
+    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
+    rules: {
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-misused-promises": "error",
+    },
+  },
+  {
     files: ["server/**/*.ts", "scripts/**/*.mjs", ".claude/hooks/**/*.mjs", "*.js", "*.mjs"],
     languageOptions: { globals: globals.node },
   },

@@ -5,13 +5,36 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [1.25.2] — 29/10/2026
+## [1.25.5] — 17/11/2026
 
 ### Corrigé
 - Extension 1.14.2 : publication bloquée sur « Taille » (et bientôt « État ») depuis le nouveau formulaire de Vinted ;
   la liste est ouverte par son bouton et non plus par un champ caché, une liste refermée aussitôt est rouverte, et la
   valeur choisie est bien relue au contrôle avant envoi. Les « choix proposés » d'une erreur ne reprennent plus le
   bouton « Voir les détails des dimensions » du colis, et le relevé est pris liste encore ouverte (#239).
+
+## [1.25.4] — 17/11/2026
+
+### Modifié
+- Qualité du code : le lint signale désormais une promesse non attendue (`await` oublié), qui laissait passer une erreur
+  en silence ; les 9 cas trouvés dans l'interface sont corrigés, sans changement visible (#247).
+
+## [1.25.3] — 17/11/2026
+
+### Corrigé
+- Documentation : `.env.example` indiquait 8 caractères minimum pour le mot de passe au lieu de 12 ; le README ne
+  promet plus « found 0 vulnerabilities » après `npm ci` (#245).
+
+## [1.25.2] — 17/11/2026
+
+### Corrigé
+- Alertes de sécurité des dépendances corrigées (`fastify`, `@fastify/static`, `fast-uri`, `glob`, `minimatch`) : elles
+  bloquaient toutes les mises en production depuis le 09/11/2026 (#242).
+
+### Modifié
+- Seules les alertes de sécurité **élevées ou critiques** bloquent une mise en production ; les autres sont contrôlées
+  chaque lundi et ouvrent une issue. `npm run verifier` fait aussi ce contrôle (sans réseau : simple avertissement)
+  (#242, ADR-0107).
 
 ## [1.25.1] — 22/10/2026
 
