@@ -37,6 +37,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0062](0062-tests-couverture-base-de-test-plus-rapide.md) | 14/10/2026 | Tests : couverture, base de test plus rapide | Modifié |
 | [0063](0063-outillage-claude-allege-et-verification-unique.md) | 14/10/2026 | Outillage Claude allégé et vérification unique | Accepté |
 | [0098](0098-cahier-des-charges-tenu-a-jour.md) | 19/10/2026 | Cahier des charges tenu à jour, règles en vigueur par thème | Accepté |
+| [0110](0110-jamais-de-push-force.md) | 17/11/2026 | Jamais de push forcé | Accepté |
 | [0108](0108-tests-de-l-interface-dans-chromium.md) | 17/11/2026 | Tests de l'interface dans Chromium | Proposé |
 | [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Accepté · à relire |
 | [0101](0101-index-des-decisions-allege.md) | 19/10/2026 | Index des décisions allégé : par thème, statut en un mot | Accepté |

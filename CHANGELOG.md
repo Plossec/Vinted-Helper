@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.26.2] — 17/11/2026
+
+### Modifié
+- Règle écrite pour Claude : jamais de push forcé ; un push refusé se règle par une fusion de la branche distante,
+  et l'utilisateur est prévenu (#266, ADR-0110).
+
 ## [1.26.1] — 17/11/2026
 
 ### Corrigé

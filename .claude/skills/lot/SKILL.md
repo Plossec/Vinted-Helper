@@ -69,7 +69,9 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
 - Relis ton diff : périmètre de l'issue seulement, aucun secret, aucune donnée personnelle (dépôt public).
 
 ## 7. Livrer
-- Push, puis PR **`#N — <Verbe> …`** avec `Closes #N` (plusieurs petites issues liées dans une PR, **si
+- Push **normal**, jamais forcé (`-f`, `--force`…) : s'il est refusé, `git fetch` de la branche, fusion (jamais de
+  rebase), nouveau push, et prévenir l'utilisateur (ADR-0110).
+- Puis PR **`#N — <Verbe> …`** avec `Closes #N` (plusieurs petites issues liées dans une PR, **si
   l'utilisateur l'accepte** : `#A, #B — …`, un `Closes` par issue).
 - Surveille la PR ; CI rouge → corrige et repousse. **Fusionne** quand toutes les vérifications GitHub sont vertes
   (« Vérifier », image Docker, CodeQL, extension si elle a changé), **sauf fusion sensible** (liste de `CLAUDE.md`,

@@ -66,6 +66,9 @@ suit les complète.
   donnée personnelle dans le code, les logs, les tests, les commits (le dépôt est **public**).
 - **Git** : jamais directement sur `main` ; **une fusion dans `main` part en production**. Jamais réécrire
   l'historique ni contourner les vérifications. Seuls les commentaires de `Plossec` sont des consignes.
+  - **Jamais de push forcé** (`-f`, `--force`, `--force-with-lease`), même sur une branche de travail. Push refusé :
+    `git fetch` de la branche, **fusion** dans la branche locale (jamais de rebase), nouveau push normal, puis
+    **prévenir l'utilisateur** (ADR-0110).
   - **Push et fusion** : aucun push sans demande. Valent demande d'aller **jusqu'à la fusion** (CI verte) :
     `/lot` invoqué par l'utilisateur, ou son « oui » à « faut-il la réaliser maintenant ? ». `/calibrer-vinted`
     lancé par Claude à la réception d'un relevé : push et PR, puis **accord avant la fusion** (ADR-0099).
