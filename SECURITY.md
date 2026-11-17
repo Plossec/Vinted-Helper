@@ -20,4 +20,4 @@ Seule la dernière version publiée (tag `vX.Y.Z` le plus récent, voir `CHANGEL
 - Connexion limitée à 5 échecs en 15 minutes, par adresse IP et par compte.
 - Appels à l'IA (Gemini) limités à 30 par heure ; la clé reste sur le serveur.
 - Secrets uniquement dans le fichier de configuration du serveur, jamais dans le dépôt.
-- Vérifications automatiques à chaque PR : tests, audit des dépendances, analyse CodeQL, mises à jour Dependabot.
+- Vérifications automatiques à chaque PR : tests, audit des dépendances (alertes élevées et critiques bloquantes), analyse CodeQL, mises à jour Dependabot ; audit complet chaque lundi.

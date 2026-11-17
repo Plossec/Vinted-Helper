@@ -8,9 +8,9 @@ disable-model-invocation: true
 
 1. Si `node_modules` manque : `npm ci` (comme la CI).
 2. **`npm run verifier`** (`scripts/verifier.mjs`) : types, lint (dont `.skip` / `.only` interdits), format, tests,
-   construction. C'est **la même commande que le job « Vérifier » de la CI**. Le script lance toutes les étapes, même
+   construction, audit des dépendances (alertes élevées et critiques ; sans réseau : ⚠️, pas d'échec). C'est **la même commande que le job « Vérifier » de la CI**. Le script lance toutes les étapes, même
    après un échec, n'affiche que la sortie des étapes en échec (`VERIFIER_DETAIL=1` : tout) et termine par un résumé.
-   La CI lance aussi `npm audit --omit=dev`, la construction de l'image Docker, CodeQL et, si l'extension change,
+   La CI lance aussi la construction de l'image Docker, CodeQL et, si l'extension change,
    ses tests (`.github/workflows/`).
 3. **Selon les fichiers changés** :
    - **Extension** — seulement si `outils/extension-vinted/` a changé (`git diff --name-only main...HEAD` et

@@ -25,10 +25,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Mêmes étapes que /verifier (types, lint, format, tests, construction) : une seule liste, scripts/verifier.mjs.
+      # Mêmes étapes que /verifier (types, lint, format, tests, construction, audit) : une seule liste,
+      # scripts/verifier.mjs. Audit (#242, ADR-0107) : seules les alertes élevées ou critiques des dépendances de
+      # production bloquent ; les autres sont suivies chaque semaine (audit.yml).
       - run: npm run verifier
-      # Vulnérabilités connues des dépendances embarquées en production (issue #124).
-      - run: npm audit --omit=dev
 
   # Construction de l'image Docker, comme sur le serveur, sur chaque pull request (issue #124) : une image qui ne se
   # construit plus est vue avant la fusion, pas pendant la mise en production.
