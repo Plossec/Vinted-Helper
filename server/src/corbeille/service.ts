@@ -39,12 +39,20 @@ export async function listerCorbeille(base: Base, utilisateurId: string) {
     base,
     lignes.map((a) => a.id),
   );
-  return lignes.map((a) => ({
-    ...a,
-    vignette: choisirVignette(photos.get(a.id) ?? []),
-    /** Date de suppression définitive automatique. */
-    suppressionLe: new Date((a.supprimeLe?.getTime() ?? 0) + DUREE_CORBEILLE_MS),
-  }));
+  // `supprimeLe` est toujours renseigné ici (filtre de la requête) ; le test le rend visible au typage (#244).
+  return lignes.flatMap(({ supprimeLe, ...a }) =>
+    supprimeLe === null
+      ? []
+      : [
+          {
+            ...a,
+            supprimeLe,
+            vignette: choisirVignette(photos.get(a.id) ?? []),
+            /** Date de suppression définitive automatique. */
+            suppressionLe: new Date(supprimeLe.getTime() + DUREE_CORBEILLE_MS),
+          },
+        ],
+  );
 }
 
 /** Supprime définitivement des articles de la corbeille, puis les photos que plus aucun article n'utilise. */

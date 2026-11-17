@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Modifié
+- Les types des réponses de l'API sont écrits une seule fois, dans le serveur (`server/src/api/types.ts`), et
+  l'interface les réutilise : un champ renommé ou retiré d'un côté est désormais une erreur de compilation, plus une
+  surprise à l'écran (#244, ADR-0111).
+
+### Corrigé
+- Fiche d'un article sorti du stock sans date enregistrée : « le 01/01/1970 » n'est plus affiché (cas trouvé par ce
+  contrôle, #244).
+
 ## [1.27.1] — 17/11/2026
 
 ### Modifié

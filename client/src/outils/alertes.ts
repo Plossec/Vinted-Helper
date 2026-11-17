@@ -1,37 +1,8 @@
 // Alertes (§5.8) renvoyées par le serveur : à expédier, à récupérer, publications Vinted en erreur (#72), articles
 // À publier incomplets (#196), brouillons trop anciens, articles dormants. Affichées par l'écran « À faire » (#191) ; leur nombre fait la pastille de l'onglet.
+import type { Alerte, AlertesServeur } from "../api.js";
 
-export interface Alerte {
-  id: string;
-  reference: number;
-  nom: string | null;
-  depuis: string;
-  jours: number;
-  /** Articles à expédier : lien de la conversation Vinted avec l'acheteur (issue #48). */
-  urlConversation?: string | null;
-  /** Articles à expédier : leur vente (bouton « Envoyé », #191). */
-  venteId?: string | null;
-  /** Articles À publier incomplets : ce qui manque à l'annonce (#196). */
-  manques?: string[];
-}
-
-export interface AlertesServeur {
-  brouillons: Alerte[];
-  dormants: Alerte[];
-  aExpedier: Alerte[];
-  /** Retours à aller chercher (issue #52). */
-  aRecuperer?: Alerte[];
-  /** Publications Vinted en échec (issue #72). */
-  erreursPublication?: Alerte[];
-  /** Articles À publier incomplets (#196). */
-  incomplets?: Alerte[];
-  /** Dormants republiés 3 fois sans vente (#147). */
-  invendus?: Alerte[];
-  /** Tâches automatisées en mode manuel (#147) : nombre d'actions prévues à valider. */
-  aValider?: number;
-  /** Tâche « Vérification vente finalisée » (#148) : commandes à valider, à rattacher, montants corrigés. */
-  commandes?: { aValider: number; aRattacher: number; montantsCorriges: number };
-}
+export type { Alerte, AlertesServeur };
 
 /** Nombre de choses à faire venant des commandes lues sur Vinted (#148). */
 export const nombreCommandes = (a: AlertesServeur | null) =>

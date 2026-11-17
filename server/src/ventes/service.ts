@@ -8,6 +8,8 @@ import { calculer } from "../couts/service.js";
 import type { MotifSortie } from "../calculs/benefice.js";
 import { estTransitionSimple, STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
 import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import type { Vente } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 /** Emballage par défaut d'un colis : 0,08 € (§5.6), modifiable dans les Réglages. */
 export const EMBALLAGE_DEFAUT = 8;
@@ -201,7 +203,11 @@ export async function modifierVente(
   await base.update(vente).set(d).where(eq(vente.id, venteId));
 }
 
-export async function lireVente(base: Base, utilisateurId: string, venteId: string) {
+/** Vente (colis), vérifiée contre le type de l'interface (#244). */
+export const lireVente = async (base: Base, utilisateurId: string, venteId: string) =>
+  conforme<Vente>()(await lireVenteBrute(base, utilisateurId, venteId));
+
+async function lireVenteBrute(base: Base, utilisateurId: string, venteId: string) {
   const [v] = await base
     .select()
     .from(vente)

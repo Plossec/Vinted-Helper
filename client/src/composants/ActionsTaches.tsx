@@ -2,13 +2,9 @@
 // par le serveur et exécutées une à une par l'extension Chrome ; leur journal est celui de toutes les tâches (#233).
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
-import { type ActionVinted, api } from "../api.js";
+import { type ActionVinted, type ActionsAValider as Actions, api } from "../api.js";
 import { formatEuros } from "../outils/montants.js";
 import { formatReference } from "../statuts.js";
-
-interface Actions {
-  aValider: ActionVinted[];
-}
 
 export const ETATS: Record<ActionVinted["etat"], string> = {
   a_valider: "À valider",

@@ -4,6 +4,8 @@ import type { ContexteRoutes } from "../app.js";
 import { idDe } from "../outils/validation.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import { listerCorbeille, mettreALaCorbeille, restaurer, viderArticle } from "./service.js";
+import type { ArticleSupprime } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 export function routesCorbeille(
   app: FastifyInstance,
@@ -15,7 +17,9 @@ export function routesCorbeille(
     return { ok: true };
   });
 
-  app.get("/api/corbeille", async (requete) => listerCorbeille(base, utilisateurDe(requete).id));
+  app.get("/api/corbeille", async (requete) =>
+    conforme<ArticleSupprime[]>()(await listerCorbeille(base, utilisateurDe(requete).id)),
+  );
 
   app.post("/api/corbeille/:id/restauration", async (requete) => {
     await restaurer(base, utilisateurDe(requete).id, idDe(requete.params), maintenant());

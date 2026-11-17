@@ -4,6 +4,8 @@ import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../outils/erreurs.js";
 import { objet } from "../outils/validation.js";
 import { tableauDeBord } from "./service.js";
+import type { Tableau } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 const PARIS = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit" });
 
@@ -18,13 +20,15 @@ export function routesTableau(app: FastifyInstance, { base, maintenant, utilisat
   app.get("/api/tableau-de-bord", async (requete) => {
     const q = objet(requete.query);
     const [anneeActuelle, moisActuel] = PARIS.format(maintenant()).split("-").map(Number);
-    return tableauDeBord(
-      base,
-      utilisateurDe(requete).id,
-      entier(q.annee, anneeActuelle ?? 2026, 2000, 2100, "Année"),
-      entier(q.mois, moisActuel ?? 1, 1, 12, "Mois"),
-      entier(q.niveau, 3, 1, 4, "Niveau de catégorie"),
-      anneeActuelle ?? 2026,
+    return conforme<Tableau>()(
+      await tableauDeBord(
+        base,
+        utilisateurDe(requete).id,
+        entier(q.annee, anneeActuelle ?? 2026, 2000, 2100, "Année"),
+        entier(q.mois, moisActuel ?? 1, 1, 12, "Mois"),
+        entier(q.niveau, 3, 1, 4, "Niveau de catégorie"),
+        anneeActuelle ?? 2026,
+      ),
     );
   });
 }

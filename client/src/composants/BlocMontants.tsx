@@ -102,8 +102,8 @@ export function BlocMontants({ article, onMiseAJour }: { article: Article; onMis
       {article.sortieStock && (
         <p>
           Sorti du stock : <strong>{LIBELLES_MOTIF[article.sortieStock.motif]}</strong>
-          {article.sortieStock.canal ? ` (${LIBELLES_CANAL[article.sortieStock.canal]})` : ""} le{" "}
-          {formatDateHeure(article.sortieStock.date)}.
+          {article.sortieStock.canal ? ` (${LIBELLES_CANAL[article.sortieStock.canal]})` : ""}
+          {article.sortieStock.date ? ` le ${formatDateHeure(article.sortieStock.date)}` : ""}.
         </p>
       )}
 

@@ -22,6 +22,8 @@ import {
   type ResultatAction,
   validerActions,
 } from "./service.js";
+import type { ActionsAValider, CommandesVintedListe, EtatTaches, LigneJournal } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 function idsObligatoires(valeur: unknown): string[] {
   if (!Array.isArray(valeur) || !valeur.every((v) => typeof v === "string" && /^[0-9a-f-]{36}$/i.test(v)))
@@ -30,13 +32,19 @@ function idsObligatoires(valeur: unknown): string[] {
 }
 
 export function routesTaches(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
-  app.get("/api/taches/actions", async (requete) => listerActions(base, utilisateurDe(requete).id, maintenant()));
+  app.get("/api/taches/actions", async (requete) =>
+    conforme<ActionsAValider>()(await listerActions(base, utilisateurDe(requete).id, maintenant())),
+  );
 
   // Refonte (#232, #233) : état de chaque tâche, journal de toutes les tâches avec ses filtres.
-  app.get("/api/taches/etat", async (requete) => etatTaches(base, utilisateurDe(requete).id, maintenant()));
-  app.get("/api/taches/journal", async (requete) => ({
-    lignes: await listerJournal(base, utilisateurDe(requete).id, lireFiltres(requete.query), maintenant()),
-  }));
+  app.get("/api/taches/etat", async (requete) =>
+    conforme<EtatTaches>()(await etatTaches(base, utilisateurDe(requete).id, maintenant())),
+  );
+  app.get("/api/taches/journal", async (requete) =>
+    conforme<{ lignes: LigneJournal[] }>()({
+      lignes: await listerJournal(base, utilisateurDe(requete).id, lireFiltres(requete.query), maintenant()),
+    }),
+  );
 
   // « Lancer maintenant » (#230) : à toute heure, même tâche désactivée ; les dormants ignorent aussi les plafonds.
   app.post("/api/taches/dormants/lancer", async (requete) => ({
@@ -92,7 +100,9 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
   });
 
   // --- Tâche « Vérification vente finalisée » (#148) ---
-  app.get("/api/taches/commandes", async (requete) => listerCommandes(base, utilisateurDe(requete).id));
+  app.get("/api/taches/commandes", async (requete) =>
+    conforme<CommandesVintedListe>()(await listerCommandes(base, utilisateurDe(requete).id)),
+  );
 
   app.post("/api/taches/commandes/appliquer", async (requete) => ({
     nombre: await appliquerCommandes(

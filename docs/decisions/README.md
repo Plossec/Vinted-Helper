@@ -55,6 +55,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0065](0065-categories-recopiees-de-vinted.md) | 14/10/2026 | Catégories recopiées de Vinted | Modifié |
 | [0085](0085-code-de-categorie-construit-sur-le-chemin.md) | 14/10/2026 | Code de catégorie construit sur le chemin | Accepté |
 | [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Accepté |
+| [0111](0111-types-de-l-api-partages.md) | 17/11/2026 | Types de l'API partagés entre le serveur et l'interface | Accepté · à relire |
 
 ## Calculs
 

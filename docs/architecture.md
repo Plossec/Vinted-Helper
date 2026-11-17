@@ -66,6 +66,8 @@ flowchart TB
     calculs["calculs/<br/>seul module d'argent :<br/>répartitions, coûts, bénéfice, indicateurs, baisse"]
     catalogue["catalogue/<br/>catégories, marques, états, couleurs Vinted"]
     base["base/<br/>schéma, migrations"]
+    contrat["api/<br/>types des réponses (source unique)<br/>+ conforme()"]
+    routes --> contrat
     routes --> metier
     routes --> calculs
     routes --> catalogue
@@ -79,6 +81,7 @@ flowchart TB
   end
 
   api -- "cookie de session" --> routes
+  api -. "import type seulement" .-> contrat
   sw -- "jeton vh_…" --> routes
   base --> pg[("PostgreSQL")]
 ```

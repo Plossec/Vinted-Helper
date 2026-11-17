@@ -24,6 +24,8 @@ import { estTransitionSimple, type Statut, transitionsProposees, verifierTransit
 import { calculer } from "../couts/service.js";
 import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
+import type { Article, ResumeArticle } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 /** Champs modifiables d'une fiche article (montants en centimes). */
 export interface DonneesArticle {
@@ -327,7 +329,10 @@ export async function corrigerDateHistorique(
 }
 
 /** Liste des articles (hors corbeille) avec les champs utiles aux filtres, à la recherche et aux tris (§5.3). */
-export async function listerArticles(base: Base, utilisateurId: string) {
+export const listerArticles = async (base: Base, utilisateurId: string) =>
+  conforme<ResumeArticle[]>()(await listerArticlesBrut(base, utilisateurId));
+
+async function listerArticlesBrut(base: Base, utilisateurId: string) {
   const dateStatut = sql<Date>`(select max(h.date) from historique_statut h where h.article_id = ${article.id})`;
   const dateMiseEnLigne = sql<Date | null>`(select max(h.date) from historique_statut h
     where h.article_id = ${article.id} and h.vers = 'en_ligne')`;
@@ -392,7 +397,11 @@ export async function listerArticles(base: Base, utilisateurId: string) {
   });
 }
 
-export async function lireArticle(base: Base, utilisateurId: string, id: string) {
+/** Fiche complète d'un article, vérifiée contre le type de l'interface (#244). */
+export const lireArticle = async (base: Base, utilisateurId: string, id: string) =>
+  conforme<Article>()(await lireArticleBrut(base, utilisateurId, id));
+
+async function lireArticleBrut(base: Base, utilisateurId: string, id: string) {
   const a = await chargerArticle(base, utilisateurId, id);
   const historiqueStatuts = await base
     .select({
@@ -413,7 +422,9 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
         .innerJoin(lieu, eq(lieu.id, sortie.lieuId))
         .where(eq(sortie.id, a.sortieId))
     : [];
-  const detail = calculs.details.get(id) ?? null;
+  // Tout article hors corbeille a ses montants calculés : leur absence serait une erreur du serveur (#244).
+  const detail = calculs.details.get(id);
+  if (!detail) throw new Error(`Montants de l'article ${id} introuvables.`);
   const venteActive = detail?.venteId
     ? ((
         await base

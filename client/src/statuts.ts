@@ -1,16 +1,6 @@
 // Libellés des statuts (§4.1). Les transitions possibles sont fournies par le serveur (source unique).
-export type Statut =
-  | "brouillon"
-  | "en_stock"
-  | "a_publier"
-  | "erreur_publication"
-  | "en_ligne"
-  | "invendu"
-  | "a_expedier"
-  | "envoye"
-  | "a_recuperer"
-  | "finalise"
-  | "sortie_stock";
+export type { Statut } from "../../server/src/api/types.js";
+import type { Statut } from "../../server/src/api/types.js";
 
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",

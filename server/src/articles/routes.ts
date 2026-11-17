@@ -31,6 +31,8 @@ import {
   lireArticle,
   modifierArticle,
 } from "./service.js";
+import type { ReponseLien } from "../api/types.js";
+import { conforme } from "../api/conforme.js";
 
 function categorieObligatoire(valeur: unknown): string {
   if (valeur === undefined || valeur === null || valeur === "") throw erreurSaisie("Catégorie : obligatoire.");
@@ -124,7 +126,7 @@ export function routesArticles(app: FastifyInstance, { base, maintenant, utilisa
     const id = idDe(requete.params);
     const url = lienVintedFacultatif(objet(requete.body).url, "Lien Vinted");
     const resultat = await enregistrerLienVinted(base, utilisateurId, id, url, maintenant());
-    return { ...resultat, article: await lireArticle(base, utilisateurId, id) };
+    return conforme<ReponseLien>()({ ...resultat, article: await lireArticle(base, utilisateurId, id) });
   });
 
   app.put("/api/articles/:id/lien-conversation", async (requete) => {

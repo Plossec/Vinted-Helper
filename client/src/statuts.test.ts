@@ -1,21 +1,12 @@
 // Prochaine étape d'un article (#98) : chaque statut a un conseil, et le passage mis en avant suit le §4.2.
 import { describe, expect, it } from "vitest";
+import { transitionsProposees } from "../../server/src/metier/statuts.js";
 import { etapeSuivante, LIBELLES_STATUT, type Statut } from "./statuts.js";
 
-// Transitions du §4.2 (copie de server/src/metier/statuts.ts) : le passage conseillé doit en faire partie.
-const TRANSITIONS: Record<Statut, Statut[]> = {
-  brouillon: ["a_publier", "en_ligne", "en_stock", "sortie_stock"],
-  en_stock: ["brouillon", "a_publier", "sortie_stock"],
-  a_publier: ["en_ligne", "brouillon", "en_stock", "sortie_stock"],
-  erreur_publication: ["a_publier", "en_ligne", "brouillon", "sortie_stock"],
-  en_ligne: ["a_expedier", "a_publier", "sortie_stock"],
-  invendu: ["a_expedier", "en_ligne", "a_publier", "sortie_stock"],
-  a_expedier: ["envoye", "en_ligne", "sortie_stock"],
-  envoye: ["finalise", "a_recuperer", "sortie_stock"],
-  a_recuperer: ["a_publier", "en_ligne", "sortie_stock"],
-  finalise: [],
-  sortie_stock: ["a_publier"],
-};
+// Transitions du §4.2 : lues dans le serveur, source unique (#244), plus de copie à tenir à jour ici.
+const TRANSITIONS = Object.fromEntries(
+  (Object.keys(LIBELLES_STATUT) as Statut[]).map((s) => [s, transitionsProposees(s)]),
+) as Record<Statut, Statut[]>;
 
 describe("etapeSuivante", () => {
   it("un conseil pour chaque statut, et un passage autorisé quand il y en a un", () => {
