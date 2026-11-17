@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Tests automatiques de l'interface dans un navigateur : saisie terrain, fiche jusqu'à « À publier », vente groupée
+  jusqu'à la finalisation et tableau de bord (`npm run test:navigateur`, vérification « Interface » sur GitHub)
+  (#243, ADR-0108).
+
 ## [1.25.2] — 17/11/2026
 
 ### Corrigé

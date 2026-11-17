@@ -119,6 +119,7 @@ Les évolutions de la base (migrations) s'appliquent automatiquement au démarra
 ```powershell
 npm test                          # tous les tests
 npm test -w server -- calculs     # uniquement les calculs (règle d'arrondi, cas de l'annexe)
+npm run test:navigateur           # parcours de l'interface dans Chromium (une fois avant : npx playwright-core install chromium)
 ```
 
 Résultat attendu : `Tests  … passed` et aucun `failed`.
