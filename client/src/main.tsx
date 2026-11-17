@@ -8,6 +8,7 @@ import { ErreurAffichage } from "./ecrans/ErreurAffichage.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
 import { MentionsLegales } from "./ecrans/MentionsLegales.js";
+import { PointsRelais } from "./ecrans/PointsRelais.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
 import { FicheVente } from "./ecrans/FicheVente.js";
 import { Listes } from "./ecrans/Listes.js";
@@ -51,6 +52,7 @@ const routeur = createBrowserRouter([
           { path: "frais", element: <FraisDivers /> },
           { path: "corbeille", element: <Corbeille /> },
           { path: "listes", element: <Listes /> },
+          { path: "points-relais", element: <PointsRelais /> },
           {
             path: "publication",
             lazy: async () => ({ Component: (await import("./ecrans/PublicationVinted.js")).PublicationVinted }),
