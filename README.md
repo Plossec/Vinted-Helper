@@ -68,7 +68,9 @@ Enregistrez et fermez. **Ne partagez jamais ce fichier** : il n'est pas envoyé 
 npm ci
 ```
 
-Résultat attendu : `added … packages` et `found 0 vulnerabilities` (cela prend une à deux minutes la première fois).
+Résultat attendu : `added … packages` (cela prend une à deux minutes la première fois). Un message « … vulnerabilities »
+peut s'afficher : il concerne surtout les outils de développement, et les alertes de sécurité sont suivies par
+les vérifications automatiques de GitHub ; rien à faire de votre côté.
 
 ---
 
