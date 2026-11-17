@@ -14,6 +14,7 @@ import { type ClientIA, creerClientGemini, MODELE_SECOURS_DEFAUT } from "./ia/ge
 import { routesIA } from "./ia/routes.js";
 import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
+import { routesPointsRelais } from "./points-relais/routes.js";
 import { routesPublication } from "./publication/routes.js";
 import { routesTaches } from "./taches/routes.js";
 import { utilisateurParJeton } from "./publication/service.js";
@@ -163,6 +164,7 @@ export async function creerApp({
   routesTaches(app, contexte);
   const stockage = creerStockagePhotos(dossierPhotos);
   routesVentes(app, contexte, stockage);
+  routesPointsRelais(app, contexte);
   routesPhotos(app, contexte, stockage);
   routesCorbeille(app, contexte, stockage);
   routesIA(app, contexte, stockage, ia);

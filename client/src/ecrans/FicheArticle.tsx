@@ -26,6 +26,7 @@ import { Repli } from "../composants/Repli.js";
 import { BlocAnnonce } from "../composants/BlocAnnonce.js";
 import { BlocVinted } from "../composants/BlocVinted.js";
 import { BlocMontants } from "../composants/BlocMontants.js";
+import { BlocPointRelais } from "../composants/PointRelais.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
@@ -391,6 +392,7 @@ export function FicheArticle() {
         {article && (
           <Repli titre="Statut et prochaine étape" ouvert>
             <BlocStatut article={article} onMiseAJour={apresChangementStatut} />
+            <BlocPointRelais key={`${article.statut}-${article.pointsRelais?.venteId ?? ""}`} article={article} />
           </Repli>
         )}
 

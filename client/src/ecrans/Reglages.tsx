@@ -90,6 +90,9 @@ export function Reglages() {
           <Link to="/listes" className="bouton">
             Marques et lieux
           </Link>
+          <Link to="/points-relais" className="bouton">
+            Points relais
+          </Link>
           <Link to="/corbeille" className="bouton">
             Corbeille
           </Link>

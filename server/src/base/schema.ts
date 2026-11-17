@@ -13,6 +13,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   primaryKey,
   pgEnum,
   pgTable,
@@ -24,6 +25,7 @@ import {
 import { CODES_FORMAT_COLIS } from "../catalogue/couleurs.js";
 import { CODES_ETAT } from "../catalogue/etats.js";
 import { STATUTS } from "../metier/statuts.js";
+import { CODES_TRANSPORTEUR, type Horaires } from "../points-relais/horaires.js";
 
 const horodatage = (nom: string) => timestamp(nom, { withTimezone: true, mode: "date" });
 
@@ -307,6 +309,35 @@ export const boost = pgTable(
   (t) => [index("boost_article_idx").on(t.articleId), index("boost_utilisateur_idx").on(t.utilisateurId)],
 );
 
+export const transporteur = pgEnum("transporteur", CODES_TRANSPORTEUR);
+
+/**
+ * Points relais de l'utilisateur (#210, ADR-0109) : saisis à la main, reliés aux ventes (point de dépôt du colis, point
+ * de retrait d'un retour). Archivé plutôt que supprimé : les ventes passées gardent leur point.
+ */
+export const pointRelais = pgTable(
+  "point_relais",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    transporteur: transporteur("transporteur").notNull(),
+    nom: text("nom").notNull(),
+    adresse: text("adresse"),
+    /** Numéro du point chez le transporteur (facultatif). */
+    numero: text("numero"),
+    /** Page officielle du point (horaires à jour, fermetures exceptionnelles). */
+    url: text("url"),
+    /** 7 jours (lundi → dimanche), plages « HH:MM », heure de Paris. */
+    horaires: jsonb("horaires").$type<Horaires>().notNull(),
+    notes: text("notes"),
+    archive: boolean("archive").notNull().default(false),
+    creeLe: horodatage("cree_le").notNull().defaultNow(),
+  },
+  (t) => [index("point_relais_utilisateur_idx").on(t.utilisateurId)],
+);
+
 /** Vente (= un colis, §3) : 1 article (vente simple) ou plusieurs (vente groupée). */
 export const vente = pgTable(
   "vente",
@@ -324,6 +355,10 @@ export const vente = pgTable(
     dateFinalisation: horodatage("date_finalisation"),
     /** Annulation par l'acheteur ou retour du colis entier : exclue de tous les calculs (§4.4). */
     annulee: boolean("annulee").notNull().default(false),
+    /** Point relais où déposer le colis (#210). */
+    pointDepotId: uuid("point_depot_id").references(() => pointRelais.id, { onDelete: "set null" }),
+    /** Point relais où récupérer un retour (#210). */
+    pointRetraitId: uuid("point_retrait_id").references(() => pointRelais.id, { onDelete: "set null" }),
     creeLe: horodatage("cree_le").notNull().defaultNow(),
   },
   (t) => [index("vente_utilisateur_idx").on(t.utilisateurId)],

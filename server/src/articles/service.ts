@@ -424,11 +424,25 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
             dateVente: vente.dateVente,
             dateEnvoi: vente.dateEnvoi,
             dateFinalisation: vente.dateFinalisation,
+            pointDepotId: vente.pointDepotId,
+            pointRetraitId: vente.pointRetraitId,
           })
           .from(vente)
           .where(eq(vente.id, detail.venteId))
       )[0] ?? null)
     : null;
+  // Points relais (#210) : le colis en cours, ou pour un article « À récupérer » la vente d'où il revient.
+  const [venteRetour] =
+    a.statut === "a_recuperer"
+      ? await base
+          .select({ id: vente.id, pointDepotId: vente.pointDepotId, pointRetraitId: vente.pointRetraitId })
+          .from(venteArticle)
+          .innerJoin(vente, eq(vente.id, venteArticle.venteId))
+          .where(and(eq(venteArticle.articleId, id), sql`(${venteArticle.retourne} or ${vente.annulee})`))
+          .orderBy(desc(vente.dateVente))
+          .limit(1)
+      : [];
+  const colis = venteRetour ?? venteActive;
   const nombreArticlesVente = venteActive
     ? (
         await base
@@ -494,6 +508,9 @@ export async function lireArticle(base: Base, utilisateurId: string, id: string)
     /** Montants calculés (centimes) : prix d'achat (part de lot), essence, emballage, boosts, prix vendu, bénéfice. */
     couts: detail,
     vente: venteActive ? { ...venteActive, nombreArticles: nombreArticlesVente } : null,
+    pointsRelais: colis
+      ? { venteId: colis.id, pointDepotId: colis.pointDepotId, pointRetraitId: colis.pointRetraitId }
+      : null,
     boosts,
     historiquePrix: historiquePrixAffiche,
     sortieStock:

@@ -1,6 +1,7 @@
 // Appels à l'API du serveur (même adresse que l'interface, cookie de session envoyé automatiquement).
 import type { Statut } from "./statuts.js";
 import { messageErreur } from "./outils/erreurs.js";
+import type { Horaires } from "./outils/horaires.js";
 
 export class ErreurApi extends Error {
   constructor(
@@ -243,6 +244,8 @@ export interface Article {
   } | null;
   boosts: { id: string; montant: number; date: string }[];
   historiquePrix: { prix: number; date: string }[];
+  /** Vente concernée par un dépôt ou un retrait en point relais (#210) : colis en cours ou retour À récupérer. */
+  pointsRelais: { venteId: string; pointDepotId: string | null; pointRetraitId: string | null } | null;
   sortieStock: { motif: MotifSortie; canal: CanalRevente | null; prixRevente: number | null; date: string } | null;
   titreAnnonce: string | null;
   descriptionAnnonce: string | null;
@@ -334,6 +337,9 @@ export interface Vente {
   dateEnvoi: string | null;
   dateFinalisation: string | null;
   annulee: boolean;
+  /** Point relais où déposer le colis, et où récupérer un retour (#210). */
+  pointDepotId: string | null;
+  pointRetraitId: string | null;
   articles: {
     id: string;
     reference: number;
@@ -344,6 +350,25 @@ export interface Vente {
     prixVendu: number | null;
     partEmballage: number;
   }[];
+}
+
+/** Point relais de l'utilisateur (#210), saisi à la main. */
+export interface PointRelais {
+  id: string;
+  transporteur: string;
+  nom: string;
+  adresse: string | null;
+  numero: string | null;
+  url: string | null;
+  /** 7 jours (lundi → dimanche), plages « HH:MM », heure de Paris. */
+  horaires: Horaires;
+  notes: string | null;
+  archive: boolean;
+}
+
+export interface ListePointsRelais {
+  transporteurs: Etat[];
+  points: PointRelais[];
 }
 
 export interface ReglagesUtilisateur {
