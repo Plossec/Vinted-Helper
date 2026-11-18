@@ -59,6 +59,8 @@ export const etatCommandeVinted = pgEnum("etat_commande_vinted", [
   "refusee",
   "ignoree",
 ]);
+/** Article créé à partir de photos (#276) : remplissage par l'IA attendu, fait, ou abandonné après 3 échecs. */
+export const etatAnalyseIa = pgEnum("etat_analyse_ia", ["en_attente", "faite", "echec"]);
 export const etatActionVinted = pgEnum("etat_action_vinted", [
   "a_valider",
   "en_attente",
@@ -207,6 +209,10 @@ export const article = pgTable(
     descriptionAnnonce: text("description_annonce"),
     /** Corbeille (lot 4) : date de mise à la corbeille, sinon null. */
     supprimeLe: horodatage("supprime_le"),
+    /** Créé à partir de photos (#276) : état du remplissage par l'IA ; null pour un article saisi autrement. */
+    analyseIa: etatAnalyseIa("analyse_ia"),
+    /** Essais de remplissage par l'IA en échec (abandon au 3e). */
+    analyseEssais: integer("analyse_essais").notNull().default(0),
   },
   (t) => [
     uniqueIndex("article_reference_unique").on(t.utilisateurId, t.reference),

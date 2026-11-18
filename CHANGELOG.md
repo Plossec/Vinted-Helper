@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.29.0] — 18/11/2026
+
+### Ajouté
+- **Nouveaux articles par photos** (Articles → lien en bas) : choisissez les photos de plusieurs articles, l'IA
+  propose un article par groupe de photos, vous corrigez, puis les brouillons sont créés et remplis par l'IA (nom,
+  catégorie, marque, état, couleurs, annonce, prix proposé). Ce qui manque apparaît dans « À faire » (#276, ADR-0117).
+
 ## [1.28.3] — 18/11/2026
 
 ### Modifié

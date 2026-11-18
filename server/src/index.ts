@@ -33,6 +33,7 @@ const app = await creerApp({
   dossierPhotos: config.dossierPhotos,
   dossierClient: config.dossierClient,
   journaliser: true,
+  analyseEnArrierePlan: true,
 });
 
 async function arreter(signal: string): Promise<void> {

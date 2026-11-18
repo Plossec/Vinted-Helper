@@ -508,6 +508,8 @@ export interface AlertesServeur {
   erreursPublication?: Alerte[];
   /** Articles À publier incomplets (#196). */
   incomplets?: Alerte[];
+  /** Brouillons créés par photos (#276), avec ce qui leur manque (dont l'analyse par l'IA). */
+  aCompleter?: Alerte[];
   /** Dormants republiés 3 fois sans vente (#147). */
   invendus?: Alerte[];
   /** Tâches automatisées en mode manuel (#147) : nombre d'actions prévues à valider. */
