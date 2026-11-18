@@ -4,7 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type ListePointsRelais, type PointRelais } from "../api.js";
 import { ResumePointRelais } from "../composants/PointRelais.js";
-import { formatJournee, type Horaires, JOURS, lireJournee } from "../outils/horaires.js";
+import { formatJournee, type Horaires, JOURS, lireJournee } from "../utilitaires/horaires.js";
 
 interface Formulaire {
   id: string | null;

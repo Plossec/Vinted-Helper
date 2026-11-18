@@ -6,8 +6,8 @@ import { ListeDeroulante, normaliser, type OptionListe } from "../composants/Lis
 import { confirmer } from "../composants/Dialogue.js";
 import { chargerReferentiels, lireSortieEnCours, memoriserSortieEnCours } from "../hors-ligne/cache.js";
 import { annulerSortie } from "../hors-ligne/index.js";
-import { formatDate } from "../outils/dates.js";
-import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { formatDate } from "../utilitaires/dates.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 
 export function ListeSorties() {

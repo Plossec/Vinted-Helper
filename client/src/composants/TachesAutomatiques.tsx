@@ -4,8 +4,8 @@
 // (#233). Le journal complet de toutes les tâches suit les cartes.
 import { type FormEvent, type ReactNode, useCallback, useEffect, useState } from "react";
 import { api, type EtatTaches, type ReglagesUtilisateur } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
-import { centimesVersSaisie, lireMontant } from "../outils/montants.js";
+import { formatDateHeure } from "../utilitaires/dates.js";
+import { centimesVersSaisie, lireMontant } from "../utilitaires/montants.js";
 import { JournalTaches } from "./JournalTaches.js";
 import { LancerTache } from "./LancerTache.js";
 

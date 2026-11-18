@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.28.1] — 18/11/2026
+
+### Modifié
+- Rangement du code, sans changement visible : « extension » remplace l'ancien mot « programme » (colonne de la base
+  renommée), fonctions utilitaires dans `utilitaires/`, commandes du serveur dans `server/src/commandes/` (#246,
+  ADR-0115).
+
 ## [1.28.0] — 18/11/2026
 
 ### Ajouté

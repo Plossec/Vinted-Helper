@@ -2,7 +2,7 @@
 // aux couleurs du thème, utilisables au clavier (Échap = annuler) et annoncées aux lecteurs d'écran (<dialog> modal).
 // Usage : `if (!(await confirmer("Supprimer ce boost ?", { action: "Supprimer", danger: true }))) return;`
 import { type FormEvent, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { lireMontant } from "../outils/montants.js";
+import { lireMontant } from "../utilitaires/montants.js";
 
 interface OptionsConfirmation {
   /** Libellé du bouton de validation (« Confirmer » par défaut). */

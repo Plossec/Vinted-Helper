@@ -1,4 +1,4 @@
-// Publication sur Vinted : file d'attente, jeton du programme, résultats (aucune requête vers Vinted).
+// Publication sur Vinted : file d'attente, jeton de l'extension, résultats (aucune requête vers Vinted).
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -18,7 +18,7 @@ describe("publication Vinted", () => {
 
   const requete = (method: "GET" | "POST" | "PUT" | "DELETE", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { cookie: t.cookie }, ...(payload ? { payload } : {}) });
-  const programme = (method: "GET" | "POST", url: string, payload?: object, jeton = t.jeton) =>
+  const extension = (method: "GET" | "POST", url: string, payload?: object, jeton = t.jeton) =>
     t.app.inject({ method, url, headers: { authorization: `Bearer ${jeton}` }, ...(payload ? { payload } : {}) });
 
   /** Article À publier, complet sauf ce qui est retiré. */
@@ -92,20 +92,20 @@ describe("publication Vinted", () => {
     expect(r.refuses[0]?.manques).toEqual(["catégorie Vinted (« Autre » : à publier à la main sur Vinted)"]);
   });
 
-  it("jeton : obligatoire, limité aux routes du programme et à la lecture des photos", async () => {
-    expect((await programme("GET", "/api/programme/suivante", undefined, "faux")).statusCode).toBe(401);
+  it("jeton : obligatoire, limité aux routes de l'extension et à la lecture des photos", async () => {
+    expect((await extension("GET", "/api/programme/suivante", undefined, "faux")).statusCode).toBe(401);
     expect(
       (await t.app.inject({ method: "GET", url: "/api/programme/suivante", headers: { cookie: t.cookie } })).statusCode,
     ).toBe(401);
-    expect((await programme("GET", "/api/articles")).statusCode).toBe(401);
-    expect((await programme("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
+    expect((await extension("GET", "/api/articles")).statusCode).toBe(401);
+    expect((await extension("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
   });
 
   it("demande suivante : données prêtes à saisir, une seule à la fois ; photos lisibles avec le jeton", async () => {
     const a = await article();
     const b = await article();
     await requete("POST", "/api/publications", { articleIds: [a.id, b.id], essai: false });
-    const { publication } = (await programme("GET", "/api/programme/suivante")).json<{
+    const { publication } = (await extension("GET", "/api/programme/suivante")).json<{
       publication: { id: string; essai: boolean; article: Record<string, unknown> & { photos: string[] } };
     }>();
     expect(publication.essai).toBe(false);
@@ -119,18 +119,18 @@ describe("publication Vinted", () => {
       couleurs: ["Bleu"],
       formatColis: "moyen",
     });
-    expect((await programme("GET", publication.article.photos[0] ?? "")).statusCode).toBe(200);
-    expect((await programme("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
+    expect((await extension("GET", publication.article.photos[0] ?? "")).statusCode).toBe(200);
+    expect((await extension("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
   });
 
   it("publié → l'article passe En ligne et garde le lien ; essai → rien ne change", async () => {
     const a = await article();
     await requete("POST", "/api/publications", { articleIds: [a.id], essai: false });
-    const id = (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication
+    const id = (await extension("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication
       .id;
     const url = "https://www.vinted.fr/items/123-jean";
     expect(
-      (await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url })).statusCode,
+      (await extension("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url })).statusCode,
     ).toBe(200);
     expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
       statut: "en_ligne",
@@ -139,21 +139,21 @@ describe("publication Vinted", () => {
     });
     const b = await article();
     await requete("POST", "/api/publications", { articleIds: [b.id] });
-    const idEssai = (await programme("GET", "/api/programme/suivante")).json<{
+    const idEssai = (await extension("GET", "/api/programme/suivante")).json<{
       publication: { id: string; essai: boolean };
     }>().publication;
     expect(idEssai.essai).toBe(true);
-    await programme("POST", `/api/programme/publications/${idEssai.id}/resultat`, { resultat: "essai" });
+    await extension("POST", `/api/programme/publications/${idEssai.id}/resultat`, { resultat: "essai" });
     expect((await requete("GET", `/api/articles/${b.id}`)).json()).toMatchObject({
       statut: "a_publier",
       urlVinted: null,
     });
     const liste = (await requete("GET", "/api/publications")).json<{
       publications: { etat: string }[];
-      programmeVuLe: string;
+      extensionVueLe: string;
     }>();
     expect(liste.publications.map((p) => p.etat).sort()).toEqual(["essai", "publie"]);
-    expect(liste.programmeVuLe).not.toBeNull();
+    expect(liste.extensionVueLe).not.toBeNull();
   });
 
   it("erreur et annulation ; une publication interrompue n'est jamais relancée seule", async () => {
@@ -165,10 +165,10 @@ describe("publication Vinted", () => {
     }>();
     const pourB = liste.publications.find((p) => p.reference === b.reference)?.id ?? "";
     expect((await requete("DELETE", `/api/publications/${pourB}`)).statusCode).toBe(200);
-    const id = (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication
+    const id = (await extension("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication
       .id;
     t.horloge.avancer(16 * 60 * 1000);
-    expect((await programme("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
+    expect((await extension("GET", "/api/programme/suivante")).json()).toEqual({ publication: null });
     const etats = (await requete("GET", "/api/publications")).json<{
       publications: { id: string; etat: string; message: string }[];
     }>();
@@ -178,7 +178,7 @@ describe("publication Vinted", () => {
     });
     expect(
       (
-        await programme("POST", `/api/programme/publications/${id}/resultat`, {
+        await extension("POST", `/api/programme/publications/${id}/resultat`, {
           resultat: "publie",
           url: "https://www.vinted.fr/items/1-jean",
         })
@@ -191,8 +191,8 @@ describe("publication Vinted", () => {
     const b = await article();
     await requete("POST", "/api/publications", { articleIds: [a.id, b.id], essai: false });
     const reponses = await Promise.all([
-      programme("GET", "/api/programme/suivante"),
-      programme("GET", "/api/programme/suivante"),
+      extension("GET", "/api/programme/suivante"),
+      extension("GET", "/api/programme/suivante"),
     ]);
     const prises = reponses.map((r) => r.json<{ publication: { id: string } | null }>().publication);
     expect(prises.filter((p) => p !== null)).toHaveLength(1);
@@ -205,8 +205,8 @@ describe("publication Vinted", () => {
     const id = await prendre(a.id, false);
     const url = "https://www.vinted.fr/items/123-jean";
     const reponses = await Promise.all([
-      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
-      programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+      extension("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
+      extension("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url }),
     ]);
     expect(reponses.map((r) => r.statusCode).sort()).toEqual([200, 409]);
     const lu = (await requete("GET", `/api/articles/${a.id}`)).json<{
@@ -221,14 +221,14 @@ describe("publication Vinted", () => {
     const a = await article();
     const id = await prendre(a.id, false);
     for (const url of ["https://hameconnage.example/items/1", "http://www.vinted.fr/items/1", "", "pas un lien"]) {
-      const r = await programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url });
+      const r = await extension("POST", `/api/programme/publications/${id}/resultat`, { resultat: "publie", url });
       expect(r.statusCode, url).toBe(400);
     }
     expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({
       statut: "a_publier",
       urlVinted: null,
     });
-    const ok = await programme("POST", `/api/programme/publications/${id}/resultat`, {
+    const ok = await extension("POST", `/api/programme/publications/${id}/resultat`, {
       resultat: "publie",
       url: "https://www.vinted.fr/items/123-jean",
     });
@@ -236,17 +236,17 @@ describe("publication Vinted", () => {
   });
 
   it("#121 — résultat d'une publication inconnue : 404", async () => {
-    const r = await programme("POST", `/api/programme/publications/${randomUUID()}/resultat`, { resultat: "essai" });
+    const r = await extension("POST", `/api/programme/publications/${randomUUID()}/resultat`, { resultat: "essai" });
     expect(r.statusCode).toBe(404);
   });
 
   /** Demande une publication et la fait prendre par l'extension ; renvoie l'identifiant de la demande. */
   async function prendre(articleId: string, essai: boolean) {
     await requete("POST", "/api/publications", { articleIds: [articleId], essai });
-    return (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication.id;
+    return (await extension("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>().publication.id;
   }
   const erreur = (id: string, message = "Champ « marque » introuvable sur la page Vinted (à calibrer).") =>
-    programme("POST", `/api/programme/publications/${id}/resultat`, { resultat: "erreur", message });
+    extension("POST", `/api/programme/publications/${id}/resultat`, { resultat: "erreur", message });
 
   it("statut Erreur (#72) : une vraie publication en erreur y fait passer l'article, avec le message", async () => {
     const a = await article();
@@ -289,7 +289,7 @@ describe("publication Vinted", () => {
       statut: "a_publier",
       erreurPublication: null,
     });
-    expect((await programme("GET", "/api/programme/suivante")).json<{ publication: unknown }>().publication).not.toBe(
+    expect((await extension("GET", "/api/programme/suivante")).json<{ publication: unknown }>().publication).not.toBe(
       null,
     );
   });
@@ -303,7 +303,7 @@ describe("publication Vinted", () => {
     const b = await article();
     await prendre(b.id, false);
     t.horloge.avancer(16 * 60 * 1000);
-    await programme("GET", "/api/programme/suivante");
+    await extension("GET", "/api/programme/suivante");
     expect((await requete("GET", `/api/articles/${b.id}`)).json()).toMatchObject({
       statut: "erreur_publication",
       erreurPublication: expect.stringMatching(/Interrompue/),
@@ -320,7 +320,7 @@ describe("publication Vinted", () => {
     expect(r.acceptes).toEqual([a.reference]);
     expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({ statut: "erreur_publication" });
     // L'essai échoue avec un autre message : la fiche garde celui de la vraie publication.
-    const essai = (await programme("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>()
+    const essai = (await extension("GET", "/api/programme/suivante")).json<{ publication: { id: string } }>()
       .publication.id;
     await erreur(essai, "Message de l'essai.");
     expect((await requete("GET", `/api/articles/${a.id}`)).json()).toMatchObject({

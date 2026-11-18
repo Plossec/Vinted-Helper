@@ -22,7 +22,7 @@ import type { ReglageBaisseArticle } from "../calculs/baisse.js";
 import { manquesArticle } from "../metier/completude.js";
 import { estTransitionSimple, type Statut, transitionsProposees, verifierTransition } from "../metier/statuts.js";
 import { calculer } from "../couts/service.js";
-import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 import type { Article, ResumeArticle } from "../api/types.js";
 import { conforme } from "../api/conforme.js";

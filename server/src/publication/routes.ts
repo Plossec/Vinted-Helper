@@ -1,8 +1,8 @@
-// Routes de la publication Vinted : interface (session) et programme du PC (jeton « Bearer »).
+// Routes de la publication Vinted : interface (session) et extension (jeton « Bearer », routes /api/programme/* : ancien nom gardé, #246).
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { erreurSaisie } from "../outils/erreurs.js";
-import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
+import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../utilitaires/validation.js";
 import { lectureCommandesDue } from "../taches/finalisation.js";
 import { nombreActionsEnAttente, planifierTaches } from "../taches/service.js";
 import {
@@ -13,7 +13,7 @@ import {
   enregistrerResultat,
   listerPublications,
   nombreEnAttente,
-  type ResultatProgramme,
+  type ResultatExtension,
 } from "./service.js";
 import type { ReponsePublication, SuiviPublication } from "../api/types.js";
 import { conforme } from "../api/conforme.js";
@@ -40,7 +40,7 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
 
   app.post("/api/publication/jeton", async (requete) => ({ jeton: await creerJeton(base, utilisateurDe(requete).id) }));
 
-  // --- Programme du PC ---
+  // --- Extension (routes /api/programme/*) ---
   app.get("/api/programme/attente", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;
     // Tâches automatisées (#147) : planifiées au passage de l'extension, qui seule agit sur Vinted. Un échec ici
@@ -65,7 +65,7 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
 
   app.post("/api/programme/publications/:id/resultat", async (requete) => {
     const c = objet(requete.body);
-    let r: ResultatProgramme;
+    let r: ResultatExtension;
     if (c.resultat === "publie") {
       // Même contrôle que le lien saisi à la main (issue #128) : uniquement une adresse https de Vinted.
       const url = lienVintedFacultatif(c.url, "Lien de l'annonce");

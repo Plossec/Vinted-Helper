@@ -12,7 +12,7 @@ import { poserCookie, routesCompte } from "./compte/routes.js";
 import { lireSession, NOM_COOKIE, type UtilisateurConnecte } from "./compte/sessions.js";
 import { type ClientIA, creerClientGemini, MODELE_SECOURS_DEFAUT } from "./ia/gemini.js";
 import { routesIA } from "./ia/routes.js";
-import { ErreurMetier, nonConnecte } from "./outils/erreurs.js";
+import { ErreurMetier, nonConnecte } from "./utilitaires/erreurs.js";
 import { routesPhotos } from "./photos/routes.js";
 import { routesPointsRelais } from "./points-relais/routes.js";
 import { routesPublication } from "./publication/routes.js";
@@ -110,14 +110,14 @@ export async function creerApp({
   app.addHook("onRequest", async (requete, reponse) => {
     const chemin = cheminControle(requete);
     if (!chemin.startsWith("/api/")) return;
-    // Programme de publication du PC : jeton personnel, limité à ses routes et à la lecture des photos.
+    // Extension de publication : jeton personnel (routes /api/programme/*, ancien nom gardé, #246), limité à ses routes et à la lecture des photos.
     const autorisation = requete.headers.authorization;
     if (autorisation?.startsWith("Bearer ")) {
       const permis =
         chemin.startsWith("/api/programme/") || (requete.method === "GET" && chemin.startsWith("/api/photos/"));
-      const programme = permis ? await utilisateurParJeton(base, autorisation.slice(7).trim()) : null;
-      if (!programme) throw nonConnecte();
-      utilisateurs.set(requete, programme);
+      const extension = permis ? await utilisateurParJeton(base, autorisation.slice(7).trim()) : null;
+      if (!extension) throw nonConnecte();
+      utilisateurs.set(requete, extension);
       return;
     }
     if (chemin.startsWith("/api/programme/")) throw nonConnecte();

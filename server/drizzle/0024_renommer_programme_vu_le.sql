@@ -1,0 +1,1 @@
+ALTER TABLE "reglages" RENAME COLUMN "programme_vu_le" TO "extension_vue_le";

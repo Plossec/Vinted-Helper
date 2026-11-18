@@ -287,10 +287,10 @@ describe("tâche « Articles dormants »", () => {
   });
 
   describe("exécution par l'extension (étape 2)", () => {
-    const programme = (method: "GET" | "POST", url: string, payload?: object) =>
+    const extension = (method: "GET" | "POST", url: string, payload?: object) =>
       t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
     const suivante = async () =>
-      (await programme("GET", "/api/programme/action-suivante")).json<{
+      (await extension("GET", "/api/programme/action-suivante")).json<{
         action: {
           id: string;
           type: string;
@@ -301,7 +301,7 @@ describe("tâche « Articles dormants »", () => {
           annonce: unknown;
         } | null;
       }>().action;
-    const resultat = (id: string, corps: object) => programme("POST", `/api/programme/actions/${id}/resultat`, corps);
+    const resultat = (id: string, corps: object) => extension("POST", `/api/programme/actions/${id}/resultat`, corps);
     const lire = async (id: string) =>
       (await requete("GET", `/api/articles/${id}`)).json<{
         statut: string;

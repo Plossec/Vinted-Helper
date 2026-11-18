@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.28.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.28.1**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -85,6 +85,18 @@ flowchart TB
   sw -- "jeton vh_…" --> routes
   base --> pg[("PostgreSQL")]
 ```
+
+Noms des dossiers (#246) :
+
+| Dossier | Contenu |
+|---|---|
+| `outils/extension-vinted/` | L'extension Chrome (chargée dans Chrome depuis ce dossier : son nom ne change pas) |
+| `server/src/utilitaires/`, `client/src/utilitaires/` | Fonctions utilitaires (erreurs, validation, formats, montants, dates…) |
+| `server/src/commandes/` | Commandes lancées à la main (`npm run reset-password`, `import-tableur`, `photos:sans-metadonnees`, `doc:categories`) |
+| `server/src/test/`, `server/navigateur/` | Outils des tests (base en mémoire, parcours dans Chromium) |
+
+« Extension » est le seul nom du logiciel de publication ; les routes qu'elle appelle gardent leur ancien nom
+`/api/programme/*` (programme du PC retiré, ADR-0036) pour ne pas casser la publication entre deux mises à jour.
 
 ## 3. Modèle de données
 

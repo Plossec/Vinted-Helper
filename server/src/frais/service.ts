@@ -4,7 +4,7 @@ import type { Base } from "../base/connexion.js";
 import { boost, fraisGeneral, reglages } from "../base/schema.js";
 import { chargerArticle } from "../articles/service.js";
 import type { FormatColis } from "../catalogue/couleurs.js";
-import { introuvable } from "../outils/erreurs.js";
+import { introuvable } from "../utilitaires/erreurs.js";
 
 export async function ajouterBoost(
   base: Base,

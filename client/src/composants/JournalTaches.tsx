@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type EtatJournal, type LigneJournal, type TacheAutomatique } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
+import { formatDateHeure } from "../utilitaires/dates.js";
 import { formatReference } from "../statuts.js";
 import { CLASSES, ETATS, libelleAction } from "./ActionsTaches.js";
 import { NouvelOnglet } from "./NouvelOnglet.js";

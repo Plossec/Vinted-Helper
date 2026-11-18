@@ -2,7 +2,7 @@
 import { and, asc, desc, eq, inArray, isNull, max } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, articlePhoto, photo } from "../base/schema.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import type { StockagePhotos } from "./stockage.js";
 
 export type TypePhoto = "terrain" | "annonce";

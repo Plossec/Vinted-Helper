@@ -1,8 +1,8 @@
 // Routes de l'API des listes de référence.
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { introuvable } from "../outils/erreurs.js";
-import { objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { introuvable } from "../utilitaires/erreurs.js";
+import { objet, texteObligatoire, uuidObligatoire } from "../utilitaires/validation.js";
 import {
   ajouterValeur,
   estTypeReferentiel,

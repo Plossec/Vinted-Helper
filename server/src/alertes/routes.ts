@@ -8,7 +8,7 @@ import { article, historiquePrix, historiqueStatut, signalementVu, vente, venteA
 import { manquesArticle } from "../metier/completude.js";
 import { lireReglages } from "../frais/service.js";
 import { calculerAlertes, GROUPES_VU, type GroupeVu, masquerVus } from "../metier/alertes.js";
-import { erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 import { nombresCommandes } from "../taches/finalisation.js";
 import { annulerActionsPerimees, nombreAValider } from "../taches/service.js";

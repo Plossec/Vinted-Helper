@@ -2,7 +2,7 @@
 // Secours si Gemini est indisponible : « Copier le prompt » pour une IA gratuite (Claude.ai, ChatGPT, Gemini).
 import { useState } from "react";
 import { api, type Article, ErreurApi } from "../api.js";
-import { useSignalerModification } from "../outils/modifications.js";
+import { useSignalerModification } from "../utilitaires/modifications.js";
 import { confirmer } from "./Dialogue.js";
 
 async function copier(texte: string): Promise<boolean> {

@@ -6,8 +6,8 @@ import { actionVinted, article, historiquePrix, historiqueStatut, reglages } fro
 import { jourParis } from "../calculs/indicateurs.js";
 import { calculerAlertes } from "../metier/alertes.js";
 import { type CandidatDormant, heureParis, passageDu, planifierDormants } from "../metier/taches.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
-import { centimesVersSaisie } from "../outils/format.js";
+import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
+import { centimesVersSaisie } from "../utilitaires/format.js";
 import { annonceARepublier } from "../publication/service.js";
 
 const EN_COURS = ["a_valider", "en_attente", "en_cours"] as const;

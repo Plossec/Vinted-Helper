@@ -7,7 +7,7 @@ import { chargerArticle, verifierCompletude, verifierDate } from "../articles/se
 import { calculer } from "../couts/service.js";
 import type { MotifSortie } from "../calculs/benefice.js";
 import { estTransitionSimple, STATUTS_COLIS, type Statut, verifierTransition } from "../metier/statuts.js";
-import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import type { Vente } from "../api/types.js";
 import { conforme } from "../api/conforme.js";
 

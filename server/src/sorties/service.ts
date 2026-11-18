@@ -3,7 +3,7 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
 import { article, lieu, lotAchat, sortie } from "../base/schema.js";
 import { calculer } from "../couts/service.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 
 export interface DonneesSortie {

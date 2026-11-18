@@ -5,7 +5,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { article, historiqueStatut, lieu, lotAchat } from "../base/schema.js";
 import { prochaineReference } from "../articles/service.js";
-import { conflit, erreurSaisie } from "../outils/erreurs.js";
+import { conflit, erreurSaisie } from "../utilitaires/erreurs.js";
 import { lierPhoto, verifierPhoto } from "../photos/service.js";
 import { chargerSortie } from "../sorties/service.js";
 
