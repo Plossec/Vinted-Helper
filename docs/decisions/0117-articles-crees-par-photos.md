@@ -1,11 +1,11 @@
 # ADR-0117 — Articles créés à partir de photos
 
 - **Date** : 18/11/2026
-- **Statut** : Accepté · à relire
+- **Statut** : Accepté
 - **Décideurs** : utilisateur, avec des points tranchés par Claude
 - **Issue** : #276
 - **Thème** : IA Gemini
-- **À relire** : oui
+- **À relire** : non (validé par l'utilisateur le 18/11/2026)
 
 [← Index des décisions](README.md)
 
@@ -21,13 +21,13 @@ suggestion de prix est retiré par #277 ([ADR-0116](0116-hors-perimetre-retire.m
 | Sujet | Décision |
 |---|---|
 | Où | Écran « Nouveaux articles par photos » (Articles → lien en bas), téléphone (galerie) et PC (choix de fichiers) (choix de l'utilisateur). |
-| Regroupement | Un appel à l'IA avec toutes les photos réduites : elle propose un groupe par article ; l'utilisateur déplace une photo si besoin, puis crée (choix de l'utilisateur). Sans l'IA (quota, panne) : une photo par article, à regrouper à la main (choix de Claude, *à relire*). |
+| Regroupement | Un appel à l'IA avec toutes les photos réduites : elle propose un groupe par article ; l'utilisateur déplace une photo si besoin, puis crée (choix de l'utilisateur). Sans l'IA (quota, panne) : une photo par article, à regrouper à la main (choix de Claude, validé par l'utilisateur). |
 | Création | Un **brouillon** par groupe, photos d'annonce (la première est la principale) ; pas de relecture des champs avant (choix de l'utilisateur). |
 | Achat | Sortie, ou lieu et date, **une fois pour le lot** ; prix d'achat total facultatif : réparti comme un lot (§6.1) s'il y a plusieurs articles, sinon à compléter article par article (choix de l'utilisateur). |
-| Remplissage | Un appel par article (photos et étiquette ensemble, 10 photos au plus envoyées) : nom, catégorie, marque (créée si nouvelle), état, couleurs (2 au plus), taille, matière, titre et description (« Réf. N »), **prix affiché proposé** (arrondi au 0,50 € au-dessus, `calculs/prix-propose.ts`) (choix de l'utilisateur). Seuls les champs encore vides sont remplis (choix de Claude, *à relire*). |
-| Quota | Même limite que les boutons (30 appels par heure) ; au-delà, l'article reste « en attente d'analyse » et passe au tour suivant (toutes les 10 minutes) (choix de l'utilisateur ; intervalle : choix de Claude, *à relire*). Après **3 erreurs** de l'IA, l'article est « à remplir à la main » (choix de Claude, *à relire*). |
-| Ce qui manque | Écran « À faire », section « À traiter » : « Créé par photos — il manque : … » (analyse en attente, nom, prix d'achat, prix affiché, annonce, catégorie, marque, état, couleur, photos), lien « Compléter » ; un tel brouillon n'est pas aussi compté comme « brouillon ancien » (choix de Claude, *à relire*). |
-| Limites | 60 photos par lot (choix de Claude, *à relire*) ; moins de 10 photos par article conseillées, avertissement au-delà (choix de l'utilisateur). |
+| Remplissage | Un appel par article (photos et étiquette ensemble, 10 photos au plus envoyées) : nom, catégorie, marque (créée si nouvelle), état, couleurs (2 au plus), taille, matière, titre et description (« Réf. N »), **prix affiché proposé** (arrondi au 0,50 € au-dessus, `calculs/prix-propose.ts`) (choix de l'utilisateur). Seuls les champs encore vides sont remplis (choix de Claude, validé par l'utilisateur). |
+| Quota | Même limite que les boutons (30 appels par heure) ; au-delà, l'article reste « en attente d'analyse » et passe au tour suivant (toutes les 10 minutes) (choix de l'utilisateur ; intervalle : choix de Claude, validé par l'utilisateur). Après **3 erreurs** de l'IA, l'article est « à remplir à la main » (choix de Claude, validé par l'utilisateur). |
+| Ce qui manque | Écran « À faire », section « À traiter » : « Créé par photos — il manque : … » (analyse en attente, nom, prix d'achat, prix affiché, annonce, catégorie, marque, état, couleur, photos), lien « Compléter » ; un tel brouillon n'est pas aussi compté comme « brouillon ancien » (choix de Claude, validé par l'utilisateur). |
+| Limites | 60 photos par lot (choix de Claude, validé par l'utilisateur) ; moins de 10 photos par article conseillées, avertissement au-delà (choix de l'utilisateur). |
 
 ## Conséquences
 

@@ -42,6 +42,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0108](0108-tests-de-l-interface-dans-chromium.md) | 17/11/2026 | Tests de l'interface dans Chromium | Proposé |
 | [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Accepté · à relire |
 | [0101](0101-index-des-decisions-allege.md) | 19/10/2026 | Index des décisions allégé : par thème, statut en un mot | Accepté |
+| [0116](0116-hors-perimetre-retire.md) | 18/11/2026 | « Hors périmètre » (§10) retiré du cahier des charges | Accepté |
 
 ## Socle
 
@@ -116,7 +117,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0032](0032-gemini-modele-retire-et-serveurs-surcharges.md) | 07/10/2026 | Gemini : modèle retiré et serveurs surchargés | Modifié |
 | [0033](0033-gemini-modele-de-secours.md) | 07/10/2026 | Gemini : modèle de secours | Accepté |
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | Accepté |
-| [0117](0117-articles-crees-par-photos.md) | 18/11/2026 | Articles créés à partir de photos | Accepté · à relire |
+| [0117](0117-articles-crees-par-photos.md) | 18/11/2026 | Articles créés à partir de photos | Accepté |
 
 ## Photos et sauvegardes
 
@@ -206,4 +207,4 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 
 | N° | Date | Décision | Statut |
 |---|---|---|---|
-| [0023](0023-import-du-tableur-compte-2026-vinted.md) | 07/10/2026 | Import du tableur « compte 2026 - Vinted » | Accepté |
+| [0023](0023-import-du-tableur-compte-2026-vinted.md) | 07/10/2026 | Import du tableur « compte 2026 - Vinted » | Modifié |

@@ -12,6 +12,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
   propose un article par groupe de photos, vous corrigez, puis les brouillons sont créés et remplis par l'IA (nom,
   catégorie, marque, état, couleurs, annonce, prix proposé). Ce qui manque apparaît dans « À faire » (#276, ADR-0117).
 
+## [1.28.3] — 18/11/2026
+
+### Modifié
+- Cahier des charges : la section « Hors périmètre » (§10) est retirée, et avec elle la règle de Claude qui
+  l'interdisait ; chaque nouvelle idée reste décidée avec vous dans une issue (#277, ADR-0116).
+
 ## [1.28.2] — 18/11/2026
 
 ### Modifié
