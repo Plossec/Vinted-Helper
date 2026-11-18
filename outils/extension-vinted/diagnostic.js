@@ -1,4 +1,5 @@
 // Page du diagnostic (issue #56) : résumé et téléchargement du relevé du formulaire Vinted.
+/* global texteDuReleve */
 const $ = (id) => document.getElementById(id);
 
 void chrome.storage.local.get("diagnostic").then((/** @type {StockageExtension} */ { diagnostic }) => {
@@ -26,7 +27,7 @@ void chrome.storage.local.get("diagnostic").then((/** @type {StockageExtension} 
   bouton.hidden = false;
   bouton.addEventListener("click", () => {
     const lien = document.createElement("a");
-    lien.href = URL.createObjectURL(new Blob([JSON.stringify(diagnostic, null, 2)], { type: "application/json" }));
+    lien.href = URL.createObjectURL(new Blob([texteDuReleve(diagnostic)], { type: "application/json" }));
     lien.download = `diagnostic-vinted-${diagnostic.date.slice(0, 19).replace(/[:T]/g, "-")}.json`;
     lien.click();
     URL.revokeObjectURL(lien.href);

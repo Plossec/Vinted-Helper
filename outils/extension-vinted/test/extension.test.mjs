@@ -198,6 +198,35 @@ test("« Relever cet onglet » (#224) : page ouverte relevée telle quelle, boî
     d.dialogues[0].elements.some((e) => e.testid === "item-delete-confirmation-button" && e.texte === "supprimer"),
   );
   assert.equal(d.boutonsTrouves.supprimer, true);
+  // Relevé compact (#253) : aucun champ vide, `visible` seulement quand l'élément est caché.
+  const tous = [...d.elements, ...d.dialogues, ...d.dialogues.flatMap((x) => x.elements)];
+  assert.ok(tous.length > 0);
+  for (const e of tous) {
+    assert.ok(!Object.values(e).includes(null), JSON.stringify(e));
+    assert.notEqual(e.visible, true, JSON.stringify(e));
+  }
+});
+
+test("fichier du relevé (#253) : un élément par ligne, le reste indenté, contenu identique", async () => {
+  const { readFileSync } = await import("node:fs");
+  const vm = await import("node:vm");
+  const contexte = {};
+  vm.runInNewContext(readFileSync(join(SOURCE, "format-releve.js"), "utf8"), contexte);
+  const releve = {
+    adresse: "https://www.vinted.fr/items/new",
+    selecteursTrouves: { titre: '[data-testid="title--input"]', taille: null },
+    elements: [
+      { balise: "button", testid: "a", texte: "ok" },
+      { balise: "input", name: "title", valeur: "Jean" },
+    ],
+    dialogues: [{ balise: "div", role: "dialog", elements: [{ balise: "button", texte: "annuler" }] }],
+  };
+  const texte = contexte.texteDuReleve(releve);
+  assert.deepEqual(JSON.parse(texte), releve);
+  const lignes = texte.split("\n");
+  assert.ok(lignes.includes('    {"balise":"button","testid":"a","texte":"ok"},'));
+  assert.ok(lignes.includes('        {"balise":"button","texte":"annuler"}'));
+  assert.ok(lignes.includes('  "adresse": "https://www.vinted.fr/items/new",'));
 });
 
 test("« Relever cet onglet » sur une page qui n'est pas Vinted : refusé avec un message", async () => {

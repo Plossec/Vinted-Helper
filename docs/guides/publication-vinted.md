@@ -183,6 +183,8 @@ Pour Claude (agent `analyste-releve`) : contenu du fichier `diagnostic-vinted-�
   `options « Femmes »` (ancêtres des éléments dont le texte est « Femmes »).
 - Chaque élément : `balise`, `type`, `name`, `id`, `testid`, `role`, `aria`, `ariaExpanded`, `placeholder`,
   `valeur` (ce que le champ contient, y compris ce que Vinted a pré-rempli), `coche`, `classe`, `texte` (80
-  caractères, en minuscules, espaces regroupés), `visible`.
+  caractères, en minuscules, espaces regroupés), `visible`. **Relevé compact** (extension 1.15.0, #253) : un champ
+  absent est vide, et `visible` n'apparaît que pour un élément caché (`false`). Dans le fichier téléchargé, chaque
+  élément tient sur **une ligne**.
 - `selecteursTrouves` : pour chaque champ de `SELECTEURS.champs`, le premier sélecteur présent, ou `null`. Un `null`
   n'est pas forcément une erreur (champ affiché seulement après le choix de la catégorie).
