@@ -15,7 +15,7 @@ import {
 } from "../frais/service.js";
 import { lireArticle } from "../articles/service.js";
 import { estFormatColis } from "../catalogue/couleurs.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import { reduirePhotos } from "../photos/reduction.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import {
@@ -31,7 +31,7 @@ import {
   texteFacultatif,
   texteObligatoire,
   uuidObligatoire,
-} from "../outils/validation.js";
+} from "../utilitaires/validation.js";
 import {
   annulerDernierChangement,
   annulerSortieStock,

@@ -13,9 +13,9 @@ import {
   nombreCommandes,
   type SectionAFaire,
   sectionsAFaire,
-} from "../outils/alertes.js";
-import { chargerAlertes } from "../outils/alertesCache.js";
-import { formatDate } from "../outils/dates.js";
+} from "../utilitaires/alertes.js";
+import { chargerAlertes } from "../utilitaires/alertesCache.js";
+import { formatDate } from "../utilitaires/dates.js";
 import { demanderPublication } from "../publication.js";
 import { formatReference } from "../statuts.js";
 

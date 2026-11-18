@@ -3,10 +3,10 @@
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article, LIBELLES_CANAL, LIBELLES_MOTIF } from "../api.js";
-import { aujourdhui, formatDate, formatDateHeure } from "../outils/dates.js";
-import { formatEuros, lireMontant } from "../outils/montants.js";
+import { aujourdhui, formatDate, formatDateHeure } from "../utilitaires/dates.js";
+import { formatEuros, lireMontant } from "../utilitaires/montants.js";
 import { Montant } from "./Montant.js";
-import { useSignalerModification } from "../outils/modifications.js";
+import { useSignalerModification } from "../utilitaires/modifications.js";
 import { confirmer } from "./Dialogue.js";
 
 export function BlocMontants({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {

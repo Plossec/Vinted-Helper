@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { type ActionVinted, type ActionsAValider as Actions, api } from "../api.js";
-import { formatEuros } from "../outils/montants.js";
+import { formatEuros } from "../utilitaires/montants.js";
 import { formatReference } from "../statuts.js";
 
 export const ETATS: Record<ActionVinted["etat"], string> = {

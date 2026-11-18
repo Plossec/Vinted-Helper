@@ -12,8 +12,8 @@ import {
 } from "../hors-ligne/cache.js";
 import type { CorpsAchat, Operation } from "../hors-ligne/file.js";
 import { ajouterALaFile, annulerSortie, useFile } from "../hors-ligne/index.js";
-import { aujourdhui, formatDate } from "../outils/dates.js";
-import { formatEuros, lireMontant } from "../outils/montants.js";
+import { aujourdhui, formatDate } from "../utilitaires/dates.js";
+import { formatEuros, lireMontant } from "../utilitaires/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 import { confirmer } from "../composants/Dialogue.js";
 

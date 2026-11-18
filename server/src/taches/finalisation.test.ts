@@ -43,13 +43,13 @@ describe("tâche « Vérification vente finalisée »", () => {
 
   const requete = (method: "GET" | "POST" | "PUT", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { cookie: t.cookie }, ...(payload ? { payload } : {}) });
-  const programme = (method: "GET" | "POST", url: string, payload?: object) =>
+  const extension = (method: "GET" | "POST", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
   const liste = async () => (await requete("GET", "/api/taches/commandes")).json<Liste>();
   const lire = async (id: string) =>
     (await requete("GET", `/api/articles/${id}`)).json<{ statut: string; urlVinted: string | null }>();
   const envoyer = (commandes: object[], essai = false) =>
-    programme("POST", "/api/programme/commandes", { essai, commandes });
+    extension("POST", "/api/programme/commandes", { essai, commandes });
   const regler = (extra: object = {}) =>
     requete("PUT", "/api/reglages", { finalisationActive: true, finalisationEssai: false, ...extra });
 
@@ -88,7 +88,7 @@ describe("tâche « Vérification vente finalisée »", () => {
 
   it("« Lancer maintenant » (#230) : lecture due à toute heure, même désactivée, une seule fois", async () => {
     const attente = async () =>
-      (await programme("GET", "/api/programme/attente")).json<{ lectureCommandes: boolean }>().lectureCommandes;
+      (await extension("GET", "/api/programme/attente")).json<{ lectureCommandes: boolean }>().lectureCommandes;
     t.horloge.avancer(11 * 3_600_000); // 23 h à Paris, tâche désactivée
     expect(await attente()).toBe(false);
     const r = await requete("POST", "/api/taches/finalisation/lancer");
@@ -102,7 +102,7 @@ describe("tâche « Vérification vente finalisée »", () => {
     const a = await envoye("111");
     await colis([a], 1000);
     const attente = async () =>
-      (await programme("GET", "/api/programme/attente")).json<{ lectureCommandes: boolean }>().lectureCommandes;
+      (await extension("GET", "/api/programme/attente")).json<{ lectureCommandes: boolean }>().lectureCommandes;
     expect(await attente()).toBe(false); // désactivée par défaut
     await requete("PUT", "/api/reglages", { finalisationActive: true }); // mode essai des tâches : coché par défaut
     expect(await attente()).toBe(true);

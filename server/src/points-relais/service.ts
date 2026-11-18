@@ -2,7 +2,7 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { pointRelais, vente } from "../base/schema.js";
-import { erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import type { CodeTransporteur, Horaires } from "./horaires.js";
 
 export interface DonneesPointRelais {

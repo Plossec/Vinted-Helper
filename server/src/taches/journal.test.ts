@@ -41,12 +41,12 @@ describe("refonte des tâches (#232, #233)", () => {
 
   const requete = (method: "GET" | "POST" | "PUT", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { cookie: t.cookie }, ...(payload ? { payload } : {}) });
-  const programme = (method: "GET" | "POST", url: string, payload?: object) =>
+  const extension = (method: "GET" | "POST", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
   const passage = async () =>
-    (await programme("GET", "/api/programme/attente")).json<{ actions: number; lectureCommandes: boolean }>();
+    (await extension("GET", "/api/programme/attente")).json<{ actions: number; lectureCommandes: boolean }>();
   const suivante = async () =>
-    (await programme("GET", "/api/programme/action-suivante")).json<{ action: { id: string; essai: boolean } | null }>()
+    (await extension("GET", "/api/programme/action-suivante")).json<{ action: { id: string; essai: boolean } | null }>()
       .action;
   const journal = async (filtres = "") =>
     (await requete("GET", `/api/taches/journal${filtres}`)).json<{ lignes: LigneJournal[] }>().lignes;
@@ -93,7 +93,7 @@ describe("refonte des tâches (#232, #233)", () => {
     // Ventes finalisées toujours en essai : la lecture est notée, aucune commande enregistrée.
     const commande = { idCommande: "C1", annonces: ["123"], dateFin: "2026-10-12T10:00:00.000Z" };
     expect(
-      (await programme("POST", "/api/programme/commandes", { essai: false, commandes: [commande] })).json(),
+      (await extension("POST", "/api/programme/commandes", { essai: false, commandes: [commande] })).json(),
     ).toEqual({ nouvelles: 0 });
     expect((await requete("GET", "/api/taches/commandes")).json()).toMatchObject({ aValider: [], aRattacher: [] });
     expect(await journal("?tache=finalisation")).toMatchObject([{ etat: "essai", essai: true }]);
@@ -112,12 +112,12 @@ describe("refonte des tâches (#232, #233)", () => {
     await passage();
     const x = await suivante();
     const erreur = { resultat: "erreur", message: "Bouton « Modifier » introuvable.", releve: true };
-    expect((await programme("POST", `/api/programme/actions/${x?.id}/resultat`, erreur)).statusCode).toBe(200);
+    expect((await extension("POST", `/api/programme/actions/${x?.id}/resultat`, erreur)).statusCode).toBe(200);
     t.horloge.avancer(60_000);
     const lecture = { essai: true, commandes: [], erreur: "Page « Porte-monnaie » introuvable.", releve: true };
-    expect((await programme("POST", "/api/programme/commandes", lecture)).statusCode).toBe(200);
+    expect((await extension("POST", "/api/programme/commandes", lecture)).statusCode).toBe(200);
     t.horloge.avancer(60_000);
-    await programme("POST", "/api/programme/commandes", { essai: true, commandes: [] });
+    await extension("POST", "/api/programme/commandes", { essai: true, commandes: [] });
 
     expect(await journal()).toMatchObject([
       { tache: "finalisation", etat: "essai", message: null, releve: false },
@@ -138,11 +138,11 @@ describe("refonte des tâches (#232, #233)", () => {
   it("lecture des ventes en erreur : la demande s'efface et la lecture attend sa fréquence", async () => {
     await requete("PUT", "/api/reglages", { finalisationActive: true });
     expect((await passage()).lectureCommandes).toBe(true);
-    await programme("POST", "/api/programme/commandes", { essai: true, commandes: [], erreur: "Session expirée." });
+    await extension("POST", "/api/programme/commandes", { essai: true, commandes: [], erreur: "Session expirée." });
     expect((await passage()).lectureCommandes).toBe(false);
     await requete("POST", "/api/taches/finalisation/lancer");
     expect((await passage()).lectureCommandes).toBe(true);
-    await programme("POST", "/api/programme/commandes", { essai: true, commandes: [], erreur: "Session expirée." });
+    await extension("POST", "/api/programme/commandes", { essai: true, commandes: [], erreur: "Session expirée." });
     expect((await passage()).lectureCommandes).toBe(false);
     expect(await journal()).toMatchObject([
       { etat: "erreur", manuelle: true },

@@ -13,10 +13,10 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=../.env --import tsx src/base/migrer-cli.ts",
-    "reset-password": "node dist/outils/reinitialiser-mot-de-passe.js",
-    "import-tableur": "node dist/outils/importer-tableur.js",
-    "photos:sans-metadonnees": "node dist/outils/photos-sans-metadonnees.js",
-    "doc:categories": "node --import tsx src/outils/generer-doc-categories.ts"
+    "reset-password": "node dist/commandes/reinitialiser-mot-de-passe.js",
+    "import-tableur": "node dist/commandes/importer-tableur.js",
+    "photos:sans-metadonnees": "node dist/commandes/photos-sans-metadonnees.js",
+    "doc:categories": "node --import tsx src/commandes/generer-doc-categories.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.5",

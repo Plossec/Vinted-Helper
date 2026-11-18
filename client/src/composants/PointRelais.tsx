@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article, type Etat, type ListePointsRelais, type PointRelais } from "../api.js";
-import { etatOuverture } from "../outils/horaires.js";
+import { etatOuverture } from "../utilitaires/horaires.js";
 
 export function libelleTransporteur(transporteurs: readonly Etat[], code: string): string {
   return transporteurs.find((t) => t.code === code)?.libelle ?? code;

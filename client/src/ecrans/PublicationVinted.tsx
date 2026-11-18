@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type EtatPublication, type SuiviPublication as Suivi } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
+import { formatDateHeure } from "../utilitaires/dates.js";
 import { ecrireModeEssai, lireModeEssai } from "../publication.js";
 import { formatReference } from "../statuts.js";
 import { confirmer } from "../composants/Dialogue.js";
@@ -20,7 +20,7 @@ const LIBELLES: Record<EtatPublication, string> = {
 
 /** L'extension interroge l'application toutes les 5 minutes et attend 10 minutes entre deux publications :
  * au-delà de 16 minutes sans contact, elle est considérée inactive. */
-const programmeActif = (vuLe: string | null) => vuLe !== null && Date.now() - new Date(vuLe).getTime() < 16 * 60_000;
+const extensionActive = (vuLe: string | null) => vuLe !== null && Date.now() - new Date(vuLe).getTime() < 16 * 60_000;
 
 export function PublicationVinted() {
   const [suivi, setSuivi] = useState<Suivi | null>(null);
@@ -72,11 +72,11 @@ export function PublicationVinted() {
           Extension Chrome :{" "}
           {suivi === null ? (
             "…"
-          ) : programmeActif(suivi.programmeVuLe) ? (
+          ) : extensionActive(suivi.extensionVueLe) ? (
             <strong className="positif">actif</strong>
           ) : (
             <strong className="negatif">
-              inactive{suivi.programmeVuLe ? ` (dernier contact ${formatDateHeure(suivi.programmeVuLe)})` : ""}
+              inactive{suivi.extensionVueLe ? ` (dernier contact ${formatDateHeure(suivi.extensionVueLe)})` : ""}
             </strong>
           )}
         </p>

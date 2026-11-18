@@ -415,10 +415,10 @@ export const reglages = pgTable(
     promptEtiquette: text("prompt_etiquette"),
     /** Publication Vinted : format de colis proposé par défaut. */
     formatColisDefaut: formatColis("format_colis_defaut").notNull().default("petit"),
-    /** Empreinte SHA-256 du jeton du programme de publication (le jeton lui-même n'est jamais stocké). */
+    /** Empreinte SHA-256 du jeton de l'extension de publication (le jeton lui-même n'est jamais stocké). */
     jetonPublication: text("jeton_publication"),
-    /** Dernier contact du programme de publication. */
-    programmeVuLe: horodatage("programme_vu_le"),
+    /** Dernier contact de l'extension de publication (#246 : ancienne colonne programme_vu_le). */
+    extensionVueLe: horodatage("extension_vue_le"),
     // Tâches automatisées (#147, ADR-0072, ADR-0078) ; plage horaire (heure de Paris) et mode essai propres à chaque
     // tâche (#232, ADR-0105). Mode essai : l'extension ouvre les pages Vinted mais ne modifie rien (jusqu'au calibrage).
     // Tâche « Articles dormants » (#147, ADR-0073).
@@ -472,11 +472,11 @@ export const reglages = pgTable(
     /** « Lancer maintenant » : lecture des favoris demandée, faite au prochain passage, à toute heure. */
     favorisLancementDemande: horodatage("favoris_lancement_demande"),
   },
-  // Le programme du PC s'identifie par son jeton à chaque appel (#131).
+  // L'extension s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
 );
 
-/** File de publication sur Vinted : une demande par article, traitée par le programme du PC. */
+/** File de publication sur Vinted : une demande par article, traitée par l'extension. */
 export const publicationVinted = pgTable(
   "publication_vinted",
   {

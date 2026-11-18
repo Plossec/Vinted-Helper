@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type ArticleSupprime, urlVignette } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
+import { formatDateHeure } from "../utilitaires/dates.js";
 import { formatReference } from "../statuts.js";
 import { confirmer } from "../composants/Dialogue.js";
 

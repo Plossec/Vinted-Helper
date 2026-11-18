@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type CommandeVinted, type CommandesVintedListe as Commandes, type ResumeArticle } from "../api.js";
-import { formatDate } from "../outils/dates.js";
-import { formatEuros } from "../outils/montants.js";
+import { formatDate } from "../utilitaires/dates.js";
+import { formatEuros } from "../utilitaires/montants.js";
 import { formatReference } from "../statuts.js";
 import { NouvelOnglet } from "./NouvelOnglet.js";
 

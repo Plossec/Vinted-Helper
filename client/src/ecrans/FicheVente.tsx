@@ -2,8 +2,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { api, type Vente } from "../api.js";
-import { formatDateHeure } from "../outils/dates.js";
-import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { formatDateHeure } from "../utilitaires/dates.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 
 export function FicheVente() {

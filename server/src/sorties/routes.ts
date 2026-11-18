@@ -2,7 +2,7 @@
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { creerAchat, modifierPrixLot, NOMBRE_MAX_ARTICLES } from "../achats/service.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import { ajouterValeur } from "../referentiels/service.js";
 import {
   centimesFacultatif,
@@ -14,7 +14,7 @@ import {
   texteObligatoire,
   uuidFacultatif,
   uuidObligatoire,
-} from "../outils/validation.js";
+} from "../utilitaires/validation.js";
 import {
   annulerSortie,
   creerSortie,

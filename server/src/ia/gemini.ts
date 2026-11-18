@@ -1,6 +1,6 @@
 // Client Google Gemini (§5.5) — appelé UNIQUEMENT depuis le serveur : la clé ne quitte jamais le serveur.
 // Pas de bibliothèque : simple requête HTTPS (fetch intégré à Node). Les tests utilisent un client simulé.
-import { ErreurMetier } from "../outils/erreurs.js";
+import { ErreurMetier } from "../utilitaires/erreurs.js";
 
 export interface ImageIA {
   /** Ex. « image/jpeg ». */

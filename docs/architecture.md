@@ -86,6 +86,18 @@ flowchart TB
   base --> pg[("PostgreSQL")]
 ```
 
+Noms des dossiers (#246) :
+
+| Dossier | Contenu |
+|---|---|
+| `outils/extension-vinted/` | L'extension Chrome (chargée dans Chrome depuis ce dossier : son nom ne change pas) |
+| `server/src/utilitaires/`, `client/src/utilitaires/` | Fonctions utilitaires (erreurs, validation, formats, montants, dates…) |
+| `server/src/commandes/` | Commandes lancées à la main (`npm run reset-password`, `import-tableur`, `photos:sans-metadonnees`, `doc:categories`) |
+| `server/src/test/`, `server/navigateur/` | Outils des tests (base en mémoire, parcours dans Chromium) |
+
+« Extension » est le seul nom du logiciel de publication ; les routes qu'elle appelle gardent leur ancien nom
+`/api/programme/*` (programme du PC retiré, ADR-0036) pour ne pas casser la publication entre deux mises à jour.
+
 ## 3. Modèle de données
 
 Chaque table (sauf `utilisateur`) porte un `utilisateur_id`, omis ici pour la lisibilité. Les montants sont en

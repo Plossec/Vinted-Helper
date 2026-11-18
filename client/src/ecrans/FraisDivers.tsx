@@ -2,8 +2,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type FraisDivers as Frais } from "../api.js";
-import { aujourdhui, formatDate } from "../outils/dates.js";
-import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
+import { aujourdhui, formatDate } from "../utilitaires/dates.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
 import { confirmer } from "../composants/Dialogue.js";
 
 const vide = () => ({ id: null as string | null, date: aujourdhui(), montant: "", libelle: "" });

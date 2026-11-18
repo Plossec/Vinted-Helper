@@ -13,9 +13,9 @@ import {
   type ResumeArticle,
   type Vente,
 } from "../api.js";
-import { depuisChampDateHeure, formatDateHeure, versChampDateHeure } from "../outils/dates.js";
-import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
-import { useModifications } from "../outils/modifications.js";
+import { depuisChampDateHeure, formatDateHeure, versChampDateHeure } from "../utilitaires/dates.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
+import { useModifications } from "../utilitaires/modifications.js";
 import { ACTIONS_STATUT, etapeSuivante, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
 import { confirmer as demanderConfirmation, demanderMontant } from "./Dialogue.js";
 

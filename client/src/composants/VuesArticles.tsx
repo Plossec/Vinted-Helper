@@ -2,10 +2,10 @@
 // Le mode choisi est mémorisé sur l'appareil (le téléphone et le PC peuvent avoir chacun le leur).
 import { Link, useNavigate } from "react-router";
 import { type ResumeArticle, urlVignette } from "../api.js";
-import { formatDate } from "../outils/dates.js";
-import { formatEuros } from "../outils/montants.js";
+import { formatDate } from "../utilitaires/dates.js";
+import { formatEuros } from "../utilitaires/montants.js";
 import { Montant } from "./Montant.js";
-import type { Tri } from "../outils/recherche.js";
+import type { Tri } from "../utilitaires/recherche.js";
 import { formatReference, LIBELLES_STATUT } from "../statuts.js";
 
 export type ModeAffichage = "vignettes" | "compacte" | "mosaique" | "detaille";

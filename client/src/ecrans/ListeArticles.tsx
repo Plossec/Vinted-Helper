@@ -14,7 +14,7 @@ import {
 } from "../composants/VuesArticles.js";
 import { chargerReferentiels } from "../hors-ligne/cache.js";
 import { demanderPublication } from "../publication.js";
-import { formatDate } from "../outils/dates.js";
+import { formatDate } from "../utilitaires/dates.js";
 import {
   FILTRES_PAR_DEFAUT,
   type Filtres,
@@ -23,7 +23,7 @@ import {
   selectionVintedPossible,
   nombreFiltresActifs,
   type Tri,
-} from "../outils/recherche.js";
+} from "../utilitaires/recherche.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 
 const CLE = "vh-liste-articles";

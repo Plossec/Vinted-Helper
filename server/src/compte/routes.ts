@@ -3,8 +3,8 @@ import { eq } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { utilisateur } from "../base/schema.js";
-import { ErreurMetier, erreurSaisie } from "../outils/erreurs.js";
-import { objet } from "../outils/validation.js";
+import { ErreurMetier, erreurSaisie } from "../utilitaires/erreurs.js";
+import { objet } from "../utilitaires/validation.js";
 import { creerLimiteur } from "./limiteur.js";
 import { hacherMotDePasse, LONGUEUR_MIN_MOT_DE_PASSE, verifierMotDePasse } from "./mot-de-passe.js";
 import {

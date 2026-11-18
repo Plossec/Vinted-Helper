@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { api, type TypeListe } from "../api.js";
-import { normaliser } from "../outils/recherche.js";
+import { normaliser } from "../utilitaires/recherche.js";
 import { confirmer } from "../composants/Dialogue.js";
 
 interface Valeur {

@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type PostesTresorerie, type Rentabilite, type Tableau } from "../api.js";
 import { GraphiqueMensuel } from "../composants/GraphiqueMensuel.js";
-import { formatDate } from "../outils/dates.js";
-import { formatEuros } from "../outils/montants.js";
+import { formatDate } from "../utilitaires/dates.js";
+import { formatEuros } from "../utilitaires/montants.js";
 import { Montant } from "../composants/Montant.js";
 import { LIBELLES_STATUT, type Statut } from "../statuts.js";
 

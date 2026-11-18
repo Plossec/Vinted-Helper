@@ -2,8 +2,8 @@
 import { createReadStream, existsSync, statSync } from "node:fs";
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { erreurSaisie, introuvable } from "../outils/erreurs.js";
-import { objet, uuidFacultatif, uuidObligatoire } from "../outils/validation.js";
+import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
+import { objet, uuidFacultatif, uuidObligatoire } from "../utilitaires/validation.js";
 import {
   ajouterPhotoArticle,
   enregistrerPhoto,
