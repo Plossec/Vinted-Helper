@@ -1,45 +1,45 @@
-// Tâche « Articles dormants » (#147, ADR-0073) : nouveau prix d'un article dormant, ou republication.
+// Tâche « Articles dormants » (#147, ADR-0073, ADR-0113) : prix de la republication avec baisse, ou rien.
 import { describe, expect, it } from "vitest";
-import { actionDormant, regleApplicable } from "./baisse.js";
+import { prixRepublication, regleApplicable } from "./baisse.js";
 
 const pourcent = (valeur: number) => ({ type: "pourcentage" as const, valeur });
 const montant = (valeur: number) => ({ type: "montant" as const, valeur });
 
 describe("prix d'un article dormant", () => {
   it("11 € − 10 % = 9,90 € → arrondi vers le haut au 0,50 € : 10 €", () => {
-    expect(actionDormant(1100, pourcent(10), 500)).toEqual({ type: "baisse", prix: 1000 });
+    expect(prixRepublication(1100, pourcent(10), 500)).toBe(1000);
   });
 
   it("arrondi qui redonne le prix actuel : baisse de 0,50 € (10 € − 2 % = 9,80 € → 10 € → 9,50 €)", () => {
-    expect(actionDormant(1000, pourcent(2), 500)).toEqual({ type: "baisse", prix: 950 });
+    expect(prixRepublication(1000, pourcent(2), 500)).toBe(950);
   });
 
   it("jamais sous le prix vente minimum : 10 € − 10 % = 9 €, minimum 9,80 € → 9,80 €", () => {
-    expect(actionDormant(1000, pourcent(10), 980)).toEqual({ type: "baisse", prix: 980 });
+    expect(prixRepublication(1000, pourcent(10), 980)).toBe(980);
   });
 
   it("montant fixe : 10 € − 1,20 € = 8,80 € → 9 €", () => {
-    expect(actionDormant(1000, montant(120), 500)).toEqual({ type: "baisse", prix: 900 });
+    expect(prixRepublication(1000, montant(120), 500)).toBe(900);
   });
 
-  it("prix déjà au minimum → republication, le prix n'est pas touché", () => {
-    expect(actionDormant(980, pourcent(10), 980)).toEqual({ type: "republication" });
+  it("prix déjà au minimum → rien (ni baisse ni republication)", () => {
+    expect(prixRepublication(980, pourcent(10), 980)).toBeNull();
   });
 
-  it("sans prix vente minimum → republication seulement", () => {
-    expect(actionDormant(1000, pourcent(10), null)).toEqual({ type: "republication" });
+  it("sans prix vente minimum → rien (pas de plancher connu)", () => {
+    expect(prixRepublication(1000, pourcent(10), null)).toBeNull();
   });
 
-  it("« ne pas baisser le prix » → republication seulement", () => {
-    expect(actionDormant(1000, null, 500)).toEqual({ type: "republication" });
+  it("« ne pas baisser le prix » → rien", () => {
+    expect(prixRepublication(1000, null, 500)).toBeNull();
   });
 
-  it("un prix entier ou le minimum : jamais à zéro", () => {
-    expect(actionDormant(50, pourcent(90), 0)).toEqual({ type: "republication" });
+  it("jamais à zéro : sinon rien", () => {
+    expect(prixRepublication(50, pourcent(90), 0)).toBeNull();
   });
 
   it("refuse un montant à virgule", () => {
-    expect(() => actionDormant(10.5, pourcent(10), 500)).toThrow();
+    expect(() => prixRepublication(10.5, pourcent(10), 500)).toThrow();
   });
 });
 

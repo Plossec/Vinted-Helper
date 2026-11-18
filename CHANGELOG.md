@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.27.4] — 18/11/2026
+
+### Modifié
+- Tâche « Articles dormants » : un article dormant est désormais **republié avec une baisse de prix** (une seule
+  action) ; sans baisse possible (« ne pas baisser », sans prix vente minimum, déjà au minimum), rien n'est fait. Les
+  réglages des baisses seules disparaissent ; une baisse seule encore prévue est annulée. Extension 1.14.4 : journal
+  « republication 11,00 € → 10,00 € » (#147, ADR-0113).
+
 ## [1.27.3] — 17/11/2026
 
 ### Modifié

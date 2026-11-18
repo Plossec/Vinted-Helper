@@ -1,7 +1,7 @@
 # ADR-0106 — Articles dormants : mode réel (étape 3 sur 3)
 
 - **Date** : 21/10/2026
-- **Statut** : Proposé — vérifications et refus « à relire » (voir Décision)
+- **Statut** : Proposé — vérifications et refus « à relire » (voir Décision) · modifié par [ADR-0113](0113-dormants-republication-avec-baisse.md) (plus de baisse seule)
 - **Décideurs** : utilisateur (demande de passage au mode réel, plan validé le 21/10/2026) ; vérifications proposées par Claude
 - **Issue** : #147
 - **Thème** : Tâches automatisées

@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { actionVinted, lectureCommandes, utilisateur } from "../base/schema.js";
-import { creerAppDeTest, seConnecter } from "../test/outils.js";
+import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 import { purgerJournalTaches } from "./journal.js";
 
 interface LigneJournal {
@@ -69,6 +69,8 @@ describe("refonte des tâches (#232, #233)", () => {
     ).json<{ id: string }>().id;
     await requete("POST", `/api/articles/${id}/statut`, { vers: "en_ligne" });
     await requete("PUT", `/api/articles/${id}/lien-vinted`, { url: "https://www.vinted.fr/items/123-jean" });
+    // Annonce complète : la republication avec baisse (ADR-0113) recrée l'annonce.
+    await completerAnnonce(t.base, id);
     return id;
   }
 
@@ -130,7 +132,7 @@ describe("refonte des tâches (#232, #233)", () => {
     expect((await requete("GET", "/api/taches/journal?tache=autre")).statusCode).toBe(400);
     expect((await requete("GET", "/api/taches/journal?jour=13/10/2026")).statusCode).toBe(400);
     // Les actions du jour comptent pour l'état de la tâche.
-    expect(await etat()).toMatchObject({ dormants: { aujourdhui: { baisses: 1, republications: 0 } } });
+    expect(await etat()).toMatchObject({ dormants: { aujourdhui: { republications: 1 } } });
   });
 
   it("lecture des ventes en erreur : la demande s'efface et la lecture attend sa fréquence", async () => {
@@ -157,7 +159,7 @@ describe("refonte des tâches (#232, #233)", () => {
         essai: true,
         dernierPassage: null,
         prochainPassage: null,
-        aujourdhui: { baisses: 0, republications: 0, plafondBaisses: 20, plafondRepublications: 10 },
+        aujourdhui: { republications: 0, plafondRepublications: 10 },
       },
       finalisation: {
         active: false,

@@ -345,7 +345,7 @@ export interface EtatTaches {
     essai: boolean;
     dernierPassage: string | null;
     prochainPassage: string | null;
-    aujourdhui: { baisses: number; republications: number; plafondBaisses: number; plafondRepublications: number };
+    aujourdhui: { republications: number; plafondRepublications: number };
   };
   finalisation: {
     active: boolean;

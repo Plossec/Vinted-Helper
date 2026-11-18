@@ -53,22 +53,26 @@ describe("actions prévues", () => {
   });
   const reglage = {
     regleCompte: { type: "pourcentage" as const, valeur: 10 },
-    plafondBaisses: 20,
     plafondRepublications: 10,
-    dejaAujourdhui: { baisse: 0, republication: 0 },
+    dejaAujourdhui: 0,
   };
 
-  it("baisse selon la règle du compte, republication au minimum ou sans minimum", () => {
+  it("republication avec baisse selon la règle du compte (ADR-0113)", () => {
+    const r = planifierDormants([candidat("A")], reglage);
+    expect(r.actions).toEqual([{ articleId: "A", type: "republication", prixAvant: 1100, prixApres: 1000 }]);
+    expect(r.invendus).toEqual([]);
+  });
+
+  it("déjà au minimum, sans minimum ou « ne pas baisser » → rien (l'article reste dormant)", () => {
     const r = planifierDormants(
-      [candidat("A"), candidat("B", { prixAffiche: 500 }), candidat("C", { prixVenteMinimum: null })],
+      [
+        candidat("B", { prixAffiche: 500 }),
+        candidat("C", { prixVenteMinimum: null }),
+        candidat("D", { baisseRegle: "aucune" }),
+      ],
       reglage,
     );
-    expect(r.actions).toEqual([
-      { articleId: "A", type: "baisse", prixAvant: 1100, prixApres: 1000 },
-      { articleId: "B", type: "republication", prixAvant: 500, prixApres: null },
-      { articleId: "C", type: "republication", prixAvant: 1100, prixApres: null },
-    ]);
-    expect(r.invendus).toEqual([]);
+    expect(r).toEqual({ actions: [], invendus: [] });
   });
 
   it("3 republications sans vente → Invendu ; action déjà prévue ou annonce sans lien → rien", () => {
@@ -83,12 +87,11 @@ describe("actions prévues", () => {
     expect(r).toEqual({ actions: [], invendus: ["A"] });
   });
 
-  it("plafonds du jour : les actions de trop attendent le passage suivant", () => {
-    const r = planifierDormants([candidat("A"), candidat("B"), candidat("C", { prixAffiche: 500 })], {
+  it("plafond du jour : les republications de trop attendent le passage suivant", () => {
+    const r = planifierDormants([candidat("A"), candidat("B"), candidat("C")], {
       ...reglage,
-      plafondBaisses: 2,
-      plafondRepublications: 1,
-      dejaAujourdhui: { baisse: 1, republication: 1 },
+      plafondRepublications: 2,
+      dejaAujourdhui: 1,
     });
     expect(r.actions.map((a) => a.articleId)).toEqual(["A"]);
   });

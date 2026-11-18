@@ -282,7 +282,9 @@ async function releverPage(onglet, nom) {
 
 const LIBELLES_ACTION = {
   baisse: (a) => `baisse ${a.prixAvant} € → ${a.prixApres} €`,
-  republication: (a) => `republication (${a.prixAvant} €)`,
+  // Republication avec baisse (ADR-0113) ; une ancienne action peut ne pas avoir de nouveau prix.
+  republication: (a) =>
+    a.prixApres ? `republication ${a.prixAvant} € → ${a.prixApres} €` : `republication (${a.prixAvant} €)`,
 };
 
 /**

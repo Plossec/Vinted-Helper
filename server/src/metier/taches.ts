@@ -1,6 +1,6 @@
 // Tâches automatisées (#147, ADR-0072, ADR-0073, ADR-0078) : quand passer, et quelles actions prévoir sur les articles
 // dormants. Fonctions pures ; le calcul du nouveau prix est dans calculs/baisse (règle n° 1).
-import { actionDormant, type ReglageBaisseArticle, type RegleBaisse, regleApplicable } from "../calculs/baisse.js";
+import { prixRepublication, type ReglageBaisseArticle, type RegleBaisse, regleApplicable } from "../calculs/baisse.js";
 
 /** Republications sans vente avant le statut « Invendu ». */
 export const REPUBLICATIONS_AVANT_INVENDU = 3;
@@ -58,30 +58,24 @@ export interface CandidatDormant {
 
 export interface ActionPrevue {
   articleId: string;
-  type: "baisse" | "republication";
+  /** Une seule action depuis ADR-0113 : republication avec baisse (« baisse » ne reste que dans l'historique). */
+  type: "republication";
   prixAvant: number;
-  prixApres: number | null;
+  prixApres: number;
 }
 
 /**
- * Actions du passage, dans l'ordre des candidats (les plus anciennement dormants d'abord), dans la limite des
- * plafonds du jour ; les articles déjà republiés 3 fois passent « Invendu » au lieu d'une nouvelle action.
+ * Actions du passage, dans l'ordre des candidats (les plus anciennement dormants d'abord), dans la limite du plafond
+ * du jour : republication avec baisse (ADR-0113). Sans baisse possible (« ne pas baisser », pas de minimum, déjà au
+ * minimum), rien ; les articles déjà republiés 3 fois passent « Invendu » au lieu d'une nouvelle action.
  */
 export function planifierDormants(
   candidats: readonly CandidatDormant[],
-  r: {
-    regleCompte: RegleBaisse;
-    plafondBaisses: number;
-    plafondRepublications: number;
-    dejaAujourdhui: { baisse: number; republication: number };
-  },
+  r: { regleCompte: RegleBaisse; plafondRepublications: number; dejaAujourdhui: number },
 ): { actions: ActionPrevue[]; invendus: string[] } {
   const actions: ActionPrevue[] = [];
   const invendus: string[] = [];
-  const restant = {
-    baisse: r.plafondBaisses - r.dejaAujourdhui.baisse,
-    republication: r.plafondRepublications - r.dejaAujourdhui.republication,
-  };
+  let restant = r.plafondRepublications - r.dejaAujourdhui;
   for (const c of candidats) {
     if (c.actionEnCours) continue;
     if (c.republications >= REPUBLICATIONS_AVANT_INVENDU) {
@@ -89,19 +83,14 @@ export function planifierDormants(
       continue;
     }
     if (c.prixAffiche === null || !c.urlVinted) continue;
-    const action = actionDormant(
+    const prix = prixRepublication(
       c.prixAffiche,
       regleApplicable({ regle: c.baisseRegle, valeur: c.baisseValeur }, r.regleCompte),
       c.prixVenteMinimum,
     );
-    if (restant[action.type] <= 0) continue;
-    restant[action.type] -= 1;
-    actions.push({
-      articleId: c.id,
-      type: action.type,
-      prixAvant: c.prixAffiche,
-      prixApres: action.type === "baisse" ? action.prix : null,
-    });
+    if (prix === null || restant <= 0) continue;
+    restant -= 1;
+    actions.push({ articleId: c.id, type: "republication", prixAvant: c.prixAffiche, prixApres: prix });
   }
   return { actions, invendus };
 }

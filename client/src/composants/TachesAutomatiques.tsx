@@ -144,9 +144,7 @@ function CarteDormants({
           : String(r.dormantsBaisseValeur),
       frequence: String(r.dormantsFrequenceHeures),
       /** Minutes. */
-      pauseBaisse: String(Math.round(r.dormantsPauseBaisse / 60)),
       pauseRepublication: String(Math.round(r.dormantsPauseRepublication / 60)),
-      plafondBaisses: String(r.dormantsPlafondBaisses),
       plafondRepublications: String(r.dormantsPlafondRepublications),
     },
     onChangement,
@@ -171,14 +169,12 @@ function CarteDormants({
         max: 168,
         message: "Fréquence : toutes les 6 à 168 heures.",
       },
-      pauseBaisse: { texte: form.pauseBaisse, min: 1, max: 60, message: "Pause entre deux baisses : 1 à 60 minutes." },
       pauseRepublication: {
         texte: form.pauseRepublication,
         min: 10,
         max: 120,
         message: "Pause entre deux republications : 10 à 120 minutes.",
       },
-      dormantsPlafondBaisses: { texte: form.plafondBaisses, min: 1, max: 40, message: "Baisses par jour : 1 à 40." },
       dormantsPlafondRepublications: {
         texte: form.plafondRepublications,
         min: 1,
@@ -187,7 +183,7 @@ function CarteDormants({
       },
     });
     if ("erreur" in lus) return void enregistrer(lus.erreur);
-    const { pauseBaisse, pauseRepublication, ...valeurs } = lus.valeurs;
+    const { pauseRepublication, ...valeurs } = lus.valeurs;
     void enregistrer({
       dormantsActive: form.active,
       dormantsEssai: form.essai,
@@ -195,7 +191,6 @@ function CarteDormants({
       dormantsBaisseType: form.baisseType,
       dormantsBaisseValeur: baisse,
       ...valeurs,
-      dormantsPauseBaisse: pauseBaisse * 60,
       dormantsPauseRepublication: pauseRepublication * 60,
     });
   }
@@ -204,8 +199,7 @@ function CarteDormants({
     <>
       Dernier passage : {dateOuJamais(etat.dernierPassage)} · Prochain : {prochain(etat.prochainPassage)}
       <br />
-      Aujourd'hui : {etat.aujourdhui.baisses}/{etat.aujourdhui.plafondBaisses} baisse(s),{" "}
-      {etat.aujourdhui.republications}/{etat.aujourdhui.plafondRepublications} republication(s)
+      Aujourd'hui : {etat.aujourdhui.republications}/{etat.aujourdhui.plafondRepublications} republication(s)
     </>
   );
 
@@ -214,12 +208,12 @@ function CarteDormants({
       <form className="formulaire" onSubmit={soumettre} noValidate>
         <label className="case">
           <input type="checkbox" checked={form.active} onChange={(e) => modifier({ active: e.target.checked })} /> Tâche
-          activée : baisser le prix des articles dormants, puis les republier une fois au prix minimum
+          activée : republier les articles dormants avec une baisse de prix
         </label>
         <label className="case">
           <input type="checkbox" checked={form.essai} onChange={(e) => modifier({ essai: e.target.checked })} /> Mode
           essai : l'extension ouvre les pages Vinted sans rien modifier. Décoché (extension 1.14 au moins) : le prix est
-          vraiment baissé, l'annonce vraiment supprimée puis recréée
+          l'annonce est vraiment supprimée puis recréée au prix baissé
         </label>
         <label className="champ">
           <span>Mode</span>
@@ -242,8 +236,9 @@ function CarteDormants({
           </label>
         </div>
         <p className="secondaire">
-          Prix arrondi vers le haut au 0,50 €, jamais sous le prix vente minimum ; sans minimum, ou réglé « ne pas
-          baisser » sur la fiche, l'article est seulement republié. Après 3 republications sans vente : « Invendu ».
+          Prix arrondi vers le haut au 0,50 €, jamais sous le prix vente minimum. Sans prix vente minimum, déjà au
+          minimum, ou réglé « ne pas baisser » sur la fiche : rien n'est fait, l'article reste dans les dormants de « À
+          faire ». Après 3 republications sans vente : « Invendu ».
         </p>
         <label className="champ">
           <span>Passage toutes les (heures, 6 au moins)</span>
@@ -254,18 +249,8 @@ function CarteDormants({
           <summary>Réglages avancés</summary>
           <div className="champs-ligne">
             <label className="champ">
-              <span>Pause entre deux baisses (min)</span>
-              <input inputMode="numeric" {...texte("pauseBaisse")} />
-            </label>
-            <label className="champ">
               <span>Entre deux republications (min)</span>
               <input inputMode="numeric" {...texte("pauseRepublication")} />
-            </label>
-          </div>
-          <div className="champs-ligne">
-            <label className="champ">
-              <span>Baisses par jour (40 au plus)</span>
-              <input inputMode="numeric" {...texte("plafondBaisses")} />
             </label>
             <label className="champ">
               <span>Republications par jour (20 au plus)</span>
