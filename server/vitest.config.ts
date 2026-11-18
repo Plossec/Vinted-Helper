@@ -12,7 +12,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts"],
-      exclude: ["src/**/*.test.ts", "src/test/**", "src/outils/*-cli.ts", "src/base/migrer-cli.ts"],
+      exclude: ["src/**/*.test.ts", "src/test/**", "src/commandes/*-cli.ts", "src/base/migrer-cli.ts"],
       thresholds: { lines: 85, statements: 80, functions: 80, branches: 70 },
     },
   },

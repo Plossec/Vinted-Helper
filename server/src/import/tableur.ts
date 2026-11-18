@@ -8,7 +8,7 @@ import { creerAchat } from "../achats/service.js";
 import { changerStatut } from "../articles/service.js";
 import type { Base } from "../base/connexion.js";
 import { article } from "../base/schema.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import { ajouterValeur } from "../referentiels/service.js";
 import { creerSortie } from "../sorties/service.js";
 import { avancerVente, creerVente } from "../ventes/service.js";

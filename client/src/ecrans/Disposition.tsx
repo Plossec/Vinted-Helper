@@ -3,14 +3,14 @@
 import { type ComponentType, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { api, ErreurApi } from "../api.js";
-import { nombreAlertes } from "../outils/alertes.js";
-import { chargerAlertes } from "../outils/alertesCache.js";
+import { nombreAlertes } from "../utilitaires/alertes.js";
+import { chargerAlertes } from "../utilitaires/alertesCache.js";
 import { BandeauFile } from "../composants/BandeauFile.js";
 import { FenetreDialogue } from "../composants/Dialogue.js";
 import { IconeAFaire, IconeArticles, IconeReglages, IconeTableau, IconeTerrain } from "../composants/Icones.js";
 import { demarrerFile, envoyerMaintenant } from "../hors-ligne/index.js";
 import { type Onglet, ongletActif } from "../navigation.js";
-import { useTitreEtFocus } from "../outils/titrePage.js";
+import { useTitreEtFocus } from "../utilitaires/titrePage.js";
 import { mettreAJour, useNouvelleVersion } from "../pwa.js";
 
 type Etat = "verification" | "connecte" | "hors-ligne";

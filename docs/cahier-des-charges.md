@@ -102,7 +102,7 @@ Niveau technique de l'utilisateur : intermédiaire (terminal OK) → installatio
 | **Prix vente minimum** | Prix le plus bas accepté pour un article (facultatif, jamais au-dessus du prix affiché) ; plancher des tâches automatisées (ADR-0048, ADR-0091). |
 | **Bénéfice attendu** | Bénéfice d'un article vendu mais pas encore finalisé (À expédier, Envoyé) : prix vendu − coût total (§6.5, ADR-0090). |
 | **Ventes en cours / théorique** | Ventes À expédier ou Envoyé ; le CA et le bénéfice **théoriques** les ajoutent au réalisé (§6.6). |
-| **Extension** | Extension Chrome qui agit sur Vinted à la place de l'utilisateur : publication, tâches automatisées (§5.14). |
+| **Extension** | Extension Chrome qui agit sur Vinted à la place de l'utilisateur : publication, tâches automatisées (§5.14). Seul nom employé (l'ancien « programme du PC » a été retiré ; ses routes `/api/programme/*` gardent leur nom). |
 | **Tâche automatisée** | Action répétée par l'extension sur le compte Vinted (articles dormants, ventes finalisées…), en mode **automatique** ou **manuel** (liste à valider) (§5.15). |
 | **Mode essai** | L'extension ouvre les pages Vinted sans rien modifier ; l'application n'enregistre rien. |
 | **À faire** | Écran qui regroupe tout ce qui demande l'attention de l'utilisateur (§5.8). |

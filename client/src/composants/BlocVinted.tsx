@@ -5,7 +5,7 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article, type ReponseLien } from "../api.js";
 import { demanderPublication, lireModeEssai } from "../publication.js";
-import { useSignalerModification } from "../outils/modifications.js";
+import { useSignalerModification } from "../utilitaires/modifications.js";
 import { NouvelOnglet } from "./NouvelOnglet.js";
 
 export function BlocVinted({ article, onMiseAJour }: { article: Article; onMiseAJour: (a: Article) => void }) {

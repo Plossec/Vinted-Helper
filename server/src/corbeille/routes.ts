@@ -1,7 +1,7 @@
 // Routes de la corbeille.
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { idDe } from "../outils/validation.js";
+import { idDe } from "../utilitaires/validation.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import { listerCorbeille, mettreALaCorbeille, restaurer, viderArticle } from "./service.js";
 import type { ArticleSupprime } from "../api/types.js";

@@ -1,6 +1,6 @@
 // Appels à l'API du serveur (même adresse que l'interface, cookie de session envoyé automatiquement).
 import type { CanalRevente, MotifSortie } from "../../server/src/api/types.js";
-import { messageErreur } from "./outils/erreurs.js";
+import { messageErreur } from "./utilitaires/erreurs.js";
 
 export class ErreurApi extends Error {
   constructor(

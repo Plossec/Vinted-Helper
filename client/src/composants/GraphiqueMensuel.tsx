@@ -3,7 +3,7 @@
 // Issues #88 et #91 : barre « réalisé » + « théorique » (ventes en cours) : partie claire quand le théorique dépasse
 // le réalisé vers le haut, et contour plein de 0 au théorique, lisible quel que soit le signe (contraste ≥ 3:1).
 import { useState } from "react";
-import { formatEuros } from "../outils/montants.js";
+import { formatEuros } from "../utilitaires/montants.js";
 
 export interface PointMensuel {
   /** « AAAA-MM ». */

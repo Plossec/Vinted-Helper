@@ -1,8 +1,8 @@
 // Route du tableau de bord.
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { erreurSaisie } from "../outils/erreurs.js";
-import { objet } from "../outils/validation.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
+import { objet } from "../utilitaires/validation.js";
 import { tableauDeBord } from "./service.js";
 import type { Tableau } from "../api/types.js";
 import { conforme } from "../api/conforme.js";

@@ -4,7 +4,7 @@
 import { and, asc, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { article, articlePhoto } from "../base/schema.js";
-import { introuvable } from "../outils/erreurs.js";
+import { introuvable } from "../utilitaires/erreurs.js";
 import { choisirVignette, photosDesArticles, supprimerSiOrpheline } from "../photos/service.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 

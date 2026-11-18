@@ -30,11 +30,11 @@ import { BlocPointRelais } from "../composants/PointRelais.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
-import { aujourdhui } from "../outils/dates.js";
-import { centimesVersSaisie, formatEuros, lireMontant } from "../outils/montants.js";
-import { formatDate } from "../outils/dates.js";
+import { aujourdhui } from "../utilitaires/dates.js";
+import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
+import { formatDate } from "../utilitaires/dates.js";
 import { AVANT_VENTE, formatReference, LIBELLES_STATUT, type Statut } from "../statuts.js";
-import { ContexteModifications, messageAbandon, type Modifications } from "../outils/modifications.js";
+import { ContexteModifications, messageAbandon, type Modifications } from "../utilitaires/modifications.js";
 import { confirmer } from "../composants/Dialogue.js";
 
 interface Formulaire {

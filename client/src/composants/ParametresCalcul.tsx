@@ -1,7 +1,7 @@
 // Réglages de calcul et d'alertes : emballage par défaut (§5.6), délais des alertes (§5.8).
 import { type FormEvent, useEffect, useState } from "react";
 import { api, type ReglagesUtilisateur } from "../api.js";
-import { centimesVersSaisie, lireMontant } from "../outils/montants.js";
+import { centimesVersSaisie, lireMontant } from "../utilitaires/montants.js";
 
 export function ParametresCalcul() {
   const [form, setForm] = useState({ emballage: "", delaiBrouillon: "", delaiDormant: "", formatColis: "petit" });

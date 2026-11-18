@@ -6,7 +6,7 @@ import type { Base, Transaction } from "../base/connexion.js";
 import { article, commandeVinted, lectureCommandes, reglages, vente, venteArticle } from "../base/schema.js";
 import { verifierDate } from "../articles/service.js";
 import { passageDu } from "../metier/taches.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { limiteConservation } from "../ventes/conservation.js";
 import { finaliseesDuJour } from "./journal.js";
 import { avancerVenteDans, chargerVente } from "../ventes/service.js";

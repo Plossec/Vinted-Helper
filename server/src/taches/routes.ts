@@ -1,8 +1,8 @@
 // Routes des tâches automatisées (#147) : liste à valider, journal, « Appliquer » / « Refuser ».
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { erreurSaisie } from "../outils/erreurs.js";
-import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../outils/validation.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
+import { idDe, lienVintedFacultatif, objet, texteObligatoire, uuidObligatoire } from "../utilitaires/validation.js";
 import {
   appliquerCommandes,
   type CommandeLue,

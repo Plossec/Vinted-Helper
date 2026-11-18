@@ -5,7 +5,7 @@ import { COULEURS_MAX, estCouleur, estFormatColis, type FormatColis } from "../c
 import { type CodeEtat, estEtat } from "../catalogue/etats.js";
 import type { ReglageBaisseArticle } from "../calculs/baisse.js";
 import { estStatut } from "../metier/statuts.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import {
   centimesFacultatif,
   dateObligatoire,
@@ -18,7 +18,7 @@ import {
   texteObligatoire,
   uuidFacultatif,
   uuidObligatoire,
-} from "../outils/validation.js";
+} from "../utilitaires/validation.js";
 import type { ContexteRoutes } from "../app.js";
 import {
   changerStatut,

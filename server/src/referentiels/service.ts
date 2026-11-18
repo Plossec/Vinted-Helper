@@ -7,7 +7,7 @@ import { article, lieu, marque, sortie } from "../base/schema.js";
 import { CATEGORIES } from "../catalogue/categories.js";
 import { COULEURS, FORMATS_COLIS } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
-import { conflit, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 
 export type TypeReferentiel = "lieux" | "marques";
 export const TYPES_REFERENTIEL: readonly TypeReferentiel[] = ["lieux", "marques"];

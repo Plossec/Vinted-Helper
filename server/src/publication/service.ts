@@ -11,16 +11,16 @@ import { type FormatColis, libelleCouleur } from "../catalogue/couleurs.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages, modifierReglages } from "../frais/service.js";
 import { manquesArticle } from "../metier/completude.js";
-import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../outils/erreurs.js";
+import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
-import { centimesVersSaisie } from "../outils/format.js";
+import { centimesVersSaisie } from "../utilitaires/format.js";
 
 /** Une demande « en cours » depuis plus longtemps est considérée comme interrompue (jamais relancée seule). */
 const DELAI_INTERRUPTION_MS = 15 * 60 * 1000;
 
 const empreinte = (jeton: string) => createHash("sha256").update(jeton).digest("hex");
 
-/** Crée (ou remplace) le jeton du programme ; il n'est affiché qu'une fois, seule son empreinte est gardée. */
+/** Crée (ou remplace) le jeton de l'extension ; il n'est affiché qu'une fois, seule son empreinte est gardée. */
 export async function creerJeton(base: Base, utilisateurId: string): Promise<string> {
   const jeton = `vh_${randomBytes(24).toString("base64url")}`;
   await modifierReglages(base, utilisateurId, {});
@@ -31,7 +31,7 @@ export async function creerJeton(base: Base, utilisateurId: string): Promise<str
   return jeton;
 }
 
-/** Utilisateur correspondant à un jeton de programme, ou null. */
+/** Utilisateur correspondant à un jeton de l'extension, ou null. */
 export async function utilisateurParJeton(base: Base, jeton: string) {
   const [ligne] = await base
     .select({ id: utilisateur.id, identifiant: utilisateur.identifiant })
@@ -147,11 +147,11 @@ export async function listerPublications(base: Base, utilisateurId: string) {
       .orderBy(desc(publicationVinted.demandeLe))
       .limit(100),
     base
-      .select({ programmeVuLe: reglages.programmeVuLe, jeton: reglages.jetonPublication })
+      .select({ extensionVueLe: reglages.extensionVueLe, jeton: reglages.jetonPublication })
       .from(reglages)
       .where(eq(reglages.utilisateurId, utilisateurId)),
   ]);
-  return { publications, programmeVuLe: r[0]?.programmeVuLe ?? null, jetonCree: !!r[0]?.jeton };
+  return { publications, extensionVueLe: r[0]?.extensionVueLe ?? null, jetonCree: !!r[0]?.jeton };
 }
 
 export async function annulerPublication(base: Base, utilisateurId: string, id: string, maintenant: Date) {
@@ -169,9 +169,9 @@ export async function annulerPublication(base: Base, utilisateurId: string, id: 
   if (r.length === 0) throw conflit("Seule une demande en attente peut être annulée.");
 }
 
-/** Nombre de demandes en attente (le programme n'ouvre Vinted que s'il y a du travail). */
+/** Nombre de demandes en attente (l'extension n'ouvre Vinted que s'il y a du travail). */
 export async function nombreEnAttente(base: Base, utilisateurId: string, maintenant: Date) {
-  await base.update(reglages).set({ programmeVuLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
+  await base.update(reglages).set({ extensionVueLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
   const lignes = await base
     .select({ id: publicationVinted.id })
     .from(publicationVinted)
@@ -196,7 +196,7 @@ async function passerEnErreur(base: Base | Transaction, utilisateurId: string, a
 }
 
 /**
- * Demande suivante pour le programme du PC (la plus ancienne en attente), passée « en cours ».
+ * Demande suivante pour l'extension (la plus ancienne en attente), passée « en cours ».
  * Une demande restée « en cours » trop longtemps passe en erreur : on ne la relance jamais seule, pour ne pas
  * risquer une annonce en double (l'utilisateur vérifie sur Vinted, puis la redemande si besoin).
  */
@@ -210,7 +210,7 @@ export async function demandeSuivante(base: Base, utilisateurId: string, mainten
 }
 
 async function suivanteDansLaFile(base: Transaction, utilisateurId: string, maintenant: Date) {
-  await base.update(reglages).set({ programmeVuLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
+  await base.update(reglages).set({ extensionVueLe: maintenant }).where(eq(reglages.utilisateurId, utilisateurId));
   const interrompues = await base
     .update(publicationVinted)
     .set({
@@ -310,18 +310,18 @@ export async function annonceARepublier(
   return versAnnonce({ ...a, prixAffiche }, photos, formatColisDefaut);
 }
 
-export type ResultatProgramme =
+export type ResultatExtension =
   { resultat: "publie"; url: string } | { resultat: "essai" } | { resultat: "erreur"; message: string };
 
 /**
- * Résultat renvoyé par le programme. Publié → l'article passe En ligne et garde le lien de l'annonce ; erreur d'une
+ * Résultat renvoyé par l'extension. Publié → l'article passe En ligne et garde le lien de l'annonce ; erreur d'une
  * vraie publication → l'article passe en Erreur (#72) ; essai → rien ne change.
  */
 export async function enregistrerResultat(
   base: Base,
   utilisateurId: string,
   id: string,
-  r: ResultatProgramme,
+  r: ResultatExtension,
   maintenant: Date,
 ) {
   // Tout ou rien (issue #121) : la publication, le statut de l'article et son lien changent ensemble. La publication

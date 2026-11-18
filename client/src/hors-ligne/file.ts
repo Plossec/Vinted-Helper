@@ -2,7 +2,7 @@
 // puis envoyée au serveur dans l'ordre, avec renvoi automatique. Les identifiants sont générés sur le
 // téléphone (UUID) : un renvoi ne crée jamais de doublon côté serveur.
 // Ce fichier ne contient que la logique (testable sans navigateur) ; le stockage est fourni à part.
-import { messageErreur } from "../outils/erreurs.js";
+import { messageErreur } from "../utilitaires/erreurs.js";
 
 export interface CorpsSortie {
   id: string;

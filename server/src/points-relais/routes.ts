@@ -1,7 +1,7 @@
 // Routes des points relais (#210).
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import {
   booleenFacultatif,
   idDe,
@@ -9,7 +9,7 @@ import {
   texteFacultatif,
   texteObligatoire,
   uuidFacultatif,
-} from "../outils/validation.js";
+} from "../utilitaires/validation.js";
 import { lireVente } from "../ventes/service.js";
 import { erreurHoraires, estTransporteur, type Horaires, TRANSPORTEURS } from "./horaires.js";
 import {

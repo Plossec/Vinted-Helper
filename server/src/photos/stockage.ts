@@ -3,7 +3,7 @@
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import sharp from "sharp";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 
 const FORMATS_ACCEPTES = new Set(["jpeg", "png", "webp", "heif"]);
 const COTE_VIGNETTE = 400;

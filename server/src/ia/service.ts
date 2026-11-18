@@ -8,7 +8,7 @@ import { chargerArticle } from "../articles/service.js";
 import { CATEGORIES } from "../catalogue/categories.js";
 import { ETATS } from "../catalogue/etats.js";
 import { lireReglages } from "../frais/service.js";
-import { erreurSaisie } from "../outils/erreurs.js";
+import { erreurSaisie } from "../utilitaires/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 import { type ClientIA, type ImageIA, lireJson } from "./gemini.js";

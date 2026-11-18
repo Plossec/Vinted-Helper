@@ -457,7 +457,7 @@ export interface ReponseLien {
 /** Suivi de la publication Vinted (GET /api/publications). */
 export interface SuiviPublication {
   publications: Publication[];
-  programmeVuLe: string | null;
+  extensionVueLe: string | null;
   jetonCree: boolean;
 }
 
