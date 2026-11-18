@@ -33,7 +33,7 @@ une de ces règles met cette page à jour dans la même PR ([ADR-0098](decisions
 | Catégories | Arbre recopié de vinted.fr (Femmes, Hommes, Sport, Loisirs et collections), « Autre » pour le reste ; codes construits sur le chemin | [0065](decisions/0065-categories-recopiees-de-vinted.md), [0085](decisions/0085-code-de-categorie-construit-sur-le-chemin.md) | réalisé |
 | Prix vente minimum | Facultatif, jamais au-dessus du prix affiché (contrôle du serveur + verrou dans la base) | [0048](decisions/0048-prix-vente-minimum.md), [0091](decisions/0091-verrou-prix-minimum-dans-la-base.md) | réalisé |
 | Connexion | Mot de passe de 12 caractères minimum ; blocage après 5 échecs en 15 min (par IP et par identifiant) | [0049](decisions/0049-securite-connexion-mot-de-passe-quota-de-l-ia.md) | réalisé |
-| Import | Aucun import dans l'application ; seule exception : import unique du tableur de l'utilisateur | [0023](decisions/0023-import-du-tableur-compte-2026-vinted.md) | réalisé |
+| Périmètre | Plus de « hors périmètre » de principe (§10 retiré) : toute idée est une issue décidée avec l'utilisateur ; import unique du tableur réalisé | [0116](decisions/0116-hors-perimetre-retire.md), [0023](decisions/0023-import-du-tableur-compte-2026-vinted.md) | réalisé |
 
 ## Statuts, ventes, liste
 
