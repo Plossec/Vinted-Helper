@@ -454,10 +454,13 @@ async function supprimerAnnonce() {
   setTimeout(() => cliquer(confirmer), 100);
 }
 
-/** Description courte d'un élément pour le diagnostic (aucune valeur saisie n'est relevée). */
+/**
+ * Description courte d'un élément pour le diagnostic (aucune valeur saisie n'est relevée). Relevé compact (#253) :
+ * seuls les champs renseignés sont gardés, et `visible` seulement quand l'élément est caché (absent = visible).
+ */
 function decrire(el) {
   const texte = normaliser(el.textContent).slice(0, 80);
-  return {
+  const description = {
     balise: el.tagName.toLowerCase(),
     type: el.getAttribute("type"),
     name: el.getAttribute("name"),
@@ -477,6 +480,9 @@ function decrire(el) {
     texte: texte || null,
     visible: visible(el),
   };
+  return Object.fromEntries(
+    Object.entries(description).filter(([cle, valeur]) => valeur !== null && !(cle === "visible" && valeur === true)),
+  );
 }
 
 const ELEMENTS_UTILES =

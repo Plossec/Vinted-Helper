@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.28.1] — 18/11/2026
+
+### Modifié
+- Extension 1.15.0 : relevé de page **2 à 3 fois plus petit** (champs vides retirés, un élément par ligne dans le
+  fichier téléchargé), plus rapide à envoyer et à analyser ; contenu inchangé (#253).
+
 ## [1.28.0] — 18/11/2026
 
 ### Ajouté

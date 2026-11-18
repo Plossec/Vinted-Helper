@@ -17,7 +17,8 @@ sauf si la cause touche autre chose que l'extension (serveur, données de l'arti
 
 ## 2. Analyse
 Lance le sous-agent **`analyste-releve`** avec : le chemin du relevé, le message d'erreur, l'étape, les captures.
-Ne lis pas le relevé dans la conversation principale. Si le rapport dit « hypothèse » ou qu'il manque une
+Ne lis pas le relevé dans la conversation principale. Exception : un relevé envoyé en pièce jointe y est déjà lu
+d'office ; analyse-le alors directement, sans sous-agent (#253). Si le rapport dit « hypothèse » ou qu'il manque une
 information, demande à l'utilisateur le relevé ou la capture qui manque plutôt que de deviner.
 
 Si la cause est dans les **données de l'article** (catégorie ou taille absente du catalogue Vinted), dis-le à

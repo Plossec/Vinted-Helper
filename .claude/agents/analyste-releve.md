@@ -25,6 +25,9 @@ un champ du relevé n'est pas clair.
 
 ## Méthode
 
+Relevé compact (extension 1.15.0 et plus, #253) : un élément par ligne ; un champ absent est vide, `visible` absent
+= élément visible. Les relevés plus anciens ont un champ par ligne, avec les `null`.
+
 1. **Ne lis pas le relevé en entier.** Lis d'abord les 30 premières lignes et la fin (`etape`, `erreur`,
    `selecteursTrouves`), puis cherche avec `Grep` (avec contexte `-C`) : les `testid` liés à l'étape
    (`catalog`, `brand`, `size`, `condition`, `color`, `price`, `package-size`, `image-wrapper`…), les `role`
