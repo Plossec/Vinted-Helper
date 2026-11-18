@@ -3,7 +3,7 @@
 // conservation de 3 mois.
 import { and, desc, eq, gte, inArray, lt, ne, or } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { actionVinted, article, commandeVinted, lectureCommandes, reglages } from "../base/schema.js";
+import { actionVinted, article, commandeVinted, lectureCommandes, offreFavori, reglages } from "../base/schema.js";
 import { jourParis } from "../calculs/indicateurs.js";
 import { lireReglages } from "../frais/service.js";
 import { prochainPassage } from "../metier/taches.js";
@@ -144,6 +144,23 @@ export async function finaliseesDuJour(
   return recentes.filter((x) => x.traiteLe && jourParis(x.traiteLe.toISOString()) === aujourdhui).length;
 }
 
+/** Offres aux favoris prévues aujourd'hui (heure de Paris), hors refusées et annulées (#149). */
+async function offresDuJour(base: Base, utilisateurId: string, maintenant: Date): Promise<number> {
+  const recentes = await base
+    .select({ creeLe: offreFavori.creeLe })
+    .from(offreFavori)
+    .where(
+      and(
+        eq(offreFavori.utilisateurId, utilisateurId),
+        gte(offreFavori.creeLe, new Date(maintenant.getTime() - 2 * 86_400_000)),
+        ne(offreFavori.etat, "refusee"),
+        ne(offreFavori.etat, "annulee"),
+      ),
+    );
+  const aujourdhui = jourParis(maintenant.toISOString());
+  return recentes.filter((x) => jourParis(x.creeLe.toISOString()) === aujourdhui).length;
+}
+
 /** État de chaque tâche (#232) : activée, essai, dernier et prochain passage automatique, actions du jour. */
 export async function etatTaches(base: Base, utilisateurId: string, maintenant: Date) {
   const r = await lireReglages(base, utilisateurId);
@@ -152,6 +169,8 @@ export async function etatTaches(base: Base, utilisateurId: string, maintenant: 
       dormants: reglages.dormantsDernierPassage,
       finalisation: reglages.finalisationDernierPassage,
       lancementDemande: reglages.finalisationLancementDemande,
+      favoris: reglages.favorisDernierPassage,
+      favorisLancementDemande: reglages.favorisLancementDemande,
     })
     .from(reglages)
     .where(eq(reglages.utilisateurId, utilisateurId));
@@ -209,6 +228,23 @@ export async function etatTaches(base: Base, utilisateurId: string, maintenant: 
         finalisees: await finaliseesDuJour(base, utilisateurId, maintenant),
         plafond: r.finalisationPlafond,
       },
+    },
+    favoris: {
+      active: r.favorisActive,
+      essai: r.favorisEssai,
+      dernierPassage: passages?.favoris ?? null,
+      prochainPassage: prochainPassage(
+        {
+          active: r.favorisActive,
+          heureDebut: r.favorisHeureDebut,
+          heureFin: r.favorisHeureFin,
+          frequenceHeures: r.favorisFrequenceHeures,
+          dernierPassage: passages?.favoris ?? null,
+        },
+        maintenant,
+      ),
+      lancementDemande: passages?.favorisLancementDemande ?? null,
+      aujourdhui: { offres: await offresDuJour(base, utilisateurId, maintenant), plafond: r.favorisPlafond },
     },
   };
 }

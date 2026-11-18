@@ -102,6 +102,18 @@ export const REGLAGES_DEFAUT = {
   /** Secondes. */
   finalisationPause: 60,
   finalisationPlafond: 50,
+  // Tâche « Négociation favoris » (#149, ADR-0075, ADR-0114) : désactivée, manuelle et en essai par défaut.
+  favorisActive: false,
+  favorisHeureDebut: 8,
+  favorisHeureFin: 22,
+  favorisEssai: true,
+  favorisMode: "manuel" as "automatique" | "manuel",
+  /** Jours entre le favori et l'offre. */
+  favorisDelaiJours: 2,
+  favorisFrequenceHeures: 24,
+  /** Secondes. */
+  favorisPause: 300,
+  favorisPlafond: 10,
 };
 
 export type Reglages = typeof REGLAGES_DEFAUT;
@@ -136,6 +148,15 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     finalisationFrequenceHeures: r.finalisationFrequenceHeures,
     finalisationPause: r.finalisationPause,
     finalisationPlafond: r.finalisationPlafond,
+    favorisActive: r.favorisActive,
+    favorisHeureDebut: r.favorisHeureDebut,
+    favorisHeureFin: r.favorisHeureFin,
+    favorisEssai: r.favorisEssai,
+    favorisMode: r.favorisMode,
+    favorisDelaiJours: r.favorisDelaiJours,
+    favorisFrequenceHeures: r.favorisFrequenceHeures,
+    favorisPause: r.favorisPause,
+    favorisPlafond: r.favorisPlafond,
   };
 }
 

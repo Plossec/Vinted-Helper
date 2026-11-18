@@ -2,7 +2,7 @@
 // 6 mois après la finalisation ; la vente et ses montants restent.
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { article, commandeVinted, reglages, utilisateur, vente } from "../base/schema.js";
+import { article, commandeVinted, offreFavori, reglages, utilisateur, vente } from "../base/schema.js";
 import { recevoirCommandes } from "../taches/finalisation.js";
 import { creerAppDeTest, seConnecter } from "../test/outils.js";
 import { limiteConservation, purgerDonneesAcheteurs } from "./conservation.js";
@@ -67,7 +67,7 @@ describe("conservation des données des acheteurs", () => {
     const ancien = await venduFinalise("2026-03-01T10:00:00.000Z");
     const recent = await venduFinalise("2026-09-01T10:00:00.000Z");
 
-    expect(await purgerDonneesAcheteurs(t.base, MAINTENANT)).toEqual({ conversations: 1, commandes: 0 });
+    expect(await purgerDonneesAcheteurs(t.base, MAINTENANT)).toEqual({ conversations: 1, commandes: 0, offres: 0 });
     expect(await lien(ancien.id)).toBeNull();
     expect(await lien(recent.id)).toBe(CONVERSATION);
     // La vente et son montant restent.
@@ -88,7 +88,7 @@ describe("conservation des données des acheteurs", () => {
       .insert(commandeVinted)
       .values([commande("ANCIENNE", "2026-03-01T10:00:00.000Z"), commande("RECENTE", "2026-09-01T10:00:00.000Z")]);
 
-    expect(await purgerDonneesAcheteurs(t.base, MAINTENANT)).toEqual({ conversations: 0, commandes: 1 });
+    expect(await purgerDonneesAcheteurs(t.base, MAINTENANT)).toEqual({ conversations: 0, commandes: 1, offres: 0 });
     const restantes = await t.base.select({ id: commandeVinted.idCommande }).from(commandeVinted);
     expect(restantes.map((c) => c.id)).toEqual(["RECENTE"]);
 
@@ -104,5 +104,28 @@ describe("conservation des données des acheteurs", () => {
       nouvelles: 0,
     });
     expect(await t.base.select().from(commandeVinted)).toHaveLength(1);
+  });
+
+  it("supprime les offres aux favoris de plus de 6 mois, avec l'empreinte de la personne (#149)", async () => {
+    const articleId = (await venduFinalise("2026-09-20T10:00:00.000Z")).id;
+    const offre = (personne: string, creeLe: string) => ({
+      utilisateurId,
+      articleId,
+      personne,
+      favoriLe: new Date(creeLe),
+      etat: "faite" as const,
+      prixAvant: 1100,
+      prixOffre: 1000,
+      creeLe: new Date(creeLe),
+    });
+    await t.base
+      .insert(offreFavori)
+      .values([
+        offre("empreinte-ancienne", "2026-03-01T10:00:00.000Z"),
+        offre("empreinte-recente", "2026-09-01T10:00:00.000Z"),
+      ]);
+    expect((await purgerDonneesAcheteurs(t.base, MAINTENANT)).offres).toBe(1);
+    const restantes = await t.base.select({ personne: offreFavori.personne }).from(offreFavori);
+    expect(restantes.map((o) => o.personne)).toEqual(["empreinte-recente"]);
   });
 });

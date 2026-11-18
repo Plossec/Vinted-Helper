@@ -185,7 +185,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0072](0072-taches-automatisees-socle-commun.md) | 14/10/2026 | Tâches automatisées : socle commun | Accepté |
 | [0073](0073-tache-articles-dormants.md) | 14/10/2026 | Tâche « Articles dormants » | Modifié |
 | [0074](0074-tache-verification-vente-finalisee.md) | 14/10/2026 | Tâche « Vérification vente finalisée » | Modifié |
-| [0075](0075-tache-negociation-favoris.md) | 14/10/2026 | Tâche « Négociation favoris » | Accepté |
+| [0075](0075-tache-negociation-favoris.md) | 14/10/2026 | Tâche « Négociation favoris » | Modifié |
 | [0076](0076-tache-validee-prix-propose.md) | 14/10/2026 | Tâche « Validée prix proposé » | Accepté |
 | [0077](0077-tache-recuperation-du-bon-de-livraison.md) | 14/10/2026 | Tâche « Récupération du bon de livraison » | Accepté |
 | [0078](0078-rythme-des-taches-automatisees.md) | 14/10/2026 | Rythme des tâches automatisées | Modifié |
@@ -198,6 +198,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0105](0105-taches-reglages-par-tache-et-journal.md) | 21/10/2026 | Tâches automatisées : réglages par tâche, état visible et journal de toutes les tâches | Proposé |
 | [0106](0106-articles-dormants-mode-reel.md) | 21/10/2026 | Articles dormants : mode réel (étape 3 sur 3) | Proposé |
 | [0113](0113-dormants-republication-avec-baisse.md) | 18/11/2026 | Articles dormants : republication avec baisse | Accepté |
+| [0114](0114-offres-aux-favoris-realisation.md) | 18/11/2026 | Offres aux favoris : précisions et réalisation (étape 1 sur 2) | Accepté · à relire |
 
 ## Import
 

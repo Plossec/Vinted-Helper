@@ -300,6 +300,18 @@ export interface ReglagesUtilisateur {
   /** Secondes. */
   finalisationPause: number;
   finalisationPlafond: number;
+  // Tâche « Négociation favoris » (#149).
+  favorisActive: boolean;
+  favorisHeureDebut: number;
+  favorisHeureFin: number;
+  favorisEssai: boolean;
+  favorisMode: "automatique" | "manuel";
+  /** Jours entre le favori et l'offre. */
+  favorisDelaiJours: number;
+  favorisFrequenceHeures: number;
+  /** Secondes. */
+  favorisPause: number;
+  favorisPlafond: number;
 }
 
 /** Commande terminée lue sur Vinted (#148), rattachée ou non à une vente de l'application. */
@@ -355,6 +367,15 @@ export interface EtatTaches {
     /** « Lancer maintenant » en attente du passage de l'extension. */
     lancementDemande: string | null;
     aujourdhui: { finalisees: number; plafond: number };
+  };
+  /** Offres aux favoris (#149). */
+  favoris: {
+    active: boolean;
+    essai: boolean;
+    dernierPassage: string | null;
+    prochainPassage: string | null;
+    lancementDemande: string | null;
+    aujourdhui: { offres: number; plafond: number };
   };
 }
 

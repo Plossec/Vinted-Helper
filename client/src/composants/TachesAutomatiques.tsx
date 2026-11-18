@@ -377,6 +377,124 @@ function CarteFinalisation({
   );
 }
 
+function CarteFavoris({
+  r,
+  etat,
+  onChangement,
+}: {
+  r: ReglagesUtilisateur;
+  etat: EtatTaches["favoris"] | null;
+  onChangement: (r?: ReglagesUtilisateur) => void;
+}) {
+  const { form, modifier, texte, message, enregistrer } = useCarte(
+    {
+      active: r.favorisActive,
+      essai: r.favorisEssai,
+      mode: r.favorisMode,
+      heureDebut: String(r.favorisHeureDebut),
+      heureFin: String(r.favorisHeureFin),
+      delai: String(r.favorisDelaiJours),
+      frequence: String(r.favorisFrequenceHeures),
+      /** Minutes. */
+      pause: String(Math.round(r.favorisPause / 60)),
+      plafond: String(r.favorisPlafond),
+    },
+    onChangement,
+  );
+
+  function soumettre(evenement: FormEvent) {
+    evenement.preventDefault();
+    const lus = lireEntiers({
+      favorisHeureDebut: { texte: form.heureDebut, min: 0, max: 23, message: "Heure de début : 0 à 23." },
+      favorisHeureFin: { texte: form.heureFin, min: 1, max: 24, message: "Heure de fin : 1 à 24." },
+      favorisDelaiJours: { texte: form.delai, min: 1, max: 30, message: "Délai après le favori : 1 à 30 jours." },
+      favorisFrequenceHeures: {
+        texte: form.frequence,
+        min: 6,
+        max: 168,
+        message: "Lecture toutes les 6 à 168 heures.",
+      },
+      pause: { texte: form.pause, min: 2, max: 60, message: "Pause entre deux offres : 2 à 60 minutes." },
+      favorisPlafond: { texte: form.plafond, min: 1, max: 20, message: "1 à 20 offres par jour." },
+    });
+    if ("erreur" in lus) return void enregistrer(lus.erreur);
+    const { pause, ...valeurs } = lus.valeurs;
+    void enregistrer({
+      favorisActive: form.active,
+      favorisEssai: form.essai,
+      favorisMode: form.mode,
+      ...valeurs,
+      favorisPause: pause * 60,
+    });
+  }
+
+  const resume = etat && (
+    <>
+      Dernière lecture : {dateOuJamais(etat.dernierPassage)} · Prochaine : {prochain(etat.prochainPassage)}
+      <br />
+      Aujourd'hui : {etat.aujourdhui.offres}/{etat.aujourdhui.plafond} offre(s)
+    </>
+  );
+
+  return (
+    <Carte titre="Offres aux favoris" active={r.favorisActive} essai={r.favorisEssai} resume={resume}>
+      <form className="formulaire" onSubmit={soumettre} noValidate>
+        <p className="secondaire">
+          <strong>En préparation :</strong> l'extension ne lit pas encore les favoris (calibrage d'après vos relevés,
+          #149). Les réglages sont déjà enregistrés.
+        </p>
+        <label className="case">
+          <input type="checkbox" checked={form.active} onChange={(e) => modifier({ active: e.target.checked })} /> Tâche
+          activée : envoyer une offre réduite aux personnes qui ont mis un article en favori sans l'acheter
+        </label>
+        <label className="case">
+          <input type="checkbox" checked={form.essai} onChange={(e) => modifier({ essai: e.target.checked })} /> Mode
+          essai : l'extension ouvre les pages Vinted sans rien envoyer
+        </label>
+        <label className="champ">
+          <span>Mode</span>
+          <select {...texte("mode")}>
+            <option value="manuel">Manuel : liste à valider dans « À faire »</option>
+            <option value="automatique">Automatique : sans validation</option>
+          </select>
+        </label>
+        <label className="champ">
+          <span>Offre après le favori (jours)</span>
+          <input inputMode="numeric" {...texte("delai")} />
+        </label>
+        <p className="secondaire">
+          Prix de l'offre : règle de baisse des articles dormants (celle de l'article, sinon celle-ci), arrondi vers le
+          haut au 0,50 €, jamais sous le prix vente minimum ; sans prix vente minimum ou réglé « ne pas baisser » : pas
+          d'offre. Une seule offre par personne et par article, sans message. Articles En ligne et Invendu ; un article
+          dormant est republié d'abord.
+        </p>
+        <label className="champ">
+          <span>Lecture des favoris toutes les (heures, 6 au moins)</span>
+          <input inputMode="numeric" {...texte("frequence")} />
+        </label>
+        <Plage debut={texte("heureDebut")} fin={texte("heureFin")} />
+        <details className="repli-historique">
+          <summary>Réglages avancés</summary>
+          <div className="champs-ligne">
+            <label className="champ">
+              <span>Entre deux offres (min)</span>
+              <input inputMode="numeric" {...texte("pause")} />
+            </label>
+            <label className="champ">
+              <span>Offres par jour (20 au plus)</span>
+              <input inputMode="numeric" {...texte("plafond")} />
+            </label>
+          </div>
+        </details>
+        <MessageCarte message={message} />
+        <button className="bouton bouton--principal" type="submit">
+          Enregistrer
+        </button>
+      </form>
+    </Carte>
+  );
+}
+
 export function TachesAutomatiques() {
   const [reglages, setReglages] = useState<ReglagesUtilisateur | null>(null);
   const [etat, setEtat] = useState<EtatTaches | null>(null);
@@ -413,6 +531,7 @@ export function TachesAutomatiques() {
       </p>
       <CarteDormants r={reglages} etat={etat?.dormants ?? null} version={version} onChangement={onChangement} />
       <CarteFinalisation r={reglages} etat={etat?.finalisation ?? null} version={version} onChangement={onChangement} />
+      <CarteFavoris r={reglages} etat={etat?.favoris ?? null} onChangement={onChangement} />
       <h3>Journal de toutes les tâches</h3>
       <p className="secondaire">3 derniers mois, le plus récent d'abord.</p>
       <JournalTaches filtres version={version} />

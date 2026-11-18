@@ -1,7 +1,7 @@
 # ADR-0075 — Tâche « Négociation favoris »
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · précisé par [ADR-0114](0114-offres-aux-favoris-realisation.md) (chemin, empreinte, articles, priorité, réglages)
 - **Décideurs** : utilisateur
 - **Issue** : #149
 - **Thème** : Tâches automatisées

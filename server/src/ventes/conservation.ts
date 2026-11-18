@@ -1,8 +1,9 @@
 // Conservation des données liées aux acheteurs (issue #216) : le lien de la conversation Vinted et les commandes lues
 // sur Vinted sont effacés 6 mois après la finalisation (choix de l'utilisateur). La vente et ses montants restent.
+// Offres aux favoris (#149, ADR-0114) : effacées 6 mois après l'offre, avec l'empreinte de la personne.
 import { and, eq, inArray, isNotNull, lt } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
-import { article, commandeVinted, vente, venteArticle } from "../base/schema.js";
+import { article, commandeVinted, offreFavori, vente, venteArticle } from "../base/schema.js";
 
 export const MOIS_CONSERVATION = 6;
 
@@ -17,7 +18,7 @@ export function limiteConservation(maintenant: Date): Date {
 export async function purgerDonneesAcheteurs(
   base: Base,
   maintenant: Date,
-): Promise<{ conversations: number; commandes: number }> {
+): Promise<{ conversations: number; commandes: number; offres: number }> {
   const limite = limiteConservation(maintenant);
   const anciennes = base
     .select({ id: venteArticle.articleId })
@@ -33,5 +34,6 @@ export async function purgerDonneesAcheteurs(
     .delete(commandeVinted)
     .where(lt(commandeVinted.dateFin, limite))
     .returning({ id: commandeVinted.id });
-  return { conversations: conversations.length, commandes: commandes.length };
+  const offres = await base.delete(offreFavori).where(lt(offreFavori.creeLe, limite)).returning({ id: offreFavori.id });
+  return { conversations: conversations.length, commandes: commandes.length, offres: offres.length };
 }

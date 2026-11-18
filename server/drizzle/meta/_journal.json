@@ -162,6 +162,13 @@
       "when": 1794950969936,
       "tag": "0022_points_relais",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794981261480,
+      "tag": "0023_taches_favoris",
+      "breakpoints": true
     }
   ]
 }

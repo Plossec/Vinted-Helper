@@ -453,6 +453,24 @@ export const reglages = pgTable(
     finalisationDernierPassage: horodatage("finalisation_dernier_passage"),
     /** « Lancer maintenant » (#230) : lecture des commandes demandée, faite au prochain passage, à toute heure. */
     finalisationLancementDemande: horodatage("finalisation_lancement_demande"),
+    // Tâche « Négociation favoris » (#149, ADR-0075, ADR-0114) : offre réduite aux personnes qui ont mis un article en
+    // favori, lue dans les notifications de Vinted.
+    favorisActive: boolean("favoris_active").notNull().default(false),
+    favorisHeureDebut: integer("favoris_heure_debut").notNull().default(8),
+    favorisHeureFin: integer("favoris_heure_fin").notNull().default(22),
+    favorisEssai: boolean("favoris_essai").notNull().default(true),
+    favorisMode: modeTache("favoris_mode").notNull().default("manuel"),
+    /** Jours entre le favori et l'offre. */
+    favorisDelaiJours: integer("favoris_delai_jours").notNull().default(2),
+    favorisFrequenceHeures: integer("favoris_frequence_heures").notNull().default(24),
+    /** Secondes entre deux offres. */
+    favorisPause: integer("favoris_pause").notNull().default(300),
+    /** Offres par jour au plus. */
+    favorisPlafond: integer("favoris_plafond").notNull().default(10),
+    /** Dernière lecture des favoris (résultat reçu de l'extension). */
+    favorisDernierPassage: horodatage("favoris_dernier_passage"),
+    /** « Lancer maintenant » : lecture des favoris demandée, faite au prochain passage, à toute heure. */
+    favorisLancementDemande: horodatage("favoris_lancement_demande"),
   },
   // Le programme du PC s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
@@ -518,6 +536,42 @@ export const actionVinted = pgTable(
   (t) => [
     index("action_vinted_utilisateur_idx").on(t.utilisateurId, t.etat),
     index("action_vinted_article_idx").on(t.articleId),
+  ],
+);
+
+/**
+ * Offres réduites aux personnes qui ont mis un article en favori (#149, ADR-0075, ADR-0114) : une seule par personne et
+ * par article. La personne n'est connue que par une empreinte de son identifiant Vinted (jamais son nom, ADR-0100),
+ * effacée 6 mois après l'offre avec la ligne.
+ */
+export const offreFavori = pgTable(
+  "offre_favori",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    /** Empreinte SHA-256 de l'identifiant Vinted de la personne. */
+    personne: text("personne").notNull(),
+    favoriLe: horodatage("favori_le").notNull(),
+    etat: etatActionVinted("etat").notNull(),
+    /** Centimes : prix affiché au moment de la planification, et prix proposé. */
+    prixAvant: integer("prix_avant").notNull(),
+    prixOffre: integer("prix_offre").notNull(),
+    essai: boolean("essai").notNull().default(true),
+    manuelle: boolean("manuelle").notNull().default(false),
+    message: text("message"),
+    releve: boolean("releve").notNull().default(false),
+    creeLe: horodatage("cree_le").notNull(),
+    debutLe: horodatage("debut_le"),
+    finLe: horodatage("fin_le"),
+  },
+  (t) => [
+    uniqueIndex("offre_favori_article_personne_unique").on(t.articleId, t.personne),
+    index("offre_favori_utilisateur_idx").on(t.utilisateurId, t.etat),
   ],
 );
 
