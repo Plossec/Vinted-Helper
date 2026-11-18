@@ -292,17 +292,22 @@ function versAnnonce(
 }
 
 /**
- * Annonce d'un article déjà En ligne, à recréer sur Vinted (republication d'un article dormant, #147) ; null si
- * l'annonce n'est plus complète (mêmes champs que la publication).
+ * Annonce d'un article déjà En ligne, à recréer sur Vinted (republication d'un article dormant, #147) au prix donné
+ * (centimes : prix baissé, ADR-0113) ; null si l'annonce n'est plus complète (mêmes champs que la publication).
  */
-export async function annonceARepublier(base: Base | Transaction, utilisateurId: string, articleId: string) {
+export async function annonceARepublier(
+  base: Base | Transaction,
+  utilisateurId: string,
+  articleId: string,
+  prixAffiche: number,
+) {
   const [a] = await chargerArticles(base, utilisateurId, [articleId]);
   const photos = ((await photosDesArticles(base, [articleId])).get(articleId) ?? []).filter(
     (p) => p.type === "annonce",
   );
   if (!a || manquesArticle(a, photos.length, true).length > 0) return null;
   const { formatColisDefaut } = await lireReglages(base, utilisateurId);
-  return versAnnonce(a, photos, formatColisDefaut);
+  return versAnnonce({ ...a, prixAffiche }, photos, formatColisDefaut);
 }
 
 export type ResultatProgramme =

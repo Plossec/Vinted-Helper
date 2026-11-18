@@ -108,10 +108,7 @@ async function actionsDuJour(tx: Transaction, utilisateurId: string, maintenant:
     );
   const aujourdhui = jourParis(maintenant.toISOString());
   const du = lignes.filter((l) => jourParis(l.creeLe.toISOString()) === aujourdhui);
-  return {
-    baisse: du.filter((l) => l.type === "baisse").length,
-    republication: du.filter((l) => l.type === "republication").length,
-  };
+  return du.filter((l) => l.type === "republication").length;
 }
 
 /**
@@ -174,7 +171,6 @@ async function prevoirDormants(
   const candidats = await candidatsDormants(tx, utilisateurId, r.delaiDormant, maintenant);
   const { actions, invendus } = planifierDormants(candidats, {
     regleCompte: { type: r.dormantsBaisseType, valeur: r.dormantsBaisseValeur },
-    plafondBaisses: manuelle ? Number.POSITIVE_INFINITY : r.dormantsPlafondBaisses,
     plafondRepublications: manuelle ? Number.POSITIVE_INFINITY : r.dormantsPlafondRepublications,
     dejaAujourdhui: await actionsDuJour(tx, utilisateurId, maintenant),
   });
@@ -213,6 +209,7 @@ export async function annulerActionsPerimees(base: Base | Transaction, utilisate
   const prevues = await base
     .select({
       id: actionVinted.id,
+      type: actionVinted.type,
       prixAvant: actionVinted.prixAvant,
       statut: article.statut,
       prixAffiche: article.prixAffiche,
@@ -226,15 +223,17 @@ export async function annulerActionsPerimees(base: Base | Transaction, utilisate
         or(eq(actionVinted.etat, "a_valider"), eq(actionVinted.etat, "en_attente")),
       ),
     );
+  // Une baisse seule prévue avant ADR-0113 n'est plus faite : la tâche republie avec une baisse.
   const perimees = prevues.filter(
-    (p) => p.statut !== "en_ligne" || p.prixAffiche !== p.prixAvant || p.supprimeLe !== null,
+    (p) => p.type === "baisse" || p.statut !== "en_ligne" || p.prixAffiche !== p.prixAvant || p.supprimeLe !== null,
   );
   if (perimees.length === 0) return;
   await base
     .update(actionVinted)
     .set({
       etat: "annulee",
-      message: "Article modifié entre-temps (statut ou prix) : action annulée.",
+      message:
+        "Action annulée : article modifié entre-temps (statut ou prix), ou baisse seule remplacée par la republication avec baisse.",
       finLe: maintenant,
     })
     .where(
@@ -358,7 +357,7 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
     // Hors de la plage horaire, seules les actions lancées à la main (#230) sont confiées à l'extension.
     const horsPlage = heure < r.dormantsHeureDebut || heure >= r.dormantsHeureFin;
     await annulerActionsPerimees(tx, utilisateurId, maintenant);
-    const pauses = { baisse: r.dormantsPauseBaisse, republication: r.dormantsPauseRepublication };
+    const pauses = { baisse: r.dormantsPauseRepublication, republication: r.dormantsPauseRepublication };
     const fins = await tx
       .select({ type: actionVinted.type, finLe: actionVinted.finLe })
       .from(actionVinted)
@@ -400,8 +399,12 @@ export async function actionSuivante(base: Base, utilisateurId: string, maintena
         await echec("Article sans lien d'annonce Vinted : action impossible.");
         continue;
       }
-      // Republication : l'annonce est recréée avec les données de l'article, qui doit être complet.
-      const annonce = a.type === "republication" ? await annonceARepublier(tx, utilisateurId, a.articleId) : null;
+      // Republication : l'annonce est recréée avec les données de l'article, qui doit être complet, au prix baissé
+      // (ADR-0113 ; sans prix baissé, une ancienne action garde le prix actuel).
+      const annonce =
+        a.type === "republication"
+          ? await annonceARepublier(tx, utilisateurId, a.articleId, a.prixApres ?? a.prixAvant)
+          : null;
       if (a.type === "republication" && !annonce) {
         await echec("Annonce incomplète : complétez l'article avant de le republier.");
         continue;
@@ -482,7 +485,8 @@ export async function enregistrerResultatAction(
     }
     if (r.resultat === "fait") {
       if (x.essai) throw conflit("Action en mode essai : rien ne devait être modifié sur Vinted.");
-      if (x.type === "baisse" && x.prixApres !== null) {
+      // Nouveau prix : baisse (anciennes actions) ou republication avec baisse (ADR-0113).
+      if (x.prixApres !== null) {
         await tx
           .update(article)
           .set({ prixAffiche: x.prixApres, modifieLe: maintenant })

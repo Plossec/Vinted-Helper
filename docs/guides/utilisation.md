@@ -15,8 +15,8 @@ par urgence :
 
 Touchez le nom d'un article pour ouvrir sa fiche. « Rien à faire 🎉 » quand tout est fait.
 
-**Articles dormants : à valider** (en tête de l'écran, si la tâche automatique est en mode manuel) : les baisses de
-prix et republications prévues ; cochez-les puis **Appliquer** (l'extension Chrome les fera) ou **Refuser**.
+**Articles dormants : à valider** (en tête de l'écran, si la tâche automatique est en mode manuel) : les
+republications avec baisse prévues ; cochez-les puis **Appliquer** (l'extension Chrome les fera) ou **Refuser**.
 
 ## Tâches automatiques : l'écran
 
@@ -32,10 +32,10 @@ Claude. Les lignes de plus de **3 mois** sont effacées.
 
 ## Tâche automatique « Articles dormants »
 
-**Réglages → Tâches automatiques** (désactivée par défaut) : un article dormant voit son prix baissé (pourcentage ou
-montant, arrondi vers le haut au 0,50 €, jamais sous le **prix vente minimum**), puis, une fois au minimum, son
-annonce republiée. Sans prix vente minimum, ou réglé **« Ne pas baisser le prix »** sur la fiche (champ « Baisse
-automatique », sous le prix vente minimum), l'article est seulement republié. Après **3 republications sans vente**,
+**Réglages → Tâches automatiques** (désactivée par défaut) : un article dormant est **republié avec une baisse de
+prix** (pourcentage ou montant, arrondi vers le haut au 0,50 €, jamais sous le **prix vente minimum**). Sans prix
+vente minimum, déjà au minimum, ou réglé **« Ne pas baisser le prix »** sur la fiche (champ « Baisse automatique »,
+sous le prix vente minimum), **rien n'est fait** : l'article reste dans les dormants de « À faire ». Après **3 republications sans vente**,
 il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 
 - **Mode** : *manuel* (liste à valider dans « À faire ») ou *automatique*.

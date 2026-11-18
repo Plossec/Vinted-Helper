@@ -1,4 +1,4 @@
-// Tâche « Articles dormants » (#147, ADR-0073) : nouveau prix d'un article dormant, ou republication.
+// Tâche « Articles dormants » (#147, ADR-0073, ADR-0113) : prix d'un article dormant republié avec une baisse.
 // Fonctions pures, montants en centimes entiers.
 
 export interface RegleBaisse {
@@ -9,8 +9,6 @@ export interface RegleBaisse {
 
 /** Réglage d'un article : celui du compte, le sien, ou « ne pas baisser le prix » (`aucune`). */
 export type ReglageBaisseArticle = "compte" | "pourcentage" | "montant" | "aucune";
-
-export type ActionDormant = { type: "baisse"; prix: number } | { type: "republication" };
 
 const PAS = 50;
 
@@ -35,20 +33,24 @@ export function regleApplicable(
 }
 
 /**
- * Prix baissé (arrondi vers le haut au 0,50 € ; baisse de 0,50 € si l'arrondi redonne le prix actuel ; jamais sous le
- * prix vente minimum), ou republication : pas de règle (« ne pas baisser »), pas de minimum, ou déjà au minimum.
+ * Prix de la republication avec baisse (ADR-0113) : arrondi vers le haut au 0,50 € ; baisse de 0,50 € si l'arrondi
+ * redonne le prix actuel ; jamais sous le prix vente minimum. `null` = rien à faire : « ne pas baisser », pas de prix
+ * vente minimum, ou déjà au minimum (l'article reste dans les dormants de l'écran « À faire »).
  */
-export function actionDormant(prixAffiche: number, regle: RegleBaisse | null, minimum: number | null): ActionDormant {
+export function prixRepublication(
+  prixAffiche: number,
+  regle: RegleBaisse | null,
+  minimum: number | null,
+): number | null {
   entier(prixAffiche, "Prix affiché");
   if (minimum !== null) entier(minimum, "Prix vente minimum");
   if (regle !== null) entier(regle.valeur, "Baisse");
-  if (regle === null || minimum === null || prixAffiche <= minimum) return { type: "republication" };
+  if (regle === null || minimum === null || prixAffiche <= minimum) return null;
   const arrondi =
     regle.type === "pourcentage"
       ? auDessus(prixAffiche * (100 - regle.valeur), 100 * PAS) * PAS
       : auDessus(Math.max(prixAffiche - regle.valeur, 0), PAS) * PAS;
   const baisse = arrondi >= prixAffiche ? prixAffiche - PAS : arrondi;
   const prix = Math.max(baisse, minimum);
-  if (prix <= 0 || prix >= prixAffiche) return { type: "republication" };
-  return { type: "baisse", prix };
+  return prix <= 0 || prix >= prixAffiche ? null : prix;
 }

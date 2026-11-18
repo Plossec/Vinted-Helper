@@ -88,8 +88,9 @@ pauses réglées dans l'application.
 
 - **Baisse de prix** : ouvre l'annonce, puis « Modifier l'annonce », et lit le prix affiché ; **rien n'est saisi ni
   enregistré**.
-- **Republication** : ouvre l'annonce (le bouton « Supprimer » est repéré, **jamais cliqué**), puis remplit
-  « Vendre un article » avec l'annonce, **sans cliquer « Ajouter »**.
+- **Republication avec baisse** (seule action depuis l'application 1.27.4, ADR-0113 ; la « baisse de prix » ne sert
+  plus qu'aux anciennes actions) : ouvre l'annonce (le bouton « Supprimer » est repéré, **jamais cliqué**), puis
+  remplit « Vendre un article » avec l'annonce **au prix baissé**, **sans cliquer « Ajouter »**.
 
 **Mode réel** (case décochée, extension 1.14 au moins) :
 

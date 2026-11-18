@@ -1,7 +1,7 @@
 # ADR-0073 — Tâche « Articles dormants »
 
 - **Date** : 14/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · baisse seule et republication sans baisse : remplacées par [ADR-0113](0113-dormants-republication-avec-baisse.md) (republication avec baisse)
 - **Décideurs** : utilisateur
 - **Issue** : #147
 - **Thème** : Tâches automatisées

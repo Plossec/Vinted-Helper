@@ -1,4 +1,5 @@
 // Tâche « Articles dormants » (#147) : planification au passage de l'extension, liste à valider, Invendu, réglages.
+// Depuis ADR-0113 : une seule action, la republication avec baisse ; sans baisse possible, rien.
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { actionVinted, article, historiquePrix } from "../base/schema.js";
@@ -77,7 +78,7 @@ describe("tâche « Articles dormants »", () => {
     expect((await actions()).aValider).toEqual([]);
   });
 
-  it("mode manuel : baisse proposée, à valider ; une seule fois par jour ; « Appliquer » la met en attente", async () => {
+  it("mode manuel : republication avec baisse proposée, à valider ; une fois par jour ; « Appliquer » la met en attente", async () => {
     const a = await enLigne();
     expect((await reglerTache()).statusCode).toBe(200);
     t.horloge.avancer(3 * JOUR_MS);
@@ -87,7 +88,7 @@ describe("tâche « Articles dormants »", () => {
     await passage();
     const liste = await actions();
     expect(liste.aValider).toMatchObject([
-      { articleId: a, type: "baisse", etat: "a_valider", prixAvant: 1100, prixApres: 1000, essai: true },
+      { articleId: a, type: "republication", etat: "a_valider", prixAvant: 1100, prixApres: 1000, essai: true },
     ]);
     expect((await requete("GET", "/api/alertes")).json<{ aValider: number }>().aValider).toBe(1);
     // Nouveau passage 5 minutes plus tard : rien de plus (fréquence : 1 fois par jour).
@@ -119,15 +120,34 @@ describe("tâche « Articles dormants »", () => {
     );
   });
 
-  it("mode automatique : l'action va directement à l'extension ; « ne pas baisser » → republication", async () => {
-    const a = await enLigne({ baisseRegle: "aucune" });
+  it("mode automatique : l'action va directement à l'extension ; « ne pas baisser » ou sans minimum → rien", async () => {
+    await enLigne({ baisseRegle: "aucune" });
+    await enLigne({ prixVenteMinimum: null });
+    const b = await enLigne();
     await reglerTache({ dormantsMode: "automatique" });
     t.horloge.avancer(8 * JOUR_MS);
     await passage();
     expect(await actions()).toMatchObject({
       aValider: [],
-      journal: [{ articleId: a, type: "republication", etat: "en_attente", prixApres: null }],
+      journal: [{ articleId: b, type: "republication", etat: "en_attente", prixApres: 1000 }],
     });
+    expect((await actions()).journal).toHaveLength(1);
+  });
+
+  it("une baisse seule prévue avant ADR-0113 est annulée (remplacée par la republication avec baisse)", async () => {
+    const a = await enLigne();
+    const utilisateurId = (await t.base.select().from(article).where(eq(article.id, a)))[0]?.utilisateurId ?? "";
+    await t.base.insert(actionVinted).values({
+      utilisateurId,
+      articleId: a,
+      type: "baisse",
+      etat: "en_attente",
+      prixAvant: 1100,
+      prixApres: 1000,
+      essai: true,
+      creeLe: t.horloge.maintenant(),
+    });
+    expect((await actions()).journal).toMatchObject([{ articleId: a, type: "baisse", etat: "annulee" }]);
   });
 
   it("hors de la plage horaire (8 h – 22 h, Paris) : rien", async () => {
@@ -171,7 +191,7 @@ describe("tâche « Articles dormants »", () => {
     expect((await requete("POST", `/api/articles/${a}/statut`, { vers: "en_ligne" })).statusCode).toBe(200);
     t.horloge.avancer(8 * JOUR_MS);
     await passage();
-    expect((await actions()).aValider).toMatchObject([{ articleId: a, type: "baisse" }]);
+    expect((await actions()).aValider).toMatchObject([{ articleId: a, type: "republication" }]);
   });
 
   it("un article Invendu peut être vendu (l'annonce reste en ligne)", async () => {
@@ -230,7 +250,8 @@ describe("tâche « Articles dormants »", () => {
     it("tâche désactivée, hors plage horaire, au-delà du plafond : actions prévues, à valider, exécutées de nuit", async () => {
       const a = await enLigne();
       const b = await enLigne();
-      await requete("PUT", "/api/reglages", { dormantsPlafondBaisses: 1 });
+      for (const id of [a, b]) await completerAnnonce(t.base, id);
+      await requete("PUT", "/api/reglages", { dormantsPlafondRepublications: 1 });
       t.horloge.avancer(8 * JOUR_MS + 11 * 3_600_000); // 23 h à Paris, tâche désactivée
       const r = await lancer();
       expect(r.statusCode).toBe(200);
@@ -238,7 +259,7 @@ describe("tâche « Articles dormants »", () => {
       const liste = (await actions()).aValider;
       expect(liste.map((l) => l.articleId).sort()).toEqual([a, b].sort());
       await requete("POST", "/api/taches/actions/appliquer", { ids: liste.map((l) => l.id) });
-      expect((await suivante())?.type).toBe("baisse"); // exécutée à 23 h
+      expect((await suivante())?.type).toBe("republication"); // exécutée à 23 h
       // Relancé aussitôt : rien de plus (une action est déjà prévue pour chaque article).
       expect((await lancer()).json()).toEqual({ actions: 0 });
     });
@@ -246,8 +267,9 @@ describe("tâche « Articles dormants »", () => {
     it("de nuit, seules les actions lancées à la main sont confiées à l'extension", async () => {
       const a = await enLigne();
       const b = await enLigne();
-      await reglerTache({ dormantsMode: "automatique", dormantsPlafondBaisses: 1 });
-      t.horloge.avancer(8 * JOUR_MS); // midi : passage automatique, plafond d'une baisse
+      for (const id of [a, b]) await completerAnnonce(t.base, id);
+      await reglerTache({ dormantsMode: "automatique", dormantsPlafondRepublications: 1 });
+      t.horloge.avancer(8 * JOUR_MS); // midi : passage automatique, plafond d'une republication
       await t.app.inject({
         method: "GET",
         url: "/api/programme/attente",
@@ -287,33 +309,38 @@ describe("tâche « Articles dormants »", () => {
         urlVinted: string | null;
       }>();
 
-    it("une action à la fois, en mode essai par défaut : rien ne change ; pause avant la baisse suivante", async () => {
+    it("une action à la fois, en mode essai par défaut : rien ne change ; pause avant la suivante", async () => {
       const a = await enLigne();
       const b = await enLigne();
+      for (const id of [a, b]) await completerAnnonce(t.base, id);
       await reglerTache({ dormantsMode: "automatique" });
       t.horloge.avancer(8 * JOUR_MS);
       expect((await passage()).json()).toEqual({ nombre: 0, actions: 2, lectureCommandes: false });
       const x = await suivante();
-      expect(x).toMatchObject({ type: "baisse", essai: true, prixAvant: "11,00", prixApres: "10,00", annonce: null });
+      expect(x).toMatchObject({ type: "republication", essai: true, prixAvant: "11,00", prixApres: "10,00" });
+      // L'annonce est recréée au prix baissé (ADR-0113).
+      expect(x?.annonce).toMatchObject({ prix: "10,00" });
       expect(await suivante()).toBeNull(); // une seule à la fois
       expect((await resultat(x?.id ?? "", { resultat: "essai" })).statusCode).toBe(200);
       expect((await resultat(x?.id ?? "", { resultat: "essai" })).statusCode).toBe(409); // pas deux fois
       expect((await lire(a)).prixAffiche).toBe(1100);
       expect((await lire(b)).prixAffiche).toBe(1100);
-      expect(await suivante()).toBeNull(); // 2 minutes entre deux baisses
-      t.horloge.avancer(2 * 60_000);
-      expect((await suivante())?.type).toBe("baisse");
+      expect(await suivante()).toBeNull(); // 10 minutes entre deux republications
+      t.horloge.avancer(10 * 60_000);
+      expect((await suivante())?.type).toBe("republication");
     });
 
-    it("hors mode essai : baisse faite → nouveau prix et historique ; « fait » refusé pour un essai", async () => {
+    it("hors mode essai : republication faite → nouveau prix, historique et lien ; « fait » refusé pour un essai", async () => {
       const a = await enLigne();
+      await completerAnnonce(t.base, a);
       await reglerTache({ dormantsMode: "automatique", dormantsEssai: false });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const x = await suivante();
       expect(x?.essai).toBe(false);
-      expect((await resultat(x?.id ?? "", { resultat: "fait" })).statusCode).toBe(200);
-      expect((await lire(a)).prixAffiche).toBe(1000);
+      const url = "https://www.vinted.fr/items/789-jean";
+      expect((await resultat(x?.id ?? "", { resultat: "fait", url })).statusCode).toBe(200);
+      expect(await lire(a)).toMatchObject({ prixAffiche: 1000, urlVinted: url });
       const prix = await t.base.select().from(historiquePrix).where(eq(historiquePrix.articleId, a));
       expect(prix.map((p) => p.prix)).toEqual([1100, 1000]);
       // La baisse relance le délai dormant : rien de prévu le lendemain.
@@ -322,26 +349,27 @@ describe("tâche « Articles dormants »", () => {
       expect((await actions()).journal.filter((l) => l.etat === "en_attente")).toEqual([]);
 
       const b = await enLigne();
+      await completerAnnonce(t.base, b);
       await requete("PUT", "/api/reglages", { dormantsEssai: true });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const y = await suivante();
       expect(y?.essai).toBe(true);
-      expect((await resultat(y?.id ?? "", { resultat: "fait" })).statusCode).toBe(409);
+      expect((await resultat(y?.id ?? "", { resultat: "fait", url })).statusCode).toBe(409);
       expect((await lire(b)).prixAffiche).toBe(1100);
     });
 
     it("republication : annonce à recréer fournie ; faite → nouveau lien ; échec après suppression → Erreur", async () => {
-      const a = await enLigne({ baisseRegle: "aucune" });
-      const b = await enLigne({ baisseRegle: "aucune" });
-      const c = await enLigne({ baisseRegle: "aucune" });
+      const a = await enLigne();
+      const b = await enLigne();
+      const c = await enLigne();
       for (const id of [a, b]) await completerAnnonce(t.base, id);
       await reglerTache({ dormantsMode: "automatique", dormantsEssai: false, dormantsPauseRepublication: 600 });
       t.horloge.avancer(8 * JOUR_MS);
       await passage();
       const x = await suivante();
       expect(x).toMatchObject({ type: "republication", url: "https://www.vinted.fr/items/123-jean" });
-      expect(x?.annonce).toMatchObject({ titre: "Titre de test", prix: "11,00", couleurs: ["Bleu"] });
+      expect(x?.annonce).toMatchObject({ titre: "Titre de test", prix: "10,00", couleurs: ["Bleu"] });
       expect((await resultat(x?.id ?? "", { resultat: "fait" })).statusCode).toBe(400); // lien manquant
       const url = "https://www.vinted.fr/items/456-jean";
       expect((await resultat(x?.id ?? "", { resultat: "fait", url })).statusCode).toBe(200);

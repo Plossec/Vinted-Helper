@@ -186,9 +186,7 @@ export async function etatTaches(base: Base, utilisateurId: string, maintenant: 
         maintenant,
       ),
       aujourdhui: {
-        baisses: du.filter((a) => a.type === "baisse").length,
         republications: du.filter((a) => a.type === "republication").length,
-        plafondBaisses: r.dormantsPlafondBaisses,
         plafondRepublications: r.dormantsPlafondRepublications,
       },
     },
