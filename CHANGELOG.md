@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.28.0] — 18/11/2026
+
+### Ajouté
+- **Offres aux favoris** (Réglages → Tâches automatiques, carte « en préparation ») : réglages de la future tâche qui
+  enverra une offre réduite aux personnes ayant mis un article en favori (délai, offres par jour, pause, plage horaire,
+  mode, essai). Les offres seront gardées 6 mois, la personne connue seulement par une empreinte. L'extension ne lit
+  pas encore les favoris : elle sera calibrée d'après vos relevés (#149, ADR-0114).
+
 ## [1.27.4] — 18/11/2026
 
 ### Modifié

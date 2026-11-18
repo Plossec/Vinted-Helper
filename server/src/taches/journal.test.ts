@@ -169,15 +169,26 @@ describe("refonte des tâches (#232, #233)", () => {
         lancementDemande: null,
         aujourdhui: { finalisees: 0, plafond: 50 },
       },
+      // Offres aux favoris (#149) : désactivées, en essai, 10 offres par jour au plus.
+      favoris: {
+        active: false,
+        essai: true,
+        dernierPassage: null,
+        prochainPassage: null,
+        lancementDemande: null,
+        aujourdhui: { offres: 0, plafond: 10 },
+      },
     });
     await requete("PUT", "/api/reglages", {
       dormantsActive: true,
       dormantsFrequenceHeures: 12,
       finalisationActive: true,
+      favorisActive: true,
     });
     expect(await etat()).toMatchObject({
       dormants: { prochainPassage: "2026-10-05T10:00:00.000Z" },
       finalisation: { prochainPassage: "2026-10-05T10:00:00.000Z" },
+      favoris: { active: true, prochainPassage: "2026-10-05T10:00:00.000Z" },
     });
     await passage(); // à midi à Paris ; 12 h plus tard il est minuit : prochain passage à 8 h
     await requete("POST", "/api/taches/finalisation/lancer");
@@ -185,6 +196,30 @@ describe("refonte des tâches (#232, #233)", () => {
       dormants: { dernierPassage: "2026-10-05T10:00:00.000Z", prochainPassage: "2026-10-06T06:00:00.000Z" },
       finalisation: { lancementDemande: "2026-10-05T10:00:00.000Z" },
     });
+  });
+
+  it("réglages des offres aux favoris (#149) : valeurs par défaut, limites contre le spam, plage cohérente", async () => {
+    expect((await requete("GET", "/api/reglages")).json()).toMatchObject({
+      favorisActive: false,
+      favorisEssai: true,
+      favorisMode: "manuel",
+      favorisDelaiJours: 2,
+      favorisPause: 300,
+      favorisPlafond: 10,
+      favorisHeureDebut: 8,
+      favorisHeureFin: 22,
+    });
+    for (const refuse of [
+      { favorisPlafond: 21 },
+      { favorisPause: 60 },
+      { favorisFrequenceHeures: 5 },
+      { favorisDelaiJours: 0 },
+      { favorisMode: "autre" },
+      { favorisHeureDebut: 22, favorisHeureFin: 8 },
+    ])
+      expect((await requete("PUT", "/api/reglages", refuse)).statusCode, JSON.stringify(refuse)).toBe(400);
+    const ok = await requete("PUT", "/api/reglages", { favorisMode: "automatique", favorisDelaiJours: 3 });
+    expect(ok.json()).toMatchObject({ favorisMode: "automatique", favorisDelaiJours: 3, favorisActive: false });
   });
 
   it("conservation : lignes de plus de 3 mois effacées, sauf les republications faites (comptées pour Invendu)", async () => {

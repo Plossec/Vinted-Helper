@@ -139,6 +139,26 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
     "finalisationPlafond",
     entierFacultatif(c.finalisationPlafond, "Ventes finalisées : finalisations par jour", 1, 100),
   );
+  // Tâche « Négociation favoris » (#149, ADR-0114) : mêmes limites contre le spam que les autres tâches.
+  poser("favorisActive", booleenFacultatif(c.favorisActive, "Offres aux favoris : activée"));
+  poser("favorisHeureDebut", entierFacultatif(c.favorisHeureDebut, "Offres aux favoris : heure de début", 0, 23));
+  poser("favorisHeureFin", entierFacultatif(c.favorisHeureFin, "Offres aux favoris : heure de fin", 1, 24));
+  poser("favorisEssai", booleenFacultatif(c.favorisEssai, "Offres aux favoris : mode essai"));
+  if (c.favorisMode !== undefined) {
+    if (c.favorisMode !== "automatique" && c.favorisMode !== "manuel")
+      throw erreurSaisie("Offres aux favoris : mode inconnu.");
+    m.favorisMode = c.favorisMode === "automatique" ? "automatique" : "manuel";
+  }
+  poser("favorisDelaiJours", entierFacultatif(c.favorisDelaiJours, "Offres aux favoris : délai (jours)", 1, 30));
+  poser(
+    "favorisFrequenceHeures",
+    entierFacultatif(c.favorisFrequenceHeures, "Offres aux favoris : fréquence (heures)", 6, 168),
+  );
+  poser(
+    "favorisPause",
+    entierFacultatif(c.favorisPause, "Offres aux favoris : pause entre deux offres (s)", 120, 3600),
+  );
+  poser("favorisPlafond", entierFacultatif(c.favorisPlafond, "Offres aux favoris : offres par jour", 1, 20));
   return m;
 }
 
@@ -317,6 +337,8 @@ export function routesVentes(
       throw erreurSaisie("Articles dormants : l'heure de début doit précéder l'heure de fin.");
     if (fusion.finalisationHeureDebut >= fusion.finalisationHeureFin)
       throw erreurSaisie("Ventes finalisées : l'heure de début doit précéder l'heure de fin.");
+    if (fusion.favorisHeureDebut >= fusion.favorisHeureFin)
+      throw erreurSaisie("Offres aux favoris : l'heure de début doit précéder l'heure de fin.");
     if (fusion.dormantsBaisseType === "pourcentage" && fusion.dormantsBaisseValeur > 90)
       throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
     await modifierReglages(base, utilisateurId, modif);

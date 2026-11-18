@@ -53,9 +53,9 @@ async function purger(): Promise<void> {
     await purgerSessionsExpirees(connexion.db, new Date());
     // Lien de la conversation et commandes Vinted : effacés 6 mois après la finalisation (#216).
     const acheteurs = await purgerDonneesAcheteurs(connexion.db, new Date());
-    if (acheteurs.conversations + acheteurs.commandes > 0) {
+    if (acheteurs.conversations + acheteurs.commandes + acheteurs.offres > 0) {
       console.info(
-        `Conservation : ${acheteurs.conversations} lien(s) de conversation et ${acheteurs.commandes} commande(s) Vinted effacé(s).`,
+        `Conservation : ${acheteurs.conversations} lien(s) de conversation, ${acheteurs.commandes} commande(s) Vinted et ${acheteurs.offres} offre(s) aux favoris effacé(s).`,
       );
     }
     // Journal des tâches automatisées : lignes de plus de 3 mois effacées (#233).
