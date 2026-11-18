@@ -32,6 +32,8 @@ function detail(l: LigneAFaire): string {
       return `À récupérer — retour du ${formatDate(l.depuis)}`;
     case "incomplets":
       return `À publier mais incomplet — il manque : ${(l.manques ?? []).join(", ")}`;
+    case "aCompleter":
+      return `Créé par photos — il manque : ${(l.manques ?? []).join(", ")}`;
     case "invendus":
       return `Invendu depuis le ${formatDate(l.depuis)} — republié 3 fois sans vente, l'annonce reste en ligne`;
     case "dormants":
@@ -126,6 +128,7 @@ export function AFaire() {
           return { ok: true, texte: `${formatReference(l.reference)} remis « En ligne » : la tâche reprend.` };
         });
       case "incomplets":
+      case "aCompleter":
         return (
           <Link to={`/articles/${l.id}`} className="bouton">
             Compléter

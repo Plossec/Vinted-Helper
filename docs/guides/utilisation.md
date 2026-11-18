@@ -135,6 +135,19 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
   un en-tête de colonne pour trier (une 2e fois pour inverser). Sur téléphone, faites glisser le tableau vers la
   gauche ; le bénéfice en *italique* est provisoire (article pas encore finalisé).
 
+## Nouveaux articles par photos
+
+**Articles → « Nouveaux articles par photos »** (en bas de la liste), sur le téléphone ou le PC :
+
+1. Choisissez les photos de plusieurs articles (60 au plus ; moins de 10 par article, étiquette comprise).
+2. Indiquez la **sortie** (ou le lieu et la date d'achat) et, si vous le connaissez, le **prix d'achat total** : il est
+   réparti entre les articles comme un lot.
+3. **Envoyer et regrouper** : l'IA propose un article par groupe de photos. Si une photo n'est pas dans le bon article,
+   changez son « Article » (ou « Nouvel article »).
+4. **Créer** : un brouillon par article. L'IA les remplit ensuite (nom, catégorie, marque, état, couleurs, annonce et
+   **prix proposé**, à vérifier). Au-delà de 30 appels par heure, les articles attendent l'heure suivante.
+5. Dans **À faire** : « Créé par photos — il manque : … » → **Compléter**.
+
 ## Tableau de bord
 
 - **Chiffre d'affaires** et **bénéfice réalisé** ne comptent que les ventes **Finalisées** (à la date de

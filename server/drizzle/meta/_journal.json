@@ -176,6 +176,13 @@
       "when": 1794984926526,
       "tag": "0024_renommer_programme_vu_le",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795007234812,
+      "tag": "0025_articles_par_photos",
+      "breakpoints": true
     }
   ]
 }

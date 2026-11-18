@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.28.2**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.29.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -134,7 +134,7 @@ erDiagram
 |---|---|
 | `sortie`, `lieu` | Un vide-grenier (date, lieu, essence) |
 | `lot_achat` | Plusieurs articles achetés ensemble pour un prix global |
-| `article` | L'objet : prix d'achat, prix affiché, statut, annonce, catégorie Vinted |
+| `article` | L'objet : prix d'achat, prix affiché, statut, annonce, catégorie Vinted ; créé par photos : état du remplissage par l'IA (#276) |
 | `photo`, `article_photo` | Photos (fichiers dans `data/photos`) et leur ordre sur l'article |
 | `historique_statut`, `historique_prix`, `boost` | Suivi dans le temps |
 | `vente`, `vente_article` | Une vente (simple ou groupée), retours compris |

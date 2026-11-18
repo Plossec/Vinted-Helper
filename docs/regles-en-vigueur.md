@@ -68,6 +68,7 @@ une de ces règles met cette page à jour dans la même PR ([ADR-0098](decisions
 
 | Sujet | Règle en vigueur | Référence | État |
 |---|---|---|---|
+| Articles par photos | Lot de photos → l'IA propose un article par groupe (validé par l'utilisateur) → brouillons remplis par l'IA (prix affiché proposé compris) dans la limite d'appels ; ce qui manque dans « À faire » | [0117](decisions/0117-articles-crees-par-photos.md) | réalisé |
 | Appels | Côté serveur seulement, 30 par heure ; alias « latest » conservé ; modèle de secours | [0049](decisions/0049-securite-connexion-mot-de-passe-quota-de-l-ia.md), [0088](decisions/0088-gemini-alias-latest-conserve.md), [0033](decisions/0033-gemini-modele-de-secours.md) | réalisé |
 
 ## Photos, sauvegardes, serveur

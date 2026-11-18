@@ -383,6 +383,10 @@ export function ListeArticles() {
         </Link>
       )}
       <p className="section">
+        <Link to="/articles/photos" className="lien">
+          Nouveaux articles par photos
+        </Link>
+        {" · "}
         <Link to="/corbeille" className="lien">
           Corbeille
         </Link>

@@ -39,6 +39,8 @@ export interface DependancesApp {
   /** Dossier de l'interface compilée ; absent en développement (Vite sert l'interface). */
   dossierClient?: string;
   journaliser?: boolean;
+  /** Analyse par l'IA, en arrière-plan, des articles créés par photos (#276) : serveur réel seulement. */
+  analyseEnArrierePlan?: boolean;
   /** Appelé pour chaque route déclarée (les tests vérifient ainsi que toute l'API exige la connexion). */
   surRoute?: (route: RouteOptions) => void;
 }
@@ -87,6 +89,7 @@ export async function creerApp({
   ),
   dossierClient,
   journaliser = false,
+  analyseEnArrierePlan = false,
   surRoute,
 }: DependancesApp) {
   // trustProxy : derrière le relais HTTPS (Caddy), le protocole d'origine sert au cookie « secure ».
@@ -165,7 +168,7 @@ export async function creerApp({
   routesPointsRelais(app, contexte);
   routesPhotos(app, contexte, stockage);
   routesCorbeille(app, contexte, stockage);
-  routesIA(app, contexte, stockage, ia);
+  routesIA(app, contexte, stockage, ia, analyseEnArrierePlan);
 
   if (dossierClient !== undefined && existsSync(dossierClient)) {
     await app.register(fastifyStatic, {

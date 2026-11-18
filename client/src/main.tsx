@@ -7,6 +7,7 @@ import { Disposition } from "./ecrans/Disposition.js";
 import { ErreurAffichage } from "./ecrans/ErreurAffichage.js";
 import { FicheArticle } from "./ecrans/FicheArticle.js";
 import { ListeArticles } from "./ecrans/ListeArticles.js";
+import { ArticlesParPhotos } from "./ecrans/ArticlesParPhotos.js";
 import { MentionsLegales } from "./ecrans/MentionsLegales.js";
 import { PointsRelais } from "./ecrans/PointsRelais.js";
 import { Corbeille } from "./ecrans/Corbeille.js";
@@ -39,6 +40,8 @@ const routeur = createBrowserRouter([
           // Ouverture de l'application installée (manifeste) : écran choisi dans les Réglages, sur l'appareil.
           { path: "demarrage", element: <Navigate to={cheminDemarrage(lireDemarrage())} replace /> },
           { path: "articles/nouveau", element: <FicheArticle /> },
+          // Nouveaux articles par photos (#276).
+          { path: "articles/photos", element: <ArticlesParPhotos /> },
           { path: "articles/:id", element: <FicheArticle /> },
           { path: "terrain", element: <Terrain /> },
           // Écrans plus lourds chargés à la demande (#131) ; gardés sur le téléphone par le service worker.

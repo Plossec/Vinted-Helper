@@ -312,6 +312,17 @@ manque. La catégorie « Autre » est admise (publication à la main).
 | **Validée prix proposé** (#150) | Répond aux offres reçues et crée la vente quand une offre est acceptée et payée (ADR-0076) | décidée |
 | **Bon de livraison** (#151) | Récupère bordereau, code de dépôt, suivi et date limite d'envoi des articles À expédier (ADR-0077) | décidée |
 
+### 5.16 Articles créés à partir de photos (#276)
+
+- Écran **« Nouveaux articles par photos »** (téléphone et PC) : un lot de photos (60 au plus, moins de 10 par article
+  conseillées), et une fois pour tout le lot la sortie (ou le lieu et la date) et le prix d'achat total facultatif
+  (réparti comme un lot, §6.1).
+- L'IA propose **un groupe de photos par article** ; l'utilisateur corrige les groupes, puis crée les **brouillons**.
+- L'IA remplit ensuite chaque brouillon (nom, catégorie, marque, état, couleurs, taille, matière, annonce, **prix
+  affiché proposé**), seulement les champs vides, dans la limite d'appels par heure (au-delà : « en attente d'analyse »,
+  repris plus tard ; abandon après 3 erreurs).
+- Ce qui manque apparaît dans **« À faire »** (« Créé par photos — il manque : … »). ADR-0117.
+
 ## 6. Règles de calcul
 
 **Règle d'arrondi commune** : toute répartition d'un montant total entre N éléments donne des parts **arrondies au centime inférieur** ; le **dernier** élément reçoit **tout le reste** (`total − somme des autres parts`). La somme est toujours exactement égale au total et **aucune part n'est jamais négative** (ex. 5 centimes sur 8 articles → 0 × 7 puis 5). *(Décision du 05/10/2026 : remplace l'arrondi au plus proche, qui pouvait donner une part négative.)*

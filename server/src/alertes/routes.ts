@@ -8,6 +8,7 @@ import { article, historiquePrix, historiqueStatut, signalementVu, vente, venteA
 import { manquesArticle } from "../metier/completude.js";
 import { lireReglages } from "../frais/service.js";
 import { calculerAlertes, GROUPES_VU, type GroupeVu, masquerVus } from "../metier/alertes.js";
+import { jourParis } from "../calculs/indicateurs.js";
 import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { photosDesArticles } from "../photos/service.js";
 import { nombresCommandes } from "../taches/finalisation.js";
@@ -42,6 +43,10 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
         marque: article.marqueId,
         etat: article.etat,
         couleurs: article.couleurs,
+        analyseIa: article.analyseIa,
+        lotId: article.lotId,
+        prixAchat: article.prixAchat,
+        creeLe: article.creeLe,
       })
       .from(article)
       .where(
@@ -69,10 +74,12 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
               .from(historiquePrix)
               .where(inArray(historiquePrix.articleId, ids)),
           ]);
+    // Brouillons créés par photos (#276) : à compléter, avec ce qui manque (dont l'analyse par l'IA).
+    const parPhotos = articles.filter((a) => a.statut === "brouillon" && a.analyseIa !== null);
     // Articles À publier : ce qui manque à leur annonce (#196).
     const photos = await photosDesArticles(
       base,
-      articles.filter((a) => a.statut === "a_publier").map((a) => a.id),
+      articles.filter((a) => a.statut === "a_publier" || parPhotos.includes(a)).map((a) => a.id),
     );
     const reglages = await lireReglages(base, utilisateurId);
     const vus = await base
@@ -97,6 +104,20 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
       maintenant(),
     );
     const alertes = masquerVus(calculees, vus);
+    const aCompleter = parPhotos
+      .map((a) => {
+        const manques = [
+          ...(a.analyseIa === "en_attente" ? ["analyse par l'IA (en attente)"] : []),
+          ...(a.analyseIa === "echec" ? ["analyse par l'IA impossible : à remplir à la main"] : []),
+          ...(a.nom ? [] : ["nom"]),
+          ...(a.lotId === null && a.prixAchat === null ? ["prix d'achat"] : []),
+          ...manquesArticle(a, (photos.get(a.id) ?? []).filter((p) => p.type === "annonce").length, false),
+        ];
+        const depuis = jourParis(a.creeLe.toISOString());
+        return { id: a.id, reference: a.reference, nom: a.nom, depuis, jours: 0, manques };
+      })
+      .filter((a) => a.manques.length > 0);
+    const aCompleterIds = new Set(aCompleter.map((a) => a.id));
     // Articles à expédier : leur vente (bouton « Envoyé » de l'écran À faire, #191).
     const aExpedierIds = alertes.aExpedier.map((a) => a.id);
     const ventes =
@@ -121,6 +142,9 @@ export function routesAlertes(app: FastifyInstance, { base, maintenant, utilisat
     await annulerActionsPerimees(base, utilisateurId, maintenant());
     return conforme<AlertesServeur>()({
       ...alertes,
+      // Un brouillon à compléter n'est pas aussi signalé comme « brouillon ancien ».
+      brouillons: alertes.brouillons.filter((a) => !aCompleterIds.has(a.id)),
+      aCompleter,
       aValider: await nombreAValider(base, utilisateurId),
       /** Tâche « Vérification vente finalisée » (#148) : commandes à valider, à rattacher, montants corrigés. */
       commandes: await nombresCommandes(base, utilisateurId),
