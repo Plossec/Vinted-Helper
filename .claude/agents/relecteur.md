@@ -35,7 +35,7 @@ Sources : `docs/cahier-des-charges.md` (fait foi), `docs/decisions/` (priment qu
    répartition, aucune part stockée, aucun calcul d'argent hors du module, cas §11 avec résultats **identiques** à
    l'annexe.
 4. **Règles non négociables** : clé Gemini absente de `client/`, aucun contournement de détection sur Vinted
-   (`docs/decisions/0082-extension-garde-fous-de-perimetre-supprimes.md`), rien du §10 (hors périmètre), migrations existantes non modifiées, aucun test qui
+   (`docs/decisions/0082-extension-garde-fous-de-perimetre-supprimes.md`), migrations existantes non modifiées, aucun test qui
    appelle vraiment Gemini, aucune donnée personnelle ni secret (dépôt public), dépendance nouvelle tracée dans
    `docs/decisions/`.
 5. **Documentation** : `CHANGELOG.md`, version (`/version`), décision datée, guide utilisateur concerné.

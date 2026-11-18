@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.28.3] — 18/11/2026
+
+### Modifié
+- Cahier des charges : la section « Hors périmètre » (§10) est retirée, et avec elle la règle de Claude qui
+  l'interdisait ; chaque nouvelle idée reste décidée avec vous dans une issue (#277, ADR-0116).
+
 ## [1.28.2] — 18/11/2026
 
 ### Modifié

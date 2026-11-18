@@ -1,7 +1,7 @@
 # ADR-0023 — Import du tableur « compte 2026 - Vinted »
 
 - **Date** : 07/10/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · « aucun autre import » : remplacé par [ADR-0116](0116-hors-perimetre-retire.md) (§10 retiré)
 - **Décideurs** : utilisateur
 - **Issue** : —
 - **Thème** : Import

@@ -16,7 +16,7 @@
 7. [Modèle de données](#7-modèle-de-données)
 8. [Critères d'acceptation](#8-critères-dacceptation)
 9. [Découpage en lots livrables](#9-découpage-en-lots-livrables) (historique)
-10. [Hors périmètre](#10-hors-périmètre)
+10. [Hors périmètre (retiré)](#10-hors-périmètre-retiré)
 11. [Annexe — Cas chiffrés (tests automatiques)](#11-annexe--cas-chiffrés-tests-automatiques)
 12. [Organisation du projet](#12-organisation-du-projet)
 
@@ -451,27 +451,12 @@ Chaque lot est testable avant de passer au suivant.
 6. **IA** : génération d'annonce, lecture d'étiquette, prompts modifiables, secours « Copier le prompt ».
 7. **Alertes et sauvegarde** : alertes, réduction des photos (Finalisé / Sortie du stock), sauvegarde automatique.
 
-## 10. Hors périmètre
+## 10. Hors périmètre (retiré)
 
-### Exclus (non prévus)
-- Aucune possibilité d'**import** de données dans l'application. Seule exception : l'import unique, par une commande du
-  serveur, du tableur « compte 2026 - Vinted » de l'utilisateur (ADR-0023).
-- Pas d'**export** de données.
-- Pas de **mode d'envoi** (choix du transporteur, bordereau, suivi du colis). Seule exception : le point relais de
-  dépôt ou de retrait d'une vente (ADR-0109).
-- Pas de **pseudo acheteur**.
-- Pas d'**alerte seuil fiscal** (DAC7).
-- Pas de **suggestion de prix** basée sur l'historique.
-- Pas de **notifications** sur le téléphone (alertes dans l'appli uniquement).
-- Pas de **page d'inscription** ni de « mot de passe oublié » par e-mail.
-- Pas de **croquis d'écrans** dans ce document.
-
-### Reportés à plus tard
-- Emplacement de rangement / QR codes → [issue #1](https://github.com/Plossec/Vinted-Helper/issues/1).
-- Ouverture au grand public (multi-utilisateurs) → [issue #4](https://github.com/Plossec/Vinted-Helper/issues/4).
-
-Reports déjà réalisés : déploiement OVH ([issue #2](https://github.com/Plossec/Vinted-Helper/issues/2), ADR-0018,
-ADR-0019) et HTTPS local pour le téléphone ([issue #3](https://github.com/Plossec/Vinted-Helper/issues/3), ADR-0009).
+Section retirée le 18/11/2026 à la demande de l'utilisateur (#277, ADR-0116) : plus aucune exclusion de principe.
+Chaque nouvelle idée reste une issue, décidée avec l'utilisateur. Les anciens reports suivent leurs issues
+([#1](https://github.com/Plossec/Vinted-Helper/issues/1), [#4](https://github.com/Plossec/Vinted-Helper/issues/4)). La
+numérotation des sections suivantes est gardée (l'annexe reste le §11).
 
 ## 11. Annexe — Cas chiffrés (tests automatiques)
 

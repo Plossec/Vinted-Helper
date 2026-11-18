@@ -53,7 +53,6 @@ n'utilisent jamais Docker ni la vraie base (PGlite en mémoire, `server/src/test
    `server/src/calculs/`. **Aucun calcul d'argent hors de ce module.**
 2. **Les parts calculées ne sont jamais stockées** : elles sont recalculées.
 3. **La clé Gemini reste côté serveur**, jamais dans `client/`.
-4. **Rien du §10 (hors périmètre)** sans demande explicite.
 
 ## Garde-fous
 
