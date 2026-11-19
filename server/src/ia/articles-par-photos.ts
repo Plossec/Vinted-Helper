@@ -25,15 +25,24 @@ export const PHOTOS_CONSEILLEES_ARTICLE = 10;
 /** Essais de remplissage en échec avant abandon (l'article reste à compléter à la main). */
 export const ESSAIS_MAX = 3;
 
-const COTE_REGROUPEMENT = 384;
+/** Côté (px) des photos envoyées pour le regroupement : assez grand pour un objet sombre sur un fond sombre (#280). */
+const COTE_REGROUPEMENT = 768;
 const COTE_ANALYSE = 1024;
 
-const PROMPT_REGROUPEMENT = `Voici {nombre} photos numérotées de 0 à {dernier}, dans l'ordre. Elles montrent plusieurs articles
-d'occasion à vendre (vêtements, chaussures, objets) ; chaque article a une ou plusieurs photos (vue d'ensemble,
-détails, étiquette).
-Regroupe les photos par article : deux photos vont ensemble si elles montrent le même objet (ou son étiquette).
+const PROMPT_REGROUPEMENT = `Voici {nombre} photos, chacune précédée de son numéro (« Photo 0 » à « Photo {dernier} »), dans
+l'ordre où elles ont été prises. Elles montrent des articles d'occasion à vendre (vêtements, chaussures, sacs, objets) ;
+chaque article a en général plusieurs photos : vue d'ensemble, autres angles (face, côté, dos, dessus, dessous),
+gros plans (détail, défaut, semelle, étiquette, mesure avec un mètre ruban).
+Regroupe les photos par article. Deux photos vont ensemble si elles montrent le même objet, même sous un autre angle,
+de plus près, ou partiellement. Une paire (chaussures, bottes, gants, boucles d'oreilles) est UN SEUL article.
+Les photos d'un même article sont presque toujours prises à la suite, sur le même fond : un changement net d'objet
+(type, couleur, forme) marque le début d'un nouvel article. Un gros plan, une étiquette ou une mesure va avec l'objet
+de la photo précédente. En cas de doute, regroupe avec la photo précédente plutôt que de créer un nouvel article.
 Garde l'ordre des photos dans chaque groupe. Chaque numéro doit apparaître dans un seul groupe.
-Réponds uniquement en JSON : {"groupes": [[0, 1], [2], [3, 4, 5]]}`;
+Réponds uniquement en JSON : {"groupes": [[0, 1, 2], [3, 4], [5]]}`;
+
+/** Regroupement : classement, pas rédaction → réponses régulières plutôt que variées (#280). */
+const TEMPERATURE_REGROUPEMENT = 0.1;
 
 const PROMPT_ANALYSE = `Tu prépares la fiche d'un article d'occasion à vendre sur Vinted, en français, à partir des photos
 jointes (vue d'ensemble, détails, et parfois l'étiquette : lis-la pour la marque, la taille et la matière).
@@ -117,12 +126,18 @@ export async function regrouperPhotos(
   if (new Set(photoIds).size !== photoIds.length) throw erreurSaisie("Photo en double.");
   const fichiers = await fichiersDesPhotos(base, utilisateurId, photoIds);
   if (photoIds.length === 1) return [[...photoIds]];
-  const images = await Promise.all(fichiers.map((f) => imagePourIA(stockage, utilisateurId, f, COTE_REGROUPEMENT)));
+  const images = await Promise.all(
+    fichiers.map(async (f, i) => ({
+      ...(await imagePourIA(stockage, utilisateurId, f, COTE_REGROUPEMENT)),
+      legende: `Photo ${i}`,
+    })),
+  );
   const prompt = PROMPT_REGROUPEMENT.replace("{nombre}", String(photoIds.length)).replace(
     "{dernier}",
     String(photoIds.length - 1),
   );
-  const groupes = groupesValides(lireJson(await ia.generer(prompt, images)), photoIds.length);
+  const reponse = await ia.generer(prompt, images, { temperature: TEMPERATURE_REGROUPEMENT });
+  const groupes = groupesValides(lireJson(reponse), photoIds.length);
   return groupes.map((g) => g.map((i) => photoIds[i] ?? ""));
 }
 

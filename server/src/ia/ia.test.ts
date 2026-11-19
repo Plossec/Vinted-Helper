@@ -165,6 +165,40 @@ describe("client Gemini (requête simulée)", () => {
     expect(url).not.toContain("secret");
     expect(entetes).toMatchObject({ "x-goog-api-key": "secret" });
   });
+
+  it("légende avant chaque image et température choisie ; 0,7 par défaut (#280)", async () => {
+    const corps: unknown[] = [];
+    const ok = (async (_u: string, init: RequestInit) => {
+      corps.push(JSON.parse(String(init.body)));
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "{}" }] } }] }));
+    }) as unknown as typeof fetch;
+    const client = creerClientGemini("cle", "gemini-test", ok);
+    await client.generer(
+      "p",
+      [
+        { type: "image/jpeg", base64: "AAA", legende: "Photo 0" },
+        { type: "image/jpeg", base64: "BBB" },
+      ],
+      {
+        temperature: 0.1,
+      },
+    );
+    await client.generer("p", []);
+    expect(corps[0]).toMatchObject({
+      contents: [
+        {
+          parts: [
+            { text: "p" },
+            { text: "Photo 0" },
+            { inline_data: { mime_type: "image/jpeg", data: "AAA" } },
+            { inline_data: { mime_type: "image/jpeg", data: "BBB" } },
+          ],
+        },
+      ],
+      generationConfig: { temperature: 0.1 },
+    });
+    expect(corps[1]).toMatchObject({ generationConfig: { temperature: 0.7 } });
+  });
 });
 
 describe("IA par l'API", () => {

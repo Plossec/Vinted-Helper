@@ -11,6 +11,7 @@ import { migrate } from "drizzle-orm/pglite/migrator";
 import { creerApp } from "../app.js";
 import { amorcerCompte } from "../base/amorcage.js";
 import type { Base } from "../base/connexion.js";
+import type { ImageIA, OptionsIA } from "../ia/gemini.js";
 import * as schema from "../base/schema.js";
 
 export const IDENTIFIANT_TEST = "pascal";
@@ -54,7 +55,7 @@ export function creerHorloge(depart = "2026-10-05T10:00:00.000Z") {
 /** Application complète sur une base en mémoire, avec le compte de test déjà créé. */
 /** Client IA simulé : les tests n'appellent jamais réellement Gemini (quota gratuit). */
 export function creerIASimulee() {
-  const appels: { prompt: string; images: number }[] = [];
+  const appels: { prompt: string; images: number; legendes: string[]; temperature?: number }[] = [];
   let reponse: string | Error = '{"titre": "Titre simulé", "description": "Description simulée."}';
   return {
     appels,
@@ -62,8 +63,13 @@ export function creerIASimulee() {
       reponse = r;
     },
     client: {
-      generer: async (prompt: string, images: readonly unknown[]) => {
-        appels.push({ prompt, images: images.length });
+      generer: async (prompt: string, images: readonly ImageIA[], options?: OptionsIA) => {
+        appels.push({
+          prompt,
+          images: images.length,
+          legendes: images.flatMap((i) => (i.legende ? [i.legende] : [])),
+          ...(options?.temperature === undefined ? {} : { temperature: options.temperature }),
+        });
         if (reponse instanceof Error) throw reponse;
         return reponse;
       },

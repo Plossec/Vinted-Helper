@@ -117,7 +117,8 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0032](0032-gemini-modele-retire-et-serveurs-surcharges.md) | 07/10/2026 | Gemini : modèle retiré et serveurs surchargés | Modifié |
 | [0033](0033-gemini-modele-de-secours.md) | 07/10/2026 | Gemini : modèle de secours | Accepté |
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | Accepté |
-| [0117](0117-articles-crees-par-photos.md) | 18/11/2026 | Articles créés à partir de photos | Accepté |
+| [0117](0117-articles-crees-par-photos.md) | 18/11/2026 | Articles créés à partir de photos | Modifié |
+| [0118](0118-regroupement-des-photos-plus-fiable.md) | 18/11/2026 | Regroupement des photos par article plus fiable | Accepté · à relire |
 
 ## Photos et sauvegardes
 
