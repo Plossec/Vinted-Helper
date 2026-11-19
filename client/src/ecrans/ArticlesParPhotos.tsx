@@ -128,8 +128,9 @@ export function ArticlesParPhotos() {
       <main className="page">
         <h1>Vérifier les articles</h1>
         <p className="secondaire">
-          L'IA propose {groupes.length} article(s). Déplacez une photo si elle n'est pas dans le bon article, puis créez
-          les brouillons.
+          {etape.avertissement
+            ? "Regroupement à faire à la main : une photo par article pour l'instant. Placez chaque photo dans son article, puis créez les brouillons."
+            : `L'IA propose ${groupes.length} article(s). Déplacez une photo si elle n'est pas dans le bon article, puis créez les brouillons.`}
         </p>
         {etape.avertissement && (
           <p className="message message--erreur" role="alert">

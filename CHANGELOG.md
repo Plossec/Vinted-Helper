@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.29.1] — 18/11/2026
+
+### Corrigé
+- Nouveaux articles par photos : le regroupement par l'IA est plus fiable. Une paire (chaussures, gants…) forme un
+  seul article, les gros plans (mesure, étiquette) vont avec l'objet voisin, et en cas de doute l'IA regroupe plutôt
+  que de séparer. Si l'IA ne répond pas, l'écran l'indique clairement (« Regroupement à faire à la main ») (#280,
+  ADR-0118).
+
 ## [1.29.0] — 18/11/2026
 
 ### Ajouté

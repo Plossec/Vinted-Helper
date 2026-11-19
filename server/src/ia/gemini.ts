@@ -7,11 +7,18 @@ export interface ImageIA {
   type: string;
   /** Contenu en base64. */
   base64: string;
+  /** Texte envoyé juste avant l'image (ex. « Photo 0 »), pour que l'IA sache de quelle image il s'agit. */
+  legende?: string;
+}
+
+export interface OptionsIA {
+  /** 0 = réponses régulières (classement), 1 = plus variées (rédaction). Défaut : 0,7. */
+  temperature?: number;
 }
 
 export interface ClientIA {
   /** Envoie le texte et les images ; renvoie la réponse texte (JSON attendu). */
-  generer(prompt: string, images: readonly ImageIA[]): Promise<string>;
+  generer(prompt: string, images: readonly ImageIA[], options?: OptionsIA): Promise<string>;
 }
 
 /** Erreur IA : message clair pour l'utilisateur (503), l'interface propose alors « Copier le prompt ». */
@@ -28,6 +35,7 @@ export const MODELE_SECOURS_DEFAUT = "gemini-flash-lite-latest";
 /** Erreurs passagères de Google (serveurs surchargés) : nouvel essai après ces délais. */
 const ERREURS_PASSAGERES = new Set([500, 502, 503, 504]);
 const DELAIS_NOUVEL_ESSAI_MS = [2_000, 5_000];
+const TEMPERATURE_DEFAUT = 0.7;
 
 const pause = (ms: number) => new Promise<void>((fin) => setTimeout(fin, ms));
 
@@ -50,6 +58,7 @@ export function creerClientGemini(
     nom: string,
     prompt: string,
     images: readonly ImageIA[],
+    temperature: number,
     delai: number,
     nouveauxEssais: readonly number[],
   ): Promise<Resultat> {
@@ -61,10 +70,16 @@ export function creerClientGemini(
         body: JSON.stringify({
           contents: [
             {
-              parts: [{ text: prompt }, ...images.map((i) => ({ inline_data: { mime_type: i.type, data: i.base64 } }))],
+              parts: [
+                { text: prompt },
+                ...images.flatMap((i) => [
+                  ...(i.legende ? [{ text: i.legende }] : []),
+                  { inline_data: { mime_type: i.type, data: i.base64 } },
+                ]),
+              ],
             },
           ],
-          generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
+          generationConfig: { responseMimeType: "application/json", temperature },
         }),
         signal: AbortSignal.timeout(delai),
       });
@@ -118,7 +133,8 @@ export function creerClientGemini(
   }
 
   return {
-    async generer(prompt, images) {
+    async generer(prompt, images, options = {}) {
+      const temperature = options.temperature ?? TEMPERATURE_DEFAUT;
       if (!cle || VALEURS_FICTIVES.has(cle)) {
         throw iaIndisponible("Clé Gemini non configurée (GEMINI_API_KEY dans le fichier .env).");
       }
@@ -128,11 +144,11 @@ export function creerClientGemini(
       const relais = secours && secours !== "aucun" && secours !== modele ? secours : null;
       // Avec un modèle de secours : un seul essai rapide du principal, puis le secours (avec ses nouveaux essais).
       const premier = relais
-        ? await essayer(cle, modele, prompt, images, DELAI_PRINCIPAL_MS, [])
-        : await essayer(cle, modele, prompt, images, DELAI_MS, DELAIS_NOUVEL_ESSAI_MS);
+        ? await essayer(cle, modele, prompt, images, temperature, DELAI_PRINCIPAL_MS, [])
+        : await essayer(cle, modele, prompt, images, temperature, DELAI_MS, DELAIS_NOUVEL_ESSAI_MS);
       if ("texte" in premier) return premier.texte;
       if (!relais || !premier.basculer) throw premier.erreur;
-      const second = await essayer(cle, relais, prompt, images, DELAI_MS, DELAIS_NOUVEL_ESSAI_MS);
+      const second = await essayer(cle, relais, prompt, images, temperature, DELAI_MS, DELAIS_NOUVEL_ESSAI_MS);
       if ("texte" in second) return second.texte;
       throw second.erreur;
     },

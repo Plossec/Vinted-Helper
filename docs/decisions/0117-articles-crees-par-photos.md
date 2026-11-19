@@ -1,7 +1,7 @@
 # ADR-0117 — Articles créés à partir de photos
 
 - **Date** : 18/11/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · modifié par [ADR-0118](0118-regroupement-des-photos-plus-fiable.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude
 - **Issue** : #276
 - **Thème** : IA Gemini

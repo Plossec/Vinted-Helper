@@ -64,7 +64,15 @@ describe("articles créés par photos", () => {
     expect(r.statusCode, r.body).toBe(200);
     expect(r.json()).toEqual({ groupes: [[photos[0], photos[2]], [photos[1]], [photos[3]]] });
     expect(t.ia.appels).toHaveLength(1);
-    expect(t.ia.appels[0]?.images).toBe(4);
+    expect(t.ia.appels[0]).toMatchObject({
+      images: 4,
+      // Chaque photo précédée de son numéro ; réponses régulières (#280).
+      legendes: ["Photo 0", "Photo 1", "Photo 2", "Photo 3"],
+      temperature: 0.1,
+    });
+    // Une paire est un seul article ; en cas de doute, regrouper (#280).
+    expect(t.ia.appels[0]?.prompt).toMatch(/paire .* UN SEUL article/);
+    expect(t.ia.appels[0]?.prompt).toMatch(/En cas de doute, regroupe/);
     // Photo inconnue ou en double : refus.
     expect(
       (await requete("POST", "/api/articles-par-photos/regroupement", { photoIds: [randomUUID()] })).statusCode,

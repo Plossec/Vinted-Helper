@@ -139,7 +139,8 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
 
 **Articles → « Nouveaux articles par photos »** (en bas de la liste), sur le téléphone ou le PC :
 
-1. Choisissez les photos de plusieurs articles (60 au plus ; moins de 10 par article, étiquette comprise).
+1. Choisissez les photos de plusieurs articles (60 au plus ; moins de 10 par article, étiquette comprise). Prenez les
+   photos d'un article **à la suite** : l'IA s'en sert pour les regrouper (une paire de chaussures = un article).
 2. Indiquez la **sortie** (ou le lieu et la date d'achat) et, si vous le connaissez, le **prix d'achat total** : il est
    réparti entre les articles comme un lot.
 3. **Envoyer et regrouper** : l'IA propose un article par groupe de photos. Si une photo n'est pas dans le bon article,
