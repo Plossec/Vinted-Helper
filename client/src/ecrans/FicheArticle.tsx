@@ -29,6 +29,7 @@ import { BlocMontants } from "../composants/BlocMontants.js";
 import { BlocPointRelais } from "../composants/PointRelais.js";
 import { BlocStatut } from "../composants/BlocStatut.js";
 import { PhotosArticle } from "../composants/PhotosArticle.js";
+import { FusionArticle } from "../composants/FusionArticle.js";
 import { ListeDeroulante, normaliser, type OptionListe } from "../composants/ListeDeroulante.js";
 import { aujourdhui } from "../utilitaires/dates.js";
 import { centimesVersSaisie, formatEuros, lireMontant } from "../utilitaires/montants.js";
@@ -656,6 +657,15 @@ export function FicheArticle() {
                 >
                   Supprimer l'article
                 </button>
+              </section>
+              <section className="section">
+                <FusionArticle
+                  articleId={article.id}
+                  onFusion={(gardeId) => {
+                    sansAvertissement.current = true;
+                    void naviguer(`/articles/${gardeId}`, { replace: true });
+                  }}
+                />
               </section>
             </div>
           )}

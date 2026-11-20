@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.30.0] — 20/11/2026
+
+### Ajouté
+- **Fusionner un doublon** (fiche de l'article, tout en bas) : choisissez l'article à garder ; il reprend ce qui lui
+  manque (rien n'est écrasé), les photos, l'historique, la vente et la place dans le lot, et prend le statut le plus
+  avancé des deux. Le doublon part à la corbeille (#284, ADR-0120).
+
 ## [1.29.2] — 20/11/2026
 
 ### Modifié

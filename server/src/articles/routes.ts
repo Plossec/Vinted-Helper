@@ -33,6 +33,8 @@ import {
 } from "./service.js";
 import type { ReponseLien } from "../api/types.js";
 import { conforme } from "../api/conforme.js";
+import type { BilanFusion } from "../api/types.js";
+import { fusionnerArticles } from "./fusion.js";
 
 function categorieObligatoire(valeur: unknown): string {
   if (valeur === undefined || valeur === null || valeur === "") throw erreurSaisie("Catégorie : obligatoire.");
@@ -154,6 +156,21 @@ export function routesArticles(app: FastifyInstance, { base, maintenant, utilisa
       maintenant(),
     );
     return lireArticle(base, utilisateurId, id);
+  });
+
+  // Fusion d'un doublon dans un autre article (#284) : `essai` = aperçu sans rien enregistrer.
+  app.post("/api/articles/:id/fusion", async (requete) => {
+    const c = objet(requete.body);
+    return conforme<BilanFusion>()(
+      await fusionnerArticles(
+        base,
+        utilisateurDe(requete).id,
+        idDe(requete.params),
+        uuidObligatoire(c.gardeId, "Article gardé"),
+        maintenant(),
+        c.essai === true,
+      ),
+    );
   });
 
   app.put("/api/historique-statuts/:id", async (requete) => {

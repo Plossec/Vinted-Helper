@@ -586,3 +586,17 @@ export interface Tableau {
   rentabiliteLieux: { classement: Rentabilite[]; maison: Rentabilite | null };
   analyse: { categories: Analyse[]; marques: Analyse[]; gammes: Analyse[] };
 }
+
+/** Fusion de deux articles (#284) : ce qui sera (aperçu) ou a été repris du doublon. */
+export interface BilanFusion {
+  /** Champs repris du doublon (libellés). */
+  champs: string[];
+  /** Photos ajoutées à l'article gardé. */
+  photos: number;
+  /** Nouveau statut de l'article gardé (libellé), ou null s'il garde le sien. */
+  statut: string | null;
+  /** L'article gardé prend la place du doublon dans son lot d'achat. */
+  lot: boolean;
+  /** Lignes d'historique rattachées (prix, boosts, ventes, publications, tâches). */
+  historique: number;
+}
