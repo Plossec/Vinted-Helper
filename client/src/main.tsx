@@ -15,6 +15,9 @@ import { FicheVente } from "./ecrans/FicheVente.js";
 import { Listes } from "./ecrans/Listes.js";
 import { FraisDivers } from "./ecrans/FraisDivers.js";
 import { Reglages } from "./ecrans/Reglages.js";
+import { ReglagesAffichage } from "./ecrans/ReglagesAffichage.js";
+import { ReglagesCompte } from "./ecrans/ReglagesCompte.js";
+import { ReglagesCalculs, ReglagesIA, ReglagesTaches } from "./ecrans/ReglagesRubrique.js";
 import { FicheSortie, ListeSorties } from "./ecrans/Sorties.js";
 import { Terrain } from "./ecrans/Terrain.js";
 import { cheminDemarrage, lireDemarrage } from "./demarrage.js";
@@ -61,6 +64,11 @@ const routeur = createBrowserRouter([
             lazy: async () => ({ Component: (await import("./ecrans/PublicationVinted.js")).PublicationVinted }),
           },
           { path: "reglages", element: <Reglages /> },
+          { path: "reglages/taches", element: <ReglagesTaches /> },
+          { path: "reglages/ia", element: <ReglagesIA /> },
+          { path: "reglages/calculs", element: <ReglagesCalculs /> },
+          { path: "reglages/affichage", element: <ReglagesAffichage /> },
+          { path: "reglages/compte", element: <ReglagesCompte /> },
         ],
       },
     ],

@@ -1471,6 +1471,53 @@ a {
 }
 
 /* Liste compacte : une ligne par article. */
+/* Sommaire des Réglages (#282) : une ligne cliquable par rubrique, titre + explication. */
+.sommaire {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--bordure);
+  border-radius: var(--rayon-carte);
+  background: var(--surface);
+}
+
+.sommaire > li + li {
+  border-top: 1px solid var(--bordure);
+}
+
+.sommaire__lien {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: var(--hauteur-tactile);
+  padding: var(--e-2) var(--e-3);
+  color: inherit;
+  text-decoration: none;
+}
+
+.sommaire__texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.sommaire__titre {
+  font-weight: 600;
+}
+
+.sommaire__detail {
+  font-size: var(--t-secondaire);
+  color: var(--texte-secondaire);
+}
+
+.sommaire__fleche {
+  flex: none;
+  font-size: 1.5rem;
+  color: var(--texte-secondaire);
+}
+
 .liste--compacte {
   gap: 0;
 }

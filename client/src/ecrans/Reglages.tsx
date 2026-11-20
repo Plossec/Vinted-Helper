@@ -1,24 +1,63 @@
-// Réglages : version, affichage (thème, écran d'ouverture #191), calculs, tâches automatiques (#147), mot de passe,
-// déconnexion.
-import { type FormEvent, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+// Réglages (#282, ADR-0119) : un sommaire de rubriques regroupées ; chaque rubrique ouvre sa propre page (court à lire
+// au téléphone). En haut, ce qui sert le plus : tâches automatiques, publication Vinted, IA et calculs.
+import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { api, type Sante } from "../api.js";
-import { ParametresCalcul } from "../composants/ParametresCalcul.js";
-import { PromptsIA } from "../composants/PromptsIA.js";
-import { TachesAutomatiques } from "../composants/TachesAutomatiques.js";
-import { CHOIX_DEMARRAGE, type EcranDemarrage, enregistrerDemarrage, lireDemarrage } from "../demarrage.js";
-import { CHOIX_THEME, enregistrerPreferenceTheme, lirePreferenceTheme, type PreferenceTheme } from "../theme.js";
+
+interface Rubrique {
+  chemin: string;
+  titre: string;
+  detail: string;
+}
+
+const GROUPES: { titre: string; rubriques: Rubrique[] }[] = [
+  {
+    titre: "Automatisation",
+    rubriques: [
+      {
+        chemin: "/reglages/taches",
+        titre: "Tâches automatiques",
+        detail: "Activer, régler, lancer ; journal de toutes les tâches",
+      },
+      {
+        chemin: "/publication",
+        titre: "Publication Vinted",
+        detail: "File de publication, jeton de l'extension",
+      },
+    ],
+  },
+  {
+    titre: "IA et calculs",
+    rubriques: [
+      { chemin: "/reglages/ia", titre: "IA (Gemini)", detail: "Prompts des annonces et de l'étiquette" },
+      {
+        chemin: "/reglages/calculs",
+        titre: "Calculs et alertes",
+        detail: "Emballage, format du colis, délais des alertes",
+      },
+    ],
+  },
+  {
+    titre: "Données",
+    rubriques: [
+      { chemin: "/frais", titre: "Frais divers", detail: "Dépenses hors articles" },
+      { chemin: "/sorties", titre: "Sorties", detail: "Vide-greniers, lieux, essence" },
+      { chemin: "/listes", titre: "Marques et lieux", detail: "Listes de référence" },
+      { chemin: "/points-relais", titre: "Points relais", detail: "Dépôt des colis, retrait des retours" },
+      { chemin: "/corbeille", titre: "Corbeille", detail: "Articles supprimés, restaurables 30 jours" },
+    ],
+  },
+  {
+    titre: "Application",
+    rubriques: [
+      { chemin: "/reglages/affichage", titre: "Affichage", detail: "Thème clair ou sombre, écran d'ouverture" },
+      { chemin: "/reglages/compte", titre: "Compte", detail: "Mot de passe, déconnexion" },
+    ],
+  },
+];
 
 export function Reglages() {
-  const naviguer = useNavigate();
   const [version, setVersion] = useState<string | null>(null);
-  const [identifiant, setIdentifiant] = useState<string | null>(null);
-  const [ancien, setAncien] = useState("");
-  const [nouveau, setNouveau] = useState("");
-  const [confirmation, setConfirmation] = useState("");
-  const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
-  const [theme, setTheme] = useState<PreferenceTheme>(lirePreferenceTheme);
-  const [demarrage, setDemarrage] = useState<EcranDemarrage>(lireDemarrage);
 
   useEffect(() => {
     let actif = true;
@@ -26,170 +65,35 @@ export function Reglages() {
       .get<Sante>("/api/sante")
       .then((s) => actif && setVersion(s.version))
       .catch(() => undefined);
-    api
-      .get<{ identifiant: string }>("/api/moi")
-      .then((m) => actif && setIdentifiant(m.identifiant))
-      .catch(() => undefined);
     return () => {
       actif = false;
     };
   }, []);
 
-  async function changerMotDePasse(evenement: FormEvent) {
-    evenement.preventDefault();
-    if (nouveau !== confirmation) {
-      setMessage({ type: "erreur", texte: "Les deux saisies du nouveau mot de passe sont différentes." });
-      return;
-    }
-    try {
-      await api.put("/api/moi/mot-de-passe", { ancien, nouveau });
-      setAncien("");
-      setNouveau("");
-      setConfirmation("");
-      setMessage({ type: "ok", texte: "Mot de passe modifié. Vos autres appareils ont été déconnectés." });
-    } catch (e) {
-      setMessage({ type: "erreur", texte: e instanceof Error ? e.message : "Modification impossible." });
-    }
-  }
-
-  function choisirTheme(preference: PreferenceTheme) {
-    enregistrerPreferenceTheme(preference);
-    setTheme(preference);
-  }
-
-  function choisirDemarrage(ecran: EcranDemarrage) {
-    enregistrerDemarrage(ecran);
-    setDemarrage(ecran);
-  }
-
-  async function seDeconnecter() {
-    await api.post("/api/deconnexion").catch(() => undefined);
-    void naviguer("/connexion", { replace: true });
-  }
-
   return (
     <main className="page">
       <h1>Réglages</h1>
-
-      <section className="section">
-        <p>
-          Connecté en tant que <strong>{identifiant ?? "…"}</strong>
-        </p>
-        <p className="secondaire">Vinted Helper — version {version ?? "…"}</p>
-      </section>
-
-      <section className="section">
-        <h2>Menu</h2>
-        <div className="actions">
-          <Link to="/frais" className="bouton">
-            Frais divers
-          </Link>
-          <Link to="/sorties" className="bouton">
-            Sorties
-          </Link>
-          <Link to="/listes" className="bouton">
-            Marques et lieux
-          </Link>
-          <Link to="/points-relais" className="bouton">
-            Points relais
-          </Link>
-          <Link to="/corbeille" className="bouton">
-            Corbeille
-          </Link>
-          <Link to="/publication" className="bouton">
-            Publication Vinted
-          </Link>
-        </div>
-      </section>
-
-      <section className="section">
-        <h2>Affichage</h2>
-        <p className="secondaire">Auto suit le réglage clair / sombre du téléphone.</p>
-        <div className="segments" role="group" aria-label="Thème">
-          {CHOIX_THEME.map((choix) => (
-            <button
-              key={choix.valeur}
-              type="button"
-              className={choix.valeur === theme ? "bouton bouton--principal" : "bouton"}
-              aria-pressed={choix.valeur === theme}
-              onClick={() => choisirTheme(choix.valeur)}
-            >
-              {choix.libelle}
-            </button>
-          ))}
-        </div>
-        <h3>Ouverture de l'application installée</h3>
-        <p className="secondaire">Écran affiché quand vous ouvrez l'application sur cet appareil.</p>
-        <div className="segments" role="group" aria-label="Écran d'ouverture">
-          {CHOIX_DEMARRAGE.map((choix) => (
-            <button
-              key={choix.valeur}
-              type="button"
-              className={choix.valeur === demarrage ? "bouton bouton--principal" : "bouton"}
-              aria-pressed={choix.valeur === demarrage}
-              onClick={() => choisirDemarrage(choix.valeur)}
-            >
-              {choix.libelle}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <ParametresCalcul />
-      <TachesAutomatiques />
-      <PromptsIA />
-
-      <section className="section">
-        <h2>Changer le mot de passe</h2>
-        <form className="formulaire" onSubmit={(e) => void changerMotDePasse(e)}>
-          <label className="champ">
-            <span>Mot de passe actuel</span>
-            <input
-              type="password"
-              value={ancien}
-              onChange={(e) => setAncien(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
-          </label>
-          <label className="champ">
-            <span>Nouveau mot de passe (12 caractères minimum)</span>
-            <input
-              type="password"
-              value={nouveau}
-              onChange={(e) => setNouveau(e.target.value)}
-              autoComplete="new-password"
-              minLength={12}
-              required
-            />
-          </label>
-          <label className="champ">
-            <span>Confirmer le nouveau mot de passe</span>
-            <input
-              type="password"
-              value={confirmation}
-              onChange={(e) => setConfirmation(e.target.value)}
-              autoComplete="new-password"
-              minLength={12}
-              required
-            />
-          </label>
-          {message && (
-            <p className={`message message--${message.type}`} role="status">
-              {message.texte}
-            </p>
-          )}
-          <button className="bouton bouton--principal" type="submit">
-            Enregistrer le nouveau mot de passe
-          </button>
-        </form>
-      </section>
-
-      <section className="section">
-        <button className="bouton" type="button" onClick={() => void seDeconnecter()}>
-          Se déconnecter
-        </button>
-      </section>
+      {GROUPES.map((groupe) => (
+        <section className="section" key={groupe.titre}>
+          <h2>{groupe.titre}</h2>
+          <ul className="sommaire">
+            {groupe.rubriques.map((r) => (
+              <li key={r.chemin}>
+                <Link to={r.chemin} className="sommaire__lien">
+                  <span className="sommaire__texte">
+                    <span className="sommaire__titre">{r.titre}</span>
+                    <span className="sommaire__detail">{r.detail}</span>
+                  </span>
+                  <span className="sommaire__fleche" aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <p className="secondaire">Vinted Helper — version {version ?? "…"}</p>
     </main>
   );
 }

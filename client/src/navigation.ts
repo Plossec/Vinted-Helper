@@ -16,6 +16,7 @@ const PARENTS: Record<string, Onglet> = {
   listes: "reglages",
   corbeille: "reglages",
   publication: "reglages",
+  "points-relais": "reglages",
 };
 
 export function ongletActif(chemin: string): Onglet | null {

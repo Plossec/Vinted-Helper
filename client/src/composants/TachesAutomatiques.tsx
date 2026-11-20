@@ -524,7 +524,6 @@ export function TachesAutomatiques() {
 
   return (
     <section className="section">
-      <h2>Tâches automatiques</h2>
       <p className="secondaire">
         Faites par l'extension Chrome, seulement quand Chrome est ouvert, une action à la fois sur Vinted. Touchez une
         tâche pour voir ses réglages et son journal.
@@ -532,7 +531,7 @@ export function TachesAutomatiques() {
       <CarteDormants r={reglages} etat={etat?.dormants ?? null} version={version} onChangement={onChangement} />
       <CarteFinalisation r={reglages} etat={etat?.finalisation ?? null} version={version} onChangement={onChangement} />
       <CarteFavoris r={reglages} etat={etat?.favoris ?? null} onChangement={onChangement} />
-      <h3>Journal de toutes les tâches</h3>
+      <h2>Journal de toutes les tâches</h2>
       <p className="secondaire">3 derniers mois, le plus récent d'abord.</p>
       <JournalTaches filtres version={version} />
     </section>

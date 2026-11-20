@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.29.2] — 20/11/2026
+
+### Modifié
+- **Réglages** réorganisés : la page devient un sommaire par groupes (Automatisation, IA et calculs, Données,
+  Application) ; chaque rubrique s'ouvre sur sa propre page, avec « ← Réglages » pour revenir. Plus de longue page à
+  faire défiler ; les réglages eux-mêmes ne changent pas (#282, ADR-0119).
+
 ## [1.29.1] — 18/11/2026
 
 ### Corrigé
