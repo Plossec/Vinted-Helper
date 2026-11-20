@@ -19,6 +19,8 @@ describe("ongletActif", () => {
     expect(ongletActif("/frais")).toBe("tableau");
     expect(ongletActif("/corbeille")).toBe("reglages");
     expect(ongletActif("/publication")).toBe("reglages");
+    expect(ongletActif("/points-relais")).toBe("reglages");
+    expect(ongletActif("/reglages/taches")).toBe("reglages");
   });
 
   it("adresse inconnue : aucun onglet", () => {

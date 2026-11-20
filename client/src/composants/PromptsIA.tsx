@@ -42,7 +42,6 @@ export function PromptsIA() {
   if (defauts === null) return null;
   return (
     <section className="section">
-      <h2>IA (Gemini)</h2>
       <p className="secondaire">
         Champs remplacés automatiquement : {"{nom} {categorie} {marque} {gamme} {taille} {etat} {matiere} {notes}"}. La
         réponse doit rester en JSON (voir la dernière ligne du prompt).

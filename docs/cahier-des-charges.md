@@ -53,6 +53,8 @@ Statut administratif de l'utilisateur : **particulier** (aucun registre comptabl
 - Interface **claire / sombre automatique**, sobre, gros boutons utilisables à une main.
 - **Accessible** : contrastes WCAG 2.2 AA, lisible par les lecteurs d'écran (et les agents IA), contrôle automatique à
   chaque PR (ADR-0102).
+- **Réglages** : un sommaire par groupes (Automatisation, IA et calculs, Données, Application) ; chaque rubrique a sa
+  page, avec « ← Réglages » pour revenir (ADR-0119).
 
 ### 2.3 Format français (obligatoire partout)
 - Montants : `3,33 €` (virgule décimale, symbole après). Saisie acceptée avec virgule **ou** point.

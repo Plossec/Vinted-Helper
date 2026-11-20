@@ -181,6 +181,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0086](0086-couleurs-des-badges-de-statut.md) | 14/10/2026 | Couleurs des badges de statut | Modifié |
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Accepté |
 | [0102](0102-accessibilite-de-l-interface.md) | 19/10/2026 | Accessibilité de l'interface : contrastes, lecteurs d'écran, contrôle automatique | Accepté |
+| [0119](0119-page-reglages-en-sommaire.md) | 20/11/2026 | Page Réglages en sommaire | Accepté · à relire |
 
 ## Tâches automatisées
 

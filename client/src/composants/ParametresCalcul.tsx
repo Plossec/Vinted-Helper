@@ -52,7 +52,6 @@ export function ParametresCalcul() {
 
   return (
     <section className="section">
-      <h2>Calculs et alertes</h2>
       <form className="formulaire" onSubmit={(e) => void enregistrer(e)} noValidate>
         <label className="champ">
           <span>Emballage par colis, par défaut (€)</span>
