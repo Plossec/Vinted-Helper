@@ -33,6 +33,9 @@ export const ACTIONS_STATUT: Record<Statut, string> = {
   sortie_stock: "Sortir du stock",
 };
 
+/** Statuts d'un article vendu : jamais mis à la corbeille en lot (#286, comme `STATUTS_VENDUS` du serveur). */
+export const STATUTS_VENDUS: ReadonlySet<Statut> = new Set<Statut>(["a_expedier", "envoye", "a_recuperer", "finalise"]);
+
 export const formatReference = (reference: number) => `#${String(reference).padStart(4, "0")}`;
 
 /** Statuts avant la vente : la fiche, les photos et l'annonce sont au premier plan (#98). */

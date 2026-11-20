@@ -74,8 +74,10 @@ export function SelecteurAffichage({
 interface Props {
   articles: ResumeArticle[];
   mode: ModeAffichage;
-  /** Mode sélection (publication Vinted) : articles cochés, sinon null. */
+  /** Mode sélection (publication Vinted, corbeille #286) : articles cochés, sinon null. */
   selection: Set<string> | null;
+  /** Article non cochable dans cette sélection : titre et raison (ex. « Incomplet », ce qui manque), sinon null. */
+  blocage: (a: ResumeArticle) => { titre: string; texte: string } | null;
   onBasculer: (id: string) => void;
   /** Mode détaillé : libellés et tri par colonne. */
   libelleCategorie: (code: string) => string;
@@ -124,9 +126,10 @@ function LienVinted({ a, dansUnLien = false }: { a: ResumeArticle; dansUnLien?: 
 
 const prixAffiche = (a: ResumeArticle) => (a.prixAffiche === null ? "—" : formatEuros(a.prixAffiche));
 
-/** Sélection pour Vinted (#196) : un article incomplet reste visible, encadré en pointillés et non cochable. */
-const incomplet = (a: ResumeArticle, props: Props) => props.selection !== null && a.manquesPublication.length > 0;
-const texteManques = (a: ResumeArticle) => `Il manque : ${a.manquesPublication.join(", ")}`;
+/** Sélection (#196, #286) : un article non cochable reste visible, encadré en pointillés, avec la raison. */
+const blocage = (a: ResumeArticle, props: Props) => (props.selection !== null ? props.blocage(a) : null);
+const incomplet = (a: ResumeArticle, props: Props) => blocage(a, props) !== null;
+const texteBlocage = (a: ResumeArticle, props: Props) => blocage(a, props)?.texte ?? "";
 
 function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
   if (!props.selection) return null;
@@ -134,8 +137,8 @@ function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
   return (
     <input
       type="checkbox"
-      aria-label={`Sélectionner ${formatReference(a.reference)}${bloque ? ` (${texteManques(a)})` : ""}`}
-      title={bloque ? texteManques(a) : undefined}
+      aria-label={`Sélectionner ${formatReference(a.reference)}${bloque ? ` (${texteBlocage(a, props)})` : ""}`}
+      title={bloque ? texteBlocage(a, props) : undefined}
       disabled={bloque}
       checked={props.selection.has(a.id)}
       onChange={() => props.onBasculer(a.id)}
@@ -144,9 +147,10 @@ function CaseSelection({ a, props }: { a: ResumeArticle; props: Props }) {
 }
 
 function Manques({ a, props }: { a: ResumeArticle; props: Props }) {
-  return incomplet(a, props) ? (
+  const b = blocage(a, props);
+  return b ? (
     <span className="manques-publication">
-      <strong>Incomplet</strong> — {texteManques(a)}
+      <strong>{b.titre}</strong> — {b.texte}
     </span>
   ) : null;
 }

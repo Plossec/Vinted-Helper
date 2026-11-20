@@ -135,6 +135,12 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
   un en-tête de colonne pour trier (une 2e fois pour inverser). Sur téléphone, faites glisser le tableau vers la
   gauche ; le bénéfice en *italique* est provisoire (article pas encore finalisé).
 
+## Supprimer plusieurs articles
+
+**Articles → Sélectionner pour supprimer** : cochez les articles (ou **Tout cocher** : ceux affichés par vos filtres,
+ex. filtre « Brouillon »), puis **Mettre à la corbeille (N)** et confirmez. Les articles vendus (à expédier, envoyés,
+à récupérer, finalisés) ne se cochent pas. Erreur ? Dans **Corbeille**, cochez-les puis **Restaurer (N)** (30 jours).
+
 ## Fusionner un doublon
 
 Un même objet existe deux fois ? Ouvrez la fiche du **doublon**, tout en bas : **Fusionner avec un autre article**.

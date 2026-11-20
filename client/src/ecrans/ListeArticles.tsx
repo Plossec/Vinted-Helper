@@ -2,7 +2,8 @@
 // le temps de la session (retour depuis une fiche).
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
-import { api, type Referentiels, type ResumeArticle, type ResumeSortie } from "../api.js";
+import { api, type BilanCorbeille, type Referentiels, type ResumeArticle, type ResumeSortie } from "../api.js";
+import { confirmer } from "../composants/Dialogue.js";
 import { ChoixMultiple } from "../composants/ChoixMultiple.js";
 import type { OptionListe } from "../composants/ListeDeroulante.js";
 import {
@@ -24,7 +25,7 @@ import {
   nombreFiltresActifs,
   type Tri,
 } from "../utilitaires/recherche.js";
-import { LIBELLES_STATUT, type Statut } from "../statuts.js";
+import { formatReference, LIBELLES_STATUT, STATUTS_VENDUS, type Statut } from "../statuts.js";
 
 const CLE = "vh-liste-articles";
 const TRIS: Record<Tri, string> = {
@@ -93,10 +94,14 @@ export function ListeArticles() {
   const [etat, setEtat] = useState<Etat>(lireEtat);
   const [filtresOuverts, setFiltresOuverts] = useState(false);
   const [mode, setMode] = useState<ModeAffichage>(lireModeAffichage);
-  /** Mode sélection (filtre « À publier » et/ou « Erreur », #95) : articles cochés pour la publication sur Vinted. */
+  /**
+   * Mode sélection : articles cochés pour la publication sur Vinted (filtre « À publier » et/ou « Erreur », #95) ou
+   * pour la corbeille (#286, tous les filtres).
+   */
   const [selection, setSelection] = useState<Set<string> | null>(null);
+  const [but, setBut] = useState<"vinted" | "corbeille">("vinted");
   const [envoi, setEnvoi] = useState(false);
-  const [retour, setRetour] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [retour, setRetour] = useState<{ ok: boolean; texte: string; suivi?: boolean } | null>(null);
 
   useEffect(() => {
     let actif = true;
@@ -166,7 +171,21 @@ export function ListeArticles() {
         ? etat.filtres.statuts.filter((x) => x !== statut)
         : [...etat.filtres.statuts, statut],
     });
-  const selectionActive = selectionPossible && selection !== null;
+  const selectionActive = selection !== null && (but === "corbeille" || selectionPossible);
+  /** Article non cochable pour la sélection en cours, avec la raison. */
+  const blocage = (a: ResumeArticle) =>
+    but === "vinted"
+      ? a.manquesPublication.length > 0
+        ? { titre: "Incomplet", texte: `Il manque : ${a.manquesPublication.join(", ")}` }
+        : null
+      : STATUTS_VENDUS.has(a.statut)
+        ? { titre: "Vendu", texte: "un article vendu ne se met pas à la corbeille en lot" }
+        : null;
+  const commencer = (b: "vinted" | "corbeille") => {
+    setRetour(null);
+    setBut(b);
+    setSelection(new Set());
+  };
 
   const basculer = (id: string) =>
     setSelection((s) => {
@@ -182,10 +201,37 @@ export function ListeArticles() {
     setRetour(null);
     try {
       const r = await demanderPublication([...selection]);
-      setRetour(r);
+      setRetour({ ...r, suivi: true });
       if (r.ok) setSelection(null);
     } catch (e: unknown) {
       setRetour({ ok: false, texte: e instanceof Error ? e.message : "Envoi impossible." });
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  const mettreALaCorbeille = async () => {
+    if (!selection || selection.size === 0) return;
+    const n = selection.size;
+    const ok = await confirmer(
+      `Mettre ${n} article${n > 1 ? "s" : ""} à la corbeille ? ${n > 1 ? "Ils seront restaurables" : "Il sera restaurable"} pendant 30 jours.`,
+      { action: "Mettre à la corbeille", danger: true },
+    );
+    if (!ok) return;
+    setEnvoi(true);
+    setRetour(null);
+    try {
+      const ids = [...selection];
+      const r = await api.post<BilanCorbeille>("/api/articles/corbeille", { ids });
+      const ignores = new Set(r.ignores);
+      setArticles((liste) => liste && liste.filter((a) => !selection.has(a.id) || ignores.has(a.reference)));
+      const lignes = [`${r.traites} article${r.traites > 1 ? "s" : ""} mis à la corbeille (restaurables 30 jours).`];
+      if (r.ignores.length > 0)
+        lignes.push(`Laissés de côté, car vendus : ${r.ignores.map((x) => formatReference(x)).join(", ")}.`);
+      setRetour({ ok: true, texte: lignes.join("\n") });
+      setSelection(null);
+    } catch (e: unknown) {
+      setRetour({ ok: false, texte: e instanceof Error ? e.message : "Suppression impossible." });
     } finally {
       setEnvoi(false);
     }
@@ -298,28 +344,32 @@ export function ListeArticles() {
         </p>
       )}
       {resultats === null && !erreur && <p className="statut">Chargement…</p>}
-      {selectionPossible && resultats && resultats.length > 0 && (
-        <p className="section">
-          <button
-            type="button"
-            className="bouton"
-            onClick={() => {
-              setRetour(null);
-              setSelection((s) => (s ? null : new Set()));
-            }}
-          >
-            {selectionActive ? "Terminer la sélection" : "Sélectionner pour Vinted"}
-          </button>
-          {selectionActive && (
-            <button
-              type="button"
-              className="bouton"
-              onClick={() =>
-                setSelection(new Set(resultats.filter((a) => a.manquesPublication.length === 0).map((a) => a.id)))
-              }
-            >
-              Tout cocher
-            </button>
+      {resultats && resultats.length > 0 && (
+        <p className="section actions">
+          {selectionActive ? (
+            <>
+              <button type="button" className="bouton" onClick={() => setSelection(null)}>
+                Terminer la sélection
+              </button>
+              <button
+                type="button"
+                className="bouton"
+                onClick={() => setSelection(new Set(resultats.filter((a) => blocage(a) === null).map((a) => a.id)))}
+              >
+                Tout cocher
+              </button>
+            </>
+          ) : (
+            <>
+              {selectionPossible && (
+                <button type="button" className="bouton" onClick={() => commencer("vinted")}>
+                  Sélectionner pour Vinted
+                </button>
+              )}
+              <button type="button" className="bouton" onClick={() => commencer("corbeille")}>
+                Sélectionner pour supprimer
+              </button>
+            </>
           )}
         </p>
       )}
@@ -329,9 +379,11 @@ export function ListeArticles() {
           role={retour.ok ? "status" : "alert"}
         >
           {retour.texte}{" "}
-          <Link to="/publication" className="lien">
-            Suivre la publication
-          </Link>
+          {retour.suivi && (
+            <Link to="/publication" className="lien">
+              Suivre la publication
+            </Link>
+          )}
         </p>
       )}
       <div className="ligne-affichage">
@@ -354,6 +406,7 @@ export function ListeArticles() {
           articles={resultats}
           mode={mode}
           selection={selectionActive ? selection : null}
+          blocage={blocage}
           onBasculer={basculer}
           libelleCategorie={(code) => options?.categoriesCourtes.get(code) ?? code}
           libelleLieu={(id) => options?.lieux.get(id) ?? "—"}
@@ -364,14 +417,25 @@ export function ListeArticles() {
       )}
       {selectionActive && (
         <div className="selection-barre">
-          <button
-            type="button"
-            className="bouton bouton--principal"
-            disabled={envoi || selection.size === 0}
-            onClick={() => void publier()}
-          >
-            {envoi ? "Envoi…" : `Publier sur Vinted (${selection.size})`}
-          </button>
+          {but === "vinted" ? (
+            <button
+              type="button"
+              className="bouton bouton--principal"
+              disabled={envoi || selection.size === 0}
+              onClick={() => void publier()}
+            >
+              {envoi ? "Envoi…" : `Publier sur Vinted (${selection.size})`}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="bouton bouton--danger"
+              disabled={envoi || selection.size === 0}
+              onClick={() => void mettreALaCorbeille()}
+            >
+              {envoi ? "Suppression…" : `Mettre à la corbeille (${selection.size})`}
+            </button>
+          )}
           <button type="button" className="bouton" onClick={() => setSelection(null)}>
             Annuler
           </button>
