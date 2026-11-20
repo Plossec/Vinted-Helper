@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.31.0] — 20/11/2026
+
+### Ajouté
+- **Supprimer plusieurs articles d'un coup** : Articles → « Sélectionner pour supprimer », cochez (ou « Tout cocher »),
+  puis « Mettre à la corbeille ». Les articles vendus sont laissés de côté. Dans la Corbeille, plusieurs articles se
+  restaurent d'un coup (#286, ADR-0121).
+
 ## [1.30.0] — 20/11/2026
 
 ### Ajouté

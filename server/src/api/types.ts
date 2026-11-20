@@ -600,3 +600,10 @@ export interface BilanFusion {
   /** Lignes d'historique rattachées (prix, boosts, ventes, publications, tâches). */
   historique: number;
 }
+
+/** Corbeille en lot (#286) : articles traités, et références des articles vendus laissés de côté. */
+export interface BilanCorbeille {
+  traites: number;
+  /** Références (#0127) des articles ignorés (vendus). */
+  ignores: number[];
+}

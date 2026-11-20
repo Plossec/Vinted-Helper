@@ -1,7 +1,8 @@
-// Corbeille (§5.11) : articles supprimés, restaurables 30 jours, puis supprimés définitivement.
+// Corbeille (§5.11) : articles supprimés, restaurables 30 jours, puis supprimés définitivement. Plusieurs articles
+// cochés se restaurent d'un coup (#286).
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { api, type ArticleSupprime, urlVignette } from "../api.js";
+import { api, type ArticleSupprime, type BilanCorbeille, urlVignette } from "../api.js";
 import { formatDateHeure } from "../utilitaires/dates.js";
 import { formatReference } from "../statuts.js";
 import { confirmer } from "../composants/Dialogue.js";
@@ -9,6 +10,8 @@ import { confirmer } from "../composants/Dialogue.js";
 export function Corbeille() {
   const [articles, setArticles] = useState<ArticleSupprime[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [coches, setCoches] = useState<Set<string>>(new Set());
+  const [message, setMessage] = useState<string | null>(null);
 
   const charger = () =>
     api
@@ -19,7 +22,28 @@ export function Corbeille() {
     void charger();
   }, []);
 
+  const basculer = (id: string) =>
+    setCoches((c) => {
+      const suivant = new Set(c);
+      if (suivant.has(id)) suivant.delete(id);
+      else suivant.add(id);
+      return suivant;
+    });
+
+  async function restaurerCoches() {
+    setMessage(null);
+    try {
+      const r = await api.post<BilanCorbeille>("/api/corbeille/restauration", { ids: [...coches] });
+      setCoches(new Set());
+      setMessage(`${r.traites} article${r.traites > 1 ? "s" : ""} restauré${r.traites > 1 ? "s" : ""}.`);
+      await charger();
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "Restauration impossible.");
+    }
+  }
+
   async function agir(promesse: Promise<unknown>) {
+    setMessage(null);
     try {
       await promesse;
       await charger();
@@ -43,10 +67,32 @@ export function Corbeille() {
           {erreur}
         </p>
       )}
+      {message && (
+        <p className="message message--ok" role="status">
+          {message}
+        </p>
+      )}
       {articles?.length === 0 && <p className="vide">La corbeille est vide.</p>}
+      {articles && articles.length > 1 && (
+        <p className="section actions">
+          <button
+            type="button"
+            className="bouton"
+            onClick={() => setCoches(coches.size === articles.length ? new Set() : new Set(articles.map((a) => a.id)))}
+          >
+            {coches.size === articles.length ? "Tout décocher" : "Tout cocher"}
+          </button>
+        </p>
+      )}
       <ul className="liste">
         {articles?.map((a) => (
           <li key={a.id} className="carte-article carte-article--photo">
+            <input
+              type="checkbox"
+              aria-label={`Sélectionner ${formatReference(a.reference)}`}
+              checked={coches.has(a.id)}
+              onChange={() => basculer(a.id)}
+            />
             {a.vignette ? (
               <img className="vignette" src={urlVignette(a.vignette)} alt="" />
             ) : (
@@ -88,6 +134,16 @@ export function Corbeille() {
           </li>
         ))}
       </ul>
+      {coches.size > 0 && (
+        <div className="selection-barre">
+          <button type="button" className="bouton bouton--principal" onClick={() => void restaurerCoches()}>
+            Restaurer ({coches.size})
+          </button>
+          <button type="button" className="bouton" onClick={() => setCoches(new Set())}>
+            Annuler
+          </button>
+        </div>
+      )}
     </main>
   );
 }

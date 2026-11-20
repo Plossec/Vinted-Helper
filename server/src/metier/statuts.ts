@@ -21,6 +21,9 @@ export const STATUTS = [
 
 export type Statut = (typeof STATUTS)[number];
 
+/** Statuts d'un article vendu (vente en cours ou finie) : jamais mis à la corbeille en lot (#286). */
+export const STATUTS_VENDUS: readonly Statut[] = ["a_expedier", "envoye", "a_recuperer", "finalise"];
+
 export const LIBELLES_STATUT: Record<Statut, string> = {
   brouillon: "Brouillon",
   en_stock: "En stock",

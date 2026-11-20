@@ -1,10 +1,12 @@
 // Corbeille (§5.11) : un article supprimé reste restaurable 30 jours, exclu de tous les calculs ;
 // ensuite suppression définitive avec ses photos propres (la photo terrain partagée suit la règle §5.10).
 // La référence n'est jamais réutilisée (le compteur de l'utilisateur ne recule jamais).
-import { and, asc, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lt, notInArray } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { article, articlePhoto } from "../base/schema.js";
-import { introuvable } from "../utilitaires/erreurs.js";
+import type { BilanCorbeille } from "../api/types.js";
+import { STATUTS_VENDUS } from "../metier/statuts.js";
+import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { choisirVignette, photosDesArticles, supprimerSiOrpheline } from "../photos/service.js";
 import type { StockagePhotos } from "../photos/stockage.js";
 
@@ -18,6 +20,61 @@ export async function mettreALaCorbeille(base: Base, utilisateurId: string, id: 
     .where(and(eq(article.id, id), eq(article.utilisateurId, utilisateurId), isNull(article.supprimeLe)))
     .returning({ id: article.id });
   if (r.length === 0) throw introuvable("Article");
+}
+
+/** Plus d'articles d'un coup : au-delà, la demande est refusée. */
+export const ARTICLES_MAX_LOT = 500;
+
+function verifierIds(ids: readonly string[]) {
+  if (ids.length === 0) throw erreurSaisie("Aucun article choisi.");
+  if (ids.length > ARTICLES_MAX_LOT) throw erreurSaisie(`${ARTICLES_MAX_LOT} articles au plus à la fois.`);
+}
+
+/**
+ * Corbeille en lot (#286, ADR-0121) : les articles choisis vont à la corbeille, sauf les articles vendus (À expédier,
+ * Envoyé, À récupérer, Finalisé), ignorés et renvoyés avec leur référence. Les articles inconnus sont ignorés.
+ */
+export async function mettreALaCorbeilleEnLot(
+  base: Base,
+  utilisateurId: string,
+  ids: readonly string[],
+  maintenant: Date,
+): Promise<BilanCorbeille> {
+  verifierIds(ids);
+  return base.transaction(async (tx) => {
+    const choisis = and(
+      eq(article.utilisateurId, utilisateurId),
+      inArray(article.id, [...ids]),
+      isNull(article.supprimeLe),
+    );
+    const vendus = await tx
+      .select({ reference: article.reference })
+      .from(article)
+      .where(and(choisis, inArray(article.statut, [...STATUTS_VENDUS])))
+      .orderBy(asc(article.reference));
+    const r = await tx
+      .update(article)
+      .set({ supprimeLe: maintenant, modifieLe: maintenant })
+      .where(and(choisis, notInArray(article.statut, [...STATUTS_VENDUS])))
+      .returning({ id: article.id });
+    return { traites: r.length, ignores: vendus.map((v) => v.reference) };
+  });
+}
+
+/** Restauration en lot (#286) : les articles choisis sortent de la corbeille. */
+export async function restaurerEnLot(
+  base: Base,
+  utilisateurId: string,
+  ids: readonly string[],
+  maintenant: Date,
+): Promise<BilanCorbeille> {
+  verifierIds(ids);
+  const r = await base
+    .update(article)
+    .set({ supprimeLe: null, modifieLe: maintenant })
+    .where(and(eq(article.utilisateurId, utilisateurId), inArray(article.id, [...ids]), isNotNull(article.supprimeLe)))
+    .returning({ id: article.id });
+  return { traites: r.length, ignores: [] };
 }
 
 export async function restaurer(base: Base, utilisateurId: string, id: string, maintenant: Date) {
