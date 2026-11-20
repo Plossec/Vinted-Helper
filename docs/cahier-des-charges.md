@@ -263,6 +263,8 @@ manque. La catégorie « Autre » est admise (publication à la main).
 ### 5.11 Suppression
 - Supprimer un article (erreur, doublon) → **corbeille 30 jours**, restaurable ; ensuite suppression définitive avec ses photos propres (la photo terrain partagée suit la règle §5.10).
 - Un article supprimé n'apparaît dans aucun calcul ; les répartitions de son lot et de sa sortie sont recalculées (§6.1, §6.2).
+- **Doublon** : depuis sa fiche, « Fusionner avec un autre article » : l'article gardé reprend ce qui lui manque (champs
+  vides, place dans le lot, photos, historique, statut le plus avancé), puis le doublon part à la corbeille (ADR-0120).
 
 ### 5.12 Frais divers
 - Écran **« Frais divers »** (accessible depuis le menu) : liste des frais saisis à la main, ajout / modification / suppression.

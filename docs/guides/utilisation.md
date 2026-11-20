@@ -135,6 +135,17 @@ retirer une). « Effacer les filtres » revient au réglage par défaut.
   un en-tête de colonne pour trier (une 2e fois pour inverser). Sur téléphone, faites glisser le tableau vers la
   gauche ; le bénéfice en *italique* est provisoire (article pas encore finalisé).
 
+## Fusionner un doublon
+
+Un même objet existe deux fois ? Ouvrez la fiche du **doublon**, tout en bas : **Fusionner avec un autre article**.
+Cherchez l'article à garder (nom ou référence, ex. « 0127 »), lisez ce qui sera repris, puis **Fusionner**.
+
+- L'article gardé reprend seulement ce qui lui manque (rien n'est écrasé), les photos du doublon, ses prix, boosts,
+  ventes et publications, et sa place dans un lot s'il n'a pas de prix d'achat.
+- Il prend le statut **le plus avancé** des deux (ex. le doublon était vendu : l'article gardé devient vendu).
+- Deux articles vendus chacun de leur côté ne se fusionnent pas : ce sont deux objets différents.
+- Le doublon part à la **corbeille** (30 jours).
+
 ## Nouveaux articles par photos
 
 **Articles → « Nouveaux articles par photos »** (en bas de la liste), sur le téléphone ou le PC :

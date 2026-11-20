@@ -108,6 +108,7 @@ export type {
   Analyse,
   Article,
   ArticleSupprime,
+  BilanFusion,
   CanalRevente,
   Categorie,
   ChangementStatut,

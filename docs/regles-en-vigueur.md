@@ -47,6 +47,7 @@ une de ces règles met cette page à jour dans la même PR ([ADR-0098](decisions
 | Liens Vinted | Lien de l'annonce (saisi ou enregistré par l'extension) et de la conversation ; l'application n'interroge pas Vinted elle-même | [0031](decisions/0031-lien-de-l-annonce-vinted-saisi-a-la-main.md), [0026](decisions/0026-lien-de-la-conversation-vinted-a-la-vente.md) | réalisé |
 | Points relais | Saisis à la main (Vinted Go, Mondial Relay, La Poste, Relais Colis), horaires → « ouvert / fermé » ; point de dépôt du colis et point de retrait d'un retour ; statut lu par l'extension à venir (une issue par transporteur) | [0109](decisions/0109-points-relais-saisis-et-relies-aux-ventes.md) (proposé) | en cours |
 | Liste | 4 modes d'affichage, filtres à choix multiples | [0029](decisions/0029-modes-d-affichage-de-la-liste.md), [0030](decisions/0030-filtres-a-choix-multiples.md) | réalisé |
+| Fusion de deux articles | Depuis la fiche du doublon : l'article gardé reprend les champs vides, la place dans le lot, les photos, l'historique et le statut le plus avancé ; deux articles vendus : refus ; doublon à la corbeille | [0120](decisions/0120-fusion-de-deux-articles.md) | réalisé |
 
 ## Tableau de bord
 

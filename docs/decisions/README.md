@@ -96,6 +96,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0030](0030-filtres-a-choix-multiples.md) | 07/10/2026 | Filtres à choix multiples | Modifié |
 | [0031](0031-lien-de-l-annonce-vinted-saisi-a-la-main.md) | 07/10/2026 | Lien de l'annonce Vinted saisi à la main | Accepté |
 | [0083](0083-filtres-a-vendre-hors-vinted-masque-par-defaut.md) | 14/10/2026 | Filtres : « À vendre hors Vinted » masqué par défaut | Accepté |
+| [0120](0120-fusion-de-deux-articles.md) | 20/11/2026 | Fusion de deux articles | Accepté · à relire |
 
 ## Tableau de bord
 

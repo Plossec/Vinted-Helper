@@ -1495,6 +1495,15 @@ a {
   text-decoration: none;
 }
 
+.sommaire__bouton {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .sommaire__texte {
   flex: 1;
   min-width: 0;
