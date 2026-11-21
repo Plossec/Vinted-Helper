@@ -79,6 +79,35 @@ test("publication complète : formulaire rempli, contrôlé, « Ajouter » cliqu
   assert.equal(etat.pause, false);
 });
 
+test("après « Ajouter », Vinted ouvre le profil : annonce retrouvée sur le profil, publiée avec son lien (#288)", async () => {
+  const { app, vinted, diagnostic } = await lancer({ demande: DEMANDE(false), vinted: { apresAjouter: "profil" } });
+  assert.equal(vinted.clics, 1);
+  assert.equal(app.resultats[0].resultat, "publie");
+  assert.match(app.resultats[0].url, /\/items\/987654-jean-levi-s-501$/);
+  assert.equal(diagnostic.etape, "apres-ajouter");
+  assert.match(diagnostic.adresse, /\/member\/1-vendeur/);
+});
+
+test("après « Ajouter », ni page d'annonce ni annonce sur le profil : erreur avec la page vue (#288)", async () => {
+  const { app } = await lancer({ demande: DEMANDE(false), vinted: { apresAjouter: "profil-sans-annonce" } });
+  assert.equal(app.resultats[0].resultat, "erreur");
+  assert.match(app.resultats[0].message, /page vue : http:\/\/127\.0\.0\.1:\d+\/member\/1-vendeur/);
+  assert.match(app.resultats[0].message, /aucune annonce « Jean Levi's 501 » parmi les 1 plus récentes/);
+});
+
+test("prix affiché mais pas retenu par Vinted : saisi comme au clavier, retenu, publié (#288)", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(false), vinted: { prixEtatInterne: "clavier" } });
+  assert.equal(app.resultats[0].resultat, "publie", app.resultats[0].message);
+  assert.equal(vinted.clics, 1);
+});
+
+test("prix jamais retenu par Vinted (« doit être supérieur ou égal à 1.0 ») : erreur, aucun clic (#288)", async () => {
+  const { app, vinted } = await lancer({ demande: DEMANDE(false), vinted: { prixEtatInterne: "jamais" } });
+  assert.equal(app.resultats[0].resultat, "erreur");
+  assert.match(app.resultats[0].message, /refusé par Vinted : « le champ prix doit être supérieur ou égal à 1\.0 »/);
+  assert.equal(vinted.clics, 0);
+});
+
 test("mode essai : tout est rempli mais « Ajouter » n'est jamais cliqué", async () => {
   const { app, vinted } = await lancer({ demande: DEMANDE(true) });
   assert.equal(vinted.clics, 0);

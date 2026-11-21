@@ -111,8 +111,22 @@ const SELECTEURS = {
   // Adresse donnée par l'utilisateur le 18/10/2026 (« /my_orders/sold » supposé auparavant).
   pagePorteMonnaie: "/wallet/balance",
 
+  /**
+   * Capture de l'utilisateur du 21/11/2026 (#288) : le champ affiche « 4.00 » mais Vinted ne l'a pas pris en compte et
+   * affiche sous le champ « Le champ prix doit être supérieur ou égal à 1.0 ». Débuts de ces messages d'erreur.
+   */
+  textesErreurPrix: ["le champ prix doit", "le prix doit"],
+
   /** Page d'une annonce créée : https://www.vinted.fr/items/1234567890-titre */
   motifAnnonceCreee: "^/items/\\d+",
+
+  /**
+   * Annonce retrouvée sur le profil quand la page de l'annonce ne s'ouvre pas après « Ajouter » (#288). PAS ENCORE
+   * RELEVÉ sur Vinted (21/11/2026) : lien du profil (« /member/123-pseudo ») dans l'en-tête ou l'adresse, puis liste
+   * des annonces du profil, les plus récentes d'abord (« {id} » remplacé par le numéro du membre).
+   */
+  motifProfil: "/member/(\\d+)",
+  annoncesDuProfil: "/api/v2/wardrobe/{id}/items?page=1&per_page=20&order=newest_first",
 
   /** Signes que l'utilisateur n'est pas connecté. */
   nonConnecte: ['[data-testid="header--login-button"]', 'a[href*="/member/signup"]', 'a[href*="/login"]'],

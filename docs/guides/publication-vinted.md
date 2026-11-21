@@ -68,6 +68,11 @@ entre chaque étape (photos, titre, description, catégorie…) : une annonce pr
 Une publication interrompue (Chrome fermé, PC éteint…) passe en **erreur** et n'est **jamais relancée
 automatiquement**, pour éviter une annonce en double : vérifiez sur Vinted avant de la redemander.
 
+Après « Ajouter », Vinted n'ouvre pas toujours la page de l'annonce. L'extension (1.16) relève alors la page affichée
+(« Dernier relevé ») et **cherche l'annonce sur votre profil** : retrouvée, elle est marquée publiée avec son lien.
+Sinon, l'article passe en Erreur avec l'adresse de la page vue : vérifiez sur Vinted, et envoyez le « Dernier relevé »
+à Claude.
+
 Quand une **vraie** publication échoue (pas un essai), l'article passe au statut **Erreur** : badge rouge, alerte
 dans l'écran « À faire » et message de l'échec dans la section Vinted de la fiche. Depuis la fiche : **Publier sur
 Vinted** (l'article repasse À publier et retourne dans la file) ou **Revenir à « À publier »**.
@@ -168,6 +173,7 @@ l'extension → **Dernier relevé** → **Télécharger le fichier**, et envoyez
 | « Jeton refusé » | Créez un nouveau jeton et saisissez-le dans les Réglages de l'extension |
 | L'article reste « en attente » | L'extension est en pause (badge « ! ») ou attend les 10 minutes entre deux articles |
 | Article au statut « Erreur » | La publication a échoué : lisez le message sur la fiche, vérifiez sur Vinted, puis « Publier sur Vinted » |
+| Erreur « Prix … refusé par Vinted » | Vinted n'a pas retenu le prix saisi ; rien n'a été publié. Republiez ; si l'erreur revient, envoyez le « Dernier relevé » |
 | Erreur « contrôle avant envoi » | Un champ n'a pas été rempli comme prévu ; rien n'a été publié (voir §8) |
 
 ## Annexe : format du relevé de l'extension
