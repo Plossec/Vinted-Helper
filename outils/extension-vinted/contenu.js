@@ -72,6 +72,30 @@ function saisir(el, valeur) {
   el.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+/**
+ * Saisie comme au clavier (#288) : texte sélectionné puis remplacé (« insertText », les événements qu'enverrait un
+ * clavier), puis sortie du champ, qui fait valider la valeur par Vinted. Saisie directe si le navigateur refuse.
+ */
+function saisirAuClavier(el, valeur) {
+  el.focus();
+  el.select();
+  if (!document.execCommand("insertText", false, valeur)) saisir(el, valeur);
+  el.blur();
+}
+
+/** Message d'erreur affiché par Vinted sous le champ prix (#288), sinon null. */
+function erreurPrix(el) {
+  let bloc = el.parentElement;
+  for (let i = 0; i < 4 && bloc; i++, bloc = bloc.parentElement) {
+    const texte = [...bloc.querySelectorAll("span, p, div")]
+      .filter((e) => e.children.length === 0 && visible(e))
+      .map((e) => normaliser(e.textContent))
+      .find((t) => SELECTEURS.textesErreurPrix.some((debut) => t.startsWith(debut)));
+    if (texte) return texte;
+  }
+  return null;
+}
+
 function cliquer(el) {
   el.scrollIntoView({ block: "center" });
   for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"])
@@ -333,11 +357,29 @@ const ETAPES = {
   async prix(article) {
     // Relevé du 14/10/2026 (#176) : Vinted reformate le prix (« 9.00 € ») et lit « 9,00 » comme « NaN € » : saisie
     // avec un point, puis relecture tout de suite (erreur et relevé à cette étape plutôt qu'au contrôle).
-    const el = await champ("prix");
-    saisir(el, article.prix.replace(",", "."));
-    await attendreMs(500);
+    // Capture du 21/11/2026 (#288) : le champ peut afficher le prix sans que Vinted l'ait pris en compte (« doit être
+    // supérieur ou égal à 1.0 ») : saisie comme au clavier (texte sélectionné puis remplacé), sortie du champ, puis
+    // relecture du champ et de son message d'erreur ; un second essai par la saisie directe si besoin.
+    const valeur = article.prix.replace(",", ".");
+    const relire = async () => {
+      await attendreMs(500);
+      return champ("prix");
+    };
+    let el = await champ("prix");
+    saisirAuClavier(el, valeur);
+    el = await relire();
+    if (montant(el.value) !== montant(article.prix) || erreurPrix(el)) {
+      saisir(el, "");
+      await attendreMs(300);
+      el = await relire();
+      saisir(el, valeur);
+      el.blur();
+      el = await relire();
+    }
     if (montant(el.value) !== montant(article.prix))
       throw new ErreurPublication(`Prix : Vinted affiche « ${el.value} » au lieu de « ${article.prix} ».`);
+    const erreur = erreurPrix(el);
+    if (erreur) throw new ErreurPublication(`Prix « ${el.value} » refusé par Vinted : « ${erreur} ».`);
   },
   async colis(article) {
     await choisirColis({ petit: "Petit", moyen: "Moyen", grand: "Grand" }[article.formatColis] ?? "Petit");
@@ -370,6 +412,7 @@ async function controler(article, nombrePhotos) {
   if (!prix) ecarts.push("prix : champ introuvable");
   else if (montant(prix.value) !== montant(article.prix))
     ecarts.push(`prix : « ${prix.value} » au lieu de « ${article.prix} »`);
+  else if (erreurPrix(prix)) ecarts.push(`prix : refusé par Vinted (« ${erreurPrix(prix)} »)`);
   await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
   await attendu("etat", article.etat); // égalité : « Bon état » ≠ « Très bon état »
@@ -592,6 +635,39 @@ function relevePage(nom) {
   };
 }
 
+/**
+ * Annonce retrouvée sur le profil (#288) : après « Ajouter », Vinted n'ouvre pas toujours la page de l'annonce alors
+ * qu'elle est publiée. Le numéro du membre vient de l'adresse ou d'un lien du profil ; les annonces les plus récentes
+ * sont lues (même demande que la page du profil) et celle qui porte exactement ce titre est retenue.
+ * @param {string} titre
+ */
+async function chercherAnnonce(titre) {
+  const motif = new RegExp(SELECTEURS.motifProfil);
+  const lien = [...document.querySelectorAll('a[href*="/member/"]')]
+    .map((a) => motif.exec(new URL(a.getAttribute("href") ?? "", location.href).pathname)?.[1])
+    .find(Boolean);
+  const membre = motif.exec(location.pathname)?.[1] ?? lien;
+  if (!membre) return { ok: false, message: "lien du profil introuvable sur la page" };
+  let reponse;
+  try {
+    reponse = await fetch(SELECTEURS.annoncesDuProfil.replace("{id}", membre), {
+      credentials: "include",
+      headers: { accept: "application/json" },
+    });
+  } catch {
+    return { ok: false, message: "annonces du profil illisibles (réseau)" };
+  }
+  if (!reponse.ok) return { ok: false, message: `annonces du profil illisibles (erreur ${reponse.status})` };
+  /** @type {{ items?: { id?: number; title?: string; url?: string; path?: string }[] } | null} */
+  const donnees = await reponse.json().catch(() => null);
+  const annonces = donnees?.items ?? [];
+  const trouvee = annonces.find((a) => normaliser(a.title ?? "") === normaliser(titre));
+  if (!trouvee?.id)
+    return { ok: false, message: `aucune annonce « ${titre} » parmi les ${annonces.length} plus récentes du profil` };
+  const url = new URL(trouvee.url ?? trouvee.path ?? `/items/${trouvee.id}`, location.origin).href;
+  return { ok: true, url };
+}
+
 /** @param {MessageContenu} message */
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
@@ -666,6 +742,8 @@ async function traiter(message) {
     setTimeout(() => cliquer(bouton), 100);
     return { ok: true };
   }
+
+  if (message.type === "chercher-annonce") return chercherAnnonce(message.titre);
 
   // Message imprévu (autre version de l'extension) : refusé.
   return { ok: false, message: `Demande inconnue : ${/** @type {{ type: string }} */ (message).type}` };

@@ -18,6 +18,8 @@ const VINTED_DEFAUT = "https://www.vinted.fr";
 const PERIODE_MINUTES = 5;
 const PAUSE_ENTRE_ARTICLES_MS = 10 * 60_000;
 const ATTENTE_ANNONCE_MS = 60_000;
+/** Secondes sur une autre page que le formulaire ou l'annonce avant de chercher l'annonce sur le profil (#288). */
+const ATTENTE_AILLEURS_S = 5;
 const TAILLE_JOURNAL = 30;
 /** Pause fixe entre deux étapes du remplissage (issue #57 ; 5 s depuis #63) : laisse la page réagir. */
 const DELAI_ETAPE_MS = 5_000;
@@ -253,15 +255,47 @@ async function publier(onglet, api, demande) {
   if (!clic?.ok) throw new Error(clic?.message ?? "Clic sur « Ajouter » impossible. Rien n'a été publié.");
   const motif = new RegExp(SELECTEURS.motifAnnonceCreee);
   const fin = Date.now() + ATTENTE_ANNONCE_MS;
+  // Page quittée pour une autre que l'annonce (#288) : on n'attend pas toute la minute.
+  let ailleursDepuis = 0;
+  let adresse = "";
   while (Date.now() < fin) {
     await attendreMs(1000);
     const t = await chrome.tabs.get(onglet);
-    if (t.url && motif.test(new URL(t.url).pathname) && !new URL(t.url).pathname.endsWith("/new"))
-      return { resultat: "publie", url: t.url };
+    if (!t.url) continue;
+    adresse = t.url;
+    const chemin = new URL(t.url).pathname;
+    if (motif.test(chemin) && !chemin.endsWith("/new")) return { resultat: "publie", url: t.url };
+    if (chemin.endsWith("/items/new")) ailleursDepuis = 0;
+    else if (++ailleursDepuis >= ATTENTE_AILLEURS_S) break;
   }
   const etat = await etatOnglet(onglet);
   if (etat !== "pret") throw new Arret(RAISONS[etat] ?? RAISONS.inconnu);
-  throw new Error("Après « Ajouter » : pas de page d'annonce. Vérifiez sur Vinted si l'annonce existe.");
+  return annonceIntrouvable(onglet, article, adresse);
+}
+
+/**
+ * Après « Ajouter », la page de l'annonce ne s'est pas ouverte (#288) : relevé de la page vue, puis recherche de
+ * l'annonce sur le profil (elle est souvent publiée). Retrouvée : publiée, avec son lien ; sinon erreur avec l'adresse vue.
+ * @param {number} onglet
+ * @param {AnnonceVinted} article
+ * @param {string} adresse
+ */
+async function annonceIntrouvable(onglet, article, adresse) {
+  const releve = await envoyer(onglet, { type: "releve-onglet" });
+  if (releve?.releve) {
+    await chrome.storage.local.set({ diagnostic: { ...releve.releve, etape: "apres-ajouter" } });
+    await journal("Relevé de la page après « Ajouter » enregistré : fenêtre de l'extension → « Dernier relevé ».");
+  }
+  const r = await envoyer(onglet, { type: "chercher-annonce", titre: article.titre });
+  if (r?.ok && r.url) {
+    await journal(`Page de l'annonce non ouverte par Vinted (${adresse}) : annonce retrouvée sur le profil.`);
+    return { resultat: "publie", url: r.url };
+  }
+  throw new Error(
+    `Après « Ajouter » : la page de l'annonce ne s'est pas ouverte (page vue : ${adresse || "inconnue"}) et ` +
+      `l'annonce n'a pas été retrouvée sur le profil (${r?.message ?? "pas de réponse"}). Vérifiez sur Vinted si ` +
+      "elle existe ; relevé : fenêtre de l'extension → « Dernier relevé ».",
+  );
 }
 
 // --- Tâches automatiques (#147) ---

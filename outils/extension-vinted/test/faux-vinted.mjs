@@ -12,6 +12,8 @@ function pageFormulaire({
   prixFormate = false,
   listesBloom = false,
   ouvertureBasculee = false,
+  apresAjouter = null,
+  prixEtatInterne = null,
 } = {}) {
   const liste = (id, options) =>
     sansChamp === id
@@ -85,10 +87,17 @@ function pageFormulaire({
     }
     ${liste("color", ["Bleu", "Noir"])}
     ${
-      prixFormate
-        ? // Relevé du 14/10/2026 (#176) : Vinted reformate le prix en « 9.00 € » et ne lit pas la virgule (« NaN € »).
-          `<input data-testid="price-input--input" placeholder="0,00 €" onchange="this.value = Number(this.value.replace(' €', '')).toFixed(2) + ' €'">`
-        : `<input data-testid="price-input--input" oninput="this.value = this.value.replace(',', '.')">`
+      prixEtatInterne
+        ? // Capture du 21/11/2026 (#288) : le champ affiche le prix, mais Vinted ne retient que la saisie au clavier
+          // (« insertText ») ; sinon « Le champ prix doit être supérieur ou égal à 1.0 » apparaît sous le champ.
+          `<div><input data-testid="price-input--input" data-retenu="0"
+             oninput="if (event.inputType === 'insertText' && '${prixEtatInterne}' !== 'jamais') this.dataset.retenu = this.value;"
+             onblur="this.nextElementSibling.hidden = Number(this.dataset.retenu) >= 1;">
+           <span hidden>Le champ prix doit être supérieur ou égal à 1.0</span></div>`
+        : prixFormate
+          ? // Relevé du 14/10/2026 (#176) : Vinted reformate le prix en « 9.00 € » et ne lit pas la virgule (« NaN € »).
+            `<input data-testid="price-input--input" placeholder="0,00 €" onchange="this.value = Number(this.value.replace(' €', '')).toFixed(2) + ' €'">`
+          : `<input data-testid="price-input--input" oninput="this.value = this.value.replace(',', '.')">`
     }
     ${["Petit", "Moyen", "Grand"]
       .map(
@@ -167,7 +176,10 @@ function pageFormulaire({
       c.querySelector("input").checked = true;
     }));
     document.querySelector('[data-testid="upload-form-save-button"]').addEventListener("click", () => {
-      fetch("/clic", { method: "POST" }).then(() => location.assign("/items/987654-jean-levis"));
+      // #288 (structure supposée, pas encore relevée) : Vinted peut ouvrir le profil au lieu de l'annonce.
+      fetch("/clic", { method: "POST" }).then(() =>
+        location.assign(${JSON.stringify(apresAjouter ? "/member/1-vendeur" : "/items/987654-jean-levis")}),
+      );
     });
   </script></body></html>`;
 }
@@ -329,6 +341,15 @@ export function demarrerFauxVinted(options = {}) {
     if (/^\/member\//.test(req.url ?? "")) {
       res.setHeader("content-type", "text/html; charset=utf-8");
       res.end("<!doctype html><html><body><h1>Mes articles</h1></body></html>");
+      return;
+    }
+    // Annonces du profil (#288), les plus récentes d'abord : l'annonce publiée n'y est pas si « profil-sans-annonce ».
+    if (req.url?.startsWith("/api/v2/wardrobe/1/items")) {
+      res.setHeader("content-type", "application/json");
+      const annonces = [{ id: 111, title: "Bonnet noir", url: "https://www.vinted.fr/items/111-bonnet-noir" }];
+      if (options.apresAjouter === "profil")
+        annonces.unshift({ id: 987654, title: "Jean Levi's 501", url: "/items/987654-jean-levi-s-501" });
+      res.end(JSON.stringify({ items: annonces }));
       return;
     }
     if (/^\/items\/\d+\/edit/.test(req.url ?? "")) {

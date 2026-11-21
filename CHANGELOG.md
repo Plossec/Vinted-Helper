@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.31.1] — 21/11/2026
+
+### Corrigé
+- Publication sur Vinted (extension **1.16.0**) : quand Vinted n'ouvre pas la page de l'annonce après « Ajouter »,
+  l'extension cherche l'annonce sur votre profil et la marque publiée au lieu de « Erreur » ; sinon le message dit
+  quelle page était affichée, et un relevé est pris. Le prix est saisi comme au clavier, puis vérifié avec le message
+  d'erreur de Vinted (« doit être supérieur ou égal à 1.0 ») : plus d'annonce bloquée par un prix non pris en compte
+  (#288, ADR-0122).
+
 ## [1.31.0] — 20/11/2026
 
 ### Ajouté

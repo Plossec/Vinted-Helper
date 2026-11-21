@@ -166,6 +166,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0082](0082-extension-garde-fous-de-perimetre-supprimes.md) | 14/10/2026 | Extension : garde-fous de périmètre supprimés | Accepté |
 | [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Accepté |
 | [0111](0111-controle-de-types-de-l-extension.md) | 17/11/2026 | Contrôle de types de l'extension | Proposé |
+| [0122](0122-publication-verifiee-apres-ajouter.md) | 21/11/2026 | Publication vérifiée après « Ajouter » et prix saisi comme au clavier | Accepté · à relire |
 
 ## Interface
 

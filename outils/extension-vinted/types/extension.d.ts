@@ -87,7 +87,8 @@ type MessageContenu =
   | { type: "supprimer-annonce" }
   | { type: "etape"; nom: string; article?: AnnonceVinted; photos?: PhotoTransmise[]; nombrePhotos?: number }
   | { type: "diagnostic"; niveau?: string }
-  | { type: "ajouter" };
+  | { type: "ajouter" }
+  | { type: "chercher-annonce"; titre: string };
 
 /** Messages des pages de l'extension (fenêtre, réglages) au service worker (service-worker.js, action). */
 type MessagePage = { type: "reprendre" | "pause" | "maintenant" | "diagnostic" | "releverOnglet" | "tester" };
