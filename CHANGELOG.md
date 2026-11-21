@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.31.2] — 21/11/2026
+
+### Corrigé
+- Publication sur Vinted (extension **1.16.1**) : un jean en « W32 » n'est plus refusé au contrôle avant envoi quand
+  Vinted affiche la taille avec son équivalent (« W32 | FR 42 ») (#290).
+
 ## [1.31.1] — 21/11/2026
 
 ### Corrigé

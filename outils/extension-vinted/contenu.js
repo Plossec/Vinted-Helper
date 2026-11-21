@@ -402,8 +402,14 @@ async function controler(article, nombrePhotos) {
     if (!el) return ecarts.push(`${nom} : champ introuvable`);
     const lu = valeurDe(el);
     const voulu = normaliser(texte);
-    if (!(mode === "egal" ? lu === voulu : lu.includes(voulu)))
-      ecarts.push(`${nom} : « ${lu} » au lieu de « ${voulu} »`);
+    // « parties » : égalité avec l'une des parties du libellé (« W32 | FR 42 » pour « W32 », #290).
+    const ok =
+      mode === "egal"
+        ? lu === voulu
+        : mode === "parties"
+          ? lu.split("|").some((partie) => partie.trim() === voulu)
+          : lu.includes(voulu);
+    if (!ok) ecarts.push(`${nom} : « ${lu} » au lieu de « ${voulu} »`);
   };
   await attendu("titre", article.titre);
   await attendu("description", article.description);
@@ -416,8 +422,9 @@ async function controler(article, nombrePhotos) {
   await attendu("categorie", categorieChoisie ?? article.categorie.at(-1) ?? "", "contient");
   await attendu("marque", article.marque, "contient");
   await attendu("etat", article.etat); // égalité : « Bon état » ≠ « Très bon état »
-  // Taille : égalité (« S » ≠ « XS »). Seulement si l'article en a une et si Vinted propose le champ.
-  if (article.taille && (await champ("taille", false))) await attendu("taille", article.taille);
+  // Taille : égalité (« S » ≠ « XS »), avec l'une des parties du libellé de Vinted (« W32 | FR 42 », #290).
+  // Seulement si l'article en a une et si Vinted propose le champ.
+  if (article.taille && (await champ("taille", false))) await attendu("taille", article.taille, "parties");
   for (const couleur of article.couleurs) await attendu("couleur", couleur, "contient");
   await attendre(SELECTEURS.photosDeposees, 5000);
   const nombre = SELECTEURS.photosDeposees.map((s) => document.querySelectorAll(s).length).find((n) => n > 0) ?? 0;
