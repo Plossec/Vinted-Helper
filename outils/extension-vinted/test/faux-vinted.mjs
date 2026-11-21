@@ -14,6 +14,7 @@ function pageFormulaire({
   ouvertureBasculee = false,
   apresAjouter = null,
   prixEtatInterne = null,
+  tailleDouble = false,
 } = {}) {
   const liste = (id, options) =>
     sansChamp === id
@@ -76,7 +77,12 @@ function pageFormulaire({
     <input data-testid="title--input"${titreCourt ? ' oninput="this.value = this.value.slice(0, 5)"' : ""}><textarea data-testid="description--input"></textarea>
     ${sansChamp === "catalog" ? "" : categories(["Femmes", "Hommes", "Vêtements", "Jeans", "Jeans droits"])}
     ${liste("brand", ["Levi's", "Nike"])}
-    ${listesBloom ? listeBloom("category-size-single-grid", "size", grilleTailles) : liste("size", ["W32", "M", "XS"])}
+    ${
+      listesBloom
+        ? listeBloom("category-size-single-grid", "size", grilleTailles)
+        : // Journal du 21/11/2026 (#290) : Vinted affiche la taille d'un jean avec son équivalent (« W32 | FR 42 »).
+          liste("size", [tailleDouble ? "W32 | FR 42" : "W32", "M", "XS"])
+    }
     ${
       sansChamp === "condition"
         ? ""

@@ -108,6 +108,11 @@ test("prix jamais retenu par Vinted (« doit être supérieur ou égal à 1.0 »
   assert.equal(vinted.clics, 0);
 });
 
+test("taille affichée « W32 | FR 42 » pour « W32 » : contrôle réussi, publiée (#290)", async () => {
+  const { app } = await lancer({ demande: DEMANDE(false), vinted: { tailleDouble: true } });
+  assert.equal(app.resultats[0].resultat, "publie", app.resultats[0].message);
+});
+
 test("mode essai : tout est rempli mais « Ajouter » n'est jamais cliqué", async () => {
   const { app, vinted } = await lancer({ demande: DEMANDE(true) });
   assert.equal(vinted.clics, 0);
