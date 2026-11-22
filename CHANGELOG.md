@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.31.3] — 22/11/2026
+
+### Corrigé
+- Écran « Publication Vinted » resté ouvert pendant la mise à jour 1.28.1 : il n'affiche plus « Extension inactive »
+  à tort jusqu'au rechargement ; test ajouté pour la migration qui a renommé la date de dernier contact (#293).
+
 ## [1.31.2] — 21/11/2026
 
 ### Corrigé

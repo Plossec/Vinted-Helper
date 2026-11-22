@@ -458,6 +458,8 @@ export interface ReponseLien {
 export interface SuiviPublication {
   publications: Publication[];
   extensionVueLe: string | null;
+  /** @deprecated Ancien nom de extensionVueLe (#246), pour une interface d'avant la mise à jour. À retirer. */
+  programmeVuLe: string | null;
   jetonCree: boolean;
 }
 

@@ -151,7 +151,10 @@ export async function listerPublications(base: Base, utilisateurId: string) {
       .from(reglages)
       .where(eq(reglages.utilisateurId, utilisateurId)),
   ]);
-  return { publications, extensionVueLe: r[0]?.extensionVueLe ?? null, jetonCree: !!r[0]?.jeton };
+  const extensionVueLe = r[0]?.extensionVueLe ?? null;
+  // programmeVuLe : ancien nom (#246), gardé pour une interface restée ouverte avant la mise à jour (sinon elle affiche
+  // « Extension inactive » jusqu'au rechargement). À retirer à la version suivante.
+  return { publications, extensionVueLe, programmeVuLe: extensionVueLe, jetonCree: !!r[0]?.jeton };
 }
 
 export async function annulerPublication(base: Base, utilisateurId: string, id: string, maintenant: Date) {
