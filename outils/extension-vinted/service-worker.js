@@ -600,7 +600,7 @@ async function faireOffreSuivante(api, vinted, signaler) {
           erreur: null,
         },
       });
-    resultat = { resultat: offre.essai ? "essai" : "faite" };
+    resultat = r.inutile ? { resultat: "inutile", message: r.inutile } : { resultat: offre.essai ? "essai" : "faite" };
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : String(erreur);
     resultat = { resultat: "erreur", message };
@@ -614,7 +614,9 @@ async function faireOffreSuivante(api, vinted, signaler) {
       ? `${reference} : offre envoyée à ${offre.prix} €.`
       : resultat.resultat === "essai"
         ? `${reference} : essai, offre remplie à ${offre.prix} € sans l'envoyer (fenêtre fermée).`
-        : `${reference} : erreur — ${resultat.message}`,
+        : resultat.resultat === "inutile"
+          ? `${reference} : ${resultat.message}`
+          : `${reference} : erreur — ${resultat.message}`,
   );
   if (arret) await mettreEnPause(arret);
 }

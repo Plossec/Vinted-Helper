@@ -7,6 +7,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [1.32.1] — 22/11/2026
 
+### Modifié
+- Offres aux favoris (extension **1.18.0**) : toutes les notifications sont lues (la page est défilée jusqu'en bas) ;
+  l'offre part N jours après la **publication** de l'article (et non plus après le favori) ; si une offre au même
+  prix ou moins chère est déjà dans la conversation (la vôtre ou celle de l'acheteur), rien n'est envoyé (#295,
+  ADR-0124).
+
+## [1.32.1] — 22/11/2026
+
 ### Corrigé
 - Écran « Publication Vinted » resté ouvert pendant la mise à jour 1.28.1 : il n'affiche plus « Extension inactive »
   à tort jusqu'au rechargement ; test ajouté pour la migration qui a renommé la date de dernier contact (#293).
