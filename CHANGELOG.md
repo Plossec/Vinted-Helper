@@ -11,6 +11,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 - Sécurité : les photos et vignettes sont limitées à 1 000 demandes par minute et par utilisateur (alerte GitHub
   « Missing rate limiting ») ; rien ne change à l'usage normal (#303, ADR-0125).
 
+## [1.32.2] — 22/11/2026
+
+### Modifié
+- Offres aux favoris (extension **1.18.0**) : toutes les notifications sont lues (la page est défilée jusqu'en bas) ;
+  l'offre part N jours après la **publication** de l'article (et non plus après le favori) ; si une offre au même
+  prix ou moins chère est déjà dans la conversation (la vôtre ou celle de l'acheteur), rien n'est envoyé (#295,
+  ADR-0124).
+
 ## [1.32.1] — 22/11/2026
 
 ### Corrigé

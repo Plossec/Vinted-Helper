@@ -87,7 +87,7 @@ describe("tâche « Offres aux favoris »", () => {
     // Lecture faite : plus due avant 24 h.
     expect((await extension("GET", "/api/programme/attente")).json()).toMatchObject({
       lectureFavoris: false,
-      offres: 1,
+      offres: 0, // article publié aujourd'hui : pas encore due (#295)
     });
     // Jamais le pseudo : seule une empreinte est acceptée.
     expect(
@@ -99,14 +99,19 @@ describe("tâche « Offres aux favoris »", () => {
     ).toBe(400);
   });
 
-  it("offre confiée après le délai, une à la fois, puis faite ; journal « Offres aux favoris »", async () => {
+  it("offre confiée N jours après la publication de l'article (pas du favori), une à la fois, puis faite (#295)", async () => {
     await regler({ favorisDelaiJours: 2 });
-    await enLigne("Sac à dos léopard");
+    await enLigne("Sac à dos léopard"); // publié maintenant
     await extension("POST", "/api/programme/favoris", {
-      favoris: [{ personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(1) }],
+      favoris: [{ personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(10) }],
     });
-    expect((await extension("GET", "/api/programme/offre-suivante")).json()).toEqual({ offre: null }); // 1 jour < 2
+    // Favori ancien, mais article publié aujourd'hui : rien avant 2 jours.
+    expect((await extension("GET", "/api/programme/offre-suivante")).json()).toEqual({ offre: null });
+    expect((await extension("GET", "/api/programme/attente")).json()).toMatchObject({ offres: 0 });
+    t.horloge.avancer(JOUR_MS);
+    expect((await extension("GET", "/api/programme/offre-suivante")).json()).toEqual({ offre: null });
     t.horloge.avancer(JOUR_MS + 60_000);
+    expect((await extension("GET", "/api/programme/attente")).json()).toMatchObject({ offres: 1 });
     const { offre } = (await extension("GET", "/api/programme/offre-suivante")).json<{
       offre: { id: string; prix: string; titre: string; personne: string; essai: boolean };
     }>();
@@ -126,6 +131,24 @@ describe("tâche « Offres aux favoris »", () => {
     const journal = (await requete("GET", "/api/taches/journal?tache=favoris")).json<{ lignes: unknown[] }>().lignes;
     expect(journal).toMatchObject([
       { tache: "favoris", etat: "faite", action: { type: "offre", prixAvant: 1100, prixApres: 1000 } },
+    ]);
+  });
+
+  it("offre moins chère déjà dans la conversation : rien n'est envoyé, offre annulée avec la raison (#295)", async () => {
+    await regler({ favorisDelaiJours: 1 });
+    await enLigne("Sac à dos léopard");
+    await extension("POST", "/api/programme/favoris", {
+      favoris: [{ personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(1) }],
+    });
+    t.horloge.avancer(2 * JOUR_MS);
+    const { offre } = (await extension("GET", "/api/programme/offre-suivante")).json<{ offre: { id: string } }>();
+    const message = "Offre déjà faite dans la conversation à 8,00 € (≤ 10,00 €) : rien n'est envoyé.";
+    expect(
+      (await extension("POST", `/api/programme/offres/${offre.id}/resultat`, { resultat: "inutile", message }))
+        .statusCode,
+    ).toBe(200);
+    expect(await t.base.select({ etat: offreFavori.etat, message: offreFavori.message }).from(offreFavori)).toEqual([
+      { etat: "annulee", message },
     ]);
   });
 
