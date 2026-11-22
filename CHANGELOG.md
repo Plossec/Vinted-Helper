@@ -5,7 +5,7 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [1.32.1] — 22/11/2026
+## [1.32.2] — 22/11/2026
 
 ### Modifié
 - Offres aux favoris (extension **1.18.0**) : toutes les notifications sont lues (la page est défilée jusqu'en bas) ;
