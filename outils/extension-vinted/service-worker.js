@@ -48,6 +48,8 @@ const ETAT_INITIAL = {
   prochain: 0,
   enCours: null,
   actionEnCours: null,
+  /** Offre aux favoris en cours (#149). */
+  offreEnCours: null,
   onglet: null,
   journal: [],
 };
@@ -123,7 +125,22 @@ function creerApi({ adresse, jeton }) {
     /** Annonces à publier, actions des tâches automatiques (#147) et lecture des commandes (#148) à faire. */
     async attente() {
       const r = await (await appeler("/api/programme/attente")).json();
-      return { nombre: r.nombre, actions: r.actions ?? 0, lectureCommandes: r.lectureCommandes === true };
+      return {
+        nombre: r.nombre,
+        actions: r.actions ?? 0,
+        lectureCommandes: r.lectureCommandes === true,
+        lectureFavoris: r.lectureFavoris === true,
+        offres: r.offres ?? 0,
+      };
+    },
+    async favoris(corps) {
+      return (await appeler("/api/programme/favoris", { method: "POST", body: JSON.stringify(corps) })).json();
+    },
+    async offreSuivante() {
+      return (await (await appeler("/api/programme/offre-suivante")).json()).offre;
+    },
+    async resultatOffre(id, corps) {
+      await appeler(`/api/programme/offres/${id}/resultat`, { method: "POST", body: JSON.stringify(corps) });
     },
     async commandes(corps) {
       await appeler("/api/programme/commandes", { method: "POST", body: JSON.stringify(corps) });
@@ -498,6 +515,110 @@ async function lireCommandes(api, vinted) {
   await journal("Ventes finalisées : page relevée, rien n'est modifié. Fenêtre de l'extension → « Dernier relevé ».");
 }
 
+// --- Offres aux favoris (#149) ---
+
+/** Réponse du script de contenu : page bloquée ou vérification → pause ; échec → erreur avec relevé. */
+async function reponseFavoris(onglet, message) {
+  const r = await envoyer(onglet, message);
+  if (!r) throw new Arret(RAISONS.inconnu);
+  if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+  if (!r.ok) {
+    if (r.releve) await chrome.storage.local.set({ diagnostic: r.releve });
+    throw new Error(r.message);
+  }
+  return r;
+}
+
+/** Page « Voir tout » des notifications, ouverte par le menu de la cloche. */
+async function ouvrirNotifications(vinted) {
+  let onglet = await ouvrirOnglet(`${vinted}/`);
+  await verifierPage(onglet);
+  const lien = await reponseFavoris(onglet, { type: "lien-notifications" });
+  if (lien.url) onglet = await ouvrirOnglet(lien.url);
+  else await attendreMs(3000);
+  await verifierPage(onglet);
+  return onglet;
+}
+
+/** Lecture des favoris : notifications « … comme favori » envoyées à l'application (empreinte, jamais le pseudo). */
+async function lireFavoris(api, vinted) {
+  await journal("Offres aux favoris : lecture des notifications…");
+  try {
+    const onglet = await ouvrirNotifications(vinted);
+    const r = await reponseFavoris(onglet, { type: "lire-favoris" });
+    await chrome.storage.local.set({
+      diagnostic: { ...r.releve, date: new Date().toISOString(), etape: "tâche : offres aux favoris", erreur: null },
+    });
+    const bilan = await api.favoris({ favoris: r.favoris });
+    await journal(
+      `Offres aux favoris : ${bilan.lus} favori(s) lu(s), ${bilan.nouvelles} offre(s) prévue(s)` +
+        (bilan.ignores.length > 0 ? ` ; ignorés : ${bilan.ignores.join(" ; ")}` : "") +
+        ".",
+    );
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    await api.favoris({ favoris: [], erreur: message });
+    await journal(`Offres aux favoris : erreur — ${message}`);
+    if (erreur instanceof Arret) await mettreEnPause(message);
+  }
+}
+
+/** Offre suivante : notification retrouvée, conversation ouverte, prix saisi ; envoyée seulement en mode réel. */
+async function faireOffreSuivante(api, vinted, signaler) {
+  const offre = await api.offreSuivante();
+  if (!offre)
+    return signaler("Aucune offre prête (pause entre deux offres, plafond du jour, ou hors des heures réglées).");
+  await ecrireEtat({ offreEnCours: offre.id });
+  const reference = `#${String(offre.reference).padStart(4, "0")}`;
+  await journal(`${reference} : offre au favori à ${offre.prix} €${offre.essai ? " (essai)" : ""}…`);
+  const avant = await empreinteReleve();
+  /** @type {{ resultat: string; message?: string; releve?: boolean }} */
+  let resultat;
+  let arret = null;
+  try {
+    const notifications = await ouvrirNotifications(vinted);
+    const lien = await reponseFavoris(notifications, {
+      type: "lien-favori",
+      personne: offre.personne,
+      titre: offre.titre,
+    });
+    const onglet = lien.url ? await ouvrirOnglet(lien.url) : notifications;
+    if (!lien.url) await attendreMs(3000);
+    await verifierPage(onglet);
+    const r = await reponseFavoris(onglet, {
+      type: "faire-offre",
+      prix: offre.prix,
+      titre: offre.titre,
+      essai: offre.essai,
+    });
+    if (r.releve)
+      await chrome.storage.local.set({
+        diagnostic: {
+          ...r.releve,
+          date: new Date().toISOString(),
+          etape: "tâche : offre au favori (essai)",
+          erreur: null,
+        },
+      });
+    resultat = { resultat: offre.essai ? "essai" : "faite" };
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    resultat = { resultat: "erreur", message };
+    if (erreur instanceof Arret) arret = message;
+  }
+  if (resultat.resultat === "erreur") resultat.releve = (await empreinteReleve()) !== avant;
+  await api.resultatOffre(offre.id, resultat);
+  await ecrireEtat({ offreEnCours: null });
+  await journal(
+    resultat.resultat === "faite"
+      ? `${reference} : offre envoyée à ${offre.prix} €.`
+      : resultat.resultat === "essai"
+        ? `${reference} : essai, offre remplie à ${offre.prix} € sans l'envoyer (fenêtre fermée).`
+        : `${reference} : erreur — ${resultat.message}`,
+  );
+  if (arret) await mettreEnPause(arret);
+}
+
 /** Action suivante des tâches automatiques : prise, faite (en essai), résultat renvoyé à l'application. */
 async function faireActionSuivante(api, vinted, signaler) {
   const action = await api.actionSuivante();
@@ -558,11 +679,18 @@ async function cycleSansVerrou(manuel) {
     });
     await ecrireEtat({ actionEnCours: null });
   }
+  if (etat.offreEnCours) {
+    await api.resultatOffre(etat.offreEnCours, {
+      resultat: "erreur",
+      message: "Offre interrompue (Chrome fermé ou extension rechargée). Vérifiez la conversation sur Vinted.",
+    });
+    await ecrireEtat({ offreEnCours: null });
+  }
   if (etat.pause) return signaler("En pause : cliquez « Reprendre » pour relancer.");
 
   // Signale aussi à l'application que l'extension est active (et lui fait prévoir les tâches automatiques).
-  const { nombre, actions, lectureCommandes } = await api.attente();
-  if (nombre === 0 && actions === 0 && !lectureCommandes)
+  const { nombre, actions, lectureCommandes, lectureFavoris, offres } = await api.attente();
+  if (nombre === 0 && actions === 0 && !lectureCommandes && !lectureFavoris && offres === 0)
     return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
   if (Date.now() < etat.prochain) {
     const heure = new Date(etat.prochain).toLocaleTimeString("fr-FR", {
@@ -579,6 +707,9 @@ async function cycleSansVerrou(manuel) {
   // La publication passe d'abord ; sans annonce à publier, la lecture des commandes (#148), puis une action des
   // tâches automatiques (#147). Une seule opération sur Vinted par passage.
   if (nombre === 0 && lectureCommandes) return lireCommandes(api, vinted);
+  // Offres aux favoris (#149) : lecture des notifications, puis les actions des dormants (prioritaires), puis les offres.
+  if (nombre === 0 && lectureFavoris) return lireFavoris(api, vinted);
+  if (nombre === 0 && actions === 0) return faireOffreSuivante(api, vinted, signaler);
   if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).

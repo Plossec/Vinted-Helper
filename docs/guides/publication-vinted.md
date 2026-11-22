@@ -119,6 +119,13 @@ quelle, sans rien cliquer. Exemple, la fenêtre de suppression :
 3. Revenez sur Vinted et cliquez **Annuler** : l'annonce reste en ligne.
 4. Envoyez le fichier à Claude, avec une capture de la fenêtre si possible.
 
+## 6 quater. Tâches automatiques : offres aux favoris (extension 1.17)
+
+L'extension ouvre la cloche des notifications puis **Voir tout**, lit les favoris (elle ne garde que l'empreinte du
+pseudo, jamais le pseudo), puis, pour chaque offre due, ouvre la notification de la personne : la fenêtre **Faire une
+offre** s'ouvre, le prix est saisi et relu. En **mode essai**, la fenêtre est refermée sans rien envoyer (relevé dans
+« Dernier relevé »). En réel, l'offre est envoyée. Une erreur est notée au journal des tâches avec sa raison.
+
 ## 6 ter. Tâches automatiques : ventes finalisées (extension 1.11, en essai)
 
 Activée dans l'application (**Réglages → Tâches automatiques → Ventes finalisées**). Une fois par jour (réglable),

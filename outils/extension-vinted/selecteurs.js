@@ -128,6 +128,24 @@ const SELECTEURS = {
   motifProfil: "/member/(\\d+)",
   annoncesDuProfil: "/api/v2/wardrobe/{id}/items?page=1&per_page=20&order=newest_first",
 
+  /**
+   * Offres aux favoris (#149). Relevés de l'utilisateur du 22/11/2026 : menu des notifications (cloche de l'en-tête,
+   * « Voir tout »), une notification par lien « … a marqué ton article … comme favori Fais-lui une proposition. »,
+   * qui ouvre la conversation avec la fenêtre « Faire une offre » déjà ouverte (`?offer_request=true`).
+   */
+  favoris: {
+    cloche: ['[data-testid="header-notification-button"]'],
+    voirTout: ['[data-testid="header-notification-see-all-button"]'],
+    notification: '[data-testid="user-notification-item"]',
+    /** « pseudo a marqué ton article Titre comme favori » (texte de la notification). */
+    motifFavori: "^(.+?) a marqué ton article (.+?) comme favori",
+    fenetreOffre: ['[data-testid="offer-modal"]'],
+    prixOffre: ['[data-testid="offer-price-field--input"]', 'input[name="offer"]'],
+    envoyerOffre: ['[data-testid="offer-submit-button"]'],
+    fermerOffre: ['[data-testid="offer-modal-navigation-close-button"]'],
+    texteFaireOffre: "Faire une offre",
+  },
+
   /** Signes que l'utilisateur n'est pas connecté. */
   nonConnecte: ['[data-testid="header--login-button"]', 'a[href*="/member/signup"]', 'a[href*="/login"]'],
 

@@ -26,11 +26,13 @@ export const CLASSES: Partial<Record<ActionVinted["etat"], string>> = {
   annulee: "annule",
 };
 
-/** « Baisse 11,00 € → 10,00 € » ou « Republication (11,00 €) ». */
+/** « Baisse 11,00 € → 10,00 € », « Republication (11,00 €) » ou « Offre à 10,00 € (prix 11,00 €) » (#149). */
 export const libelleAction = (a: Pick<ActionVinted, "type" | "prixAvant" | "prixApres">) =>
-  a.type === "baisse" && a.prixApres !== null
-    ? `Baisse ${formatEuros(a.prixAvant)} → ${formatEuros(a.prixApres)}`
-    : `Republication (${formatEuros(a.prixAvant)})`;
+  a.type === "offre" && a.prixApres !== null
+    ? `Offre au favori : ${formatEuros(a.prixApres)} (prix ${formatEuros(a.prixAvant)})`
+    : a.type === "baisse" && a.prixApres !== null
+      ? `Baisse ${formatEuros(a.prixAvant)} → ${formatEuros(a.prixApres)}`
+      : `Republication (${formatEuros(a.prixAvant)})`;
 
 function useActions() {
   const [actions, setActions] = useState<Actions | null>(null);

@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { chromium } from "playwright-core";
-import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted } from "./faux-vinted.mjs";
+import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted, OFFRE } from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
 /* global chrome, cycle, diagnostic, releverOnglet */
@@ -30,13 +30,15 @@ async function lancer({
   demande,
   actions = [],
   lectureCommandes = false,
+  lectureFavoris = false,
+  offres = [],
   vinted = {},
   passages = 1,
   delaiEtape = 0,
   action = () => cycle(),
 }) {
   const faux = await demarrerFauxVinted(vinted);
-  const app = await demarrerFausseApplication(demande, actions, { lectureCommandes });
+  const app = await demarrerFausseApplication(demande, actions, { lectureCommandes, lectureFavoris, offres });
   const extension = copieDeTest();
   const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
     executablePath: CHROME,
@@ -525,4 +527,37 @@ test("ordre : publication, puis lecture des commandes, puis actions ; une seule 
   assert.deepEqual(app.resultats, [{ resultat: "essai" }]); // passage 1 : publication
   assert.equal(vinted.pagesVentes, 1); // passage 2 : lecture des commandes
   assert.equal(app.actionsPrises, 0); // la baisse attend le passage suivant
+});
+
+test("offres aux favoris : notifications lues par « Voir tout », empreintes envoyées, jamais les pseudos (#149)", async () => {
+  const { app } = await lancer({ lectureFavoris: true });
+  assert.equal(app.favoris.length, 1);
+  const { favoris } = app.favoris[0];
+  assert.equal(favoris.length, 2); // la notification « vendu » est ignorée
+  assert.equal(favoris[0].titre, "Jean Levi's 501");
+  assert.match(favoris[0].personne, /^[0-9a-f]{64}$/);
+  assert.ok(!JSON.stringify(app.favoris).includes("acheteur"));
+  // « il y a 3 jours » : date du favori environ 3 jours plus tôt.
+  const jours = (Date.now() - new Date(favoris[0].depuis).getTime()) / 86_400_000;
+  assert.ok(jours > 2.9 && jours < 3.1);
+});
+
+test("offre aux favoris en essai : fenêtre ouverte, prix saisi, rien envoyé ; cadre anti-robot caché ignoré (#149)", async () => {
+  const { app, vinted, etat } = await lancer({ offres: [OFFRE(true)] });
+  assert.deepEqual(app.resultatsOffres, [{ resultat: "essai" }]);
+  assert.deepEqual(vinted.offres, []);
+  assert.equal(etat.pause, false);
+});
+
+test("offre aux favoris réelle : prix saisi et offre envoyée dans la bonne conversation (#149)", async () => {
+  const { app, vinted } = await lancer({ offres: [OFFRE(false)] });
+  assert.deepEqual(app.resultatsOffres, [{ resultat: "faite" }]);
+  assert.deepEqual(vinted.offres, ["9.50"]);
+});
+
+test("offre aux favoris : notification de la personne introuvable → erreur, rien envoyé (#149)", async () => {
+  const { app, vinted } = await lancer({ offres: [{ ...OFFRE(false), personne: "0".repeat(64) }] });
+  assert.equal(app.resultatsOffres[0].resultat, "erreur");
+  assert.match(app.resultatsOffres[0].message, /Notification du favori introuvable/);
+  assert.deepEqual(vinted.offres, []);
 });
