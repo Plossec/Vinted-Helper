@@ -144,6 +144,13 @@ const SELECTEURS = {
     envoyerOffre: ['[data-testid="offer-submit-button"]'],
     fermerOffre: ['[data-testid="offer-modal-navigation-close-button"]'],
     texteFaireOffre: "Faire une offre",
+    /** Relevé du 22/11/2026 (#295) : bouton « Faire une offre » de la conversation. */
+    boutonFaireOffre: ['[data-testid="make-offer-button"]'],
+    /**
+     * Relevé du 22/11/2026 (#295) : offre déjà faite dans la conversation (par l'acheteur ou le vendeur) : prix proposé,
+     * ancien prix barré, état (« - offre acceptée »).
+     */
+    offreExistante: '[data-testid="offer-request-current-price-label"]',
   },
 
   /** Signes que l'utilisateur n'est pas connecté. */

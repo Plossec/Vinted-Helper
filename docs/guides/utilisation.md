@@ -54,8 +54,10 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
 
 **Réglages → Tâches automatiques → Offres aux favoris** (désactivée par défaut) : l'extension lit vos notifications
 Vinted (« … a marqué ton article … comme favori »), retrouve l'article par le **titre de son annonce**, puis, après le
-délai réglé, ouvre la conversation et fait **une seule offre** par personne et par article, au prix de la règle de
-baisse (jamais sous le prix vente minimum ; sans minimum : pas d'offre).
+délai réglé **depuis la publication de l'article**, ouvre la conversation et fait **une seule offre** par personne et
+par article, au prix de la règle de baisse (jamais sous le prix vente minimum ; sans minimum : pas d'offre). Toutes
+les notifications sont lues (la page est défilée jusqu'en bas). Si une offre au même prix ou moins chère est déjà dans
+la conversation (la vôtre ou celle de l'acheteur), rien n'est envoyé.
 
 - **Mode essai** (conseillé au début) : l'offre est remplie mais **pas envoyée** ; vérifiez le journal, puis décochez.
 - **Mode manuel** : les offres prévues apparaissent dans « À faire » avec les actions à valider.

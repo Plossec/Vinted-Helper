@@ -742,9 +742,28 @@ async function lienNotifications() {
   return { ok: true, url };
 }
 
+/**
+ * Toutes les notifications (#295) : la page en charge d'autres en bas ; on la fait défiler jusqu'à ce que leur nombre
+ * ne change plus (500 au plus).
+ */
+async function chargerToutesNotifications() {
+  await attendre([SELECTEURS.favoris.notification], 8000);
+  let avant = -1;
+  let stable = 0;
+  for (let i = 0; i < 60 && stable < 2; i++) {
+    const liste = document.querySelectorAll(SELECTEURS.favoris.notification);
+    if (liste.length >= 500) break;
+    stable = liste.length === avant ? stable + 1 : 0;
+    avant = liste.length;
+    liste[liste.length - 1]?.scrollIntoView({ block: "end" });
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    await attendreMs(1000);
+  }
+}
+
 /** Favoris lus sur la page des notifications : empreinte de la personne, titre, date (jamais le pseudo). */
 async function lireFavoris() {
-  await attendre([SELECTEURS.favoris.notification], 8000);
+  await chargerToutesNotifications();
   const favoris = [];
   for (const n of await notificationsFavoris())
     favoris.push({ personne: await empreinte(n.pseudo), titre: n.titre, depuis: n.depuis.toISOString() });
@@ -753,7 +772,7 @@ async function lireFavoris() {
 
 /** Lien de la notification de cette personne pour cet article. */
 async function lienFavori(personne, titre) {
-  await attendre([SELECTEURS.favoris.notification], 8000);
+  await chargerToutesNotifications();
   for (const n of await notificationsFavoris()) {
     if (normaliser(n.titre) !== normaliser(titre) || (await empreinte(n.pseudo)) !== personne) continue;
     if (n.url) return { ok: true, url: n.url };
@@ -770,7 +789,7 @@ async function lienFavori(personne, titre) {
 async function faireOffre(prix, titre, essai) {
   let fenetre = await attendre(SELECTEURS.favoris.fenetreOffre, 8000);
   if (!fenetre) {
-    const bouton = boutonAnnonce([], SELECTEURS.favoris.texteFaireOffre);
+    const bouton = boutonAnnonce(SELECTEURS.favoris.boutonFaireOffre, SELECTEURS.favoris.texteFaireOffre);
     if (bouton) {
       cliquer(bouton);
       fenetre = await attendre(SELECTEURS.favoris.fenetreOffre, 5000);
@@ -779,6 +798,23 @@ async function faireOffre(prix, titre, essai) {
   if (!fenetre) throw new ErreurPublication("Fenêtre « Faire une offre » introuvable. Rien n'a été envoyé.");
   if (!normaliser(fenetre.textContent).includes(normaliser(titre)))
     throw new ErreurPublication(`La fenêtre d'offre ne concerne pas « ${titre} ». Rien n'a été envoyé.`);
+  // Offre déjà faite dans la conversation (#295), par l'acheteur ou par vous : si elle est au même prix ou moins
+  // chère, rien n'est envoyé.
+  const existantes = [...document.querySelectorAll(SELECTEURS.favoris.offreExistante)]
+    .filter((el) => !fenetre.contains(el))
+    .map((el) => montant(el.textContent ?? ""))
+    .filter((m) => Number.isFinite(m) && m > 0);
+  if (existantes.length > 0 && Math.min(...existantes) <= montant(prix)) {
+    const fermer = SELECTEURS.favoris.fermerOffre.map((s) => fenetre.querySelector(s)).find(Boolean);
+    if (fermer) cliquer(fermer);
+    const deja = Math.min(...existantes)
+      .toFixed(2)
+      .replace(".", ",");
+    return {
+      releve: null,
+      inutile: `Offre déjà faite dans la conversation à ${deja} € (≤ ${prix} €) : rien n'est envoyé.`,
+    };
+  }
   const champPrix = SELECTEURS.favoris.prixOffre.map((s) => fenetre.querySelector(s)).find(Boolean);
   if (!(champPrix instanceof HTMLInputElement))
     throw new ErreurPublication("Champ du prix de l'offre introuvable. Rien n'a été envoyé.");
@@ -901,8 +937,8 @@ async function traiter(message) {
     const etat = etatPage();
     if (etat !== "pret") return { ok: false, etat };
     try {
-      const { releve } = await faireOffre(message.prix, message.titre, message.essai);
-      return { ok: true, releve };
+      const { releve, inutile } = await faireOffre(message.prix, message.titre, message.essai);
+      return { ok: true, releve, inutile };
     } catch (erreur) {
       const apres = etatPage();
       if (apres !== "pret") return { ok: false, etat: apres };
