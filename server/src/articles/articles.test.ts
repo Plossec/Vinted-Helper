@@ -66,6 +66,16 @@ describe("articles", () => {
     });
   });
 
+  describe("conseil de prix historique (#270)", () => {
+    it("aucun conseil tant qu'il n'y a pas 10 ventes comparables", async () => {
+      const cree = await creer();
+      expect((await requete("GET", `/api/articles/${cree.id}/conseil-prix`)).json()).toEqual({
+        prix: null,
+        nombreVentes: 0,
+      });
+    });
+  });
+
   describe("fiche", () => {
     it("création : nom, lieu, prix d'achat, date d'achat, catégorie, marque et état sont obligatoires", async () => {
       for (const champ of ["nom", "lieuId", "prixAchat", "dateAchat", "categorie", "marqueId", "etat"]) {

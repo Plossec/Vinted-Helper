@@ -136,6 +136,7 @@ export function FicheArticle() {
   const [message, setMessage] = useState<{ type: "ok" | "erreur"; texte: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [lecture, setLecture] = useState(false);
+  const [conseilPrix, setConseilPrix] = useState<{ prix: number | null; nombreVentes: number } | null>(null);
   const etiquette = useRef<HTMLInputElement>(null);
   const avantVente = article === null || AVANT_VENTE.has(article.statut);
 
@@ -195,12 +196,17 @@ export function FicheArticle() {
   useEffect(() => {
     let actif = true;
     sansAvertissement.current = false;
-    Promise.all([api.get<Referentiels>("/api/referentiels"), id ? api.get<Article>(`/api/articles/${id}`) : null])
-      .then(([r, a]) => {
+    Promise.all([
+      api.get<Referentiels>("/api/referentiels"),
+      id ? api.get<Article>(`/api/articles/${id}`) : null,
+      id ? api.get<{ prix: number | null; nombreVentes: number }>(`/api/articles/${id}/conseil-prix`) : null,
+    ])
+      .then(([r, a, conseil]) => {
         if (!actif) return;
         const charge = a ? versFormulaire(a, r) : formulaireVide();
         setRefs(r);
         setArticle(a);
+        setConseilPrix(conseil);
         setForm(charge);
         setFormEnregistre(charge);
         setMessage(null);
@@ -526,6 +532,20 @@ export function FicheArticle() {
                     onChange={(e) => modifier("prixAffiche")(e.target.value)}
                     placeholder="12,00"
                   />
+                  {conseilPrix?.prix !== null && conseilPrix?.prix !== undefined ? (
+                    <div>
+                      <span>
+                        Conseil : {formatEuros(conseilPrix.prix)} ({conseilPrix.nombreVentes} ventes comparables)
+                      </span>
+                      <button
+                        type="button"
+                        className="bouton bouton--secondaire"
+                        onClick={() => modifier("prixAffiche")(centimesVersSaisie(conseilPrix.prix))}
+                      >
+                        Utiliser ce prix
+                      </button>
+                    </div>
+                  ) : null}
                 </label>
                 <label className="champ">
                   <span>Prix vente minimum (€)</span>
