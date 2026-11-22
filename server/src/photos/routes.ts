@@ -1,6 +1,6 @@
 // Routes des photos : envoi (contenu brut de l'image), lecture, rattachement aux articles.
 import { createReadStream, existsSync, statSync } from "node:fs";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { objet, uuidFacultatif, uuidObligatoire } from "../utilitaires/validation.js";
@@ -17,6 +17,9 @@ import { nomVignette, type StockagePhotos } from "./stockage.js";
 /** Taille maximale d'une photo envoyée (les photos de téléphone font quelques Mo). */
 const TAILLE_MAX_PHOTO = 30 * 1024 * 1024;
 const TYPES_IMAGE = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "application/octet-stream"];
+
+/** Photos et vignettes envoyées au plus par utilisateur et par minute (#303). */
+export const LIMITE_PHOTOS_PAR_MINUTE = 1000;
 
 export function routesPhotos(
   app: FastifyInstance,
@@ -52,8 +55,23 @@ export function routesPhotos(
     heic: "image/heic",
   };
 
+  // Limite par utilisateur connecté (#303) : large, pour ne pas gêner la mosaïque de la liste des articles.
+  const limite = {
+    rateLimit: {
+      max: LIMITE_PHOTOS_PAR_MINUTE,
+      timeWindow: "1 minute",
+      keyGenerator: (requete: FastifyRequest) => {
+        try {
+          return `photos:${utilisateurDe(requete).id}`;
+        } catch {
+          return `photos:${requete.ip}`;
+        }
+      },
+    },
+  };
+
   for (const vignette of [false, true]) {
-    app.get(vignette ? "/api/photos/:id/vignette" : "/api/photos/:id", async (requete, reponse) => {
+    app.get(vignette ? "/api/photos/:id/vignette" : "/api/photos/:id", { config: limite }, async (requete, reponse) => {
       const utilisateurId = utilisateurDe(requete).id;
       const id = uuidObligatoire(objet(requete.params).id, "Identifiant");
       const { fichier } = await lirePhoto(base, utilisateurId, id);
