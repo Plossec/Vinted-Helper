@@ -3,11 +3,21 @@
 // différent est corrigé par celui de Vinted et signalé. Une commande non retrouvée est « à rattacher ».
 import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { article, commandeVinted, lectureCommandes, reglages, vente, venteArticle } from "../base/schema.js";
+import {
+  article,
+  commandeVinted,
+  historiqueStatut,
+  lectureCommandes,
+  offreRecue,
+  reglages,
+  vente,
+  venteArticle,
+} from "../base/schema.js";
 import { verifierDate } from "../articles/service.js";
 import { passageDu } from "../metier/taches.js";
 import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { limiteConservation } from "../ventes/conservation.js";
+import { emballageParDefaut } from "../ventes/service.js";
 import { finaliseesDuJour } from "./journal.js";
 import { avancerVenteDans, chargerVente } from "../ventes/service.js";
 
@@ -219,8 +229,107 @@ export async function recevoirCommandes(
       }
     }
     await tx.insert(lectureCommandes).values({ ...lecture, ...compte });
+    await creerVentesPayees(tx, utilisateurId, d.commandes, maintenant);
     return { nouvelles: compte.nouvelles };
   });
+}
+
+/**
+ * Ventes créées quand une offre reçue est acceptée et payée (ADR-0076) : la commande lue dans le Porte-monnaire
+ * rapproche l'article (numéro de l'annonce) ; si une offre a été faite et acceptée (offreRecue, « faite »), la vente
+ * est créée : article « À expédier », prix vendu = prix accepté, date de vente = date de fin lue sur Vinted, lien de
+ * la conversation enregistré (même logique que la création d'une vente normale, §4.3).
+ */
+export async function creerVentesPayees(
+  tx: Transaction,
+  utilisateurId: string,
+  commandes: { annonces: string[]; dateFin: Date; montant: number | null }[],
+  maintenant: Date,
+): Promise<number> {
+  const offresRecues = await tx
+    .select({
+      id: offreRecue.id,
+      articleId: offreRecue.articleId,
+      etat: offreRecue.etat,
+      prixOffre: offreRecue.prixOffre,
+    })
+    .from(offreRecue)
+    .where(eq(offreRecue.utilisateurId, utilisateurId));
+  if (offresRecues.length === 0) return 0;
+  const articles = await tx
+    .select({
+      id: article.id,
+      urlVinted: article.urlVinted,
+      urlConversation: article.urlConversation,
+      statut: article.statut,
+      prixAffiche: article.prixAffiche,
+    })
+    .from(article)
+    .where(
+      and(
+        eq(article.utilisateurId, utilisateurId),
+        isNull(article.supprimeLe),
+        inArray(article.statut, ["en_ligne", "invendu"]),
+      ),
+    );
+  const parNumero = new Map<string, (typeof articles)[number]>();
+  for (const a of articles) {
+    const numero = numeroAnnonce(a.urlVinted);
+    if (numero) parNumero.set(numero, a);
+  }
+  const rattachees = new Set<string>();
+  const ventesActives = await tx
+    .select({ id: vente.id })
+    .from(vente)
+    .where(and(eq(vente.utilisateurId, utilisateurId), eq(vente.annulee, false)));
+  for (const v of ventesActives)
+    for (const l of await tx
+      .select({ articleId: venteArticle.articleId })
+      .from(venteArticle)
+      .where(eq(venteArticle.venteId, v.id)))
+      rattachees.add(l.articleId);
+
+  let creees = 0;
+  for (const c of commandes) {
+    if (c.dateFin < limiteConservation(maintenant)) continue;
+    const articlesCommande = [
+      ...new Set(c.annonces.map((n) => parNumero.get(n)).filter((a): a is NonNullable<typeof a> => a !== undefined)),
+    ];
+    const faites = offresRecues.filter((o) => o.etat === "faite" && articlesCommande.some((a) => a.id === o.articleId));
+    const ids = [...new Set(faites.map((o) => o.articleId))];
+    if (ids.length === 0 || ids.some((id) => rattachees.has(id))) continue;
+    const prixTotal = ids.reduce((s, id) => s + (faites.find((o) => o.articleId === id)?.prixOffre ?? 0), 0);
+    const [v] = await tx
+      .insert(vente)
+      .values({
+        utilisateurId,
+        montantCredite: c.montant ?? prixTotal,
+        emballage: await emballageParDefaut(tx, utilisateurId),
+        dateVente: c.dateFin,
+        creeLe: maintenant,
+      })
+      .returning({ id: vente.id });
+    if (!v) continue;
+    for (const a of articlesCommande) {
+      await tx.insert(venteArticle).values({ venteId: v.id, articleId: a.id, prixAfficheAuMoment: a.prixAffiche ?? 0 });
+      const modifies = await tx
+        .update(article)
+        .set({
+          statut: "a_expedier",
+          ...(a.urlConversation ? { urlConversation: a.urlConversation } : {}),
+          modifieLe: maintenant,
+        })
+        .where(eq(article.id, a.id))
+        .returning({ id: article.id });
+      if (modifies.length > 0)
+        await tx
+          .insert(historiqueStatut)
+          .values({ utilisateurId, articleId: a.id, de: a.statut, vers: "a_expedier", date: c.dateFin });
+      rattachees.add(a.id);
+    }
+    creees += articlesCommande.length;
+  }
+  return creees;
 }
 
 /** Commande de l'utilisateur dans l'état attendu, sinon erreur. */
