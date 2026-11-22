@@ -29,6 +29,7 @@ import {
   type DonneesArticle,
   listerArticles,
   lireArticle,
+  lireConseilPrix,
   modifierArticle,
 } from "./service.js";
 import type { ReponseLien } from "../api/types.js";
@@ -115,6 +116,10 @@ export function routesArticles(app: FastifyInstance, { base, maintenant, utilisa
   });
 
   app.get("/api/articles/:id", async (requete) => lireArticle(base, utilisateurDe(requete).id, idDe(requete.params)));
+
+  app.get("/api/articles/:id/conseil-prix", async (requete) =>
+    lireConseilPrix(base, utilisateurDe(requete).id, idDe(requete.params)),
+  );
 
   app.put("/api/articles/:id", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;

@@ -21,3 +21,24 @@ export function prixPropose(valeur: unknown): number | null {
   if (centimes === null || centimes <= 0 || centimes > MAXIMUM) return null;
   return Math.ceil(centimes / PAS) * PAS;
 }
+
+/** Conseil issu de l'historique des ventes comparables, sans stockage ni accès à la base. */
+export function conseilPrixHistorique(prixVendus: number[], prixVenteMinimum: number | null): number | null {
+  if (prixVendus.length < 10) return null;
+  if (prixVendus.some((prix) => !Number.isInteger(prix) || prix <= 0)) {
+    throw new Error("Les prix vendus doivent être des montants entiers en centimes.");
+  }
+  if (prixVenteMinimum !== null && (!Number.isInteger(prixVenteMinimum) || prixVenteMinimum < 0)) {
+    throw new Error("Le prix vente minimum doit être un montant entier en centimes.");
+  }
+
+  const tries = [...prixVendus].sort((a, b) => a - b);
+  const milieu = tries.length / 2;
+  const mediane =
+    tries.length % 2 === 1
+      ? (tries[Math.floor(milieu)] ?? 0)
+      : Math.floor(((tries[milieu - 1] ?? 0) + (tries[milieu] ?? 0)) / 2);
+  const conseille = Math.ceil(mediane / PAS) * PAS;
+
+  return Math.max(conseille, prixVenteMinimum ?? 0);
+}

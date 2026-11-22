@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Fiche article : conseil de prix issu des ventes finalisées comparables (même catégorie, marque et état), affiché à
+  partir de 10 ventes avec un bouton « Utiliser ce prix » ; le prix reste modifiable (#270).
+
 ## [1.32.4] — 22/11/2026
 
 ### Corrigé

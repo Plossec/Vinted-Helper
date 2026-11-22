@@ -26,6 +26,7 @@ import { conflit, conflitStatutChange, erreurSaisie, introuvable } from "../util
 import { choisirVignette, photosDesArticles } from "../photos/service.js";
 import type { Article, ResumeArticle } from "../api/types.js";
 import { conforme } from "../api/conforme.js";
+import { conseilPrixHistorique } from "../calculs/prix-propose.js";
 
 /** Champs modifiables d'une fiche article (montants en centimes). */
 export interface DonneesArticle {
@@ -395,6 +396,33 @@ async function listerArticlesBrut(base: Base, utilisateurId: string) {
       beneficeRealise: detail?.realise ?? false,
     };
   });
+}
+
+/** Conseil de prix issu des ventes finalisées comparables : même catégorie, marque et état. */
+export async function lireConseilPrix(base: Base, utilisateurId: string, id: string) {
+  const cible = await chargerArticle(base, utilisateurId, id);
+  if (cible.categorie === null || cible.marqueId === null || cible.etat === null) {
+    return { prix: null, nombreVentes: 0 };
+  }
+  const comparables = (await base
+    .select({ id: article.id, statut: article.statut })
+    .from(article)
+    .where(
+      and(
+        eq(article.utilisateurId, utilisateurId),
+        eq(article.categorie, cible.categorie),
+        eq(article.marqueId, cible.marqueId),
+        eq(article.etat, cible.etat),
+        eq(article.statut, "finalise"),
+        isNull(article.supprimeLe),
+      ),
+    )) as { id: string; statut: Statut }[];
+  const calculs = await calculer(base, utilisateurId);
+  const prixVendus = comparables
+    .map((a) => calculs.details.get(a.id)?.prixVendu)
+    .filter((prix): prix is number => prix !== null && prix !== undefined && prix > 0);
+  const prix = conseilPrixHistorique(prixVendus, cible.prixVenteMinimum);
+  return { prix, nombreVentes: prixVendus.length };
 }
 
 /** Fiche complète d'un article, vérifiée contre le type de l'interface (#244). */
