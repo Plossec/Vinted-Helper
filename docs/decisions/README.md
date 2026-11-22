@@ -38,9 +38,9 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0063](0063-outillage-claude-allege-et-verification-unique.md) | 14/10/2026 | Outillage Claude allégé et vérification unique | Accepté |
 | [0098](0098-cahier-des-charges-tenu-a-jour.md) | 19/10/2026 | Cahier des charges tenu à jour, règles en vigueur par thème | Accepté |
 | [0110](0110-jamais-de-push-force.md) | 17/11/2026 | Jamais de push forcé | Accepté |
-| [0115](0115-vocabulaire-extension-et-dossiers-utilitaires.md) | 18/11/2026 | Vocabulaire « extension », dossiers utilitaires et commandes | Proposé |
-| [0108](0108-tests-de-l-interface-dans-chromium.md) | 17/11/2026 | Tests de l'interface dans Chromium | Proposé |
-| [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Accepté · à relire |
+| [0115](0115-vocabulaire-extension-et-dossiers-utilitaires.md) | 18/11/2026 | Vocabulaire « extension », dossiers utilitaires et commandes | Accepté |
+| [0108](0108-tests-de-l-interface-dans-chromium.md) | 17/11/2026 | Tests de l'interface dans Chromium | Accepté |
+| [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Accepté |
 | [0101](0101-index-des-decisions-allege.md) | 19/10/2026 | Index des décisions allégé : par thème, statut en un mot | Accepté |
 | [0116](0116-hors-perimetre-retire.md) | 18/11/2026 | « Hors périmètre » (§10) retiré du cahier des charges | Accepté |
 
@@ -57,7 +57,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0065](0065-categories-recopiees-de-vinted.md) | 14/10/2026 | Catégories recopiées de Vinted | Modifié |
 | [0085](0085-code-de-categorie-construit-sur-le-chemin.md) | 14/10/2026 | Code de catégorie construit sur le chemin | Accepté |
 | [0091](0091-verrou-prix-minimum-dans-la-base.md) | 15/10/2026 | Prix vente minimum : verrou dans la base | Accepté |
-| [0112](0112-types-de-l-api-partages.md) | 17/11/2026 | Types de l'API partagés entre le serveur et l'interface | Accepté · à relire |
+| [0112](0112-types-de-l-api-partages.md) | 17/11/2026 | Types de l'API partagés entre le serveur et l'interface | Accepté |
 
 ## Calculs
 
@@ -85,7 +85,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0066](0066-motif-de-sortie-a-vendre-hors-vinted.md) | 14/10/2026 | Motif de sortie « À vendre hors Vinted » | Accepté |
 | [0067](0067-statut-en-stock.md) | 14/10/2026 | Statut « En stock » | Accepté |
 | [0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md) | 15/10/2026 | Sortie du stock depuis un colis en cours | Accepté |
-| [0109](0109-points-relais-saisis-et-relies-aux-ventes.md) | 17/11/2026 | Points relais saisis et reliés aux ventes | Proposé |
+| [0109](0109-points-relais-saisis-et-relies-aux-ventes.md) | 17/11/2026 | Points relais saisis et reliés aux ventes | Accepté |
 
 ## Liste
 
@@ -96,8 +96,8 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0030](0030-filtres-a-choix-multiples.md) | 07/10/2026 | Filtres à choix multiples | Modifié |
 | [0031](0031-lien-de-l-annonce-vinted-saisi-a-la-main.md) | 07/10/2026 | Lien de l'annonce Vinted saisi à la main | Accepté |
 | [0083](0083-filtres-a-vendre-hors-vinted-masque-par-defaut.md) | 14/10/2026 | Filtres : « À vendre hors Vinted » masqué par défaut | Accepté |
-| [0120](0120-fusion-de-deux-articles.md) | 20/11/2026 | Fusion de deux articles | Accepté · à relire |
-| [0121](0121-corbeille-en-lot.md) | 20/11/2026 | Corbeille en lot | Accepté · à relire |
+| [0120](0120-fusion-de-deux-articles.md) | 20/11/2026 | Fusion de deux articles | Accepté |
+| [0121](0121-corbeille-en-lot.md) | 20/11/2026 | Corbeille en lot | Accepté |
 
 ## Tableau de bord
 
@@ -120,7 +120,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0033](0033-gemini-modele-de-secours.md) | 07/10/2026 | Gemini : modèle de secours | Accepté |
 | [0088](0088-gemini-alias-latest-conserve.md) | 14/10/2026 | Gemini : alias « latest » conservé | Accepté |
 | [0117](0117-articles-crees-par-photos.md) | 18/11/2026 | Articles créés à partir de photos | Modifié |
-| [0118](0118-regroupement-des-photos-plus-fiable.md) | 18/11/2026 | Regroupement des photos par article plus fiable | Accepté · à relire |
+| [0118](0118-regroupement-des-photos-plus-fiable.md) | 18/11/2026 | Regroupement des photos par article plus fiable | Accepté |
 
 ## Photos et sauvegardes
 
@@ -146,7 +146,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0081](0081-fusions-dans-main-par-claude-et-dependabot.md) | 14/10/2026 | Fusions dans main par Claude et Dependabot | Modifié |
 | [0087](0087-serveur-ovh-connexion-ssh-par-cle.md) | 14/10/2026 | Serveur OVH : connexion SSH par clé | Accepté |
 | [0103](0103-cache-de-construction-vide-apres-mise-en-ligne.md) | 19/10/2026 | Cache de construction Docker vidé après chaque mise en ligne réussie | Accepté |
-| [0107](0107-audit-des-dependances-seuil-et-suivi-hebdomadaire.md) | 17/11/2026 | Audit des dépendances : seuil bloquant et suivi hebdomadaire | Accepté · à relire |
+| [0107](0107-audit-des-dependances-seuil-et-suivi-hebdomadaire.md) | 17/11/2026 | Audit des dépendances : seuil bloquant et suivi hebdomadaire | Accepté |
 | [0125](0125-limite-des-demandes-de-photos.md) | 22/11/2026 | Limite des demandes de photos (@fastify/rate-limit) | Accepté · à relire |
 
 ## Publication Vinted
@@ -166,8 +166,8 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0071](0071-delais-de-l-extension.md) | 14/10/2026 | Délais de l'extension | Accepté |
 | [0082](0082-extension-garde-fous-de-perimetre-supprimes.md) | 14/10/2026 | Extension : garde-fous de périmètre supprimés | Accepté |
 | [0093](0093-completude-des-le-passage-a-publier.md) | 15/10/2026 | Complétude contrôlée dès le passage « À publier » | Accepté |
-| [0111](0111-controle-de-types-de-l-extension.md) | 17/11/2026 | Contrôle de types de l'extension | Proposé |
-| [0122](0122-publication-verifiee-apres-ajouter.md) | 21/11/2026 | Publication vérifiée après « Ajouter » et prix saisi comme au clavier | Accepté · à relire |
+| [0111](0111-controle-de-types-de-l-extension.md) | 17/11/2026 | Contrôle de types de l'extension | Accepté |
+| [0122](0122-publication-verifiee-apres-ajouter.md) | 21/11/2026 | Publication vérifiée après « Ajouter » et prix saisi comme au clavier | Accepté |
 
 ## Interface
 
@@ -185,7 +185,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0086](0086-couleurs-des-badges-de-statut.md) | 14/10/2026 | Couleurs des badges de statut | Modifié |
 | [0089](0089-ecran-a-faire-realisation-et-ecran-d-ouverture.md) | 14/10/2026 | Écran « À faire » : réalisation et écran d'ouverture | Accepté |
 | [0102](0102-accessibilite-de-l-interface.md) | 19/10/2026 | Accessibilité de l'interface : contrastes, lecteurs d'écran, contrôle automatique | Accepté |
-| [0119](0119-page-reglages-en-sommaire.md) | 20/11/2026 | Page Réglages en sommaire | Accepté · à relire |
+| [0119](0119-page-reglages-en-sommaire.md) | 20/11/2026 | Page Réglages en sommaire | Accepté |
 
 ## Tâches automatisées
 
@@ -204,10 +204,10 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0096](0096-ventes-finalisees-realisation-etape-1.md) | 16/10/2026 | Vérification vente finalisée : réalisation, étape 1 sur 2 | Modifié |
 | [0097](0097-ventes-finalisees-lues-dans-le-porte-monnaie.md) | 18/10/2026 | Ventes finalisées : lues dans le « Porte-monnaie » | Accepté |
 | [0104](0104-lancement-manuel-des-taches-automatisees.md) | 21/10/2026 | Lancement manuel des tâches automatisées, à toute heure | Accepté |
-| [0105](0105-taches-reglages-par-tache-et-journal.md) | 21/10/2026 | Tâches automatisées : réglages par tâche, état visible et journal de toutes les tâches | Proposé |
+| [0105](0105-taches-reglages-par-tache-et-journal.md) | 21/10/2026 | Tâches automatisées : réglages par tâche, état visible et journal de toutes les tâches | Accepté |
 | [0106](0106-articles-dormants-mode-reel.md) | 21/10/2026 | Articles dormants : mode réel (étape 3 sur 3) | Proposé |
 | [0113](0113-dormants-republication-avec-baisse.md) | 18/11/2026 | Articles dormants : republication avec baisse | Accepté |
-| [0114](0114-offres-aux-favoris-realisation.md) | 18/11/2026 | Offres aux favoris : précisions et réalisation (étape 1 sur 2) | Accepté · à relire |
+| [0114](0114-offres-aux-favoris-realisation.md) | 18/11/2026 | Offres aux favoris : précisions et réalisation (étape 1 sur 2) | Accepté |
 | [0123](0123-offres-aux-favoris-etape-2.md) | 22/11/2026 | Offres aux favoris : lecture des notifications et envoi des offres (étape 2) | Modifié |
 | [0124](0124-offres-aux-favoris-delai-et-offre-existante.md) | 22/11/2026 | Offres aux favoris : toutes les notifications, délai depuis la publication, offre déjà faite | Accepté · à relire |
 

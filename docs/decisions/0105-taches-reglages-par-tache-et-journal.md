@@ -1,8 +1,8 @@
 # ADR-0105 — Tâches automatisées : réglages par tâche, état visible et journal de toutes les tâches
 
 - **Date** : 21/10/2026
-- **Statut** : Proposé — trois points « à relire » (voir Décision)
-- **Décideurs** : utilisateur (réponses du 21/10/2026 et plan validé) ; points « à relire » proposés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur (réponses du 21/10/2026 et plan validé) ; points proposés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #232, #233 (refonte suivie dans #230)
 - **Thème** : Tâches automatisées
 

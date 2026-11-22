@@ -1,11 +1,10 @@
 # ADR-0109 — Points relais saisis et reliés aux ventes
 
 - **Date** : 17/11/2026
-- **Statut** : Proposé
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #210
 - **Thème** : Ventes
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 
