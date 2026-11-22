@@ -5,6 +5,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.34.0] — 22/11/2026
+
+### Ajouté
+- Tâche « Offres reçues » (#150, ADR-0076, ADR-0126) : l'extension lit les offres reçues via `GET /api/v2/inbox` + `GET /api/v2/conversations/{id}` ; l'application applique les règles : offre ≥ minimum vendeur et article dormant depuis ≥ X jours → acceptation ; sinon contre-offre à mi-chemin (arrondi 0,50 €, plancher) ; sans minimum → signalée dans « À faire » ; la vente est créée quand l'offre est acceptée et payée. (#302)
+
 ## [1.33.0] — 22/11/2026
 
 ### Ajouté
