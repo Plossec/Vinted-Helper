@@ -2,10 +2,9 @@
 
 - **Date** : 19/10/2026
 - **Statut** : Accepté
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #217
 - **Thème** : Méthode
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 

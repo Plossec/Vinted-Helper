@@ -1,11 +1,10 @@
 # ADR-0107 — Audit des dépendances : seuil bloquant et suivi hebdomadaire
 
 - **Date** : 17/11/2026
-- **Statut** : Accepté · à relire
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #242
 - **Thème** : Serveur
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 

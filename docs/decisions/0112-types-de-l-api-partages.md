@@ -1,11 +1,10 @@
 # ADR-0112 — Types de l'API partagés entre le serveur et l'interface
 
 - **Date** : 17/11/2026
-- **Statut** : Accepté · à relire
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #244
 - **Thème** : Socle
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 
