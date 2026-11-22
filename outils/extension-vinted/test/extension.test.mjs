@@ -265,6 +265,20 @@ test("fichier du relevé (#253) : un élément par ligne, le reste indenté, con
   assert.ok(lignes.includes('  "adresse": "https://www.vinted.fr/items/new",'));
 });
 
+test("« Relever cet onglet » accepte une page Vinted Go (#262)", async () => {
+  const { reponse } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const onglet = await chrome.tabs.create({
+        url: "https://vintedgo.com/fr/carrier-locations?country=fr&region=europe",
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return releverOnglet(onglet.id);
+    },
+  });
+  assert.equal(reponse.ok, true);
+});
+
 test("« Relever cet onglet » sur une page qui n'est pas Vinted : refusé avec un message", async () => {
   const { reponse } = await lancer({
     demande: DEMANDE(false),

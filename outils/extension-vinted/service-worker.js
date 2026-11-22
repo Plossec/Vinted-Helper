@@ -784,8 +784,11 @@ async function releverOnglet(ongletId) {
     ongletId === undefined
       ? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]
       : await chrome.tabs.get(ongletId);
-  if (!onglet?.url?.startsWith(vinted))
-    return { ok: false, message: "Ouvrez d'abord la page Vinted à relever, puis cliquez « Relever cet onglet »." };
+  if (!onglet?.url?.startsWith(vinted) && !onglet?.url?.startsWith("https://vintedgo.com/"))
+    return {
+      ok: false,
+      message: "Ouvrez d'abord une page Vinted ou Vinted Go à relever, puis cliquez « Relever cet onglet ».",
+    };
   const r = await envoyer(onglet.id, { type: "releve-onglet" });
   if (!r?.ok) return { ok: false, message: "La page Vinted ne répond pas : rechargez-la, puis réessayez." };
   await chrome.storage.local.set({
