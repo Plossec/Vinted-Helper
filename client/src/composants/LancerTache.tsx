@@ -11,7 +11,7 @@ export function LancerTache({
   libelle,
   onLance,
 }: {
-  tache: "dormants" | "finalisation" | "favoris";
+  tache: "dormants" | "finalisation" | "favoris" | "offresRecues";
   libelle: string;
   onLance?: () => void;
 }) {
@@ -34,6 +34,9 @@ export function LancerTache({
       } else if (tache === "favoris") {
         await api.post("/api/taches/favoris/lancer", {});
         setMessage({ ok: true, texte: `Lecture des favoris demandée : ${PROCHAIN_PASSAGE}` });
+      } else if (tache === "offresRecues") {
+        await api.post("/api/taches/offres-recues/lancer", {});
+        setMessage({ ok: true, texte: `Lecture des offres reçues demandée : ${PROCHAIN_PASSAGE}` });
       } else {
         await api.post("/api/taches/finalisation/lancer", {});
         setMessage({ ok: true, texte: `Lecture du « Porte-monnaie » demandée : ${PROCHAIN_PASSAGE}` });

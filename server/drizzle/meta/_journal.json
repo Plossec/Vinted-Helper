@@ -183,6 +183,13 @@
       "when": 1795007234812,
       "tag": "0025_articles_par_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795383111070,
+      "tag": "0026_offres-recues",
+      "breakpoints": true
     }
   ]
 }

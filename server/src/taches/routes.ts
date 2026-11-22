@@ -21,6 +21,17 @@ import {
   recevoirFavoris,
   type ResultatOffre,
 } from "./favoris.js";
+import {
+  enregistrerResultatOffreRecue,
+  type OffreRecueLu,
+  type OffreRecueLigne,
+  type ResultatOffreRecue,
+  recevoirOffres,
+  offresAValuer,
+  validerOffresRecues,
+  lancerOffresRecues,
+  offreRecueSuivante,
+} from "./offres.js";
 import { ETATS_JOURNAL, etatTaches, type FiltresJournal, listerJournal, TACHES } from "./journal.js";
 import {
   actionSuivante,
@@ -139,6 +150,41 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
     return { ok: true };
   });
 
+  // --- Tâche « Offres reçues » (#150, ADR-0076) : extension Chrome (jeton) ---
+  app.post("/api/programme/offres-recues", async (requete) => {
+    const c = objet(requete.body);
+    if (!Array.isArray(c.offres)) throw erreurSaisie("Offres reçues : liste attendue.");
+    const offres: OffreRecueLu[] = c.offres.map((brut: unknown, i: number) => lireOffreRecue(brut, i));
+    return recevoirOffres(base, utilisateurDe(requete).id, offres, maintenant());
+  });
+
+  app.get("/api/programme/offres-recues/suivante", async (requete) => ({
+    offre: await offreRecueSuivante(base, utilisateurDe(requete).id, maintenant()),
+  }));
+
+  app.post("/api/programme/offres-recues/:id/resultat", async (requete) => {
+    const c = objet(requete.body);
+    let r: ResultatOffreRecue;
+    if (c.resultat === "faite") r = { resultat: "faite" };
+    else if (c.resultat === "erreur")
+      r = { resultat: "erreur", message: texteObligatoire(c.message, "Message", 1000), releve: c.releve === true };
+    else throw erreurSaisie("Résultat inconnu.");
+    await enregistrerResultatOffreRecue(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());
+    return { ok: true };
+  });
+
+  // --- Tâche « Offres reçues » : écran « À faire » ---
+  app.get("/api/taches/offres-recues", async (requete) =>
+    conforme<OffreRecueLigne[]>()(await offresAValuer(base, utilisateurDe(requete).id)),
+  );
+  app.post("/api/taches/offres-recues/appliquer", async (requete) => ({
+    nombre: await validerOffresRecues(base, utilisateurDe(requete).id, idsObligatoires(objet(requete.body).ids)),
+  }));
+  app.post("/api/taches/offres-recues/lancer", async (requete) => {
+    await lancerOffresRecues(base, utilisateurDe(requete).id, maintenant());
+    return { ok: true };
+  });
+
   // --- Tâche « Vérification vente finalisée » (#148) ---
   app.get("/api/taches/commandes", async (requete) =>
     conforme<CommandesVintedListe>()(await listerCommandes(base, utilisateurDe(requete).id)),
@@ -243,4 +289,27 @@ function lireFavori(brut: unknown, i: number): FavoriLu {
   const depuis = typeof c.depuis === "string" ? new Date(c.depuis) : new Date(Number.NaN);
   if (Number.isNaN(depuis.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
   return { personne: c.personne, titre, depuis };
+}
+
+/** Une offre reçue envoyée par l'extension : offreId, articleId, identifiants de transaction et de demande, prix. */
+function lireOffreRecue(brut: unknown, i: number): OffreRecueLu {
+  const c = objet(brut);
+  const champ = `Offre ${i + 1}`;
+  const offreId = texteObligatoire(c.offreId, `${champ} : offre`, 200);
+  const articleId = uuidObligatoire(c.articleId, `${champ} : article`);
+  if (typeof c.prixOffre !== "number" || !Number.isInteger(c.prixOffre) || c.prixOffre <= 0 || c.prixOffre > 10_000_000)
+    throw erreurSaisie(`${champ} : prix de l'offre en centimes attendu.`);
+  const depuis = typeof c.depuis === "string" ? new Date(c.depuis) : new Date(Number.NaN);
+  if (Number.isNaN(depuis.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
+  const texte = (x: unknown, max: number): string | null =>
+    typeof x === "string" && x.trim() !== "" ? x.trim().slice(0, max) : null;
+  return {
+    offreId,
+    articleId,
+    transactionId: texte(c.transactionId, 200),
+    offerRequestId: texte(c.offerRequestId, 200),
+    prixOffre: c.prixOffre,
+    depuis: depuis.toISOString(),
+    message: texte(c.message, 500),
+  };
 }

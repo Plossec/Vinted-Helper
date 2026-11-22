@@ -782,6 +782,89 @@ async function lienFavori(personne, titre) {
   return { ok: false, message: `Notification du favori introuvable pour « ${titre} » (trop ancienne, ou déjà lue).` };
 }
 
+// --- Offres reçues (#150, ADR-0076) : extraction des offres via GET /api/v2/inbox + conversations. ---
+
+/** Fetch API de Vinted depuis la page (aucune requête vers Vinted depuis l'extension, voir ADR-0068). */
+async function apiVinted(chemin) {
+  const reponse = await fetch(`/api/v2/${chemin}`, { credentials: "include", headers: { accept: "application/json" } });
+  if (!reponse.ok) throw new ErreurPublication(`Requête Vinted refusée (HTTP ${reponse.status}) : ${chemin}`);
+  return reponse.json().catch(() => ({}));
+}
+
+/** Numéro de l'annonce dans une URL Vinted (« /items/123-titre »), sinon null. */
+function numeroAnnonceVinted(url) {
+  return typeof url === "string" ? (/\/items\/(\d+)/.exec(url)?.[1] ?? null) : null;
+}
+
+/** Extraction tolérante d'une offre d'un message (formats courants de l'API Vinted). */
+function extraireOffreRecue(message) {
+  if (!message || typeof message !== "object") return null;
+  const prix =
+    message.prixOffre ?? message.offerPrice ?? message.offer?.price ?? message.prix ?? message.price ?? message.amount;
+  if (typeof prix !== "number" || !Number.isFinite(prix) || prix <= 0) return null;
+  const offreId =
+    message.id ??
+    message.messageId ??
+    message.offerRequestId ??
+    message.offer_request_id ??
+    message.transactionId ??
+    `${message.createdAt ?? Date.now()}`;
+  return {
+    offreId: String(offreId),
+    articleId: numeroAnnonceVinted(message.articleUrl ?? message.article_url ?? message.url) ?? "",
+    transactionId: typeof message.transactionId === "string" ? message.transactionId : null,
+    offerRequestId: typeof message.offerRequestId === "string" ? message.offerRequestId : null,
+    prixOffre: Math.round(prix * 100),
+    depuis:
+      typeof message.createdAt === "string" ? new Date(message.createdAt).toISOString() : new Date().toISOString(),
+    message: typeof message.message === "string" ? message.message.slice(0, 500) : null,
+  };
+}
+
+/** Offres reçues lues via GET /api/v2/inbox + GET /api/v2/conversations/{id} : envoyées à l'application. */
+async function lireOffresRecues() {
+  const inbox = await apiVinted("inbox");
+  const conversations = Array.isArray(inbox?.conversations) ? inbox.conversations : Array.isArray(inbox) ? inbox : [];
+  const offres = [];
+  for (const conversation of conversations.slice(0, 20)) {
+    const id = conversation?.id ?? conversation?.conversationId ?? conversation?.uid;
+    if (typeof id !== "string") continue;
+    try {
+      const detail = await apiVinted(`conversations/${encodeURIComponent(id)}`);
+      for (const message of Array.isArray(detail?.messages) ? detail.messages : []) {
+        const offre = extraireOffreRecue(message);
+        if (offre) offres.push(offre);
+      }
+    } catch {
+      /* conversation lue, rien à en extraire */
+    }
+  }
+  return offres;
+}
+
+/** Accepte l'offre reçue (PUT /api/v2/offer_requests/{id}/accept). */
+async function accepterOffreRecue(offre) {
+  const r = await fetch(`/api/v2/offer_requests/${encodeURIComponent(offre.offerRequestId)}/accept`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { accept: "application/json" },
+  });
+  if (!r.ok) throw new ErreurPublication(`Acceptation refusée : HTTP ${r.status}`);
+  await r.json().catch(() => ({}));
+}
+
+/** Envoie la contre-offre (POST /api/v2/transactions/{tid}/offers). */
+async function contreOffreRecue(offre) {
+  const r = await fetch(`/api/v2/transactions/${encodeURIComponent(offre.transactionId)}/offers`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify({ offer: { price: offre.prixContreOffre / 100, currency: "EUR" } }),
+  });
+  if (!r.ok) throw new ErreurPublication(`Contre-offre refusée : HTTP ${r.status}`);
+  await r.json().catch(() => ({}));
+}
+
 /**
  * Offre dans la fenêtre « Faire une offre » de la conversation (ouverte par la notification, sinon par le bouton).
  * Essai : le prix est saisi et relu, puis la fenêtre est fermée sans rien envoyer.
@@ -933,6 +1016,27 @@ async function traiter(message) {
     if (message.type === "lire-favoris") return lireFavoris();
     return lienFavori(message.personne, message.titre);
   }
+  // Offres reçues (#150, ADR-0076).
+  if (message.type === "lire-offres-recues") {
+    try {
+      return { ok: true, offres: await lireOffresRecues() };
+    } catch (erreur) {
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      return { ok: false, message: `Lecture des offres reçues impossible : ${texte}` };
+    }
+  }
+  if (message.type === "executer-offre-recue") {
+    try {
+      if (message.offre.prixContreOffre !== null) await contreOffreRecue(message.offre);
+      else if (message.offre.offerRequestId) await accepterOffreRecue(message.offre);
+      else throw new ErreurPublication("Identifiants de l'offre manquants : contactez l'aide du projet (#302).");
+      return { ok: true, resultat: "faite" };
+    } catch (erreur) {
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      return { ok: false, message: texte };
+    }
+  }
+
   if (message.type === "faire-offre") {
     const etat = etatPage();
     if (etat !== "pret") return { ok: false, etat };

@@ -7,6 +7,7 @@ import { api } from "../api.js";
 import { ActionsAValider } from "../composants/ActionsTaches.js";
 import { CommandesVinted } from "../composants/CommandesVinted.js";
 import { LancerTache } from "../composants/LancerTache.js";
+import { OffresRecues } from "../composants/OffresRecues.js";
 import {
   type AlertesServeur,
   type LigneAFaire,
@@ -163,6 +164,8 @@ export function AFaire() {
       {alertes === null && !erreur && <p className="statut">Chargement…</p>}
       {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
       {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}
+      {/* Tâche « Offres reçues » (#150, ADR-0076) : offres reçues à valider. */}
+      {alertes !== null && <OffresRecues onChangement={() => void charger()} />}
       {/* Tâche « Vérification vente finalisée » (#148) : commandes lues sur Vinted. */}
       {alertes !== null && nombreCommandes(alertes) > 0 && <CommandesVinted onChangement={() => void charger()} />}
       {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && nombreCommandes(alertes) === 0 && (
@@ -197,6 +200,7 @@ export function AFaire() {
         <LancerTache tache="dormants" libelle="Articles dormants" onLance={() => void charger()} />
         <LancerTache tache="finalisation" libelle="Ventes finalisées" />
         <LancerTache tache="favoris" libelle="Offres aux favoris" />
+        <LancerTache tache="offresRecues" libelle="Offres reçues" />
       </section>
     </main>
   );

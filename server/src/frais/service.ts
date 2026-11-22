@@ -114,6 +114,18 @@ export const REGLAGES_DEFAUT = {
   /** Secondes. */
   favorisPause: 300,
   favorisPlafond: 10,
+  // Tâche « Offres reçues » (#150, ADR-0076) : désactivée par défaut (mode manuel).
+  offresRecuesActive: false,
+  offresRecuesHeureDebut: 8,
+  offresRecuesHeureFin: 22,
+  offresRecuesEssai: true,
+  offresRecuesMode: "manuel" as "automatique" | "manuel",
+  /** Jours d'ancienneté de l'article (depuis la dernière baisse de prix ou la mise en ligne) pour une acceptation. */
+  offresRecuesDelaiJours: 30,
+  offresRecuesFrequenceHeures: 6,
+  /** Secondes. */
+  offresRecuesPause: 120,
+  offresRecuesPlafond: 30,
 };
 
 export type Reglages = typeof REGLAGES_DEFAUT;
@@ -157,6 +169,15 @@ export async function lireReglages(base: Base, utilisateurId: string): Promise<R
     favorisFrequenceHeures: r.favorisFrequenceHeures,
     favorisPause: r.favorisPause,
     favorisPlafond: r.favorisPlafond,
+    offresRecuesActive: r.offresRecuesActive,
+    offresRecuesHeureDebut: r.offresRecuesHeureDebut,
+    offresRecuesHeureFin: r.offresRecuesHeureFin,
+    offresRecuesEssai: r.offresRecuesEssai,
+    offresRecuesMode: r.offresRecuesMode,
+    offresRecuesDelaiJours: r.offresRecuesDelaiJours,
+    offresRecuesFrequenceHeures: r.offresRecuesFrequenceHeures,
+    offresRecuesPause: r.offresRecuesPause,
+    offresRecuesPlafond: r.offresRecuesPlafond,
   };
 }
 
