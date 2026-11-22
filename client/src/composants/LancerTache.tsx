@@ -11,7 +11,7 @@ export function LancerTache({
   libelle,
   onLance,
 }: {
-  tache: "dormants" | "finalisation";
+  tache: "dormants" | "finalisation" | "favoris";
   libelle: string;
   onLance?: () => void;
 }) {
@@ -31,6 +31,9 @@ export function LancerTache({
               ? "Aucun article dormant à traiter (ou action déjà prévue)."
               : `${actions} action(s) prévue(s) (à valider dans « À faire » en mode manuel) : ${PROCHAIN_PASSAGE}`,
         });
+      } else if (tache === "favoris") {
+        await api.post("/api/taches/favoris/lancer", {});
+        setMessage({ ok: true, texte: `Lecture des favoris demandée : ${PROCHAIN_PASSAGE}` });
       } else {
         await api.post("/api/taches/finalisation/lancer", {});
         setMessage({ ok: true, texte: `Lecture du « Porte-monnaie » demandée : ${PROCHAIN_PASSAGE}` });

@@ -1,4 +1,5 @@
 // Faux formulaire « Vendre un article » (imitation locale, AUCUNE requête vers Vinted) et fausse application.
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 
 /** Page du faux formulaire. Options : sans un champ, déconnecté, captcha, titre tronqué, prix reformaté. */
@@ -224,6 +225,46 @@ const PAGE_ANNONCE = `<!doctype html><html><body><h1>Jean Levi's 501</h1>
     });
   </script></body></html>`;
 
+/**
+ * Offres aux favoris (#149), d'après les relevés de l'utilisateur du 22/11/2026 (pseudos et titres fictifs) : en-tête
+ * avec la cloche, menu « Voir tout », page des notifications, conversation avec la fenêtre « Faire une offre » ouverte
+ * et un cadre anti-robot caché (pas de vérification affichée).
+ */
+const PAGE_ACCUEIL = `<!doctype html><html><body><header>
+  <a data-testid="header-notification-button" aria-label="Notifications" href="#"
+     onclick="event.preventDefault(); document.getElementById('menu').hidden = false;"><span>cloche</span></a>
+  <div id="menu" data-testid="header-notification-dropdown" hidden>
+    <a data-testid="header-notification-see-all-button" href="/notifications">Voir tout</a></div>
+</header><h1>Accueil</h1></body></html>`;
+
+const notification = (pseudo, titre, quand, lien) => `<div data-testid="inbox-notification-intersection-wrapper">
+  <a data-testid="user-notification-item" class="web_ui__Cell__cell" href="${lien}">
+    <div data-testid="user-notification-item--prefix"><img role="img" alt=""></div>
+    <div data-testid="user-notification-item--content">${pseudo} a marqué ton article ${titre} comme favori Fais-lui une proposition.
+      <span>${quand}</span></div></a></div>`;
+
+const PAGE_NOTIFICATIONS = `<!doctype html><html><body><h1>Notifications</h1>
+  ${notification("acheteur1", "Jean Levi's 501", "il y a 3 jours", "/inbox/1?offer_request=true")}
+  ${notification("acheteur2", "Pull bleu M", "il y a 2 heures", "/inbox/2?offer_request=true")}
+  <div data-testid="inbox-notification-intersection-wrapper"><a data-testid="user-notification-item" href="/inbox/3">
+    <div data-testid="user-notification-item--content">Ton article a été vendu.</div></a></div>
+</body></html>`;
+
+const pageConversation = (titre) => `<!doctype html><html><body>
+  <iframe title="captcha" src="about:blank" style="display:none"></iframe>
+  <div>${titre} 11,00 € <button type="button">Faire une offre</button></div>
+  <div role="dialog" data-testid="offer-modal" class="ReactModal__Content">
+    <div data-testid="offer-modal-navigation">Faire une offre
+      <button type="button" data-testid="offer-modal-navigation-close-button"
+        onclick="document.querySelector('[data-testid=offer-modal]').remove()">x</button></div>
+    <div role="presentation">${titre}prix de l'article: 11,00 €</div>
+    <h3 data-testid="offer-price-field-title">Faire une offre</h3>
+    <div data-testid="offer-price-field"><input data-testid="offer-price-field--input" id="offer" name="offer" type="number" placeholder="11,00 €"></div>
+    <div role="alert">12,50 € frais Vinted inclus</div>
+    <button type="submit" data-testid="offer-submit-button" onclick="fetch('/clic-offre', { method: 'POST', body:
+      document.getElementById('offer').value }).then(() => document.querySelector('[data-testid=offer-modal]').remove())">Faire une offre</button>
+  </div></body></html>`;
+
 const PAGE_INTROUVABLE = `<!doctype html><html><body><h1>Page introuvable</h1></body></html>`;
 
 /**
@@ -283,12 +324,30 @@ export function demarrerFauxVinted(options = {}) {
     supprimee: false,
     clicsValider: 0,
     clicsPousser: 0,
+    /** Offres envoyées (#149) : prix saisi dans la fenêtre. */
+    offres: [],
     clicsPhoto: 0,
     clicsSupprimerPage: 0,
     clicsConfirmerSuppression: 0,
     clicsAnnulerSuppression: 0,
   };
   const serveur = createServer((req, res) => {
+    if (req.url === "/" || req.url === "/notifications" || req.url?.startsWith("/inbox/")) {
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      if (options.bloque) return res.end(PAGE_BLOCAGE);
+      if (req.url === "/") return res.end(PAGE_ACCUEIL);
+      if (req.url === "/notifications") return res.end(PAGE_NOTIFICATIONS);
+      return res.end(pageConversation(req.url.startsWith("/inbox/1") ? "Jean Levi's 501" : "Pull bleu M"));
+    }
+    if (req.url === "/clic-offre") {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.offres.push(corps);
+        res.end("ok");
+      });
+      return;
+    }
     if (req.url === "/clic-categorie") {
       etat.clicsCategorie++;
       res.end("ok");
@@ -392,9 +451,23 @@ const PNG = Buffer.from(
 );
 
 /** Fausse application : une demande en file, des actions de tâches automatiques (#147), résultats enregistrés. */
-export function demarrerFausseApplication(demande, actions = [], { lectureCommandes = false } = {}) {
-  const etat = { resultats: [], prises: 0, resultatsActions: [], actionsPrises: 0, commandes: [] };
+export function demarrerFausseApplication(
+  demande,
+  actions = [],
+  { lectureCommandes = false, lectureFavoris = false, offres = [] } = {},
+) {
+  const etat = {
+    resultats: [],
+    prises: 0,
+    resultatsActions: [],
+    actionsPrises: 0,
+    commandes: [],
+    favoris: [],
+    resultatsOffres: [],
+  };
   let lecture = lectureCommandes;
+  let lectureF = lectureFavoris;
+  const offresEnFile = [...offres];
   let enFile = demande ? [demande] : [];
   const actionsEnFile = [...actions];
   const serveur = createServer((req, res) => {
@@ -406,8 +479,26 @@ export function demarrerFausseApplication(demande, actions = [], { lectureComman
     res.setHeader("content-type", "application/json");
     if (req.url === "/api/programme/attente")
       return res.end(
-        JSON.stringify({ nombre: enFile.length, actions: actionsEnFile.length, lectureCommandes: lecture }),
+        JSON.stringify({
+          nombre: enFile.length,
+          actions: actionsEnFile.length,
+          lectureCommandes: lecture,
+          lectureFavoris: lectureF,
+          offres: offresEnFile.length,
+        }),
       );
+    if (req.url === "/api/programme/favoris") {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.favoris.push(JSON.parse(corps));
+        lectureF = false;
+        res.end(JSON.stringify({ lus: 0, nouvelles: 0, ignores: [] }));
+      });
+      return;
+    }
+    if (req.url === "/api/programme/offre-suivante")
+      return res.end(JSON.stringify({ offre: offresEnFile.shift() ?? null }));
     if (req.url === "/api/programme/commandes") {
       let corps = "";
       req.on("data", (c) => (corps += c));
@@ -435,9 +526,12 @@ export function demarrerFausseApplication(demande, actions = [], { lectureComman
       let corps = "";
       req.on("data", (c) => (corps += c));
       req.on("end", () => {
-        (req.url?.startsWith("/api/programme/actions/") ? etat.resultatsActions : etat.resultats).push(
-          JSON.parse(corps),
-        );
+        (req.url?.startsWith("/api/programme/actions/")
+          ? etat.resultatsActions
+          : req.url?.startsWith("/api/programme/offres/")
+            ? etat.resultatsOffres
+            : etat.resultats
+        ).push(JSON.parse(corps));
         res.end("{}");
       });
       return;
@@ -481,4 +575,15 @@ export const ACTION = (type, essai = true) => ({
   prixAvant: "11,00",
   prixApres: type === "baisse" ? "10,00" : null,
   annonce: type === "republication" ? { ...DEMANDE(true).article, prix: "11,00" } : null,
+});
+
+/** Offre aux favoris (#149) confiée à l'extension : empreinte SHA-256 du pseudo fictif « acheteur1 ». */
+export const OFFRE = (essai = true) => ({
+  id: "offre-1",
+  essai,
+  reference: 12,
+  titre: "Jean Levi's 501",
+  personne: createHash("sha256").update("acheteur1").digest("hex"),
+  prix: "9,50",
+  prixAvant: "11,00",
 });

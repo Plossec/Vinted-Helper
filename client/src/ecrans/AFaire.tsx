@@ -196,6 +196,7 @@ export function AFaire() {
         <h2>Lancer une tâche</h2>
         <LancerTache tache="dormants" libelle="Articles dormants" onLance={() => void charger()} />
         <LancerTache tache="finalisation" libelle="Ventes finalisées" />
+        <LancerTache tache="favoris" libelle="Offres aux favoris" />
       </section>
     </main>
   );

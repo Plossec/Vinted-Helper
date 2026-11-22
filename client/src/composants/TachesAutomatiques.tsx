@@ -380,10 +380,12 @@ function CarteFinalisation({
 function CarteFavoris({
   r,
   etat,
+  version,
   onChangement,
 }: {
   r: ReglagesUtilisateur;
   etat: EtatTaches["favoris"] | null;
+  version: number;
   onChangement: (r?: ReglagesUtilisateur) => void;
 }) {
   const { form, modifier, texte, message, enregistrer } = useCarte(
@@ -440,8 +442,9 @@ function CarteFavoris({
     <Carte titre="Offres aux favoris" active={r.favorisActive} essai={r.favorisEssai} resume={resume}>
       <form className="formulaire" onSubmit={soumettre} noValidate>
         <p className="secondaire">
-          <strong>En préparation :</strong> l'extension ne lit pas encore les favoris (calibrage d'après vos relevés,
-          #149). Les réglages sont déjà enregistrés.
+          L'extension lit vos notifications Vinted (« … a marqué ton article … comme favori »), retrouve l'article par
+          le titre de son annonce, puis, après le délai, ouvre la conversation et fait l'offre. Mode essai : l'offre est
+          remplie mais pas envoyée.
         </p>
         <label className="case">
           <input type="checkbox" checked={form.active} onChange={(e) => modifier({ active: e.target.checked })} /> Tâche
@@ -491,6 +494,10 @@ function CarteFavoris({
           Enregistrer
         </button>
       </form>
+      <LancerTache tache="favoris" libelle="Lancer maintenant la lecture des favoris" onLance={() => onChangement()} />
+      <p className="secondaire">{NOTE_LANCER}</p>
+      <h4>Journal</h4>
+      <JournalTaches tache="favoris" limite={10} version={version} />
     </Carte>
   );
 }
@@ -530,7 +537,7 @@ export function TachesAutomatiques() {
       </p>
       <CarteDormants r={reglages} etat={etat?.dormants ?? null} version={version} onChangement={onChangement} />
       <CarteFinalisation r={reglages} etat={etat?.finalisation ?? null} version={version} onChangement={onChangement} />
-      <CarteFavoris r={reglages} etat={etat?.favoris ?? null} onChangement={onChangement} />
+      <CarteFavoris r={reglages} etat={etat?.favoris ?? null} version={version} onChangement={onChangement} />
       <h2>Journal de toutes les tâches</h2>
       <p className="secondaire">3 derniers mois, le plus récent d'abord.</p>
       <JournalTaches filtres version={version} />

@@ -13,6 +13,14 @@ import {
   rattacherCommande,
   recevoirCommandes,
 } from "./finalisation.js";
+import {
+  enregistrerResultatOffre,
+  type FavoriLu,
+  lancerFavoris,
+  offreSuivante,
+  recevoirFavoris,
+  type ResultatOffre,
+} from "./favoris.js";
 import { ETATS_JOURNAL, etatTaches, type FiltresJournal, listerJournal, TACHES } from "./journal.js";
 import {
   actionSuivante,
@@ -50,6 +58,10 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
   app.post("/api/taches/dormants/lancer", async (requete) => ({
     actions: await lancerDormants(base, utilisateurDe(requete).id, maintenant()),
   }));
+  app.post("/api/taches/favoris/lancer", async (requete) => {
+    await lancerFavoris(base, utilisateurDe(requete).id, maintenant());
+    return { ok: true };
+  });
   app.post("/api/taches/finalisation/lancer", async (requete) => {
     await lancerFinalisation(base, utilisateurDe(requete).id, maintenant());
     return { ok: true };
@@ -96,6 +108,32 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
       };
     else throw erreurSaisie("Résultat inconnu.");
     await enregistrerResultatAction(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());
+    return { ok: true };
+  });
+
+  // --- Tâche « Offres aux favoris » (#149) : extension Chrome (jeton) ---
+  app.post("/api/programme/favoris", async (requete) => {
+    const c = objet(requete.body);
+    if (!Array.isArray(c.favoris) || c.favoris.length > 500)
+      throw erreurSaisie("Favoris : liste attendue (500 au plus).");
+    const favoris: FavoriLu[] = c.favoris.map((brut: unknown, i: number) => lireFavori(brut, i));
+    const erreur = c.erreur === undefined || c.erreur === null ? null : texteObligatoire(c.erreur, "Erreur", 1000);
+    return recevoirFavoris(base, utilisateurDe(requete).id, { favoris, erreur }, maintenant());
+  });
+
+  app.get("/api/programme/offre-suivante", async (requete) => ({
+    offre: await offreSuivante(base, utilisateurDe(requete).id, maintenant()),
+  }));
+
+  app.post("/api/programme/offres/:id/resultat", async (requete) => {
+    const c = objet(requete.body);
+    let r: ResultatOffre;
+    if (c.resultat === "essai") r = { resultat: "essai" };
+    else if (c.resultat === "faite") r = { resultat: "faite" };
+    else if (c.resultat === "erreur")
+      r = { resultat: "erreur", message: texteObligatoire(c.message, "Message", 1000), releve: c.releve === true };
+    else throw erreurSaisie("Résultat inconnu.");
+    await enregistrerResultatOffre(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());
     return { ok: true };
   });
 
@@ -191,4 +229,16 @@ function lireCommande(brut: unknown, i: number): CommandeLue {
     montant = c.montant;
   }
   return { idCommande, annonces: [...new Set(annonces)], dateFin, montant };
+}
+
+/** Un favori envoyé par l'extension : empreinte de la personne, titre de l'annonce, date du favori. */
+function lireFavori(brut: unknown, i: number): FavoriLu {
+  const c = objet(brut);
+  const champ = `Favori ${i + 1}`;
+  if (typeof c.personne !== "string" || !/^[0-9a-f]{64}$/.test(c.personne))
+    throw erreurSaisie(`${champ} : empreinte de la personne attendue (jamais son pseudo).`);
+  const titre = texteObligatoire(c.titre, `${champ} : titre`, 200);
+  const depuis = typeof c.depuis === "string" ? new Date(c.depuis) : new Date(Number.NaN);
+  if (Number.isNaN(depuis.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
+  return { personne: c.personne, titre, depuis };
 }

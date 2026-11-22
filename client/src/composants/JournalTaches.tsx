@@ -12,6 +12,7 @@ import { NouvelOnglet } from "./NouvelOnglet.js";
 export const NOMS_TACHES: Record<TacheAutomatique, string> = {
   dormants: "Articles dormants",
   finalisation: "Ventes finalisées",
+  favoris: "Offres aux favoris",
 };
 
 const ETATS_FILTRE: EtatJournal[] = ["faite", "essai", "erreur", "en_attente", "en_cours", "refusee", "annulee"];
@@ -83,6 +84,7 @@ export function JournalTaches({
                 <option value="">Toutes</option>
                 <option value="dormants">{NOMS_TACHES.dormants}</option>
                 <option value="finalisation">{NOMS_TACHES.finalisation}</option>
+                <option value="favoris">{NOMS_TACHES.favoris}</option>
               </select>
             </label>
           )}
@@ -114,7 +116,7 @@ export function JournalTaches({
           <li key={`${l.tache}-${l.id}`}>
             <span>
               {!tache && <strong>{NOMS_TACHES[l.tache]} </strong>}
-              {l.tache === "dormants" && (
+              {l.tache !== "finalisation" && (
                 <Link to={`/articles/${l.action.article.id}`}>
                   {formatReference(l.action.article.reference)} {l.action.article.nom ?? "(sans nom)"}
                 </Link>
@@ -126,7 +128,7 @@ export function JournalTaches({
               <br />
               <span className="secondaire">
                 {formatDateHeure(l.date)} —{" "}
-                {l.tache === "dormants" ? libelleAction(l.action) : libelleLecture(l.lecture, l.essai)}
+                {l.tache !== "finalisation" ? libelleAction(l.action) : libelleLecture(l.lecture, l.essai)}
                 {l.manuelle ? " — lancée à la main" : ""}
               </span>
               {l.message && (
@@ -144,7 +146,7 @@ export function JournalTaches({
                   <span className="secondaire">Relevé enregistré : fenêtre de l'extension → « Dernier relevé ».</span>
                 </>
               )}
-              {l.tache === "dormants" && l.action.url && (
+              {l.tache !== "finalisation" && l.action.url && (
                 <>
                   {" "}
                   <a href={l.action.url} target="_blank" rel="noreferrer">
