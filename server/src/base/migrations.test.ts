@@ -265,3 +265,34 @@ describe("migration 0021 — plage horaire et mode essai propres à chaque tâch
     expect(colonnes.rows.map((c) => c.column_name)).not.toContain("taches_essai");
   });
 });
+
+describe("migration 0024 — colonne programme_vu_le renommée extension_vue_le (#246)", { timeout: DELAI }, () => {
+  const client = new PGlite();
+  const vuLe = "2026-11-17T20:15:00.000Z";
+
+  beforeAll(async () => {
+    const fichiers = readdirSync(dossier)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    const avant = fichiers.filter((f) => f < "0024");
+    for (const f of avant) await appliquer(client, f);
+    await client.exec(`
+      INSERT INTO utilisateur (id, identifiant, mot_de_passe_hache) VALUES ('00000000-0000-4000-8000-000000000001', 'u', 'x');
+      INSERT INTO reglages (utilisateur_id, programme_vu_le) VALUES ('00000000-0000-4000-8000-000000000001', '${vuLe}');
+    `);
+    await appliquer(client, "0024_renommer_programme_vu_le.sql");
+  }, DELAI);
+  afterAll(() => client.close());
+
+  it("le dernier contact de l'extension est gardé", async () => {
+    const r = await client.query<{ extension_vue_le: Date }>("SELECT extension_vue_le FROM reglages");
+    expect(r.rows[0]?.extension_vue_le.toISOString()).toBe(vuLe);
+  });
+
+  it("l'ancienne colonne n'existe plus", async () => {
+    const colonnes = await client.query<{ column_name: string }>(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'reglages'",
+    );
+    expect(colonnes.rows.map((c) => c.column_name)).not.toContain("programme_vu_le");
+  });
+});

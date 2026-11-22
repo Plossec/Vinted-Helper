@@ -151,9 +151,12 @@ describe("publication Vinted", () => {
     const liste = (await requete("GET", "/api/publications")).json<{
       publications: { etat: string }[];
       extensionVueLe: string;
+      programmeVuLe: string;
     }>();
     expect(liste.publications.map((p) => p.etat).sort()).toEqual(["essai", "publie"]);
     expect(liste.extensionVueLe).not.toBeNull();
+    // Ancien nom gardé une version pour une interface d'avant la mise à jour (#246).
+    expect(liste.programmeVuLe).toBe(liste.extensionVueLe);
   });
 
   it("erreur et annulation ; une publication interrompue n'est jamais relancée seule", async () => {
