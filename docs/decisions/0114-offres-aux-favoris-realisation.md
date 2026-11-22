@@ -1,11 +1,10 @@
 # ADR-0114 — Offres aux favoris : précisions et réalisation (étape 1 sur 2)
 
 - **Date** : 18/11/2026
-- **Statut** : Accepté · à relire
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #149
 - **Thème** : Tâches automatisées
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 

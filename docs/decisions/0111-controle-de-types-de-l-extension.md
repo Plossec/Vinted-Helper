@@ -1,11 +1,10 @@
 # ADR-0111 — Contrôle de types de l'extension
 
 - **Date** : 17/11/2026
-- **Statut** : Proposé
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #248
 - **Thème** : Publication Vinted
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 

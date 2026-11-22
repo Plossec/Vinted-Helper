@@ -2,10 +2,9 @@
 
 - **Date** : 22/11/2026
 - **Statut** : Accepté · modifié par [ADR-0124](0124-offres-aux-favoris-delai-et-offre-existante.md)
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #149
 - **Thème** : Tâches automatisées
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 

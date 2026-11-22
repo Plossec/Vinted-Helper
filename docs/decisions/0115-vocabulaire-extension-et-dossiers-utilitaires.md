@@ -1,11 +1,10 @@
 # ADR-0115 — Vocabulaire « extension » et dossiers utilitaires / commandes
 
 - **Date** : 18/11/2026
-- **Statut** : Proposé
-- **Décideurs** : utilisateur, avec des points tranchés par Claude
+- **Statut** : Accepté
+- **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #246
 - **Thème** : Méthode
-- **À relire** : oui
 
 [← Index des décisions](README.md)
 
