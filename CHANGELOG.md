@@ -5,6 +5,19 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.32.0] — 22/11/2026
+
+### Ajouté
+- **Offres aux favoris** (Réglages → Tâches automatiques ; extension **1.17.0**) : l'extension lit vos notifications
+  « … a marqué ton article … comme favori », retrouve l'article par le titre de son annonce, puis, après le délai
+  réglé, fait une seule offre par personne et par article au prix de la règle de baisse (jamais sous le prix vente
+  minimum). Mode essai : l'offre est remplie sans être envoyée. Journal, « Lancer maintenant », liste à valider en
+  mode manuel. Le pseudo de la personne ne quitte jamais le PC (#149, ADR-0123).
+
+### Corrigé
+- Extension : un cadre anti-robot caché (page d'une conversation) ne met plus l'extension en pause ; seule une
+  vérification affichée le fait (#149).
+
 ## [1.31.2] — 21/11/2026
 
 ### Corrigé

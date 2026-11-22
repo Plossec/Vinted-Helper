@@ -9,6 +9,7 @@ import { type CandidatDormant, heureParis, passageDu, planifierDormants } from "
 import { conflit, erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
 import { centimesVersSaisie } from "../utilitaires/format.js";
 import { annonceARepublier } from "../publication/service.js";
+import { offresAValider, validerOffres } from "./favoris.js";
 
 const EN_COURS = ["a_valider", "en_attente", "en_cours"] as const;
 
@@ -272,7 +273,8 @@ export async function listerActions(base: Base, utilisateurId: string, maintenan
     .orderBy(desc(actionVinted.creeLe), article.reference)
     .limit(200);
   return {
-    aValider: lignes.filter((l) => l.etat === "a_valider"),
+    // Offres aux favoris à valider (#149) : même liste, type « offre ».
+    aValider: [...lignes.filter((l) => l.etat === "a_valider"), ...(await offresAValider(base, utilisateurId))],
     journal: lignes.filter((l) => l.etat !== "a_valider").slice(0, 50),
   };
 }
@@ -287,6 +289,8 @@ export async function validerActions(
 ): Promise<number> {
   if (ids.length === 0) throw erreurSaisie("Cochez au moins une action.");
   await annulerActionsPerimees(base, utilisateurId, maintenant);
+  // Les offres aux favoris (#149) partagent la liste à valider : leurs identifiants sont traités à part.
+  const offres = await validerOffres(base, utilisateurId, ids, appliquer, maintenant);
   const r = await base
     .update(actionVinted)
     .set(appliquer ? { etat: "en_attente" } : { etat: "refusee", finLe: maintenant })
@@ -298,7 +302,7 @@ export async function validerActions(
       ),
     )
     .returning({ id: actionVinted.id });
-  return r.length;
+  return r.length + offres;
 }
 
 /** Nombre d'actions à valider (pastille de l'écran « À faire »). */
@@ -307,7 +311,7 @@ export async function nombreAValider(base: Base, utilisateurId: string): Promise
     .select({ id: actionVinted.id })
     .from(actionVinted)
     .where(and(eq(actionVinted.utilisateurId, utilisateurId), eq(actionVinted.etat, "a_valider")));
-  return r.length;
+  return r.length + (await offresAValider(base, utilisateurId)).length;
 }
 
 /** Actions en attente de l'extension (réponse au passage de l'extension). */

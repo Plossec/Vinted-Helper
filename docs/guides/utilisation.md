@@ -50,6 +50,19 @@ il passe **Invendu** : l'annonce reste en ligne et la tâche ne le touche plus.
   réel sur un seul article (voir `publication-vinted.md`).
 - **Journal** : sous la tâche, et dans le journal de toutes les tâches (voir plus haut).
 
+## Tâche automatique « Offres aux favoris »
+
+**Réglages → Tâches automatiques → Offres aux favoris** (désactivée par défaut) : l'extension lit vos notifications
+Vinted (« … a marqué ton article … comme favori »), retrouve l'article par le **titre de son annonce**, puis, après le
+délai réglé, ouvre la conversation et fait **une seule offre** par personne et par article, au prix de la règle de
+baisse (jamais sous le prix vente minimum ; sans minimum : pas d'offre).
+
+- **Mode essai** (conseillé au début) : l'offre est remplie mais **pas envoyée** ; vérifiez le journal, puis décochez.
+- **Mode manuel** : les offres prévues apparaissent dans « À faire » avec les actions à valider.
+- **Lancer maintenant** : lecture des notifications au prochain passage de l'extension.
+- **Journal** : sous la tâche ; l'extension écrit aussi dans sa fenêtre les favoris lus et ceux ignorés (titre inconnu
+  ou en double).
+
 ## Tâche automatique « Vérification vente finalisée »
 
 **Réglages → Tâches automatiques → Ventes finalisées** (désactivée par défaut) : l'extension lit le « Porte-monnaie » sur Vinted ; une commande terminée fait passer **Finalisé** le colis Envoyé correspondant (retrouvé par le

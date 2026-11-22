@@ -23,6 +23,8 @@ interface EtatExtension {
   enCours: string | null;
   /** Action d'une tâche automatique en cours (identifiant). */
   actionEnCours: string | null;
+  /** Offre aux favoris en cours (#149). */
+  offreEnCours: string | null;
   onglet: number | null;
   journal: LigneJournal[];
 }
@@ -88,7 +90,11 @@ type MessageContenu =
   | { type: "etape"; nom: string; article?: AnnonceVinted; photos?: PhotoTransmise[]; nombrePhotos?: number }
   | { type: "diagnostic"; niveau?: string }
   | { type: "ajouter" }
-  | { type: "chercher-annonce"; titre: string };
+  | { type: "chercher-annonce"; titre: string }
+  | { type: "lien-notifications" }
+  | { type: "lire-favoris" }
+  | { type: "lien-favori"; personne: string; titre: string }
+  | { type: "faire-offre"; prix: string; titre: string; essai: boolean };
 
 /** Messages des pages de l'extension (fenêtre, réglages) au service worker (service-worker.js, action). */
 type MessagePage = { type: "reprendre" | "pause" | "maintenant" | "diagnostic" | "releverOnglet" | "tester" };

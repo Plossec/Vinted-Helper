@@ -52,7 +52,9 @@ async function attendre(selecteurs, delai = DELAI_MS) {
 function etatPage() {
   const texte = normaliser(document.body?.innerText);
   if (SELECTEURS.textesBlocage.some((t) => texte.includes(t))) return "bloque";
-  if (trouver(SELECTEURS.verification)) return "verification";
+  // Relevé du 22/11/2026 (#149) : la page d'une conversation contient un cadre anti-robot caché, sans vérification
+  // affichée ; seule une vérification visible met l'extension en pause.
+  if (SELECTEURS.verification.some((s) => [...document.querySelectorAll(s)].some(visible))) return "verification";
   if (trouver(SELECTEURS.nonConnecte)) return "deconnecte";
   return "pret";
 }
@@ -675,6 +677,141 @@ async function chercherAnnonce(titre) {
   return { ok: true, url };
 }
 
+// --- Offres aux favoris (#149) ---
+
+/** Empreinte SHA-256 (hexadécimal) d'un pseudo : le pseudo ne quitte jamais le PC (ADR-0100). */
+async function empreinte(pseudo) {
+  const octets = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(normaliser(pseudo)));
+  return [...new Uint8Array(octets)].map((o) => o.toString(16).padStart(2, "0")).join("");
+}
+
+const DUREES_MS = {
+  seconde: 1000,
+  minute: 60_000,
+  heure: 3_600_000,
+  jour: 86_400_000,
+  semaine: 7 * 86_400_000,
+  mois: 30 * 86_400_000,
+  an: 365 * 86_400_000,
+};
+
+/** Date d'après « il y a 3 jours » (approximative) ; maintenant si le texte n'est pas reconnu. */
+function dateDepuis(texte) {
+  const m = /il y a (\d+|une?|quelques) (seconde|minute|heure|jour|semaine|mois|an)/.exec(normaliser(texte));
+  if (!m) return new Date();
+  const n = /^\d+$/.test(m[1]) ? Number(m[1]) : m[1] === "quelques" ? 0 : 1;
+  return new Date(Date.now() - n * DUREES_MS[m[2]]);
+}
+
+/** Notifications de favori de la page : pseudo, titre, date, lien. */
+async function notificationsFavoris() {
+  const motif = new RegExp(SELECTEURS.favoris.motifFavori);
+  const liste = [];
+  for (const el of document.querySelectorAll(SELECTEURS.favoris.notification)) {
+    const texte = String(el.textContent ?? "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const m = motif.exec(texte);
+    if (!m) continue;
+    liste.push({
+      pseudo: m[1].trim(),
+      titre: m[2].trim(),
+      depuis: dateDepuis(texte),
+      url: el instanceof HTMLAnchorElement ? el.href : (el.querySelector("a")?.href ?? null),
+      el,
+    });
+  }
+  return liste;
+}
+
+/** Lien de « Voir tout » des notifications (menu de la cloche ouvert au besoin). */
+async function lienNotifications() {
+  let voirTout = trouver(SELECTEURS.favoris.voirTout);
+  if (!voirTout) {
+    const cloche = await attendre(SELECTEURS.favoris.cloche, 5000);
+    if (!cloche) return { ok: false, message: "Cloche des notifications introuvable (à calibrer)." };
+    cliquer(cloche);
+    voirTout = await attendre(SELECTEURS.favoris.voirTout, 5000);
+  }
+  if (!voirTout) return { ok: false, message: "« Voir tout » des notifications introuvable (à calibrer)." };
+  const url = voirTout instanceof HTMLAnchorElement ? voirTout.href : null;
+  if (!url) {
+    setTimeout(() => cliquer(voirTout), 100);
+    return { ok: true, url: null };
+  }
+  return { ok: true, url };
+}
+
+/** Favoris lus sur la page des notifications : empreinte de la personne, titre, date (jamais le pseudo). */
+async function lireFavoris() {
+  await attendre([SELECTEURS.favoris.notification], 8000);
+  const favoris = [];
+  for (const n of await notificationsFavoris())
+    favoris.push({ personne: await empreinte(n.pseudo), titre: n.titre, depuis: n.depuis.toISOString() });
+  return { ok: true, favoris, releve: relevePage("notifications") };
+}
+
+/** Lien de la notification de cette personne pour cet article. */
+async function lienFavori(personne, titre) {
+  await attendre([SELECTEURS.favoris.notification], 8000);
+  for (const n of await notificationsFavoris()) {
+    if (normaliser(n.titre) !== normaliser(titre) || (await empreinte(n.pseudo)) !== personne) continue;
+    if (n.url) return { ok: true, url: n.url };
+    setTimeout(() => cliquer(n.el), 100);
+    return { ok: true, url: null };
+  }
+  return { ok: false, message: `Notification du favori introuvable pour « ${titre} » (trop ancienne, ou déjà lue).` };
+}
+
+/**
+ * Offre dans la fenêtre « Faire une offre » de la conversation (ouverte par la notification, sinon par le bouton).
+ * Essai : le prix est saisi et relu, puis la fenêtre est fermée sans rien envoyer.
+ */
+async function faireOffre(prix, titre, essai) {
+  let fenetre = await attendre(SELECTEURS.favoris.fenetreOffre, 8000);
+  if (!fenetre) {
+    const bouton = boutonAnnonce([], SELECTEURS.favoris.texteFaireOffre);
+    if (bouton) {
+      cliquer(bouton);
+      fenetre = await attendre(SELECTEURS.favoris.fenetreOffre, 5000);
+    }
+  }
+  if (!fenetre) throw new ErreurPublication("Fenêtre « Faire une offre » introuvable. Rien n'a été envoyé.");
+  if (!normaliser(fenetre.textContent).includes(normaliser(titre)))
+    throw new ErreurPublication(`La fenêtre d'offre ne concerne pas « ${titre} ». Rien n'a été envoyé.`);
+  const champPrix = SELECTEURS.favoris.prixOffre.map((s) => fenetre.querySelector(s)).find(Boolean);
+  if (!(champPrix instanceof HTMLInputElement))
+    throw new ErreurPublication("Champ du prix de l'offre introuvable. Rien n'a été envoyé.");
+  saisirAuClavier(champPrix, prix.replace(",", "."));
+  await attendreMs(500);
+  if (montant(champPrix.value) !== montant(prix)) {
+    saisir(champPrix, prix.replace(",", "."));
+    await attendreMs(500);
+  }
+  if (montant(champPrix.value) !== montant(prix))
+    throw new ErreurPublication(
+      `Prix de l'offre : Vinted affiche « ${champPrix.value} » au lieu de « ${prix} ». Rien n'a été envoyé.`,
+    );
+  if (essai) {
+    const releve = { ...relevePage("offre"), dialogues: dialogues() };
+    const fermer = SELECTEURS.favoris.fermerOffre.map((s) => fenetre.querySelector(s)).find(Boolean);
+    if (fermer) cliquer(fermer);
+    return { releve };
+  }
+  const envoyer = SELECTEURS.favoris.envoyerOffre.map((s) => fenetre.querySelector(s)).find(Boolean);
+  if (!envoyer)
+    throw new ErreurPublication("Bouton « Faire une offre » de la fenêtre introuvable. Rien n'a été envoyé.");
+  cliquer(envoyer);
+  const fin = Date.now() + 10_000;
+  while (Date.now() < fin) {
+    await attendreMs(500);
+    if (!fenetre.isConnected || !visible(fenetre)) return { releve: null };
+  }
+  throw new ErreurPublication(
+    `Offre peut-être pas envoyée : la fenêtre est restée ouverte (« ${normaliser(fenetre.textContent).slice(0, 120)} »). Vérifiez la conversation sur Vinted.`,
+  );
+}
+
 /** @param {MessageContenu} message */
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
@@ -751,6 +888,28 @@ async function traiter(message) {
   }
 
   if (message.type === "chercher-annonce") return chercherAnnonce(message.titre);
+
+  // Offres aux favoris (#149).
+  if (message.type === "lien-notifications" || message.type === "lire-favoris" || message.type === "lien-favori") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    if (message.type === "lien-notifications") return lienNotifications();
+    if (message.type === "lire-favoris") return lireFavoris();
+    return lienFavori(message.personne, message.titre);
+  }
+  if (message.type === "faire-offre") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    try {
+      const { releve } = await faireOffre(message.prix, message.titre, message.essai);
+      return { ok: true, releve };
+    } catch (erreur) {
+      const apres = etatPage();
+      if (apres !== "pret") return { ok: false, etat: apres };
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      return { ok: false, message: texte, releve: { ...releveErreur("offre", texte), dialogues: dialogues() } };
+    }
+  }
 
   // Message imprévu (autre version de l'extension) : refusé.
   return { ok: false, message: `Demande inconnue : ${/** @type {{ type: string }} */ (message).type}` };

@@ -17,7 +17,7 @@ export function limiteJournal(maintenant: Date): Date {
   return limite;
 }
 
-export const TACHES = ["dormants", "finalisation"] as const;
+export const TACHES = ["dormants", "finalisation", "favoris"] as const;
 export type Tache = (typeof TACHES)[number];
 /** États d'une ligne du journal : ceux des actions (hors « à valider ») ; une lecture est faite, essai ou erreur. */
 export const ETATS_JOURNAL = ["en_attente", "en_cours", "faite", "essai", "erreur", "refusee", "annulee"] as const;
@@ -40,7 +40,7 @@ const LIMITE_LIGNES = 200;
 export async function listerJournal(base: Base, utilisateurId: string, f: FiltresJournal, maintenant: Date) {
   const limite = limiteJournal(maintenant);
   const actions =
-    f.tache === "finalisation"
+    f.tache === "finalisation" || f.tache === "favoris"
       ? []
       : await base
           .select({
@@ -71,8 +71,39 @@ export async function listerJournal(base: Base, utilisateurId: string, f: Filtre
           )
           .orderBy(desc(actionVinted.creeLe))
           .limit(2000);
+  // Offres aux favoris (#149) : une ligne par offre (hors « à valider »).
+  const offres =
+    f.tache === "finalisation" || f.tache === "dormants"
+      ? []
+      : await base
+          .select({
+            id: offreFavori.id,
+            etat: offreFavori.etat,
+            prixAvant: offreFavori.prixAvant,
+            prixOffre: offreFavori.prixOffre,
+            essai: offreFavori.essai,
+            manuelle: offreFavori.manuelle,
+            message: offreFavori.message,
+            releve: offreFavori.releve,
+            creeLe: offreFavori.creeLe,
+            finLe: offreFavori.finLe,
+            articleId: offreFavori.articleId,
+            reference: article.reference,
+            nom: article.nom,
+          })
+          .from(offreFavori)
+          .innerJoin(article, eq(article.id, offreFavori.articleId))
+          .where(
+            and(
+              eq(offreFavori.utilisateurId, utilisateurId),
+              f.etat ? eq(offreFavori.etat, f.etat) : ne(offreFavori.etat, "a_valider"),
+              gte(offreFavori.creeLe, limite),
+            ),
+          )
+          .orderBy(desc(offreFavori.creeLe))
+          .limit(2000);
   const lectures =
-    f.tache === "dormants" || (f.etat && !["faite", "essai", "erreur"].includes(f.etat))
+    f.tache === "dormants" || f.tache === "favoris" || (f.etat && !["faite", "essai", "erreur"].includes(f.etat))
       ? []
       : await base
           .select()
@@ -96,6 +127,23 @@ export async function listerJournal(base: Base, utilisateurId: string, f: Filtre
         prixApres: a.prixApres,
         url: a.url,
         article: { id: a.articleId, reference: a.reference, nom: a.nom },
+      },
+    })),
+    ...offres.map((o) => ({
+      tache: "favoris" as const,
+      id: o.id,
+      etat: o.etat as EtatJournal,
+      date: o.finLe ?? o.creeLe,
+      essai: o.essai,
+      manuelle: o.manuelle,
+      message: o.message,
+      releve: o.releve,
+      action: {
+        type: "offre" as const,
+        prixAvant: o.prixAvant,
+        prixApres: o.prixOffre,
+        url: null,
+        article: { id: o.articleId, reference: o.reference, nom: o.nom },
       },
     })),
     ...lectures
@@ -144,21 +192,19 @@ export async function finaliseesDuJour(
   return recentes.filter((x) => x.traiteLe && jourParis(x.traiteLe.toISOString()) === aujourdhui).length;
 }
 
-/** Offres aux favoris prévues aujourd'hui (heure de Paris), hors refusées et annulées (#149). */
+/** Offres aux favoris confiées à l'extension aujourd'hui (heure de Paris), comme le plafond du jour (#149). */
 async function offresDuJour(base: Base, utilisateurId: string, maintenant: Date): Promise<number> {
   const recentes = await base
-    .select({ creeLe: offreFavori.creeLe })
+    .select({ debutLe: offreFavori.debutLe })
     .from(offreFavori)
     .where(
       and(
         eq(offreFavori.utilisateurId, utilisateurId),
-        gte(offreFavori.creeLe, new Date(maintenant.getTime() - 2 * 86_400_000)),
-        ne(offreFavori.etat, "refusee"),
-        ne(offreFavori.etat, "annulee"),
+        gte(offreFavori.debutLe, new Date(maintenant.getTime() - 2 * 86_400_000)),
       ),
     );
   const aujourdhui = jourParis(maintenant.toISOString());
-  return recentes.filter((x) => jourParis(x.creeLe.toISOString()) === aujourdhui).length;
+  return recentes.filter((x) => x.debutLe && jourParis(x.debutLe.toISOString()) === aujourdhui).length;
 }
 
 /** État de chaque tâche (#232) : activée, essai, dernier et prochain passage automatique, actions du jour. */

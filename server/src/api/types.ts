@@ -339,7 +339,8 @@ export interface ActionVinted {
   articleId: string;
   reference: number;
   nom: string | null;
-  type: "baisse" | "republication";
+  /** « offre » : offre aux favoris (#149) ; prixApres = prix de l'offre. */
+  type: "baisse" | "republication" | "offre";
   etat: "a_valider" | "en_attente" | "en_cours" | "faite" | "essai" | "erreur" | "refusee" | "annulee";
   prixAvant: number;
   prixApres: number | null;
@@ -379,7 +380,7 @@ export interface EtatTaches {
   };
 }
 
-export type TacheAutomatique = "dormants" | "finalisation";
+export type TacheAutomatique = "dormants" | "finalisation" | "favoris";
 export type EtatJournal = Exclude<ActionVinted["etat"], "a_valider">;
 
 /** Ligne du journal des tâches (#233) : une action des articles dormants, ou une lecture des ventes finalisées. */
@@ -396,9 +397,10 @@ export type LigneJournal = {
   releve: boolean;
 } & (
   | {
-      tache: "dormants";
+      /** « favoris » : offre aux favoris (#149), type « offre », prixApres = prix de l'offre. */
+      tache: "dormants" | "favoris";
       action: {
-        type: "baisse" | "republication";
+        type: "baisse" | "republication" | "offre";
         prixAvant: number;
         prixApres: number | null;
         url: string | null;

@@ -315,7 +315,13 @@ describe("tâche « Articles dormants »", () => {
       for (const id of [a, b]) await completerAnnonce(t.base, id);
       await reglerTache({ dormantsMode: "automatique" });
       t.horloge.avancer(8 * JOUR_MS);
-      expect((await passage()).json()).toEqual({ nombre: 0, actions: 2, lectureCommandes: false });
+      expect((await passage()).json()).toEqual({
+        nombre: 0,
+        actions: 2,
+        lectureCommandes: false,
+        lectureFavoris: false,
+        offres: 0,
+      });
       const x = await suivante();
       expect(x).toMatchObject({ type: "republication", essai: true, prixAvant: "11,00", prixApres: "10,00" });
       // L'annonce est recréée au prix baissé (ADR-0113).
