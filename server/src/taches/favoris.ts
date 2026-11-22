@@ -1,10 +1,11 @@
 // Tâche « Offres aux favoris » (#149, ADR-0075, ADR-0114, ADR-0123), étape 2 : l'extension lit les notifications
 // « … a marqué ton article … comme favori » ; chaque favori d'un article En ligne ou Invendu devient une offre réduite
-// (une seule par personne et par article), envoyée par l'extension au moins N jours après le favori, une à la fois,
+// (une seule par personne et par article), envoyée par l'extension quand l'article est publié depuis au moins N jours
+// (#295), une à la fois,
 // dans la plage horaire, la pause et le plafond du jour. La personne n'est connue que par une empreinte (ADR-0100).
 import { and, asc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
-import { actionVinted, article, offreFavori, reglages } from "../base/schema.js";
+import { actionVinted, article, historiqueStatut, offreFavori, reglages } from "../base/schema.js";
 import { jourParis } from "../calculs/indicateurs.js";
 import { prixRepublication, regleApplicable } from "../calculs/baisse.js";
 import { heureParis, passageDu } from "../metier/taches.js";
@@ -171,21 +172,51 @@ export async function recevoirFavoris(
   });
 }
 
-/** Offres en attente de l'extension et dues (délai après le favori écoulé), pour le passage de l'extension. */
+/**
+ * Date de publication de chaque article (#295) : dernière mise en ligne (historique des statuts) ou dernière
+ * republication faite par la tâche « Articles dormants » (nouvelle annonce sur Vinted). Inconnue : article absent.
+ */
+async function datesPublication(tx: Transaction | Base, articleIds: readonly string[]): Promise<Map<string, number>> {
+  const dates = new Map<string, number>();
+  if (articleIds.length === 0) return dates;
+  const noter = (id: string, d: Date | null) => {
+    if (d && d.getTime() > (dates.get(id) ?? 0)) dates.set(id, d.getTime());
+  };
+  const [statuts, republications] = await Promise.all([
+    tx
+      .select({ articleId: historiqueStatut.articleId, date: historiqueStatut.date })
+      .from(historiqueStatut)
+      .where(and(inArray(historiqueStatut.articleId, [...articleIds]), eq(historiqueStatut.vers, "en_ligne"))),
+    tx
+      .select({ articleId: actionVinted.articleId, date: actionVinted.finLe })
+      .from(actionVinted)
+      .where(
+        and(
+          inArray(actionVinted.articleId, [...articleIds]),
+          eq(actionVinted.type, "republication"),
+          eq(actionVinted.etat, "faite"),
+        ),
+      ),
+  ]);
+  for (const s of statuts) noter(s.articleId, s.date);
+  for (const a of republications) noter(a.articleId, a.date);
+  return dates;
+}
+
+/** Offre due (#295) : article publié depuis au moins le délai réglé (et non plus N jours après le favori). */
+const publieDepuisDelai = (dates: Map<string, number>, articleId: string, delaiJours: number, maintenant: Date) =>
+  (dates.get(articleId) ?? Number.POSITIVE_INFINITY) <= maintenant.getTime() - delaiJours * JOUR_MS;
+
+/** Offres en attente de l'extension et dues (article publié depuis le délai), pour le passage de l'extension. */
 export async function nombreOffresDues(base: Base, utilisateurId: string, maintenant: Date): Promise<number> {
   const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
   if (!r) return 0;
   const lignes = await base
-    .select({ id: offreFavori.id })
+    .select({ articleId: offreFavori.articleId })
     .from(offreFavori)
-    .where(
-      and(
-        eq(offreFavori.utilisateurId, utilisateurId),
-        eq(offreFavori.etat, "en_attente"),
-        lt(offreFavori.favoriLe, new Date(maintenant.getTime() - r.favorisDelaiJours * JOUR_MS)),
-      ),
-    );
-  return lignes.length;
+    .where(and(eq(offreFavori.utilisateurId, utilisateurId), eq(offreFavori.etat, "en_attente")));
+  const dates = await datesPublication(base, [...new Set(lignes.map((l) => l.articleId))]);
+  return lignes.filter((l) => publieDepuisDelai(dates, l.articleId, r.favorisDelaiJours, maintenant)).length;
 }
 
 /** Offres confiées à l'extension aujourd'hui (heure de Paris), pour le plafond du jour. */
@@ -263,16 +294,10 @@ export async function offreSuivante(base: Base, utilisateurId: string, maintenan
       })
       .from(offreFavori)
       .innerJoin(article, eq(article.id, offreFavori.articleId))
-      .where(
-        and(
-          eq(offreFavori.utilisateurId, utilisateurId),
-          eq(offreFavori.etat, "en_attente"),
-          lt(offreFavori.favoriLe, new Date(maintenant.getTime() - r.favorisDelaiJours * JOUR_MS)),
-        ),
-      )
+      .where(and(eq(offreFavori.utilisateurId, utilisateurId), eq(offreFavori.etat, "en_attente")))
       .orderBy(asc(offreFavori.favoriLe), asc(article.reference));
+    const publications = await datesPublication(tx, [...new Set(attente.map((o) => o.articleId))]);
     for (const o of attente) {
-      if (dormants.has(o.articleId)) continue;
       const prix =
         o.supprimeLe === null && (STATUTS_OFFRE as readonly string[]).includes(o.statut) ? prixOffre(o, r) : null;
       if (prix === null || o.prixAffiche === null || !o.titre) {
@@ -286,6 +311,9 @@ export async function offreSuivante(base: Base, utilisateurId: string, maintenan
           .where(eq(offreFavori.id, o.id));
         continue;
       }
+      // Republication du dormant prioritaire ; offre seulement N jours après la publication de l'article (#295).
+      if (dormants.has(o.articleId)) continue;
+      if (!publieDepuisDelai(publications, o.articleId, r.favorisDelaiJours, maintenant)) continue;
       const prise = await tx
         .update(offreFavori)
         .set({
@@ -315,7 +343,11 @@ export async function offreSuivante(base: Base, utilisateurId: string, maintenan
 }
 
 export type ResultatOffre =
-  { resultat: "essai" } | { resultat: "faite" } | { resultat: "erreur"; message: string; releve: boolean };
+  | { resultat: "essai" }
+  | { resultat: "faite" }
+  /** Une offre au même prix ou moins cher est déjà dans la conversation (#295) : rien n'est envoyé. */
+  | { resultat: "inutile"; message: string }
+  | { resultat: "erreur"; message: string; releve: boolean };
 
 /** Résultat d'une offre renvoyé par l'extension ; un résultat envoyé deux fois est refusé. */
 export async function enregistrerResultatOffre(
@@ -328,10 +360,10 @@ export async function enregistrerResultatOffre(
   const [x] = await base
     .update(offreFavori)
     .set({
-      etat: r.resultat,
+      etat: r.resultat === "inutile" ? "annulee" : r.resultat,
       finLe: maintenant,
       message:
-        r.resultat === "erreur"
+        r.resultat === "erreur" || r.resultat === "inutile"
           ? r.message
           : r.resultat === "essai"
             ? "Essai : offre remplie sur Vinted, rien n'a été envoyé."

@@ -130,6 +130,8 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
     let r: ResultatOffre;
     if (c.resultat === "essai") r = { resultat: "essai" };
     else if (c.resultat === "faite") r = { resultat: "faite" };
+    else if (c.resultat === "inutile")
+      r = { resultat: "inutile", message: texteObligatoire(c.message, "Message", 1000) };
     else if (c.resultat === "erreur")
       r = { resultat: "erreur", message: texteObligatoire(c.message, "Message", 1000), releve: c.releve === true };
     else throw erreurSaisie("Résultat inconnu.");

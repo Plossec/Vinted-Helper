@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.32.2] — 22/11/2026
+
+### Modifié
+- Offres aux favoris (extension **1.18.0**) : toutes les notifications sont lues (la page est défilée jusqu'en bas) ;
+  l'offre part N jours après la **publication** de l'article (et non plus après le favori) ; si une offre au même
+  prix ou moins chère est déjà dans la conversation (la vôtre ou celle de l'acheteur), rien n'est envoyé (#295,
+  ADR-0124).
+
 ## [1.32.1] — 22/11/2026
 
 ### Corrigé

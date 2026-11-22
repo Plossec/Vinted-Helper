@@ -207,7 +207,8 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0106](0106-articles-dormants-mode-reel.md) | 21/10/2026 | Articles dormants : mode réel (étape 3 sur 3) | Proposé |
 | [0113](0113-dormants-republication-avec-baisse.md) | 18/11/2026 | Articles dormants : republication avec baisse | Accepté |
 | [0114](0114-offres-aux-favoris-realisation.md) | 18/11/2026 | Offres aux favoris : précisions et réalisation (étape 1 sur 2) | Accepté · à relire |
-| [0123](0123-offres-aux-favoris-etape-2.md) | 22/11/2026 | Offres aux favoris : lecture des notifications et envoi des offres (étape 2) | Accepté · à relire |
+| [0123](0123-offres-aux-favoris-etape-2.md) | 22/11/2026 | Offres aux favoris : lecture des notifications et envoi des offres (étape 2) | Modifié |
+| [0124](0124-offres-aux-favoris-delai-et-offre-existante.md) | 22/11/2026 | Offres aux favoris : toutes les notifications, délai depuis la publication, offre déjà faite | Accepté · à relire |
 
 ## Import
 

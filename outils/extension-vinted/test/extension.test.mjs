@@ -533,7 +533,8 @@ test("offres aux favoris : notifications lues par « Voir tout », empreintes en
   const { app } = await lancer({ lectureFavoris: true });
   assert.equal(app.favoris.length, 1);
   const { favoris } = app.favoris[0];
-  assert.equal(favoris.length, 2); // la notification « vendu » est ignorée
+  assert.equal(favoris.length, 3); // la notification « vendu » est ignorée ; la 3e est chargée en bas de page (#295)
+  assert.equal(favoris[2].titre, "Veste noire L");
   assert.equal(favoris[0].titre, "Jean Levi's 501");
   assert.match(favoris[0].personne, /^[0-9a-f]{64}$/);
   assert.ok(!JSON.stringify(app.favoris).includes("acheteur"));
@@ -560,4 +561,17 @@ test("offre aux favoris : notification de la personne introuvable → erreur, ri
   assert.equal(app.resultatsOffres[0].resultat, "erreur");
   assert.match(app.resultatsOffres[0].message, /Notification du favori introuvable/);
   assert.deepEqual(vinted.offres, []);
+});
+
+test("offre aux favoris : offre moins chère déjà dans la conversation → rien envoyé, « inutile » (#295)", async () => {
+  const { app, vinted } = await lancer({ offres: [OFFRE(false)], vinted: { offreExistante: "8,00 €" } });
+  assert.equal(app.resultatsOffres[0].resultat, "inutile");
+  assert.match(app.resultatsOffres[0].message, /déjà faite dans la conversation à 8,00 € \(≤ 9,50 €\)/);
+  assert.deepEqual(vinted.offres, []);
+});
+
+test("offre aux favoris : offre plus chère déjà dans la conversation → offre envoyée (#295)", async () => {
+  const { app, vinted } = await lancer({ offres: [OFFRE(false)], vinted: { offreExistante: "10,00 €" } });
+  assert.deepEqual(app.resultatsOffres, [{ resultat: "faite" }]);
+  assert.deepEqual(vinted.offres, ["9.50"]);
 });

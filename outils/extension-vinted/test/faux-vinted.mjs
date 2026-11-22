@@ -248,11 +248,30 @@ const PAGE_NOTIFICATIONS = `<!doctype html><html><body><h1>Notifications</h1>
   ${notification("acheteur2", "Pull bleu M", "il y a 2 heures", "/inbox/2?offer_request=true")}
   <div data-testid="inbox-notification-intersection-wrapper"><a data-testid="user-notification-item" href="/inbox/3">
     <div data-testid="user-notification-item--content">Ton article a été vendu.</div></a></div>
+  <div id="suite" style="height: 3000px"></div>
+  <script>
+    // #295 : les notifications suivantes ne sont chargées qu'en bas de la page.
+    addEventListener("scroll", () => {
+      if (window.scrollY < 1000 || document.getElementById("chargee")) return;
+      const div = document.createElement("div");
+      div.id = "chargee";
+      div.innerHTML = ${JSON.stringify(notification("acheteur3", "Veste noire L", "il y a 2 semaines", "/inbox/4?offer_request=true"))};
+      document.getElementById("suite").before(div);
+    });
+  </script>
 </body></html>`;
 
-const pageConversation = (titre) => `<!doctype html><html><body>
+const pageConversation = (titre, offreExistante = null) => `<!doctype html><html><body>
   <iframe title="captcha" src="about:blank" style="display:none"></iframe>
-  <div>${titre} 11,00 € <button type="button">Faire une offre</button></div>
+  <div>${titre} 11,00 € <button type="button" data-testid="make-offer-button">Faire une offre</button></div>
+  ${
+    offreExistante
+      ? // Relevé du 22/11/2026 (#295) : offre déjà faite dans la conversation.
+        `<div data-testid="conversation-content"><span data-testid="offer-request-current-price-label">${offreExistante}</span>
+         <span data-testid="offer-request-original-price-label">11,00 €</span>
+         <span data-testid="offer-status-title">- offre acceptée</span></div>`
+      : ""
+  }
   <div role="dialog" data-testid="offer-modal" class="ReactModal__Content">
     <div data-testid="offer-modal-navigation">Faire une offre
       <button type="button" data-testid="offer-modal-navigation-close-button"
@@ -337,7 +356,12 @@ export function demarrerFauxVinted(options = {}) {
       if (options.bloque) return res.end(PAGE_BLOCAGE);
       if (req.url === "/") return res.end(PAGE_ACCUEIL);
       if (req.url === "/notifications") return res.end(PAGE_NOTIFICATIONS);
-      return res.end(pageConversation(req.url.startsWith("/inbox/1") ? "Jean Levi's 501" : "Pull bleu M"));
+      return res.end(
+        pageConversation(
+          req.url.startsWith("/inbox/1") ? "Jean Levi's 501" : "Pull bleu M",
+          req.url.startsWith("/inbox/1") ? (options.offreExistante ?? null) : null,
+        ),
+      );
     }
     if (req.url === "/clic-offre") {
       let corps = "";
