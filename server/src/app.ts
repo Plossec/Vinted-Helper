@@ -1,6 +1,7 @@
 // Construction de l'application web (routes de l'API + interface compilée).
 import { existsSync } from "node:fs";
 import { sep } from "node:path";
+import fastifyRateLimit from "@fastify/rate-limit";
 import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
 import Fastify, { type FastifyRequest, type RouteOptions } from "fastify";
@@ -95,6 +96,12 @@ export async function creerApp({
   // trustProxy : derrière le relais HTTPS (Caddy), le protocole d'origine sert au cookie « secure ».
   const app = Fastify({ logger: journaliser, trustProxy: true });
   await app.register(fastifyCookie);
+  // Limite du nombre de demandes (#303, alerte CodeQL « Missing rate limiting ») : aucune limite globale, seulement
+  // sur les routes qui la déclarent (photos). Refus 429 avec un message en français.
+  await app.register(fastifyRateLimit, {
+    global: false,
+    errorResponseBuilder: () => new ErreurMetier(429, "Trop de demandes de photos : réessayez dans une minute."),
+  });
   if (surRoute) app.addHook("onRoute", surRoute);
 
   const utilisateurs = new WeakMap<FastifyRequest, UtilisateurConnecte>();

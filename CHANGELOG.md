@@ -5,6 +5,12 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.32.3] — 22/11/2026
+
+### Corrigé
+- Sécurité : les photos et vignettes sont limitées à 1 000 demandes par minute et par utilisateur (alerte GitHub
+  « Missing rate limiting ») ; rien ne change à l'usage normal (#303, ADR-0125).
+
 ## [1.32.1] — 22/11/2026
 
 ### Corrigé
