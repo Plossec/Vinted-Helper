@@ -50,10 +50,14 @@ describe("horaires", () => {
 });
 
 describe("points relais", () => {
-  let t: Awaited<ReturnType<typeof creerAppDeTest>> & { cookie: string };
+  let t: Awaited<ReturnType<typeof creerAppDeTest>> & { cookie: string; jeton: string };
   beforeEach(async () => {
     const base = await creerAppDeTest();
-    t = { ...base, cookie: await seConnecter(base.app) };
+    const cookie = await seConnecter(base.app);
+    const jeton = (await base.app.inject({ method: "POST", url: "/api/publication/jeton", headers: { cookie } })).json<{
+      jeton: string;
+    }>().jeton;
+    t = { ...base, cookie, jeton };
   });
   afterEach(() => t.fermer());
 
@@ -65,6 +69,89 @@ describe("points relais", () => {
     expect(r.statusCode, r.body).toBe(201);
     return r.json<{ id: string; archive: boolean }>();
   }
+
+  it("enregistre un relevé Vinted Go structuré (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Laverie test",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    const r = await requete("POST", `/api/points-relais/${point.id}/releve-vinted-go`, {
+      vintedGoId: "128563",
+      vintedGoStatut: "pas_de_compartiments",
+      horaires: [
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+      ],
+      capacite: {
+        miseAJour: "il y a 11 min",
+        tailles: [
+          { taille: "xs", disponibles: "5+" },
+          { taille: "s", disponibles: "5+" },
+          { taille: "m", disponibles: "5+" },
+        ],
+      },
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json()).toMatchObject({
+      vintedGoId: "128563",
+      vintedGoStatut: "pas_de_compartiments",
+      horaires: [
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+      ],
+      vintedGoCapacite: { miseAJour: "il y a 11 min" },
+    });
+  });
+
+  it("place un relevé Vinted Go demandé en priorité dans la file (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Casier prioritaire",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    expect((await requete("POST", `/api/points-relais/${point.id}/demander-releve-vinted-go`)).statusCode).toBe(200);
+    expect(
+      (
+        await t.app.inject({
+          method: "GET",
+          url: "/api/programme/vinted-go",
+          headers: { authorization: `Bearer ${t.jeton}` },
+        })
+      ).json(),
+    ).toMatchObject({
+      point: { id: point.id, nom: "Casier prioritaire" },
+    });
+  });
+
+  it("un point Vinted Go n'accepte aucune saisie d'horaires manuelle (#262)", async () => {
+    const r = await requete("POST", "/api/points-relais", {
+      transporteur: "vinted_go",
+      nom: "Laverie test",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: SEMAINE,
+    });
+    expect(r.statusCode).toBe(400);
+    expect(r.json<{ erreur: string }>().erreur).toMatch(/horaires.*relevé/i);
+  });
 
   /** Vente d'un article en ligne ; renvoie l'identifiant de la vente. */
   async function vente() {
@@ -97,6 +184,7 @@ describe("points relais", () => {
       transporteur: "vinted_go",
       nom: "Casier Vinted Go",
       url: "https://vintedgo.com/fr",
+      horaires: [[], [], [], [], [], [], []],
     });
     expect((await requete("PUT", `/api/points-relais/${a.id}`, { ...POINT, archive: true })).statusCode).toBe(200);
     const { points: liste, transporteurs } = (await requete("GET", "/api/points-relais")).json<{

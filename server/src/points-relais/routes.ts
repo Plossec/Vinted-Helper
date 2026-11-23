@@ -16,6 +16,10 @@ import {
   ajouterPointRelais,
   choisirPointsRelais,
   type DonneesPointRelais,
+  demanderReleveVintedGo,
+  enregistrerReleveVintedGo,
+  pointVintedGoSuivant,
+  type ReleveVintedGo,
   listerPointsRelais,
   modifierPointRelais,
 } from "./service.js";
@@ -39,6 +43,13 @@ function lienFacultatif(valeur: unknown): string | null {
 function donnees(corps: unknown): DonneesPointRelais {
   const c = objet(corps);
   if (!estTransporteur(c.transporteur)) throw erreurSaisie("Transporteur inconnu.");
+  if (
+    c.transporteur === "vinted_go" &&
+    Array.isArray(c.horaires) &&
+    c.horaires.some((jour) => Array.isArray(jour) && jour.length > 0)
+  ) {
+    throw erreurSaisie("Horaires Vinted Go : utilisez le relevé de l'extension, aucune saisie manuelle.");
+  }
   const erreur = erreurHoraires(c.horaires);
   if (erreur) throw erreurSaisie(erreur);
   return {
@@ -58,7 +69,7 @@ function choixPoint(valeur: unknown, champ: string): string | null | undefined {
   return valeur === undefined ? undefined : uuidFacultatif(valeur, champ);
 }
 
-export function routesPointsRelais(app: FastifyInstance, { base, utilisateurDe }: ContexteRoutes) {
+export function routesPointsRelais(app: FastifyInstance, { base, maintenant, utilisateurDe }: ContexteRoutes) {
   app.get("/api/points-relais", async (requete) =>
     conforme<ListePointsRelais>()({
       transporteurs: TRANSPORTEURS,
@@ -70,9 +81,58 @@ export function routesPointsRelais(app: FastifyInstance, { base, utilisateurDe }
     reponse.code(201).send(await ajouterPointRelais(base, utilisateurDe(requete).id, donnees(requete.body))),
   );
 
+  app.post("/api/points-relais/:id/demander-releve-vinted-go", async (requete) =>
+    demanderReleveVintedGo(base, utilisateurDe(requete).id, idDe(requete.params), maintenant()),
+  );
+
+  app.get("/api/programme/vinted-go", async (requete) => ({
+    point: await pointVintedGoSuivant(base, utilisateurDe(requete).id, maintenant()),
+  }));
+
   app.put("/api/points-relais/:id", async (requete) =>
     modifierPointRelais(base, utilisateurDe(requete).id, idDe(requete.params), donnees(requete.body)),
   );
+
+  app.post("/api/points-relais/:id/releve-vinted-go", async (requete) => {
+    const c = objet(requete.body);
+    const erreur = erreurHoraires(c.horaires);
+    if (erreur) throw erreurSaisie(erreur);
+    const statuts: readonly string[] = [
+      "ouvert",
+      "ferme",
+      "hors_service",
+      "pas_de_compartiments",
+      "ramassage_uniquement",
+    ];
+    if (typeof c.vintedGoStatut !== "string" || !statuts.includes(c.vintedGoStatut))
+      throw erreurSaisie("Statut Vinted Go inconnu.");
+    const vintedGoId = texteObligatoire(c.vintedGoId, "Identifiant Vinted Go", 100).trim();
+    let capacite: ReleveVintedGo["capacite"] = null;
+    if (c.capacite !== undefined && c.capacite !== null) {
+      const obj = objet(c.capacite);
+      const miseAJour = typeof obj.miseAJour === "string" ? obj.miseAJour : null;
+      if (!Array.isArray(obj.tailles)) throw erreurSaisie("Capacité Vinted Go invalide.");
+      const tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[] = obj.tailles.map((v) => {
+        const t = objet(v);
+        if (t.taille !== "xs" && t.taille !== "s" && t.taille !== "m")
+          throw erreurSaisie("Taille de compartiment inconnue.");
+        return { taille: t.taille, disponibles: typeof t.disponibles === "string" ? t.disponibles : null };
+      });
+      capacite = { miseAJour, tailles };
+    }
+    return enregistrerReleveVintedGo(
+      base,
+      utilisateurDe(requete).id,
+      idDe(requete.params),
+      {
+        vintedGoId,
+        vintedGoStatut: c.vintedGoStatut as ReleveVintedGo["vintedGoStatut"],
+        horaires: c.horaires as Horaires,
+        capacite,
+      },
+      maintenant(),
+    );
+  });
 
   app.put("/api/ventes/:id/points-relais", async (requete) => {
     const utilisateurId = utilisateurDe(requete).id;

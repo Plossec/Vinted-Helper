@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { api, type Article, type Etat, type ListePointsRelais, type PointRelais } from "../api.js";
-import { etatOuverture } from "../utilitaires/horaires.js";
+import { etatOuverture, formatJournee, JOURS } from "../utilitaires/horaires.js";
 
 export function libelleTransporteur(transporteurs: readonly Etat[], code: string): string {
   return transporteurs.find((t) => t.code === code)?.libelle ?? code;
@@ -19,6 +19,19 @@ export function ResumePointRelais({
   maintenant?: Date;
 }) {
   const etat = etatOuverture(point.horaires, maintenant);
+  const fermeVintedGo =
+    point.transporteur === "vinted_go" &&
+    point.vintedGoStatut !== null &&
+    ["ferme", "hors_service", "pas_de_compartiments", "ramassage_uniquement"].includes(point.vintedGoStatut);
+  const ouvert = point.transporteur === "vinted_go" && point.vintedGoStatut !== null ? !fermeVintedGo : etat.ouvert;
+  const statutVintedGo =
+    point.vintedGoStatut === "pas_de_compartiments"
+      ? "Pas de compartiments"
+      : point.vintedGoStatut === "ramassage_uniquement"
+        ? "Ramassage uniquement"
+        : point.vintedGoStatut === "hors_service"
+          ? "Hors service"
+          : null;
   return (
     <span className="point-relais">
       <span className="carte-article__ligne">
@@ -26,16 +39,40 @@ export function ResumePointRelais({
           {point.nom}
           {point.archive && " (archivé)"}
         </span>
-        <span className={`badge ${etat.ouvert ? "badge--ouvert" : "badge--ferme"}`}>
-          {etat.ouvert ? "Ouvert" : "Fermé"}
+        <span className={`badge ${ouvert ? "badge--ouvert" : "badge--ferme"}`}>
+          {statutVintedGo ?? (ouvert ? "Ouvert" : "Fermé")}
         </span>
       </span>
       <span className="secondaire">
         {libelleTransporteur(transporteurs, point.transporteur)}
         {point.numero ? ` — n° ${point.numero}` : ""}
       </span>
-      <span className="secondaire">{etat.texte}</span>
+      <span className="secondaire">
+        {point.transporteur === "vinted_go"
+          ? ouvert
+            ? "Ouvert selon les horaires relevés"
+            : "Fermé selon le relevé"
+          : etat.texte}
+      </span>
       {point.adresse && <span>{point.adresse}</span>}
+      {point.transporteur === "vinted_go" && point.vintedGoCapacite && (
+        <span className="secondaire">
+          Capacité{point.vintedGoCapacite.miseAJour ? ` — mise à jour ${point.vintedGoCapacite.miseAJour}` : ""}
+          {point.vintedGoCapacite.tailles
+            .map((taille) => ` · ${taille.taille.toUpperCase()}: ${taille.disponibles ?? "—"}`)
+            .join("")}
+        </span>
+      )}
+      {point.transporteur === "vinted_go" && point.vintedGoReleveLe && (
+        <details className="section">
+          <summary>Horaires complets relevés</summary>
+          {JOURS.map((jour, index) => (
+            <span key={jour} className="secondaire">
+              {jour}: {formatJournee(point.horaires[index] ?? [])}
+            </span>
+          ))}
+        </details>
+      )}
       <span className="point-relais__liens">
         {point.url && (
           <a className="lien" href={point.url} target="_blank" rel="noreferrer">

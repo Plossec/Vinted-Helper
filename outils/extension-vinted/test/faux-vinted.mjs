@@ -351,6 +351,31 @@ export function demarrerFauxVinted(options = {}) {
     clicsAnnulerSuppression: 0,
   };
   const serveur = createServer((req, res) => {
+    if (req.url?.startsWith("/carrier-locations")) {
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      res.end(`<!doctype html><main>
+        <button class="PointListItem_pointItemButton__Rd5K4">Laverie Speed Queen - Sautron58 rue de Bretagne, Sautron, FRPas de compartiments</button>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Heures d'ouverture</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>
+          <li class="PointDetails_workingHoursItem__ejJGJ">lundi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mardi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mercredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">jeudi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">vendredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">samedi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">dimanche00:00-23:59</li>
+        </div>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 5+M: 5+</div>
+        <script>
+          document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
+            b.setAttribute("aria-expanded", "true");
+            b.nextElementSibling.hidden = false;
+          }));
+        </script>
+      </main>`);
+      return;
+    }
     if (req.url === "/" || req.url === "/notifications" || req.url?.startsWith("/inbox/")) {
       res.setHeader("content-type", "text/html; charset=utf-8");
       if (options.bloque) return res.end(PAGE_BLOCAGE);

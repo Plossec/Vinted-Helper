@@ -84,6 +84,7 @@ type MessageContenu =
   | { type: "etat" }
   | { type: "releve-onglet" }
   | { type: "releve-page"; nom: string }
+  | { type: "releve-vinted-go"; point: { id: string; nom: string; adresse: string | null } }
   | { type: "lire-prix" }
   | { type: "baisser-prix"; avant: string; apres: string }
   | { type: "supprimer-annonce" }

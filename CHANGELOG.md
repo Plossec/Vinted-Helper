@@ -5,6 +5,10 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Points relais Vinted Go : lecture à la demande et quotidienne des horaires, du statut ouvert/fermé et de la
+  capacité des compartiments, affichés sur la fiche du point (#262). L’extension passe en 1.20.0.
+
 ### Corrigé
 - Extension Vinted : « Relever cet onglet » accepte maintenant les pages publiques Vinted Go, sans remplir ni envoyer
   quoi que ce soit (#262).

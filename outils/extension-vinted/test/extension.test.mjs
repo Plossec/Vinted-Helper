@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted, OFFRE } from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
-/* global chrome, cycle, diagnostic, releverOnglet */
+/* global chrome, cycle, diagnostic, releverOnglet, releverVintedGoPoint */
 
 const CHROME = process.env.VH_CHROME_TEST ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const SOURCE = join(import.meta.dirname, "..");
@@ -277,6 +277,30 @@ test("« Relever cet onglet » accepte une page Vinted Go (#262)", async () => {
     },
   });
   assert.equal(reponse.ok, true);
+});
+
+test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => {
+  const { reponse } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const onglet = await chrome.tabs.create({
+        url: `${await (async () => {
+          const faux = await chrome.storage.local.get("vinted");
+          return faux.vinted;
+        })()}/carrier-locations?selected_point=128563`,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return releverVintedGoPoint(onglet.id, {
+        id: "128563",
+        nom: "Laverie Speed Queen - Sautron",
+        adresse: "58 rue de Bretagne, Sautron",
+      });
+    },
+  });
+  assert.equal(reponse.ok, true);
+  assert.equal(reponse.releve.vintedGoStatut, "pas_de_compartiments");
+  assert.equal(reponse.releve.horaires.length, 7);
+  assert.equal(reponse.releve.capacite.tailles.length, 3);
 });
 
 test("« Relever cet onglet » sur une page qui n'est pas Vinted : refusé avec un message", async () => {
