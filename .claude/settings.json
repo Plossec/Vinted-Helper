@@ -131,10 +131,10 @@
       {
         "hooks": [
           {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tests-calculs.mjs\"",
-            "timeout": 120
-          }
+  "type": "command",
+  "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/verifier-version.mjs\"",
+  "timeout": 15
+}
         ]
       }
     ]
