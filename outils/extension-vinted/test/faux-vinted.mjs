@@ -706,9 +706,26 @@ const PAGE_POINTS_VINTED_GO = `<!doctype html><main>
         </script>
       </main>`;
 
+/**
+ * Point « Capacité faible » avec le texte exact de la capacité relevé le 22/11/2026 (#313) : la description des
+ * casiers suit la valeur de « M » sans séparateur. Nom et adresse fictifs.
+ */
+const PAGE_CAPACITE_FAIBLE = `<!doctype html><main>
+        <button class="PointListItem_pointItemButton__Rd5K4">Tabac Exemple - Nantes1 place Fictive, Nantes, FRCapacité faible</button>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 min XS: 5+ S: 5+ M: 5+ XS (max 0.5 kg; 38×18×8.5 cm); S (max 10 kg; 38×64×8 cm); M (max 20 kg; 38×64×19 cm)</div>
+        <script>
+          document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
+            b.setAttribute("aria-expanded", "true");
+            b.nextElementSibling.hidden = false;
+          }));
+        </script>
+      </main>`;
+
 export function demarrerFauxVintedGo() {
   const serveur = createServer((req, res) => {
     res.setHeader("content-type", "text/html; charset=utf-8");
+    if (req.url?.includes("/carrier-locations-capacite-faible")) return res.end(PAGE_CAPACITE_FAIBLE);
     if (req.url?.includes("/carrier-locations")) return res.end(PAGE_POINTS_VINTED_GO);
     res.end(
       "<html><body><h1>Points relais</h1><ul><li><button>Point A — ouvert</button></li>" +

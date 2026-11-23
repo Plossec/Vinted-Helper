@@ -955,7 +955,8 @@ function plagesVintedGo(texte) {
 
 /**
  * Capacité « Mis à jour il y a 11 min XS: 5+ S: 3 M: 0 » : chaque taille lue de gauche à droite (la valeur de « S »
- * n'est plus prise dans « XS »), et la mise à jour avec son unité.
+ * n'est plus prise dans « XS »), et la mise à jour avec son unité. La valeur est le nombre affiché seulement
+ * (« 5+ », « 0 ») : la description des casiers qui suit (« XS (max 0.5 kg; …) ») est ignorée (#313).
  */
 function capaciteVintedGo(texte) {
   const t = normaliser(texte);
@@ -963,7 +964,7 @@ function capaciteVintedGo(texte) {
   const miseAJour = new RegExp(`mis à jour (il y a .+?)${fin}`).exec(t)?.[1]?.trim() ?? null;
   const valeurs = new Map();
   for (const m of t.matchAll(new RegExp(`(xs|s|m)\\s*:\\s*(.*?)${fin}`, "g")))
-    if (!valeurs.has(m[1])) valeurs.set(m[1], m[2].trim() || null);
+    if (!valeurs.has(m[1])) valeurs.set(m[1], /^\d+\+?/.exec(m[2].trim())?.[0] ?? (m[2].trim() || null));
   return {
     miseAJour,
     tailles: ["xs", "s", "m"].map((taille) => ({ taille, disponibles: valeurs.get(taille) ?? null })),
@@ -995,15 +996,17 @@ async function releverPointVintedGo(point) {
     .flatMap((s) => [...document.querySelectorAll(s)])
     .find((e) => /(xs|s|m)\s*:/.test(normaliser(e.textContent)));
   const texte = normaliser(bouton.textContent);
-  const vintedGoStatut = texte.includes("pas de compartiments")
-    ? "pas_de_compartiments"
-    : texte.includes("ramassage uniquement")
-      ? "ramassage_uniquement"
-      : texte.includes("hors service")
-        ? "hors_service"
-        : texte.includes("fermé")
-          ? "ferme"
-          : "ouvert";
+  const vintedGoStatut = texte.includes("capacité faible")
+    ? "capacite_faible"
+    : texte.includes("pas de compartiments")
+      ? "pas_de_compartiments"
+      : texte.includes("ramassage uniquement")
+        ? "ramassage_uniquement"
+        : texte.includes("hors service")
+          ? "hors_service"
+          : texte.includes("fermé")
+            ? "ferme"
+            : "ouvert";
   return {
     ok: true,
     releve: {

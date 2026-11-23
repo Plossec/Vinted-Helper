@@ -122,6 +122,25 @@ describe("points relais", () => {
     });
   });
 
+  it("accepte l'état « Capacité faible » d'un point Vinted Go (#313)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Laverie test",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    const r = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      vintedGoId: "128563",
+      vintedGoStatut: "capacite_faible",
+      horaires: [[], [], [], [], [], [], []],
+      capacite: null,
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json()).toMatchObject({ vintedGoStatut: "capacite_faible" });
+  });
+
   it("place un relevé Vinted Go demandé en priorité dans la file (#262)", async () => {
     const point = await ajouter({
       transporteur: "vinted_go",

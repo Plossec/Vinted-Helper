@@ -105,6 +105,7 @@ export function routesPointsRelais(app: FastifyInstance, { base, maintenant, uti
     if (erreur) throw erreurSaisie(erreur);
     const statuts: readonly string[] = [
       "ouvert",
+      "capacite_faible",
       "ferme",
       "hors_service",
       "pas_de_compartiments",

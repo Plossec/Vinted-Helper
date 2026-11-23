@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.3] — 23/11/2026
+
+### Corrigé
+- Points Vinted Go (extension 1.21.2) : la place libre des casiers « M » n'affiche plus la description des casiers
+  (« 5+xs (max 0.5 kg… ») mais seulement le nombre (« 5+ »). Le nouvel état « Capacité faible » du site est reconnu
+  et affiché sur la fiche du point (#313).
+
 ## [1.35.2] — 23/11/2026
 
 ### Modifié

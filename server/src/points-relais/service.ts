@@ -50,7 +50,8 @@ export async function listerPointsRelais(base: Base, utilisateurId: string) {
 
 export interface ReleveVintedGo {
   vintedGoId: string;
-  vintedGoStatut: "ouvert" | "ferme" | "hors_service" | "pas_de_compartiments" | "ramassage_uniquement";
+  vintedGoStatut:
+    "ouvert" | "capacite_faible" | "ferme" | "hors_service" | "pas_de_compartiments" | "ramassage_uniquement";
   horaires: Horaires;
   capacite: { miseAJour: string | null; tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[] } | null;
 }
