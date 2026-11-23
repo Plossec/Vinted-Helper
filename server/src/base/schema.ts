@@ -346,8 +346,10 @@ export const pointRelais = pgTable(
       miseAJour: string | null;
       tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[];
     }>(),
-    /** Date du dernier relevé Vinted Go, UTC. */
+    /** Date du dernier relevé Vinted Go (réussi ou non), UTC : le suivant attend 24 h. */
     vintedGoReleveLe: horodatage("vinted_go_releve_le"),
+    /** Raison de l'échec du dernier relevé Vinted Go, sinon null. */
+    vintedGoErreur: text("vinted_go_erreur"),
     /** Demande manuelle prioritaire de relevé Vinted Go. */
     vintedGoReleveDemandeLe: horodatage("vinted_go_releve_demande_le"),
     notes: text("notes"),

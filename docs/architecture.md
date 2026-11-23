@@ -3,7 +3,7 @@
 Trois vues : l'ensemble (qui parle à qui), le découpage du code, puis le modèle de données. Les schémas sont en
 Mermaid : GitHub les affiche directement.
 
-> À jour pour la version **1.33.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
+> À jour pour la version **1.34.0**. Ce document est relu et mis à jour à chaque nouvelle version (`/version`).
 
 ## 1. Vue d'ensemble
 
@@ -138,7 +138,7 @@ erDiagram
 | `photo`, `article_photo` | Photos (fichiers dans `data/photos`) et leur ordre sur l'article |
 | `historique_statut`, `historique_prix`, `boost` | Suivi dans le temps |
 | `vente`, `vente_article` | Une vente (simple ou groupée), retours compris |
-| `point_relais` | Points relais saisis par l'utilisateur (#210) : horaires, page officielle ; point de dépôt et de retrait d'une vente |
+| `point_relais` | Points relais saisis par l'utilisateur (#210) : horaires, page officielle ; point de dépôt et de retrait d'une vente ; Vinted Go : état, capacité et horaires relevés par l'extension (#262) |
 | `frais_general` | Frais divers hors articles |
 | `publication_vinted` | File d'attente de l'extension et résultat de chaque publication (échec d'une vraie publication → article au statut Erreur) |
 | `signalement_vu` | Alertes « Pour info » de l'écran « À faire » marquées « Vu » (#191), avec leur date de départ |

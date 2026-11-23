@@ -28,6 +28,7 @@ const colonnes = {
   vintedGoStatut: pointRelais.vintedGoStatut,
   vintedGoCapacite: pointRelais.vintedGoCapacite,
   vintedGoReleveLe: pointRelais.vintedGoReleveLe,
+  vintedGoErreur: pointRelais.vintedGoErreur,
   vintedGoReleveDemandeLe: pointRelais.vintedGoReleveDemandeLe,
   notes: pointRelais.notes,
   archive: pointRelais.archive,
@@ -84,12 +85,44 @@ export async function enregistrerReleveVintedGo(
       vintedGoCapacite: releve.capacite,
       vintedGoReleveLe: maintenant,
       vintedGoReleveDemandeLe: null,
+      vintedGoErreur: null,
       horaires: releve.horaires,
     })
     .where(and(eq(pointRelais.id, id), eq(pointRelais.utilisateurId, utilisateurId)))
     .returning(colonnes);
   if (!modifie) throw introuvable("Point relais");
-  return { ...modifie, vintedGoReleveLe: modifie.vintedGoReleveLe?.toISOString() ?? null };
+  return enIso(modifie);
+}
+
+/**
+ * Relevé Vinted Go en échec (#262) : la raison est gardée et affichée sur la fiche ; le relevé compte comme fait
+ * (le suivant attend 24 h, ou une nouvelle demande) pour ne pas rouvrir Vinted Go à chaque passage de l'extension.
+ */
+export async function noterEchecReleveVintedGo(
+  base: Base,
+  utilisateurId: string,
+  id: string,
+  erreur: string,
+  maintenant: Date,
+) {
+  const point = await lirePointRelais(base, utilisateurId, id);
+  if (point.transporteur !== "vinted_go") throw erreurSaisie("Ce point relais n'est pas un point Vinted Go.");
+  const [modifie] = await base
+    .update(pointRelais)
+    .set({ vintedGoReleveLe: maintenant, vintedGoReleveDemandeLe: null, vintedGoErreur: erreur })
+    .where(and(eq(pointRelais.id, id), eq(pointRelais.utilisateurId, utilisateurId)))
+    .returning(colonnes);
+  if (!modifie) throw introuvable("Point relais");
+  return enIso(modifie);
+}
+
+/** Dates du relevé en texte ISO (format de l'API). */
+function enIso<T extends { vintedGoReleveLe: Date | null; vintedGoReleveDemandeLe: Date | null }>(p: T) {
+  return {
+    ...p,
+    vintedGoReleveLe: p.vintedGoReleveLe?.toISOString() ?? null,
+    vintedGoReleveDemandeLe: p.vintedGoReleveDemandeLe?.toISOString() ?? null,
+  };
 }
 
 export async function ajouterPointRelais(base: Base, utilisateurId: string, d: DonneesPointRelais) {
@@ -144,13 +177,16 @@ export async function pointVintedGoSuivant(base: Base, utilisateurId: string, ma
 }
 
 export async function modifierPointRelais(base: Base, utilisateurId: string, id: string, d: DonneesPointRelais) {
-  await lirePointRelais(base, utilisateurId, id);
+  const actuel = await lirePointRelais(base, utilisateurId, id);
+  // Point Vinted Go (#262) : les horaires viennent du relevé, jamais du formulaire ; ils sont gardés tels quels.
+  const horaires = d.transporteur === "vinted_go" && actuel.transporteur === "vinted_go" ? actuel.horaires : d.horaires;
   const [modifie] = await base
     .update(pointRelais)
-    .set(d)
+    .set({ ...d, horaires })
     .where(and(eq(pointRelais.id, id), eq(pointRelais.utilisateurId, utilisateurId)))
     .returning(colonnes);
-  return modifie;
+  if (!modifie) throw introuvable("Point relais");
+  return enIso(modifie);
 }
 
 /**

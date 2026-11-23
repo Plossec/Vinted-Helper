@@ -848,6 +848,89 @@ async function faireOffre(prix, titre, essai) {
   );
 }
 
+// --- Points relais Vinted Go (#262) ---
+
+const JOURS_VINTED_GO = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+
+/** « 9:00 », « 9h00 » → « 09:00 » ; « 23:59 » (fin de journée) → « 24:00 ». */
+function heureVintedGo(texte, fin) {
+  const [h, m] = texte.split(/[:h]/).map(Number);
+  const heure = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  return fin && heure === "23:59" ? "24:00" : heure;
+}
+
+/** Toutes les plages d'une journée (« 09:00-12:00 14:00-19:00 »), pas seulement la première. */
+function plagesVintedGo(texte) {
+  return [...normaliser(texte).matchAll(/(\d{1,2}[:h]\d{2})\s*[-–]\s*(\d{1,2}[:h]\d{2})/g)].map((m) => ({
+    debut: heureVintedGo(m[1], false),
+    fin: heureVintedGo(m[2], true),
+  }));
+}
+
+/**
+ * Capacité « Mis à jour il y a 11 min XS: 5+ S: 3 M: 0 » : chaque taille lue de gauche à droite (la valeur de « S »
+ * n'est plus prise dans « XS »), et la mise à jour avec son unité.
+ */
+function capaciteVintedGo(texte) {
+  const t = normaliser(texte);
+  const fin = "(?=(?:xs|s|m)\\s*:|$)";
+  const miseAJour = new RegExp(`mis à jour (il y a .+?)${fin}`).exec(t)?.[1]?.trim() ?? null;
+  const valeurs = new Map();
+  for (const m of t.matchAll(new RegExp(`(xs|s|m)\\s*:\\s*(.*?)${fin}`, "g")))
+    if (!valeurs.has(m[1])) valeurs.set(m[1], m[2].trim() || null);
+  return {
+    miseAJour,
+    tailles: ["xs", "s", "m"].map((taille) => ({ taille, disponibles: valeurs.get(taille) ?? null })),
+  };
+}
+
+/** Relevé d'un point Vinted Go : le point est ouvert dans la liste, puis horaires, capacité et état sont lus. */
+async function releverPointVintedGo(point) {
+  const v = SELECTEURS.vintedGo;
+  const nom = normaliser(point.nom);
+  const adresse = normaliser(point.adresse ?? "");
+  const boutons = /** @type {HTMLElement[]} */ (v.point.flatMap((s) => [...document.querySelectorAll(s)]));
+  const bouton = boutons.find((b) => {
+    const texte = normaliser(b.textContent);
+    return texte.includes(nom) || (adresse.length > 0 && texte.includes(adresse));
+  });
+  if (!bouton) return { ok: false, message: `Point Vinted Go introuvable sur la page : ${point.nom}.` };
+  cliquer(bouton);
+  await attendreMs(500);
+  for (const b of /** @type {HTMLElement[]} */ (v.accordeon.flatMap((s) => [...document.querySelectorAll(s)])))
+    if (v.titresAccordeon.includes(normaliser(b.textContent)) && b.getAttribute("aria-expanded") !== "true") cliquer(b);
+  await attendreMs(500);
+  const lignes = v.jour.flatMap((s) => [...document.querySelectorAll(s)]);
+  const horaires = JOURS_VINTED_GO.map((jour) => {
+    const ligne = lignes.find((e) => normaliser(e.textContent).startsWith(jour));
+    return ligne ? plagesVintedGo(ligne.textContent) : [];
+  });
+  const region = v.contenuAccordeon
+    .flatMap((s) => [...document.querySelectorAll(s)])
+    .find((e) => /(xs|s|m)\s*:/.test(normaliser(e.textContent)));
+  const texte = normaliser(bouton.textContent);
+  const vintedGoStatut = texte.includes("pas de compartiments")
+    ? "pas_de_compartiments"
+    : texte.includes("ramassage uniquement")
+      ? "ramassage_uniquement"
+      : texte.includes("hors service")
+        ? "hors_service"
+        : texte.includes("fermé")
+          ? "ferme"
+          : "ouvert";
+  return {
+    ok: true,
+    releve: {
+      // Numéro du point chez Vinted Go (adresse « selected_point », sinon celui déjà connu ou saisi).
+      vintedGoId:
+        new URL(location.href).searchParams.get("selected_point") ?? point.vintedGoId ?? point.numero ?? point.id,
+      vintedGoStatut,
+      horaires,
+      capacite: region ? capaciteVintedGo(region.textContent) : null,
+    },
+  };
+}
+
 /** @param {MessageContenu} message */
 async function traiter(message) {
   if (message.type === "etat") return { etat: etatPage() };
@@ -857,67 +940,9 @@ async function traiter(message) {
     return { ok: true, releve: { ...relevePage("onglet"), dialogues: dialogues() } };
 
   if (message.type === "releve-vinted-go") {
-    const boutonPoint = /** @type {HTMLButtonElement|undefined} */ (
-      [...document.querySelectorAll("button.PointListItem_pointItemButton__Rd5K4")].find((b) => {
-        const texte = normaliser(b.textContent);
-        return (
-          texte.includes(normaliser(message.point.nom)) ||
-          (normaliser(message.point.adresse ?? "").length > 0 && texte.includes(normaliser(message.point.adresse)))
-        );
-      })
-    );
-    if (!boutonPoint) return { ok: false, message: `Point Vinted Go introuvable : ${message.point.nom}.` };
-    boutonPoint.click();
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    for (const bouton of /** @type {HTMLButtonElement[]} */ ([
-      ...document.querySelectorAll("button.Accordion_accordionTrigger__25qD0"),
-    ])) {
-      if (
-        ["heures d'ouverture", "capacité du compartiment"].includes(normaliser(bouton.textContent)) &&
-        bouton.getAttribute("aria-expanded") !== "true"
-      ) {
-        bouton.click();
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    const jours = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
-    const horaires = jours.map((jour) => {
-      const ligne = [...document.querySelectorAll("li.PointDetails_workingHoursItem__ejJGJ")].find((e) =>
-        normaliser(e.textContent).startsWith(jour),
-      );
-      const match = normaliser(ligne?.textContent).match(/(\d{2}:\d{2})-(\d{2}:\d{2})/);
-      return match ? [{ debut: match[1], fin: match[2] }] : [];
-    });
-
-    const regionCapacite = [...document.querySelectorAll("div.PointDetails_accordionContent__H3i6G")].find((e) =>
-      /xs\s*:|s\s*:|m\s*:/i.test(normaliser(e.textContent)),
-    );
-    const texteCapacite = normaliser(regionCapacite?.textContent);
-    const miseAJour = texteCapacite.match(/mis à jour il y a ([^xsm]*)/i)?.[1]?.trim() ?? null;
-    const tailles = ["xs", "s", "m"].map((taille) => {
-      const match = texteCapacite.match(new RegExp(`${taille} *: *([^xsm]*?)(?=(?:xs|s|m) *:|$)`, "i"));
-      return { taille, disponibles: match?.[1]?.trim() || null };
-    });
-
-    const textePoint = normaliser(boutonPoint.textContent);
-    const vintedGoStatut = textePoint.includes("pas de compartiments")
-      ? "pas_de_compartiments"
-      : textePoint.includes("ramassage uniquement")
-        ? "ramassage_uniquement"
-        : textePoint.includes("hors service")
-          ? "hors_service"
-          : "ouvert";
-    return {
-      ok: true,
-      releve: {
-        vintedGoId: message.point.id,
-        vintedGoStatut,
-        horaires,
-        capacite: regionCapacite ? { miseAJour, tailles } : null,
-      },
-    };
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    return releverPointVintedGo(message.point);
   }
 
   if (message.type === "releve-page") {

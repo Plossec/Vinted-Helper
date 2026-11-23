@@ -64,6 +64,10 @@ describe("points relais", () => {
   const requete = (method: "GET" | "POST" | "PUT", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { cookie: t.cookie }, ...(payload ? { payload } : {}) });
 
+  /** Demande de l'extension Chrome (jeton « Bearer »). */
+  const extension = (method: "GET" | "POST", url: string, payload?: object) =>
+    t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
+
   async function ajouter(donnees: object = POINT) {
     const r = await requete("POST", "/api/points-relais", donnees);
     expect(r.statusCode, r.body).toBe(201);
@@ -79,7 +83,8 @@ describe("points relais", () => {
       url: "https://vintedgo.com/fr/carrier-locations",
       horaires: [[], [], [], [], [], [], []],
     });
-    const r = await requete("POST", `/api/points-relais/${point.id}/releve-vinted-go`, {
+    // L'extension envoie le relevé avec son jeton : seules les routes /api/programme/* l'acceptent.
+    const r = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
       vintedGoId: "128563",
       vintedGoStatut: "pas_de_compartiments",
       horaires: [
@@ -140,17 +145,53 @@ describe("points relais", () => {
     });
   });
 
-  it("un point Vinted Go n'accepte aucune saisie d'horaires manuelle (#262)", async () => {
+  it("point Vinted Go : horaires du formulaire ignorés, ceux du relevé gardés à la modification (#262)", async () => {
     const r = await requete("POST", "/api/points-relais", {
       transporteur: "vinted_go",
       nom: "Laverie test",
-      adresse: "1 rue des Tests",
-      numero: "128563",
       url: "https://vintedgo.com/fr/carrier-locations",
       horaires: SEMAINE,
     });
-    expect(r.statusCode).toBe(400);
-    expect(r.json<{ erreur: string }>().erreur).toMatch(/horaires.*relevé/i);
+    expect(r.statusCode, r.body).toBe(201);
+    const point = r.json<{ id: string; horaires: unknown[][] }>();
+    expect(point.horaires.every((j) => j.length === 0)).toBe(true);
+    const journee = [{ debut: "08:00", fin: "20:00" }];
+    const releve = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      vintedGoId: "128563",
+      vintedGoStatut: "ouvert",
+      horaires: Array.from({ length: 7 }, () => journee),
+      capacite: null,
+    });
+    expect(releve.statusCode, releve.body).toBe(200);
+    // Modification du nom : les horaires relevés restent, même si le formulaire en renvoie d'autres.
+    const modif = await requete("PUT", `/api/points-relais/${point.id}`, {
+      transporteur: "vinted_go",
+      nom: "Laverie renommée",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: SEMAINE,
+    });
+    expect(modif.statusCode, modif.body).toBe(200);
+    expect(modif.json()).toMatchObject({ nom: "Laverie renommée", horaires: Array.from({ length: 7 }, () => journee) });
+  });
+
+  it("relevé Vinted Go : l'ancienne adresse refuse le jeton ; un échec est gardé et le point attend 24 h (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Casier",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    expect((await extension("POST", `/api/points-relais/${point.id}/releve-vinted-go`, {})).statusCode).toBe(401);
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toMatchObject({ point: { id: point.id } });
+    const echec = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      erreur: "Point Vinted Go introuvable : Casier.",
+    });
+    expect(echec.statusCode, echec.body).toBe(200);
+    expect(echec.json()).toMatchObject({ vintedGoErreur: "Point Vinted Go introuvable : Casier." });
+    // Plus proposé avant 24 h : l'extension ne rouvre pas Vinted Go à chaque passage.
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toEqual({ point: null });
+    t.horloge.avancer(24 * 60 * 60 * 1000 + 60_000);
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toMatchObject({ point: { id: point.id } });
   });
 
   /** Vente d'un article en ligne ; renvoie l'identifiant de la vente. */

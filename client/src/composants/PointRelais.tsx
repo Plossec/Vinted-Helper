@@ -23,7 +23,9 @@ export function ResumePointRelais({
     point.transporteur === "vinted_go" &&
     point.vintedGoStatut !== null &&
     ["ferme", "hors_service", "pas_de_compartiments", "ramassage_uniquement"].includes(point.vintedGoStatut);
-  const ouvert = point.transporteur === "vinted_go" && point.vintedGoStatut !== null ? !fermeVintedGo : etat.ouvert;
+  // Vinted Go relevé (#262) : ouvert seulement si le point n'est pas fermé ET dans ses horaires relevés.
+  const releveVintedGo = point.transporteur === "vinted_go" && point.vintedGoStatut !== null;
+  const ouvert = releveVintedGo ? !fermeVintedGo && etat.ouvert : etat.ouvert;
   const statutVintedGo =
     point.vintedGoStatut === "pas_de_compartiments"
       ? "Pas de compartiments"
@@ -48,12 +50,11 @@ export function ResumePointRelais({
         {point.numero ? ` — n° ${point.numero}` : ""}
       </span>
       <span className="secondaire">
-        {point.transporteur === "vinted_go"
-          ? ouvert
-            ? "Ouvert selon les horaires relevés"
-            : "Fermé selon le relevé"
-          : etat.texte}
+        {releveVintedGo && fermeVintedGo ? "Fermé selon le relevé de Vinted Go" : etat.texte}
       </span>
+      {point.transporteur === "vinted_go" && point.vintedGoErreur && (
+        <span className="secondaire">Dernier relevé en échec : {point.vintedGoErreur}</span>
+      )}
       {point.adresse && <span>{point.adresse}</span>}
       {point.transporteur === "vinted_go" && point.vintedGoCapacite && (
         <span className="secondaire">

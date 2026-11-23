@@ -351,13 +351,13 @@ export function demarrerFauxVinted(options = {}) {
     clicsAnnulerSuppression: 0,
   };
   const serveur = createServer((req, res) => {
-    if (req.url?.startsWith("/carrier-locations")) {
+    if (req.url?.includes("/carrier-locations")) {
       res.setHeader("content-type", "text/html; charset=utf-8");
       res.end(`<!doctype html><main>
         <button class="PointListItem_pointItemButton__Rd5K4">Laverie Speed Queen - Sautron58 rue de Bretagne, Sautron, FRPas de compartiments</button>
         <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Heures d'ouverture</button>
         <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>
-          <li class="PointDetails_workingHoursItem__ejJGJ">lundi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">lundi09:00-12:00 14:00-19:00</li>
           <li class="PointDetails_workingHoursItem__ejJGJ">mardi00:00-23:59</li>
           <li class="PointDetails_workingHoursItem__ejJGJ">mercredi00:00-23:59</li>
           <li class="PointDetails_workingHoursItem__ejJGJ">jeudi00:00-23:59</li>
@@ -366,7 +366,7 @@ export function demarrerFauxVinted(options = {}) {
           <li class="PointDetails_workingHoursItem__ejJGJ">dimanche00:00-23:59</li>
         </div>
         <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
-        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 5+M: 5+</div>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 3M: 0</div>
         <script>
           document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
             b.setAttribute("aria-expanded", "true");
@@ -503,7 +503,7 @@ const PNG = Buffer.from(
 export function demarrerFausseApplication(
   demande,
   actions = [],
-  { lectureCommandes = false, lectureFavoris = false, offres = [] } = {},
+  { lectureCommandes = false, lectureFavoris = false, offres = [], pointVintedGo = null } = {},
 ) {
   const etat = {
     resultats: [],
@@ -513,7 +513,10 @@ export function demarrerFausseApplication(
     commandes: [],
     favoris: [],
     resultatsOffres: [],
+    /** Relevés Vinted Go reçus (#262) : chemin et corps. */
+    relevesVintedGo: [],
   };
+  let pointVG = pointVintedGo;
   let lecture = lectureCommandes;
   let lectureF = lectureFavoris;
   const offresEnFile = [...offres];
@@ -543,6 +546,17 @@ export function demarrerFausseApplication(
         etat.favoris.push(JSON.parse(corps));
         lectureF = false;
         res.end(JSON.stringify({ lus: 0, nouvelles: 0, ignores: [] }));
+      });
+      return;
+    }
+    if (req.url === "/api/programme/vinted-go") return res.end(JSON.stringify({ point: pointVG }));
+    if (req.url?.startsWith("/api/programme/points-relais/")) {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.relevesVintedGo.push({ chemin: req.url, corps: JSON.parse(corps) });
+        pointVG = null;
+        res.end("{}");
       });
       return;
     }

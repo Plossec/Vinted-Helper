@@ -22,6 +22,7 @@ import {
   type ReleveVintedGo,
   listerPointsRelais,
   modifierPointRelais,
+  noterEchecReleveVintedGo,
 } from "./service.js";
 import type { ListePointsRelais } from "../api/types.js";
 import { conforme } from "../api/conforme.js";
@@ -43,14 +44,10 @@ function lienFacultatif(valeur: unknown): string | null {
 function donnees(corps: unknown): DonneesPointRelais {
   const c = objet(corps);
   if (!estTransporteur(c.transporteur)) throw erreurSaisie("Transporteur inconnu.");
-  if (
-    c.transporteur === "vinted_go" &&
-    Array.isArray(c.horaires) &&
-    c.horaires.some((jour) => Array.isArray(jour) && jour.length > 0)
-  ) {
-    throw erreurSaisie("Horaires Vinted Go : utilisez le relevé de l'extension, aucune saisie manuelle.");
-  }
-  const erreur = erreurHoraires(c.horaires);
+  // Point Vinted Go (#262) : horaires lus par l'extension ; ceux du formulaire sont ignorés (vides à la création,
+  // gardés à la modification).
+  const vintedGo = c.transporteur === "vinted_go";
+  const erreur = vintedGo ? null : erreurHoraires(c.horaires);
   if (erreur) throw erreurSaisie(erreur);
   return {
     transporteur: c.transporteur,
@@ -58,7 +55,7 @@ function donnees(corps: unknown): DonneesPointRelais {
     adresse: texteFacultatif(c.adresse, "Adresse", 200),
     numero: texteFacultatif(c.numero, "Numéro du point", 30),
     url: lienFacultatif(c.url),
-    horaires: c.horaires as Horaires,
+    horaires: vintedGo ? [[], [], [], [], [], [], []] : (c.horaires as Horaires),
     notes: texteFacultatif(c.notes, "Notes", 500),
     archive: booleenFacultatif(c.archive, "Archivé") ?? false,
   };
@@ -93,8 +90,17 @@ export function routesPointsRelais(app: FastifyInstance, { base, maintenant, uti
     modifierPointRelais(base, utilisateurDe(requete).id, idDe(requete.params), donnees(requete.body)),
   );
 
-  app.post("/api/points-relais/:id/releve-vinted-go", async (requete) => {
+  // Extension Chrome (jeton « Bearer », routes /api/programme/* seulement) : relevé d'un point Vinted Go, ou son échec.
+  app.post("/api/programme/points-relais/:id/releve-vinted-go", async (requete) => {
     const c = objet(requete.body);
+    if (c.erreur !== undefined && c.erreur !== null)
+      return noterEchecReleveVintedGo(
+        base,
+        utilisateurDe(requete).id,
+        idDe(requete.params),
+        texteObligatoire(c.erreur, "Erreur", 500),
+        maintenant(),
+      );
     const erreur = erreurHoraires(c.horaires);
     if (erreur) throw erreurSaisie(erreur);
     const statuts: readonly string[] = [

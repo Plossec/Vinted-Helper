@@ -32,13 +32,19 @@ async function lancer({
   lectureCommandes = false,
   lectureFavoris = false,
   offres = [],
+  pointVintedGo = null,
   vinted = {},
   passages = 1,
   delaiEtape = 0,
   action = () => cycle(),
 }) {
   const faux = await demarrerFauxVinted(vinted);
-  const app = await demarrerFausseApplication(demande, actions, { lectureCommandes, lectureFavoris, offres });
+  const app = await demarrerFausseApplication(demande, actions, {
+    lectureCommandes,
+    lectureFavoris,
+    offres,
+    pointVintedGo,
+  });
   const extension = copieDeTest();
   const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
     executablePath: CHROME,
@@ -300,7 +306,49 @@ test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => 
   assert.equal(reponse.ok, true);
   assert.equal(reponse.releve.vintedGoStatut, "pas_de_compartiments");
   assert.equal(reponse.releve.horaires.length, 7);
-  assert.equal(reponse.releve.capacite.tailles.length, 3);
+  // Toutes les plages d'une journée, et « 23:59 » lu comme fin de journée.
+  assert.deepEqual(reponse.releve.horaires[0], [
+    { debut: "09:00", fin: "12:00" },
+    { debut: "14:00", fin: "19:00" },
+  ]);
+  assert.deepEqual(reponse.releve.horaires[1], [{ debut: "00:00", fin: "24:00" }]);
+  // Capacité : « S » n'est plus confondu avec « XS », la mise à jour garde son unité.
+  assert.deepEqual(reponse.releve.capacite, {
+    miseAJour: "il y a 11 min",
+    tailles: [
+      { taille: "xs", disponibles: "5+" },
+      { taille: "s", disponibles: "3" },
+      { taille: "m", disponibles: "0" },
+    ],
+  });
+});
+
+/** Passage avec la page Vinted Go servie par le faux site (jamais vintedgo.com). */
+const VINTED_GO_LOCAL = async () => {
+  const { vinted } = await chrome.storage.local.get("vinted");
+  await chrome.storage.local.set({ vintedGo: vinted });
+  return cycle();
+};
+
+const POINT_VG = (nom) => ({ id: "pr-1", nom, adresse: null, url: null, numero: "128563", vintedGoId: null });
+
+test("passage : point Vinted Go relevé et envoyé à l'application par une route /api/programme (#262)", async () => {
+  const { app, etat } = await lancer({
+    pointVintedGo: POINT_VG("Laverie Speed Queen - Sautron"),
+    vinted: {},
+    action: VINTED_GO_LOCAL,
+  });
+  assert.equal(app.relevesVintedGo.length, 1);
+  assert.match(app.relevesVintedGo[0].chemin, /^\/api\/programme\/points-relais\/pr-1\/releve-vinted-go$/);
+  assert.equal(app.relevesVintedGo[0].corps.vintedGoId, "128563"); // numéro du point, pas l'identifiant de l'application
+  assert.equal(etat.pause, false);
+});
+
+test("passage : point Vinted Go introuvable → erreur notée sur le point, rien n'est bloqué (#262)", async () => {
+  const { app, etat } = await lancer({ pointVintedGo: POINT_VG("Point inexistant"), action: VINTED_GO_LOCAL });
+  assert.equal(app.relevesVintedGo.length, 1);
+  assert.match(app.relevesVintedGo[0].corps.erreur, /Point Vinted Go introuvable/);
+  assert.equal(etat.pause, false);
 });
 
 test("« Relever cet onglet » sur une page qui n'est pas Vinted : refusé avec un message", async () => {

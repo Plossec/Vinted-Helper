@@ -265,6 +265,8 @@ export interface PointRelais {
     tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[];
   } | null;
   vintedGoReleveLe: string | null;
+  /** Raison de l'échec du dernier relevé Vinted Go, sinon null. */
+  vintedGoErreur: string | null;
   vintedGoReleveDemandeLe: string | null;
   notes: string | null;
   archive: boolean;
