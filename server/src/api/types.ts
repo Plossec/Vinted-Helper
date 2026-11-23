@@ -365,6 +365,7 @@ export interface ActionVinted {
 export interface OffreRecueLu {
   /** Identifiant de l'offre sur Vinted (transaction / message) — unicité de lecture. */
   offreId: string;
+  /** Numéro de l'annonce Vinted (« 123 » de /items/123-…), vide s'il n'a pas été lu. */
   articleId: string;
   /** Identifiant de la transaction Vinted, si lu. */
   transactionId: string | null;
@@ -388,19 +389,6 @@ export interface OffreRecueLigne {
   prixContreOffre: number | null;
   message: string | null;
   depuis: string;
-}
-
-/** Offre reçue faite sans validation : confiée à l'extension (GET /api/programme/offres-recues/suivante). */
-export interface OffreRecueSuivante {
-  id: string;
-  articleId: string;
-  offreId: string;
-  transactionId: string | null;
-  offerRequestId: string | null;
-  reference: number;
-  nom: string | null;
-  prixOffre: number;
-  prixContreOffre: number | null;
 }
 
 /** État de chaque tâche automatisée (#232) : dates ISO, passage automatique prévu (null : désactivée). */

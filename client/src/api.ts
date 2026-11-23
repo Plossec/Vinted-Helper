@@ -130,7 +130,6 @@ export type {
   MotifSortie,
   OffreRecueLigne,
   OffreRecueLu,
-  OffreRecueSuivante,
   PeriodeTableau,
   PhotoArticle,
   Plage,

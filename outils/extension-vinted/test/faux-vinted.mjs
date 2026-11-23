@@ -349,8 +349,38 @@ export function demarrerFauxVinted(options = {}) {
     clicsSupprimerPage: 0,
     clicsConfirmerSuppression: 0,
     clicsAnnulerSuppression: 0,
+    /** Offres reçues (#302) : requêtes d'écriture vers les adresses internes (doit rester à 0 : lecture seule). */
+    ecrituresApi: 0,
   };
   const serveur = createServer((req, res) => {
+    // Offres reçues (#302) : boîte de réception et conversations (adresses internes), données fictives.
+    if (req.url?.startsWith("/api/v2/") && req.method !== "GET") etat.ecrituresApi++;
+    if (req.url === "/inbox") {
+      res.setHeader("content-type", "text/html; charset=utf-8");
+      return res.end(PAGE_ACCUEIL);
+    }
+    if (req.url?.startsWith("/api/v2/inbox")) {
+      res.setHeader("content-type", "application/json");
+      return res.end(JSON.stringify({ conversations: [{ id: 11 }, { id: 12 }], pagination: { total_entries: 2 } }));
+    }
+    if (req.url?.startsWith("/api/v2/conversations/")) {
+      res.setHeader("content-type", "application/json");
+      const id = Number(req.url.split("/")[4]);
+      const messages =
+        id === 11
+          ? [
+              { entity_type: "message", entity: { body: "Bonjour, il est toujours dispo ?" } },
+              {
+                entity_type: "offer_request_message",
+                entity: { id: 5001, price: { amount: "9.00", currency_code: "EUR" } },
+                created_at_ts: "2026-11-22T10:00:00+01:00",
+              },
+            ]
+          : [{ entity_type: "message", entity: { body: "Merci !" } }];
+      return res.end(
+        JSON.stringify({ conversation: { id, transaction: { id: 7000 + id, item: { id: 987654 } }, messages } }),
+      );
+    }
     if (req.url === "/" || req.url === "/notifications" || req.url?.startsWith("/inbox/")) {
       res.setHeader("content-type", "text/html; charset=utf-8");
       if (options.bloque) return res.end(PAGE_BLOCAGE);
@@ -478,7 +508,7 @@ const PNG = Buffer.from(
 export function demarrerFausseApplication(
   demande,
   actions = [],
-  { lectureCommandes = false, lectureFavoris = false, offres = [] } = {},
+  { lectureCommandes = false, lectureFavoris = false, offres = [], lectureOffresRecues = false } = {},
 ) {
   const etat = {
     resultats: [],
@@ -488,7 +518,10 @@ export function demarrerFausseApplication(
     commandes: [],
     favoris: [],
     resultatsOffres: [],
+    /** Offres reçues envoyées par l'extension (#302). */
+    offresRecues: [],
   };
+  let lectureOR = lectureOffresRecues;
   let lecture = lectureCommandes;
   let lectureF = lectureFavoris;
   const offresEnFile = [...offres];
@@ -509,8 +542,20 @@ export function demarrerFausseApplication(
           lectureCommandes: lecture,
           lectureFavoris: lectureF,
           offres: offresEnFile.length,
+          lectureOffresRecues: lectureOR,
         }),
       );
+    if (req.url === "/api/programme/offres-recues") {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        const recu = JSON.parse(corps);
+        etat.offresRecues.push(recu);
+        lectureOR = false;
+        res.end(JSON.stringify({ nouvelles: recu.offres.length, ignores: [] }));
+      });
+      return;
+    }
     if (req.url === "/api/programme/favoris") {
       let corps = "";
       req.on("data", (c) => (corps += c));

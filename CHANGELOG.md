@@ -8,7 +8,11 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ## [1.34.0] — 23/11/2026
 
 ### Ajouté
-- Tâche « Offres reçues » (#150, ADR-0076, ADR-0126) : l'extension lit les offres reçues via `GET /api/v2/inbox` + `GET /api/v2/conversations/{id}` ; l'application applique les règles : offre ≥ minimum vendeur et article dormant depuis ≥ X jours → acceptation ; sinon contre-offre à mi-chemin (arrondi 0,50 €, plancher) ; sans minimum → signalée dans « À faire » ; la vente est créée quand l'offre est acceptée et payée. (#302)
+- **Offres reçues** (première étape, extension 1.20.0) : la tâche lit les offres reçues dans votre messagerie Vinted
+  et l'écran **À faire** affiche, pour chacune, ce que la règle propose (accepter, contre-offre à mi-chemin, ou rien
+  sans prix vente minimum). **Rien n'est envoyé à Vinted** pour l'instant : vous répondez à la main ; l'envoi
+  automatique viendra après le calibrage sur un premier relevé (#302, ADR-0126). « Lancer maintenant » dans
+  **À faire** demande une lecture.
 
 ## [1.33.1] — 23/11/2026
 

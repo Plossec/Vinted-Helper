@@ -41,7 +41,11 @@ describe("tâche « Offres reçues »", () => {
       ...extra,
     });
 
-  /** Article En ligne à 11 €, minimum 5 €, annonce « titre ». */
+  /** Numéro de l'annonce Vinted de chaque article de test (lien Vinted « /items/{numéro}-… »). */
+  const numeros = new Map<string, string>();
+  const annonce = (id: string) => numeros.get(id) ?? "";
+
+  /** Article En ligne à 11 €, minimum 5 €, annonce « titre », publié sur Vinted (lien avec un numéro d'annonce). */
   async function enLigne(titre: string, extra: object = {}) {
     const id = (
       await requete("POST", "/api/articles", {
@@ -58,7 +62,12 @@ describe("tâche « Offres reçues »", () => {
       })
     ).json<{ id: string }>().id;
     expect((await requete("POST", `/api/articles/${id}/statut`, { vers: "en_ligne" })).statusCode).toBe(200);
-    await t.base.update(article).set({ titreAnnonce: titre }).where(eq(article.id, id));
+    const numero = String(100 + numeros.size);
+    numeros.set(id, numero);
+    await t.base
+      .update(article)
+      .set({ titreAnnonce: titre, urlVinted: `https://www.vinted.fr/items/${numero}-annonce` })
+      .where(eq(article.id, id));
     return id;
   }
 
@@ -89,7 +98,7 @@ describe("tâche « Offres reçues »", () => {
     const a = await enLigne("Sac à dos");
     const d = {
       offreId: "offre-1",
-      articleId: a,
+      articleId: annonce(a),
       transactionId: "tid-1",
       offerRequestId: "orid-1",
       prixOffre: 700,
@@ -121,7 +130,7 @@ describe("tâche « Offres reçues »", () => {
       offres: [
         {
           offreId: "offre-2",
-          articleId: b,
+          articleId: annonce(b),
           transactionId: "tid-2",
           offerRequestId: null,
           prixOffre: 100,
@@ -137,14 +146,14 @@ describe("tâche « Offres reçues »", () => {
     ).toMatch(/minimum vendeur/);
   });
 
-  it("automatique : confiée à l'extension puis faite", async () => {
-    await regler({ offresRecuesActive: true, offresRecuesMode: "automatique", offresRecuesEssai: false });
+  it("lecture seule (#302) : même en mode automatique, l'offre reste à valider ; rien n'est confié à l'extension", async () => {
+    await regler({ offresRecuesMode: "automatique" });
     const a = await enLigne("Offre auto");
     await extension("POST", "/api/programme/offres-recues", {
       offres: [
         {
           offreId: "offre-3",
-          articleId: a,
+          articleId: annonce(a),
           transactionId: "tid-3",
           offerRequestId: "orid-3",
           prixOffre: 900,
@@ -152,16 +161,40 @@ describe("tâche « Offres reçues »", () => {
         },
       ],
     });
-    const { offre } = (await extension("GET", "/api/programme/offres-recues/suivante")).json<{
-      offre: { id: string; articleId: string };
-    }>();
-    expect(offre).toMatchObject({ articleId: a });
-    await extension("POST", `/api/programme/offres-recues/${offre.id}/resultat`, { resultat: "faite" });
     expect(
       (await t.base.select({ etat: offreRecue.etat }).from(offreRecue).where(eq(offreRecue.articleId, a))).at(0)?.etat,
-    ).toBe("faite");
-    // Plus de offre faite en attente
-    expect((await extension("GET", "/api/programme/offres-recues/suivante")).json()).toMatchObject({ offre: null });
+    ).toBe("a_valider");
+    expect((await extension("GET", "/api/programme/offres-recues/suivante")).statusCode).toBe(404);
+  });
+
+  it("annonce sans article dans l'application : offre ignorée avec la raison", async () => {
+    const r = await extension("POST", "/api/programme/offres-recues", {
+      offres: [
+        {
+          offreId: "offre-x",
+          articleId: "999999",
+          transactionId: null,
+          offerRequestId: "orid-x",
+          prixOffre: 500,
+          depuis: "2026-11-21T10:00:00.000Z",
+        },
+      ],
+    });
+    expect(r.json()).toMatchObject({ nouvelles: 0 });
+    expect(r.json<{ ignores: string[] }>().ignores[0]).toMatch(/annonce 999999 sans article/);
+  });
+
+  it("lecture due : à la fréquence après une lecture, et à toute heure après « Lancer maintenant »", async () => {
+    await regler();
+    const attente = async () =>
+      (await extension("GET", "/api/programme/attente")).json<{ lectureOffresRecues: boolean }>().lectureOffresRecues;
+    expect(await attente()).toBe(true);
+    await extension("POST", "/api/programme/offres-recues", { offres: [] });
+    expect(await attente()).toBe(false);
+    expect((await requete("POST", "/api/taches/offres-recues/lancer")).statusCode).toBe(200);
+    expect(await attente()).toBe(true);
+    await extension("POST", "/api/programme/offres-recues", { offres: [] });
+    expect(await attente()).toBe(false);
   });
 
   it("vente créée quand payée (ADR-0076) : article « À expédier », prix accepté, date de fin Vinted", async () => {

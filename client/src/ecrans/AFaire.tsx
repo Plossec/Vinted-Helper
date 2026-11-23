@@ -165,7 +165,7 @@ export function AFaire() {
       {/* Tâches automatisées en mode manuel (#147) : actions prévues, à valider avant que l'extension les fasse. */}
       {alertes !== null && (alertes.aValider ?? 0) > 0 && <ActionsAValider onChangement={() => void charger()} />}
       {/* Tâche « Offres reçues » (#150, ADR-0076) : offres reçues à valider. */}
-      {alertes !== null && <OffresRecues onChangement={() => void charger()} />}
+      {alertes !== null && <OffresRecues />}
       {/* Tâche « Vérification vente finalisée » (#148) : commandes lues sur Vinted. */}
       {alertes !== null && nombreCommandes(alertes) > 0 && <CommandesVinted onChangement={() => void charger()} />}
       {alertes !== null && sections.length === 0 && (alertes.aValider ?? 0) === 0 && nombreCommandes(alertes) === 0 && (

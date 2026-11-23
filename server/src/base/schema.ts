@@ -495,6 +495,8 @@ export const reglages = pgTable(
     offresRecuesPlafond: integer("offres_recues_plafond").notNull().default(30),
     /** Dernière lecture des offres reçues (résultat reçu de l'extension). */
     offresRecuesDernierPassage: horodatage("offres_recues_dernier_passage"),
+    /** « Lancer maintenant » (#230) : lecture des offres demandée, faite au prochain passage, à toute heure. */
+    offresRecuesLancementDemande: horodatage("offres_recues_lancement_demande"),
   },
   // L'extension s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],

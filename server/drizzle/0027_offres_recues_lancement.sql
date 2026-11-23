@@ -1,0 +1,1 @@
+ALTER TABLE "reglages" ADD COLUMN "offres_recues_lancement_demande" timestamp with time zone;

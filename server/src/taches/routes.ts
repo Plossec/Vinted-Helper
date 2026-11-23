@@ -22,15 +22,11 @@ import {
   type ResultatOffre,
 } from "./favoris.js";
 import {
-  enregistrerResultatOffreRecue,
   type OffreRecueLu,
   type OffreRecueLigne,
-  type ResultatOffreRecue,
   recevoirOffres,
   offresAValuer,
-  validerOffresRecues,
   lancerOffresRecues,
-  offreRecueSuivante,
 } from "./offres.js";
 import { ETATS_JOURNAL, etatTaches, type FiltresJournal, listerJournal, TACHES } from "./journal.js";
 import {
@@ -158,28 +154,10 @@ export function routesTaches(app: FastifyInstance, { base, maintenant, utilisate
     return recevoirOffres(base, utilisateurDe(requete).id, offres, maintenant());
   });
 
-  app.get("/api/programme/offres-recues/suivante", async (requete) => ({
-    offre: await offreRecueSuivante(base, utilisateurDe(requete).id, maintenant()),
-  }));
-
-  app.post("/api/programme/offres-recues/:id/resultat", async (requete) => {
-    const c = objet(requete.body);
-    let r: ResultatOffreRecue;
-    if (c.resultat === "faite") r = { resultat: "faite" };
-    else if (c.resultat === "erreur")
-      r = { resultat: "erreur", message: texteObligatoire(c.message, "Message", 1000), releve: c.releve === true };
-    else throw erreurSaisie("Résultat inconnu.");
-    await enregistrerResultatOffreRecue(base, utilisateurDe(requete).id, idDe(requete.params), r, maintenant());
-    return { ok: true };
-  });
-
   // --- Tâche « Offres reçues » : écran « À faire » ---
   app.get("/api/taches/offres-recues", async (requete) =>
     conforme<OffreRecueLigne[]>()(await offresAValuer(base, utilisateurDe(requete).id)),
   );
-  app.post("/api/taches/offres-recues/appliquer", async (requete) => ({
-    nombre: await validerOffresRecues(base, utilisateurDe(requete).id, idsObligatoires(objet(requete.body).ids)),
-  }));
   app.post("/api/taches/offres-recues/lancer", async (requete) => {
     await lancerOffresRecues(base, utilisateurDe(requete).id, maintenant());
     return { ok: true };
@@ -296,7 +274,9 @@ function lireOffreRecue(brut: unknown, i: number): OffreRecueLu {
   const c = objet(brut);
   const champ = `Offre ${i + 1}`;
   const offreId = texteObligatoire(c.offreId, `${champ} : offre`, 200);
-  const articleId = uuidObligatoire(c.articleId, `${champ} : article`);
+  // Numéro de l'annonce Vinted (« 123 » de /items/123-…) ; vide si l'extension ne l'a pas lu.
+  const articleId = typeof c.articleId === "string" && /^\d{0,20}$/.test(c.articleId) ? c.articleId : null;
+  if (articleId === null) throw erreurSaisie(`${champ} : numéro d'annonce Vinted invalide.`);
   if (typeof c.prixOffre !== "number" || !Number.isInteger(c.prixOffre) || c.prixOffre <= 0 || c.prixOffre > 10_000_000)
     throw erreurSaisie(`${champ} : prix de l'offre en centimes attendu.`);
   const depuis = typeof c.depuis === "string" ? new Date(c.depuis) : new Date(Number.NaN);

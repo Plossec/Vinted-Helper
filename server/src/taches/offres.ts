@@ -4,27 +4,22 @@
 // baisse de prix ou la mise en ligne), sinon contre-offre à mi-chemin ; offre < minimum → contre-offre à mi-chemin ;
 // sans minimum → offre signalée dans l'application (#191). La vente est créée quand l'offre est acceptée et payée
 // (réutilisation de la lecture du Porte-monnaie, ADR-0097).
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import type { Base } from "../base/connexion.js";
 import { article, historiquePrix, historiqueStatut, offreRecue, reglages } from "../base/schema.js";
-import type { OffreRecueLigne, OffreRecueLu, OffreRecueSuivante } from "../api/types.js";
-import { chargerArticle } from "../articles/service.js";
+import type { OffreRecueLigne, OffreRecueLu } from "../api/types.js";
+import { contreOffreMiChemin } from "../calculs/contre-offre.js";
 import { passageDu } from "../metier/taches.js";
-import { erreurSaisie, introuvable } from "../utilitaires/erreurs.js";
+import { numeroAnnonce } from "./finalisation.js";
+import { introuvable } from "../utilitaires/erreurs.js";
 
-export type { OffreRecueLigne, OffreRecueLu, OffreRecueSuivante } from "../api/types.js";
+export type { OffreRecueLigne, OffreRecueLu } from "../api/types.js";
 
 /** Règle ADR-0076 appliquée à une offre reçue. */
 export interface PlanOffre {
   etat: "accepter" | "contreOffre" | "signaler";
   /** Contre-offre prévue (centimes), à afficher dans « À faire » en mode manuel. */
   prixContreOffre: number | null;
-}
-
-/** Contre-offre à mi-chemin entre l'offre et le prix affiché, arrondie vers le haut au 0,50 €, jamais sous le minimum (#91). */
-function contreOffre(prixOffre: number, prixAffiche: number, minimum: number): number {
-  const milieu = Math.ceil((prixOffre + prixAffiche) / 2 / 50) * 50;
-  return Math.min(Math.max(milieu, minimum), prixAffiche);
 }
 
 /**
@@ -39,7 +34,7 @@ export function planOffreRecue(
   if (a.prixAffiche === null) return { etat: "signaler", prixContreOffre: null };
   if (a.prixVenteMinimum === null) return { etat: "signaler", prixContreOffre: null };
   if (o.prixOffre >= a.prixVenteMinimum && dormante) return { etat: "accepter", prixContreOffre: null };
-  return { etat: "contreOffre", prixContreOffre: contreOffre(o.prixOffre, a.prixAffiche, a.prixVenteMinimum) };
+  return { etat: "contreOffre", prixContreOffre: contreOffreMiChemin(o.prixOffre, a.prixAffiche, a.prixVenteMinimum) };
 }
 
 /** Dernier changement significatif de l'article : dernière mise en ligne ou dernière baisse de prix (ADR-0076). */
@@ -74,12 +69,26 @@ export async function recevoirOffres(
     if (!r) throw introuvable("Réglages");
     const ignores: string[] = [];
     let nouvelles = 0;
+    // L'extension lit le numéro de l'annonce Vinted : l'article est celui dont le lien Vinted porte ce numéro.
+    const parAnnonce = new Map(
+      (
+        await tx
+          .select({
+            id: article.id,
+            urlVinted: article.urlVinted,
+            prixVenteMinimum: article.prixVenteMinimum,
+            prixAffiche: article.prixAffiche,
+          })
+          .from(article)
+          .where(
+            and(eq(article.utilisateurId, utilisateurId), isNull(article.supprimeLe), isNotNull(article.urlVinted)),
+          )
+      ).map((x) => [numeroAnnonce(x.urlVinted), x] as const),
+    );
     for (const o of offres) {
-      let a;
-      try {
-        a = await chargerArticle(tx, utilisateurId, o.articleId);
-      } catch {
-        ignores.push(`Offre « ${o.offreId} » : article inconnu.`);
+      const a = parAnnonce.get(o.articleId);
+      if (!a) {
+        ignores.push(`Offre « ${o.offreId} » : annonce ${o.articleId || "inconnue"} sans article dans l'application.`);
         continue;
       }
       if (
@@ -105,7 +114,9 @@ export async function recevoirOffres(
         offerRequestId: o.offerRequestId,
         prixOffre: o.prixOffre,
         depuis: new Date(o.depuis),
-        etat: plan.etat === "signaler" ? "signale" : r.offresRecuesMode === "automatique" ? "en_attente" : "a_valider",
+        // Lecture seule (#302, 23/11/2026) : rien n'est envoyé à Vinted tant que la lecture n'est pas calibrée ; même en
+        // mode automatique, l'offre reste à valider.
+        etat: plan.etat === "signaler" ? "signale" : "a_valider",
         prixContreOffre: plan.prixContreOffre,
         message: plan.etat === "signaler" ? "Offre reçue sans minimum vendeur : rien à faire sur Vinted." : null,
         essai: r.offresRecuesEssai,
@@ -113,6 +124,11 @@ export async function recevoirOffres(
       });
       nouvelles++;
     }
+    // Passage fait : la lecture suivante attend la fréquence réglée ; une demande « Lancer maintenant » est satisfaite.
+    await tx
+      .update(reglages)
+      .set({ offresRecuesDernierPassage: maintenant, offresRecuesLancementDemande: null })
+      .where(eq(reglages.utilisateurId, utilisateurId));
     return { nouvelles, ignores };
   });
 }
@@ -137,23 +153,11 @@ export async function offresAValuer(base: Base, utilisateurId: string): Promise<
   return lignes.map((l) => ({ ...l, depuis: l.depuis.toISOString() }));
 }
 
-/** « Appliquer » (→ en attente de l'extension) des offres reçues à valider en mode manuel. */
-export async function validerOffresRecues(base: Base, utilisateurId: string, ids: string[]): Promise<number> {
-  if (ids.length === 0) throw erreurSaisie("Cochez au moins une offre.");
-  return base
-    .update(offreRecue)
-    .set({ etat: "en_attente", manuelle: false })
-    .where(
-      and(eq(offreRecue.utilisateurId, utilisateurId), inArray(offreRecue.id, ids), eq(offreRecue.etat, "a_valider")),
-    )
-    .returning({ id: offreRecue.id })
-    .then((lignes) => lignes.length);
-}
-
 /** La lecture des offres est-elle due : « Lancer maintenant » (à toute heure), ou tâche activée, dans la plage et à sa fréquence ? */
 export async function lectureOffresRecuesDue(base: Base, utilisateurId: string, maintenant: Date): Promise<boolean> {
   const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
   if (!r) return false;
+  if (r.offresRecuesLancementDemande) return true;
   return passageDu(
     {
       active: r.offresRecuesActive,
@@ -170,80 +174,6 @@ export async function lectureOffresRecuesDue(base: Base, utilisateurId: string, 
 export async function lancerOffresRecues(base: Base, utilisateurId: string, maintenant: Date): Promise<void> {
   await base
     .update(reglages)
-    .set({ offresRecuesDernierPassage: maintenant })
+    .set({ offresRecuesLancementDemande: maintenant })
     .where(eq(reglages.utilisateurId, utilisateurId));
-}
-
-/**
- * Passage : la prochaine offre reçue faite sans validation (automatique), confiée à l'extension
- * (un passage à la fois, plage horaire et pause réglés à l'application, ADR-0078).
- */
-export async function offreRecueSuivante(
-  base: Base,
-  utilisateurId: string,
-  maintenant: Date,
-): Promise<OffreRecueSuivante | null> {
-  const [r] = await base.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
-  if (
-    !r ||
-    !passageDu(
-      {
-        active: r.offresRecuesActive,
-        heureDebut: r.offresRecuesHeureDebut,
-        heureFin: r.offresRecuesHeureFin,
-        frequenceHeures: r.offresRecuesFrequenceHeures,
-        dernierPassage: r.offresRecuesDernierPassage,
-      },
-      maintenant,
-    )
-  )
-    return null;
-  await base
-    .update(reglages)
-    .set({ offresRecuesDernierPassage: maintenant })
-    .where(eq(reglages.utilisateurId, utilisateurId));
-  const [offre] = await base
-    .select({
-      id: offreRecue.id,
-      articleId: offreRecue.articleId,
-      offreId: offreRecue.offreId,
-      transactionId: offreRecue.transactionId,
-      offerRequestId: offreRecue.offerRequestId,
-      reference: article.reference,
-      nom: article.nom,
-      prixOffre: offreRecue.prixOffre,
-      prixContreOffre: offreRecue.prixContreOffre,
-    })
-    .from(offreRecue)
-    .innerJoin(article, eq(article.id, offreRecue.articleId))
-    .where(and(eq(offreRecue.utilisateurId, utilisateurId), eq(offreRecue.etat, "en_attente")))
-    .orderBy(asc(offreRecue.creeLe));
-  if (!offre) return null;
-  await base.update(offreRecue).set({ debutLe: maintenant }).where(eq(offreRecue.id, offre.id));
-  return { ...offre, reference: offre.reference ?? 0 };
-}
-
-export type ResultatOffreRecue = { resultat: "faite" } | { resultat: "erreur"; message: string; releve?: boolean };
-
-/** Résultat renvoyé par l'extension : faite (offre acceptée, attendue la lecture du Porte-mon laboratories), erreur. */
-export async function enregistrerResultatOffreRecue(
-  base: Base,
-  utilisateurId: string,
-  id: string,
-  r: ResultatOffreRecue,
-  maintenant: Date,
-): Promise<{ id: string } | null> {
-  const [x] = await base
-    .update(offreRecue)
-    .set({
-      etat: r.resultat,
-      finLe: maintenant,
-      message: r.resultat === "erreur" ? r.message : null,
-      releve: r.resultat === "erreur" && r.releve === true,
-    })
-    .where(
-      and(eq(offreRecue.id, id), eq(offreRecue.utilisateurId, utilisateurId), inArray(offreRecue.etat, ["en_attente"])),
-    )
-    .returning({ id: offreRecue.id });
-  return x ?? null;
 }

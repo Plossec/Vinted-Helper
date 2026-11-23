@@ -152,12 +152,6 @@ function creerApi({ adresse, jeton }) {
     async offresRecues(corps) {
       return (await appeler("/api/programme/offres-recues", { method: "POST", body: JSON.stringify(corps) })).json();
     },
-    async offreRecueSuivante() {
-      return (await (await appeler("/api/programme/offres-recues/suivante")).json()).offre;
-    },
-    async enregistrerResultatOffreRecue(id, corps) {
-      await appeler(`/api/programme/offres-recues/${id}/resultat`, { method: "POST", body: JSON.stringify(corps) });
-    },
     async commandes(corps) {
       await appeler("/api/programme/commandes", { method: "POST", body: JSON.stringify(corps) });
     },
@@ -588,18 +582,34 @@ async function reponseOffresRecues(onglet, message) {
   return r;
 }
 
-/** Lecture des offres reçues : inbox + conversations lues par le script de contenu, envoyées à l'application. */
+/**
+ * Lecture des offres reçues (#302, lecture seule) : boîte de réception et conversations lues par le script de contenu,
+ * offres envoyées à l'application ; la forme des réponses (clés, jamais les valeurs) est gardée comme relevé pour le
+ * calibrage. Rien n'est envoyé à Vinted.
+ */
 async function lireOffresRecues(api, vinted) {
-  await journal("Offres reçues : lecture via GET /api/v2/inbox…");
+  await journal("Offres reçues : lecture de la messagerie…");
   try {
     const onglet = await ouvrirOnglet(`${vinted}/inbox`);
     await verifierPage(onglet);
     const r = await reponseOffresRecues(onglet, { type: "lire-offres-recues" });
+    if (r.releve) {
+      await chrome.storage.local.set({
+        diagnostic: {
+          ...r.releve,
+          date: new Date().toISOString(),
+          etape: "offres reçues (forme des réponses)",
+          erreur: null,
+          elements: [],
+          selecteursTrouves: {},
+        },
+      });
+    }
     const bilan = await api.offresRecues({ offres: r.offres ?? [] });
     await journal(
-      `Offres reçues : ${bilan.nouvelles} nouvelle(s), ${bilan.ignores?.length ?? 0} ignorée(s)` +
-        (bilan.ignores?.length > 0 ? ` ; ${bilan.ignores.join(" ; ")}` : "") +
-        ".",
+      `Offres reçues : ${r.offres?.length ?? 0} lue(s), ${bilan.nouvelles} nouvelle(s)` +
+        (bilan.ignores?.length > 0 ? ` ; ignorées : ${bilan.ignores.join(" ; ")}` : "") +
+        ". Relevé : fenêtre de l'extension → « Dernier relevé ».",
     );
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : String(erreur);
@@ -664,37 +674,6 @@ async function faireOffreSuivante(api, vinted, signaler) {
           ? `${reference} : ${resultat.message}`
           : `${reference} : erreur — ${resultat.message}`,
   );
-  if (arret) await mettreEnPause(arret);
-}
-
-/** Exécute l'offre reçue faite sans validation : acceptation (PUT accept) ou contre-offre (POST offers). */
-async function executerOffreRecueSuivante(api, vinted) {
-  const offre = await api.offreRecueSuivante();
-  if (!offre) return;
-  await ecrireEtat({ offreRecueEnCours: offre.id });
-  const reference = `#${String(offre.reference).padStart(4, "0")}`;
-  await journal(
-    `${reference} : ${offre.prixContreOffre !== null ? `contre-offre à ${offre.prixContreOffre} €` : "acceptation"}${offre.nom ? ` (${offre.nom})` : ""}…`,
-  );
-  const avant = await empreinteReleve();
-  /** @type {{ resultat: string; message?: string; releve?: boolean }} */
-  let resultat;
-  let arret = null;
-  try {
-    const onglet = await ouvrirOnglet(`${vinted}/inbox`);
-    await verifierPage(onglet);
-    const r = await reponseOffresRecues(onglet, { type: "executer-offre-recue", offre });
-    if (!r.resultat) throw new Error("Aucune confirmation reçue de l'offre sur Vinted.");
-    resultat = { resultat: r.resultat };
-  } catch (erreur) {
-    const message = erreur instanceof Error ? erreur.message : String(erreur);
-    resultat = { resultat: "erreur", message };
-    if (erreur instanceof Arret) arret = message;
-  }
-  if (resultat.resultat === "erreur") resultat.releve = (await empreinteReleve()) !== avant;
-  await api.enregistrarResultatOffreRecue(offre.id, resultat);
-  await ecrireEtat({ offreRecueEnCours: null });
-  await journal(`${reference} : ${resultat.resultat}${resultat.message ? ` — ${resultat.message}` : ""}.`);
   if (arret) await mettreEnPause(arret);
 }
 
@@ -788,9 +767,9 @@ async function cycleSansVerrou(manuel) {
   if (nombre === 0 && lectureCommandes) return lireCommandes(api, vinted);
   // Offres aux favoris (#149) : lecture des notifications, puis les actions des dormants (prioritaires), puis les offres.
   if (nombre === 0 && lectureFavoris) return lireFavoris(api, vinted);
+  // Offres reçues (#302) : lecture seule, après les autres lectures.
   if (nombre === 0 && lectureOffresRecues) return lireOffresRecues(api, vinted);
   if (nombre === 0 && actions === 0) return faireOffreSuivante(api, vinted, signaler);
-  if (nombre === 0) return executerOffreRecueSuivante(api, vinted);
   if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).
