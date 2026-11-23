@@ -86,6 +86,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0067](0067-statut-en-stock.md) | 14/10/2026 | Statut « En stock » | Accepté |
 | [0092](0092-sortie-du-stock-depuis-un-colis-en-cours.md) | 15/10/2026 | Sortie du stock depuis un colis en cours | Accepté |
 | [0109](0109-points-relais-saisis-et-relies-aux-ventes.md) | 17/11/2026 | Points relais saisis et reliés aux ventes | Accepté |
+| [0126](0126-points-relais-vinted-go-releves-par-l-extension.md) | 23/11/2026 | Points relais Vinted Go : relevés par l'extension | Proposé · à relire |
 
 ## Liste
 

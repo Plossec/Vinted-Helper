@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.34.0] — 23/11/2026
+
+### Ajouté
+- Points relais Vinted Go : lecture à la demande et quotidienne des horaires, du statut ouvert/fermé et de la
+  capacité des compartiments, affichés sur la fiche du point ; un relevé en échec affiche sa raison et n'arrête pas
+  le reste de l'extension (#262, ADR-0126). L’extension passe en 1.20.0 ; sur Vinted Go, elle ne fait toujours que
+  lire (le garde-fou de #309 admet ce relevé).
+
 ## [1.33.1] — 23/11/2026
 
 ### Corrigé

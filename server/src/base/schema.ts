@@ -337,6 +337,21 @@ export const pointRelais = pgTable(
     url: text("url"),
     /** 7 jours (lundi → dimanche), plages « HH:MM », heure de Paris. */
     horaires: jsonb("horaires").$type<Horaires>().notNull(),
+    /** Identifiant externe Vinted Go (query selected_point), sans coordonnées ni adresse stockée. */
+    vintedGoId: text("vinted_go_id"),
+    /** Statut de lecture Vinted Go : ouvert / fermé / hors-service / ramassage uniquement / pas de compartiments. */
+    vintedGoStatut: text("vinted_go_statut"),
+    /** Dernier relevé de capacité : mise à jour relative et compte par taille. */
+    vintedGoCapacite: jsonb("vinted_go_capacite").$type<{
+      miseAJour: string | null;
+      tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[];
+    }>(),
+    /** Date du dernier relevé Vinted Go (réussi ou non), UTC : le suivant attend 24 h. */
+    vintedGoReleveLe: horodatage("vinted_go_releve_le"),
+    /** Raison de l'échec du dernier relevé Vinted Go, sinon null. */
+    vintedGoErreur: text("vinted_go_erreur"),
+    /** Demande manuelle prioritaire de relevé Vinted Go. */
+    vintedGoReleveDemandeLe: horodatage("vinted_go_releve_demande_le"),
     notes: text("notes"),
     archive: boolean("archive").notNull().default(false),
     creeLe: horodatage("cree_le").notNull().defaultNow(),

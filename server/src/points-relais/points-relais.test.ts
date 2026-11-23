@@ -50,21 +50,149 @@ describe("horaires", () => {
 });
 
 describe("points relais", () => {
-  let t: Awaited<ReturnType<typeof creerAppDeTest>> & { cookie: string };
+  let t: Awaited<ReturnType<typeof creerAppDeTest>> & { cookie: string; jeton: string };
   beforeEach(async () => {
     const base = await creerAppDeTest();
-    t = { ...base, cookie: await seConnecter(base.app) };
+    const cookie = await seConnecter(base.app);
+    const jeton = (await base.app.inject({ method: "POST", url: "/api/publication/jeton", headers: { cookie } })).json<{
+      jeton: string;
+    }>().jeton;
+    t = { ...base, cookie, jeton };
   });
   afterEach(() => t.fermer());
 
   const requete = (method: "GET" | "POST" | "PUT", url: string, payload?: object) =>
     t.app.inject({ method, url, headers: { cookie: t.cookie }, ...(payload ? { payload } : {}) });
 
+  /** Demande de l'extension Chrome (jeton « Bearer »). */
+  const extension = (method: "GET" | "POST", url: string, payload?: object) =>
+    t.app.inject({ method, url, headers: { authorization: `Bearer ${t.jeton}` }, ...(payload ? { payload } : {}) });
+
   async function ajouter(donnees: object = POINT) {
     const r = await requete("POST", "/api/points-relais", donnees);
     expect(r.statusCode, r.body).toBe(201);
     return r.json<{ id: string; archive: boolean }>();
   }
+
+  it("enregistre un relevé Vinted Go structuré (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Laverie test",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    // L'extension envoie le relevé avec son jeton : seules les routes /api/programme/* l'acceptent.
+    const r = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      vintedGoId: "128563",
+      vintedGoStatut: "pas_de_compartiments",
+      horaires: [
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+      ],
+      capacite: {
+        miseAJour: "il y a 11 min",
+        tailles: [
+          { taille: "xs", disponibles: "5+" },
+          { taille: "s", disponibles: "5+" },
+          { taille: "m", disponibles: "5+" },
+        ],
+      },
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json()).toMatchObject({
+      vintedGoId: "128563",
+      vintedGoStatut: "pas_de_compartiments",
+      horaires: [
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+        [{ debut: "00:00", fin: "24:00" }],
+      ],
+      vintedGoCapacite: { miseAJour: "il y a 11 min" },
+    });
+  });
+
+  it("place un relevé Vinted Go demandé en priorité dans la file (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Casier prioritaire",
+      adresse: "1 rue des Tests",
+      numero: "128563",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    expect((await requete("POST", `/api/points-relais/${point.id}/demander-releve-vinted-go`)).statusCode).toBe(200);
+    expect(
+      (
+        await t.app.inject({
+          method: "GET",
+          url: "/api/programme/vinted-go",
+          headers: { authorization: `Bearer ${t.jeton}` },
+        })
+      ).json(),
+    ).toMatchObject({
+      point: { id: point.id, nom: "Casier prioritaire" },
+    });
+  });
+
+  it("point Vinted Go : horaires du formulaire ignorés, ceux du relevé gardés à la modification (#262)", async () => {
+    const r = await requete("POST", "/api/points-relais", {
+      transporteur: "vinted_go",
+      nom: "Laverie test",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: SEMAINE,
+    });
+    expect(r.statusCode, r.body).toBe(201);
+    const point = r.json<{ id: string; horaires: unknown[][] }>();
+    expect(point.horaires.every((j) => j.length === 0)).toBe(true);
+    const journee = [{ debut: "08:00", fin: "20:00" }];
+    const releve = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      vintedGoId: "128563",
+      vintedGoStatut: "ouvert",
+      horaires: Array.from({ length: 7 }, () => journee),
+      capacite: null,
+    });
+    expect(releve.statusCode, releve.body).toBe(200);
+    // Modification du nom : les horaires relevés restent, même si le formulaire en renvoie d'autres.
+    const modif = await requete("PUT", `/api/points-relais/${point.id}`, {
+      transporteur: "vinted_go",
+      nom: "Laverie renommée",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: SEMAINE,
+    });
+    expect(modif.statusCode, modif.body).toBe(200);
+    expect(modif.json()).toMatchObject({ nom: "Laverie renommée", horaires: Array.from({ length: 7 }, () => journee) });
+  });
+
+  it("relevé Vinted Go : l'ancienne adresse refuse le jeton ; un échec est gardé et le point attend 24 h (#262)", async () => {
+    const point = await ajouter({
+      transporteur: "vinted_go",
+      nom: "Casier",
+      url: "https://vintedgo.com/fr/carrier-locations",
+      horaires: [[], [], [], [], [], [], []],
+    });
+    expect((await extension("POST", `/api/points-relais/${point.id}/releve-vinted-go`, {})).statusCode).toBe(401);
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toMatchObject({ point: { id: point.id } });
+    const echec = await extension("POST", `/api/programme/points-relais/${point.id}/releve-vinted-go`, {
+      erreur: "Point Vinted Go introuvable : Casier.",
+    });
+    expect(echec.statusCode, echec.body).toBe(200);
+    expect(echec.json()).toMatchObject({ vintedGoErreur: "Point Vinted Go introuvable : Casier." });
+    // Plus proposé avant 24 h : l'extension ne rouvre pas Vinted Go à chaque passage.
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toEqual({ point: null });
+    t.horloge.avancer(24 * 60 * 60 * 1000 + 60_000);
+    expect((await extension("GET", "/api/programme/vinted-go")).json()).toMatchObject({ point: { id: point.id } });
+  });
 
   /** Vente d'un article en ligne ; renvoie l'identifiant de la vente. */
   async function vente() {
@@ -97,6 +225,7 @@ describe("points relais", () => {
       transporteur: "vinted_go",
       nom: "Casier Vinted Go",
       url: "https://vintedgo.com/fr",
+      horaires: [[], [], [], [], [], [], []],
     });
     expect((await requete("PUT", `/api/points-relais/${a.id}`, { ...POINT, archive: true })).statusCode).toBe(200);
     const { points: liste, transporteurs } = (await requete("GET", "/api/points-relais")).json<{

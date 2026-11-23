@@ -99,6 +99,25 @@ export function PointsRelais() {
   const carte = (p: PointRelais) => (
     <li key={p.id} className="carte-article">
       <ResumePointRelais point={p} transporteurs={liste?.transporteurs ?? []} />
+      {p.transporteur === "vinted_go" && (
+        <button
+          type="button"
+          className="lien"
+          onClick={() => {
+            void (async () => {
+              try {
+                await api.post(`/api/points-relais/${p.id}/demander-releve-vinted-go`, {});
+                setMessage("Relevé Vinted Go demandé. Il sera effectué au prochain passage de l’extension.");
+                window.open(p.url ?? "https://vintedgo.com/fr/carrier-locations", "_blank", "noopener,noreferrer");
+              } catch (e) {
+                setErreur(e instanceof Error ? e.message : "Demande de relevé impossible.");
+              }
+            })();
+          }}
+        >
+          Relever maintenant
+        </button>
+      )}
       <button
         type="button"
         className="lien"
@@ -177,19 +196,23 @@ export function PointsRelais() {
               placeholder="https://…"
             />
           </label>
-          <fieldset className="horaires">
-            <legend>Horaires (vide = fermé)</legend>
-            {JOURS.map((jour, i) => (
-              <label key={jour} className="champ">
-                <span>{jour}</span>
-                <input
-                  value={form.jours[i] ?? ""}
-                  placeholder={i === 0 ? "ex. 9h-12h, 14h-19h" : "Fermé"}
-                  onChange={(e) => modifier({ jours: form.jours.map((j, k) => (k === i ? e.target.value : j)) })}
-                />
-              </label>
-            ))}
-          </fieldset>
+          {form.transporteur === "vinted_go" ? (
+            <p className="secondaire">Horaires et capacité lus automatiquement depuis Vinted Go.</p>
+          ) : (
+            <fieldset className="horaires">
+              <legend>Horaires (vide = fermé)</legend>
+              {JOURS.map((jour, i) => (
+                <label key={jour} className="champ">
+                  <span>{jour}</span>
+                  <input
+                    value={form.jours[i] ?? ""}
+                    placeholder={i === 0 ? "ex. 9h-12h, 14h-19h" : "Fermé"}
+                    onChange={(e) => modifier({ jours: form.jours.map((j, k) => (k === i ? e.target.value : j)) })}
+                  />
+                </label>
+              ))}
+            </fieldset>
+          )}
           <label className="champ">
             <span>Notes</span>
             <textarea value={form.notes} onChange={(e) => modifier({ notes: e.target.value })} />

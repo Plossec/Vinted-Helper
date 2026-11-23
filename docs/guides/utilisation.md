@@ -126,6 +126,11 @@ fermeture exceptionnelle) et « Itinéraire ». Sur la fiche d'un article **À e
 « Point de dépôt du colis » ; sur un article **À récupérer**, le « Point de retrait du retour ». Un point qui ne sert
 plus s'archive (case « Archivé ») : il n'est plus proposé, les anciennes ventes le gardent.
 
+**Points Vinted Go** (extension 1.20) : pas d'horaires à saisir. L'extension Chrome relit la page Vinted Go du point une
+fois par jour (ou tout de suite avec **Relever maintenant** sur sa fiche) : horaires, état (« Pas de compartiments »,
+« Ramassage uniquement », « Hors service ») et place libre par taille de casier (XS, S, M). Un relevé en échec
+affiche sa raison sur la fiche ; il est refait le lendemain.
+
 **Publication Vinted en erreur** : si l'extension Chrome échoue sur une vraie publication (pas en mode essai),
 l'article passe **Erreur** (badge rouge, ligne « Urgent » de l'écran **À faire**). Le message
 de l'échec est dans la section Vinted de la fiche. Vérifiez sur Vinted qu'aucune annonce n'a été créée, puis :

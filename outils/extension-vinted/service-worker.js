@@ -150,6 +150,20 @@ function creerApi({ adresse, jeton }) {
     async commandes(corps) {
       await appeler("/api/programme/commandes", { method: "POST", body: JSON.stringify(corps) });
     },
+    async vintedGoSuivant() {
+      try {
+        return (await (await appeler("/api/programme/vinted-go")).json()).point;
+      } catch {
+        return null;
+      }
+    },
+    /** Relevé d'un point Vinted Go (#262), ou { erreur } ; route /api/programme/* (seule ouverte au jeton). */
+    async releverVintedGo(id, releve) {
+      await appeler(`/api/programme/points-relais/${id}/releve-vinted-go`, {
+        method: "POST",
+        body: JSON.stringify(releve),
+      });
+    },
     async actionSuivante() {
       return (await (await appeler("/api/programme/action-suivante")).json()).action;
     },
@@ -697,6 +711,12 @@ async function cycleSansVerrou(manuel) {
 
   // Signale aussi à l'application que l'extension est active (et lui fait prévoir les tâches automatiques).
   const { nombre, actions, lectureCommandes, lectureFavoris, offres } = await api.attente();
+  // Points relais Vinted Go (#262) : sans annonce à publier, un point à relever passe en premier (il ne touche pas
+  // Vinted) ; un échec est noté sur le point et n'arrête jamais le reste.
+  if (nombre === 0) {
+    const pointVintedGo = await api.vintedGoSuivant();
+    if (pointVintedGo) return releverPointVintedGo(api, pointVintedGo);
+  }
   if (nombre === 0 && actions === 0 && !lectureCommandes && !lectureFavoris && offres === 0)
     return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
   if (Date.now() < etat.prochain) {
@@ -776,6 +796,45 @@ async function diagnostic() {
     return { ok: true };
   } finally {
     occupe = false;
+  }
+}
+
+/** Relevé d'un point Vinted Go dans un onglet ouvert sur vintedgo.com (#262) ; page en vérification : erreur claire. */
+async function releverVintedGoPoint(ongletId, point) {
+  const onglet =
+    ongletId === undefined
+      ? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]
+      : await chrome.tabs.get(ongletId);
+  const { vintedGo } = await lire();
+  if (!onglet?.url?.startsWith(`${vintedGo}/`))
+    return { ok: false, message: "Ouvrez d'abord la page Vinted Go du point relais." };
+  const r = await envoyer(onglet.id, { type: "releve-vinted-go", point });
+  if (!r) return { ok: false, message: "Page Vinted Go non lue (onglet fermé ou extension rechargée)." };
+  if (r.etat) return { ok: false, message: RAISONS[r.etat] ?? RAISONS.inconnu };
+  if (!r.ok) return r;
+  return { ok: true, releve: r.releve };
+}
+
+/** Un point Vinted Go relevé dans l'onglet de l'extension ; résultat ou erreur envoyés à l'application. */
+async function releverPointVintedGo(api, point) {
+  let resultat;
+  try {
+    // Adresse du site Vinted Go : réglable pour les tests, comme celle de Vinted.
+    const { vintedGo } = await lire();
+    const page = point.url?.startsWith(`${vintedGo}/`) ? point.url : `${vintedGo}${SELECTEURS.vintedGo.page}`;
+    const onglet = await ouvrirOnglet(page);
+    await attendreMs(1500);
+    resultat = await releverVintedGoPoint(onglet, point);
+  } catch (erreur) {
+    resultat = { ok: false, message: erreur instanceof Error ? erreur.message : String(erreur) };
+  }
+  if (resultat?.ok) {
+    await api.releverVintedGo(point.id, resultat.releve);
+    await journal(`Point Vinted Go « ${point.nom} » relevé.`);
+  } else {
+    const message = resultat?.message ?? "Relevé Vinted Go impossible (page non lue).";
+    await api.releverVintedGo(point.id, { erreur: message });
+    await journal(`Point Vinted Go « ${point.nom} » : erreur — ${message}`);
   }
 }
 
