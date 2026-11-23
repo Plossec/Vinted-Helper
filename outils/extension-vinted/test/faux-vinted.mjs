@@ -611,3 +611,22 @@ export const OFFRE = (essai = true) => ({
   prix: "9,50",
   prixAvant: "11,00",
 });
+
+/**
+ * Fausse page publique Vinted Go (#262, #309) : carte des points relais, sans aucune donnée réelle. Servie sur
+ * « localhost » (et non 127.0.0.1) pour que la copie de test du manifeste n'y charge que le script de relevé.
+ */
+export function demarrerFauxVintedGo() {
+  const serveur = createServer((_req, res) => {
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    res.end(
+      "<html><body><h1>Points relais</h1><ul><li><button>Point A — ouvert</button></li>" +
+        "<li><button>Casier B — plein</button></li></ul></body></html>",
+    );
+  });
+  return new Promise((r) =>
+    serveur.listen(0, "localhost", () =>
+      r({ url: `http://localhost:${serveur.address().port}`, fermer: () => serveur.close() }),
+    ),
+  );
+}

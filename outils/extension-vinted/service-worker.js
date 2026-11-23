@@ -15,6 +15,8 @@
 importScripts("selecteurs.js");
 
 const VINTED_DEFAUT = "https://www.vinted.fr";
+/** Vinted Go (#262) : seulement le relevé de l'onglet. */
+const VINTED_GO_DEFAUT = "https://vintedgo.com";
 const PERIODE_MINUTES = 5;
 const PAUSE_ENTRE_ARTICLES_MS = 10 * 60_000;
 const ATTENTE_ANNONCE_MS = 60_000;
@@ -55,14 +57,17 @@ const ETAT_INITIAL = {
 };
 
 async function lire() {
-  // « vinted » et « delaiEtape » ne sont changés que par les tests (page factice locale, délais courts).
+  // « vinted », « vintedGo » et « delaiEtape » ne sont changés que par les tests (pages factices locales, délais courts).
   const {
     config = null,
     etat = {},
     vinted = VINTED_DEFAUT,
+    vintedGo = VINTED_GO_DEFAUT,
     delaiEtape = DELAI_ETAPE_MS,
-  } = /** @type {StockageExtension} */ (await chrome.storage.local.get(["config", "etat", "vinted", "delaiEtape"]));
-  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, delaiEtape };
+  } = /** @type {StockageExtension} */ (
+    await chrome.storage.local.get(["config", "etat", "vinted", "vintedGo", "delaiEtape"])
+  );
+  return { config, etat: { ...ETAT_INITIAL, ...etat }, vinted, vintedGo, delaiEtape };
 }
 
 async function ecrireEtat(modifications) {
@@ -779,18 +784,18 @@ async function diagnostic() {
  * cliquer, pour calibrer ce que l'extension n'ouvre jamais seule (ex. confirmation de suppression d'une annonce).
  */
 async function releverOnglet(ongletId) {
-  const { vinted } = await lire();
+  const { vinted, vintedGo } = await lire();
   const onglet =
     ongletId === undefined
       ? (await chrome.tabs.query({ active: true, lastFocusedWindow: true }))[0]
       : await chrome.tabs.get(ongletId);
-  if (!onglet?.url?.startsWith(vinted) && !onglet?.url?.startsWith("https://vintedgo.com/"))
+  if (!onglet?.url?.startsWith(vinted) && !onglet?.url?.startsWith(`${vintedGo}/`))
     return {
       ok: false,
       message: "Ouvrez d'abord une page Vinted ou Vinted Go à relever, puis cliquez « Relever cet onglet ».",
     };
   const r = await envoyer(onglet.id, { type: "releve-onglet" });
-  if (!r?.ok) return { ok: false, message: "La page Vinted ne répond pas : rechargez-la, puis réessayez." };
+  if (!r?.ok) return { ok: false, message: "La page ne répond pas : rechargez-la, puis réessayez." };
   await chrome.storage.local.set({
     diagnostic: { ...r.releve, date: new Date().toISOString(), etape: "relevé de l'onglet", erreur: null },
   });
