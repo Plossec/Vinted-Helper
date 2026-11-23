@@ -127,7 +127,7 @@ fermeture exceptionnelle) et « Itinéraire ». Sur la fiche d'un article **À e
 plus s'archive (case « Archivé ») : il n'est plus proposé, les anciennes ventes le gardent.
 
 **Points Vinted Go** (extension 1.20) : pas d'horaires à saisir. L'extension Chrome relit la page Vinted Go du point une
-fois par jour (ou tout de suite avec **Relever maintenant** sur sa fiche) : horaires, état (« Pas de compartiments »,
+fois par jour (ou tout de suite avec **Relever maintenant** sur sa fiche) : horaires, état (« Capacité faible », « Pas de compartiments »,
 « Ramassage uniquement », « Hors service ») et place libre par taille de casier (XS, S, M). Un relevé en échec
 affiche sa raison sur la fiche ; il est refait le lendemain.
 

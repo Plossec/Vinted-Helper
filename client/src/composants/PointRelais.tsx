@@ -33,7 +33,9 @@ export function ResumePointRelais({
         ? "Ramassage uniquement"
         : point.vintedGoStatut === "hors_service"
           ? "Hors service"
-          : null;
+          : point.vintedGoStatut === "capacite_faible" && ouvert
+            ? "Capacité faible"
+            : null;
   return (
     <span className="point-relais">
       <span className="carte-article__ligne">

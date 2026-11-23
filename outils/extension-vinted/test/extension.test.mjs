@@ -369,6 +369,29 @@ test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => 
   });
 });
 
+test("lecture Vinted Go : « Capacité faible » et capacité sans la description des casiers (#313)", async () => {
+  const { reponse } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const onglet = await chrome.tabs.create({
+        url: `${(await chrome.storage.local.get("vintedGo")).vintedGo}/fr/carrier-locations-capacite-faible`,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return releverVintedGoPoint(onglet.id, { id: "1", nom: "Tabac Exemple - Nantes", adresse: null });
+    },
+  });
+  assert.equal(reponse.ok, true);
+  assert.equal(reponse.releve.vintedGoStatut, "capacite_faible");
+  assert.deepEqual(reponse.releve.capacite, {
+    miseAJour: "il y a 11 min",
+    tailles: [
+      { taille: "xs", disponibles: "5+" },
+      { taille: "s", disponibles: "5+" },
+      { taille: "m", disponibles: "5+" },
+    ],
+  });
+});
+
 const POINT_VG = (nom) => ({ id: "pr-1", nom, adresse: null, url: null, numero: "128563", vintedGoId: null });
 
 test("passage : point Vinted Go relevé et envoyé à l'application par une route /api/programme (#262)", async () => {
