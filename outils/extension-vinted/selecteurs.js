@@ -153,6 +153,21 @@ const SELECTEURS = {
     offreExistante: '[data-testid="offer-request-current-price-label"]',
   },
 
+  /**
+   * Points relais Vinted Go (#262), page publique https://vintedgo.com/fr/carrier-locations. Les noms de classes du site
+   * se terminent par un code qui change à chaque mise à jour (« PointListItem_pointItemButton__Rd5K4 ») : seul leur
+   * début est cherché. Repères de la PR #308 (relevé de l'utilisateur, novembre 2026).
+   */
+  vintedGo: {
+    /** Page des points, après l'adresse du site (https://vintedgo.com, ou le faux site des tests). */
+    page: "/fr/carrier-locations?country=fr&region=europe",
+    point: ['button[class*="PointListItem_pointItemButton"]'],
+    accordeon: ['button[class*="Accordion_accordionTrigger"]'],
+    titresAccordeon: ["heures d'ouverture", "capacité du compartiment"],
+    jour: ['li[class*="PointDetails_workingHoursItem"]'],
+    contenuAccordeon: ['div[class*="PointDetails_accordionContent"]'],
+  },
+
   /** Signes que l'utilisateur n'est pas connecté. */
   nonConnecte: ['[data-testid="header--login-button"]', 'a[href*="/member/signup"]', 'a[href*="/login"]'],
 

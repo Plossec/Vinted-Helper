@@ -1,4 +1,4 @@
-// Tâche « Offres reçues » (#302, ADR-0076, ADR-0126) dans l'écran « À faire » : offres lues dans la messagerie Vinted,
+// Tâche « Offres reçues » (#302, ADR-0076, ADR-0127) dans l'écran « À faire » : offres lues dans la messagerie Vinted,
 // avec ce que la règle propose (accepter, contre-offre, ou rien sans prix vente minimum). Lecture seule : rien n'est
 // envoyé à Vinted tant que la lecture n'est pas calibrée ; la réponse se fait à la main sur Vinted.
 import { useEffect, useState } from "react";

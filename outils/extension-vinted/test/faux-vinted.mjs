@@ -508,7 +508,13 @@ const PNG = Buffer.from(
 export function demarrerFausseApplication(
   demande,
   actions = [],
-  { lectureCommandes = false, lectureFavoris = false, offres = [], lectureOffresRecues = false } = {},
+  {
+    lectureCommandes = false,
+    lectureFavoris = false,
+    offres = [],
+    lectureOffresRecues = false,
+    pointVintedGo = null,
+  } = {},
 ) {
   const etat = {
     resultats: [],
@@ -520,8 +526,11 @@ export function demarrerFausseApplication(
     resultatsOffres: [],
     /** Offres reçues envoyées par l'extension (#302). */
     offresRecues: [],
+    /** Relevés Vinted Go reçus (#262) : chemin et corps. */
+    relevesVintedGo: [],
   };
   let lectureOR = lectureOffresRecues;
+  let pointVG = pointVintedGo;
   let lecture = lectureCommandes;
   let lectureF = lectureFavoris;
   const offresEnFile = [...offres];
@@ -563,6 +572,17 @@ export function demarrerFausseApplication(
         etat.favoris.push(JSON.parse(corps));
         lectureF = false;
         res.end(JSON.stringify({ lus: 0, nouvelles: 0, ignores: [] }));
+      });
+      return;
+    }
+    if (req.url === "/api/programme/vinted-go") return res.end(JSON.stringify({ point: pointVG }));
+    if (req.url?.startsWith("/api/programme/points-relais/")) {
+      let corps = "";
+      req.on("data", (c) => (corps += c));
+      req.on("end", () => {
+        etat.relevesVintedGo.push({ chemin: req.url, corps: JSON.parse(corps) });
+        pointVG = null;
+        res.end("{}");
       });
       return;
     }
@@ -661,9 +681,33 @@ export const OFFRE = (essai = true) => ({
  * Fausse page publique Vinted Go (#262, #309) : carte des points relais, sans aucune donnée réelle. Servie sur
  * « localhost » (et non 127.0.0.1) pour que la copie de test du manifeste n'y charge que le script de relevé.
  */
+/** Page des points Vinted Go (#262, structure de la PR #308) : point « Pas de compartiments », horaires, capacité. */
+const PAGE_POINTS_VINTED_GO = `<!doctype html><main>
+        <button class="PointListItem_pointItemButton__Rd5K4">Laverie Speed Queen - Sautron58 rue de Bretagne, Sautron, FRPas de compartiments</button>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Heures d'ouverture</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>
+          <li class="PointDetails_workingHoursItem__ejJGJ">lundi09:00-12:00 14:00-19:00</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mardi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mercredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">jeudi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">vendredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">samedi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">dimanche00:00-23:59</li>
+        </div>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 3M: 0</div>
+        <script>
+          document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
+            b.setAttribute("aria-expanded", "true");
+            b.nextElementSibling.hidden = false;
+          }));
+        </script>
+      </main>`;
+
 export function demarrerFauxVintedGo() {
-  const serveur = createServer((_req, res) => {
+  const serveur = createServer((req, res) => {
     res.setHeader("content-type", "text/html; charset=utf-8");
+    if (req.url?.includes("/carrier-locations")) return res.end(PAGE_POINTS_VINTED_GO);
     res.end(
       "<html><body><h1>Points relais</h1><ul><li><button>Point A — ouvert</button></li>" +
         "<li><button>Casier B — plein</button></li></ul></body></html>",

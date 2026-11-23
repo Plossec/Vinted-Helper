@@ -258,6 +258,16 @@ export interface PointRelais {
   url: string | null;
   /** 7 jours (lundi → dimanche), plages « HH:MM », heure de Paris. */
   horaires: Horaires;
+  vintedGoId: string | null;
+  vintedGoStatut: string | null;
+  vintedGoCapacite: {
+    miseAJour: string | null;
+    tailles: { taille: "xs" | "s" | "m"; disponibles: string | null }[];
+  } | null;
+  vintedGoReleveLe: string | null;
+  /** Raison de l'échec du dernier relevé Vinted Go, sinon null. */
+  vintedGoErreur: string | null;
+  vintedGoReleveDemandeLe: string | null;
   notes: string | null;
   archive: boolean;
 }

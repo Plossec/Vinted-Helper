@@ -782,7 +782,7 @@ async function lienFavori(personne, titre) {
   return { ok: false, message: `Notification du favori introuvable pour « ${titre} » (trop ancienne, ou déjà lue).` };
 }
 
-// --- Offres reçues (#302, ADR-0076, ADR-0126) : lecture seule par les adresses internes du site. ---
+// --- Offres reçues (#302, ADR-0076, ADR-0127) : lecture seule par les adresses internes du site. ---
 // Première livraison : rien n'est envoyé à Vinted (ni acceptation, ni contre-offre) tant que la lecture n'est pas
 // calibrée sur un relevé. Les requêtes partent de la page Vinted ouverte (cookies de la session), en lecture (GET).
 
@@ -934,16 +934,106 @@ async function faireOffre(prix, titre, essai) {
   );
 }
 
+// --- Points relais Vinted Go (#262) ---
+
+const JOURS_VINTED_GO = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+
+/** « 9:00 », « 9h00 » → « 09:00 » ; « 23:59 » (fin de journée) → « 24:00 ». */
+function heureVintedGo(texte, fin) {
+  const [h, m] = texte.split(/[:h]/).map(Number);
+  const heure = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  return fin && heure === "23:59" ? "24:00" : heure;
+}
+
+/** Toutes les plages d'une journée (« 09:00-12:00 14:00-19:00 »), pas seulement la première. */
+function plagesVintedGo(texte) {
+  return [...normaliser(texte).matchAll(/(\d{1,2}[:h]\d{2})\s*[-–]\s*(\d{1,2}[:h]\d{2})/g)].map((m) => ({
+    debut: heureVintedGo(m[1], false),
+    fin: heureVintedGo(m[2], true),
+  }));
+}
+
+/**
+ * Capacité « Mis à jour il y a 11 min XS: 5+ S: 3 M: 0 » : chaque taille lue de gauche à droite (la valeur de « S »
+ * n'est plus prise dans « XS »), et la mise à jour avec son unité.
+ */
+function capaciteVintedGo(texte) {
+  const t = normaliser(texte);
+  const fin = "(?=(?:xs|s|m)\\s*:|$)";
+  const miseAJour = new RegExp(`mis à jour (il y a .+?)${fin}`).exec(t)?.[1]?.trim() ?? null;
+  const valeurs = new Map();
+  for (const m of t.matchAll(new RegExp(`(xs|s|m)\\s*:\\s*(.*?)${fin}`, "g")))
+    if (!valeurs.has(m[1])) valeurs.set(m[1], m[2].trim() || null);
+  return {
+    miseAJour,
+    tailles: ["xs", "s", "m"].map((taille) => ({ taille, disponibles: valeurs.get(taille) ?? null })),
+  };
+}
+
+/** Relevé d'un point Vinted Go : le point est ouvert dans la liste, puis horaires, capacité et état sont lus. */
+async function releverPointVintedGo(point) {
+  const v = SELECTEURS.vintedGo;
+  const nom = normaliser(point.nom);
+  const adresse = normaliser(point.adresse ?? "");
+  const boutons = /** @type {HTMLElement[]} */ (v.point.flatMap((s) => [...document.querySelectorAll(s)]));
+  const bouton = boutons.find((b) => {
+    const texte = normaliser(b.textContent);
+    return texte.includes(nom) || (adresse.length > 0 && texte.includes(adresse));
+  });
+  if (!bouton) return { ok: false, message: `Point Vinted Go introuvable sur la page : ${point.nom}.` };
+  cliquer(bouton);
+  await attendreMs(500);
+  for (const b of /** @type {HTMLElement[]} */ (v.accordeon.flatMap((s) => [...document.querySelectorAll(s)])))
+    if (v.titresAccordeon.includes(normaliser(b.textContent)) && b.getAttribute("aria-expanded") !== "true") cliquer(b);
+  await attendreMs(500);
+  const lignes = v.jour.flatMap((s) => [...document.querySelectorAll(s)]);
+  const horaires = JOURS_VINTED_GO.map((jour) => {
+    const ligne = lignes.find((e) => normaliser(e.textContent).startsWith(jour));
+    return ligne ? plagesVintedGo(ligne.textContent) : [];
+  });
+  const region = v.contenuAccordeon
+    .flatMap((s) => [...document.querySelectorAll(s)])
+    .find((e) => /(xs|s|m)\s*:/.test(normaliser(e.textContent)));
+  const texte = normaliser(bouton.textContent);
+  const vintedGoStatut = texte.includes("pas de compartiments")
+    ? "pas_de_compartiments"
+    : texte.includes("ramassage uniquement")
+      ? "ramassage_uniquement"
+      : texte.includes("hors service")
+        ? "hors_service"
+        : texte.includes("fermé")
+          ? "ferme"
+          : "ouvert";
+  return {
+    ok: true,
+    releve: {
+      // Numéro du point chez Vinted Go (adresse « selected_point », sinon celui déjà connu ou saisi).
+      vintedGoId:
+        new URL(location.href).searchParams.get("selected_point") ?? point.vintedGoId ?? point.numero ?? point.id,
+      vintedGoStatut,
+      horaires,
+      capacite: region ? capaciteVintedGo(region.textContent) : null,
+    },
+  };
+}
+
 /** @param {MessageContenu} message */
 async function traiter(message) {
-  // Vinted Go (#309) : relevé de l'onglet seulement, jamais de remplissage ni de clic.
-  if (globalThis.vhReleveSeul && message.type !== "releve-onglet")
+  // Vinted Go (#309) : lecture seulement (état de la page, relevé de l'onglet, relevé d'un point relais #262), jamais
+  // de remplissage ni d'envoi.
+  if (globalThis.vhReleveSeul && !["etat", "releve-onglet", "releve-vinted-go"].includes(message.type))
     return { ok: false, message: "Sur Vinted Go, l'extension ne fait que relever la page." };
   if (message.type === "etat") return { etat: etatPage() };
 
   // « Relever cet onglet » (#224) : la page telle quelle, quel que soit son état, sans rien cliquer.
   if (message.type === "releve-onglet")
     return { ok: true, releve: { ...relevePage("onglet"), dialogues: dialogues() } };
+
+  if (message.type === "releve-vinted-go") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    return releverPointVintedGo(message.point);
+  }
 
   if (message.type === "releve-page") {
     const etat = etatPage();

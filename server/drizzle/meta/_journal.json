@@ -187,15 +187,22 @@
     {
       "idx": 26,
       "version": "7",
-      "when": 1795383111070,
-      "tag": "0026_offres-recues",
+      "when": 1795390541105,
+      "tag": "0026_point-relais-vinted-go-releve",
       "breakpoints": true
     },
     {
       "idx": 27,
       "version": "7",
-      "when": 1795394076522,
-      "tag": "0027_offres_recues_lancement",
+      "when": 1795392420977,
+      "tag": "0027_point-relais-vinted-go-erreur",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795394738814,
+      "tag": "0028_offres_recues",
       "breakpoints": true
     }
   ]

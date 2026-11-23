@@ -1,4 +1,4 @@
-# ADR-0126 — Offres reçues : lecture seule et données (étape 1 de #302)
+# ADR-0127 — Offres reçues : lecture seule et données (étape 1 de #302)
 
 - **Date** : 23/11/2026
 - **Statut** : Proposé
@@ -42,8 +42,8 @@ Points tranchés par Claude (*à relire*) :
 
 ## Conséquences
 
-- Migrations 0026 (table `offre_recue`, réglages de la tâche) et 0027 (demande « Lancer maintenant »).
-- Extension 1.20.0 : lecture des offres, relevé de forme ; tests sur une fausse messagerie (aucune écriture vers Vinted).
+- Migration 0028 : table `offre_recue`, réglages de la tâche et demande « Lancer maintenant ».
+- Extension 1.21.0 : lecture des offres, relevé de forme ; tests sur une fausse messagerie (aucune écriture vers Vinted).
 - Étapes suivantes de #302 : calibrage d'après le premier relevé, carte de réglages de la tâche (délai X jours, mode),
   envoi des acceptations et contre-offres (jeton CSRF du site, adresse
   `PUT /api/v2/transactions/{tid}/offer_requests/{id}/accept`), puis réponses, négociation et messages après la vente.

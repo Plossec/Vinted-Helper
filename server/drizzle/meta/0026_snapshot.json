@@ -1,5 +1,5 @@
 {
-  "id": "a94d682d-8706-4589-9263-37ec7a9564b7",
+  "id": "8078bd78-7040-430b-b0ea-df1a8ef8a104",
   "prevId": "f9e2fed5-9caf-4bef-aa39-36fa0c03d583",
   "version": "7",
   "dialect": "postgresql",
@@ -1709,196 +1709,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.offre_recue": {
-      "name": "offre_recue",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "utilisateur_id": {
-          "name": "utilisateur_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "article_id": {
-          "name": "article_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "offre_id": {
-          "name": "offre_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "transaction_id": {
-          "name": "transaction_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "offer_request_id": {
-          "name": "offer_request_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "prix_offre": {
-          "name": "prix_offre",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "depuis": {
-          "name": "depuis",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "etat": {
-          "name": "etat",
-          "type": "etat_offre_recue",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "prix_contre_offre": {
-          "name": "prix_contre_offre",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "message": {
-          "name": "message",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "essai": {
-          "name": "essai",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "manuelle": {
-          "name": "manuelle",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "releve": {
-          "name": "releve",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "cree_le": {
-          "name": "cree_le",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "debut_le": {
-          "name": "debut_le",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "fin_le": {
-          "name": "fin_le",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "offre_recue_article_offre_unique": {
-          "name": "offre_recue_article_offre_unique",
-          "columns": [
-            {
-              "expression": "article_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "offre_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "offre_recue_utilisateur_idx": {
-          "name": "offre_recue_utilisateur_idx",
-          "columns": [
-            {
-              "expression": "utilisateur_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "etat",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "offre_recue_utilisateur_id_utilisateur_id_fk": {
-          "name": "offre_recue_utilisateur_id_utilisateur_id_fk",
-          "tableFrom": "offre_recue",
-          "tableTo": "utilisateur",
-          "columnsFrom": [
-            "utilisateur_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "offre_recue_article_id_article_id_fk": {
-          "name": "offre_recue_article_id_article_id_fk",
-          "tableFrom": "offre_recue",
-          "tableTo": "article",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.photo": {
       "name": "photo",
       "schema": "",
@@ -2034,6 +1844,30 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "vinted_go_id": {
+          "name": "vinted_go_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vinted_go_statut": {
+          "name": "vinted_go_statut",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vinted_go_capacite": {
+          "name": "vinted_go_capacite",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vinted_go_releve_le": {
+          "name": "vinted_go_releve_le",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "notes": {
           "name": "notes",
@@ -2525,76 +2359,6 @@
         },
         "favoris_lancement_demande": {
           "name": "favoris_lancement_demande",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "offres_recues_active": {
-          "name": "offres_recues_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "offres_recues_heure_debut": {
-          "name": "offres_recues_heure_debut",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 8
-        },
-        "offres_recues_heure_fin": {
-          "name": "offres_recues_heure_fin",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 22
-        },
-        "offres_recues_essai": {
-          "name": "offres_recues_essai",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "offres_recues_mode": {
-          "name": "offres_recues_mode",
-          "type": "mode_tache",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'manuel'"
-        },
-        "offres_recues_delai_jours": {
-          "name": "offres_recues_delai_jours",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 30
-        },
-        "offres_recues_frequence_heures": {
-          "name": "offres_recues_frequence_heures",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 6
-        },
-        "offres_recues_pause": {
-          "name": "offres_recues_pause",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 120
-        },
-        "offres_recues_plafond": {
-          "name": "offres_recues_plafond",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 30
-        },
-        "offres_recues_dernier_passage": {
-          "name": "offres_recues_dernier_passage",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -3229,17 +2993,6 @@
         "appliquee",
         "refusee",
         "ignoree"
-      ]
-    },
-    "public.etat_offre_recue": {
-      "name": "etat_offre_recue",
-      "schema": "public",
-      "values": [
-        "a_valider",
-        "en_attente",
-        "faite",
-        "signale",
-        "erreur"
       ]
     },
     "public.etat_publication": {

@@ -29,6 +29,7 @@ ALTER TABLE "reglages" ADD COLUMN "offres_recues_frequence_heures" integer DEFAU
 ALTER TABLE "reglages" ADD COLUMN "offres_recues_pause" integer DEFAULT 120 NOT NULL;--> statement-breakpoint
 ALTER TABLE "reglages" ADD COLUMN "offres_recues_plafond" integer DEFAULT 30 NOT NULL;--> statement-breakpoint
 ALTER TABLE "reglages" ADD COLUMN "offres_recues_dernier_passage" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "reglages" ADD COLUMN "offres_recues_lancement_demande" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "offre_recue" ADD CONSTRAINT "offre_recue_utilisateur_id_utilisateur_id_fk" FOREIGN KEY ("utilisateur_id") REFERENCES "public"."utilisateur"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "offre_recue" ADD CONSTRAINT "offre_recue_article_id_article_id_fk" FOREIGN KEY ("article_id") REFERENCES "public"."article"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "offre_recue_article_offre_unique" ON "offre_recue" USING btree ("article_id","offre_id");--> statement-breakpoint
