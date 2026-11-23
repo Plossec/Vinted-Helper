@@ -58,7 +58,7 @@ $("diagnostic").addEventListener("click", async () => {
     $("etat").textContent = r.message;
   }
 });
-// Relevé de la page Vinted ouverte, telle quelle (#224).
+// Relevé de la page Vinted ou Vinted Go ouverte, telle quelle (#224, #262).
 $("releverOnglet").addEventListener("click", async () => {
   const r = await chrome.runtime.sendMessage({ type: "releverOnglet" });
   if (!r.ok) {

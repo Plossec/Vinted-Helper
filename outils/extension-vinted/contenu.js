@@ -933,6 +933,9 @@ async function faireOffre(prix, titre, essai) {
 
 /** @param {MessageContenu} message */
 async function traiter(message) {
+  // Vinted Go (#309) : relevé de l'onglet seulement, jamais de remplissage ni de clic.
+  if (globalThis.vhReleveSeul && message.type !== "releve-onglet")
+    return { ok: false, message: "Sur Vinted Go, l'extension ne fait que relever la page." };
   if (message.type === "etat") return { etat: etatPage() };
 
   // « Relever cet onglet » (#224) : la page telle quelle, quel que soit son état, sans rien cliquer.

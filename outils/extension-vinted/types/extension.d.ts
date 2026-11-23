@@ -46,6 +46,7 @@ interface StockageExtension {
   config?: ConfigExtension | null;
   etat?: Partial<EtatExtension>;
   vinted?: string;
+  vintedGo?: string;
   delaiEtape?: number;
   diagnostic?: Releve;
   empreinteReleve?: string;

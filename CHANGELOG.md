@@ -5,16 +5,25 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
-## [1.34.0] — 22/11/2026
+## [1.34.0] — 23/11/2026
 
 ### Ajouté
 - Tâche « Offres reçues » (#150, ADR-0076, ADR-0126) : l'extension lit les offres reçues via `GET /api/v2/inbox` + `GET /api/v2/conversations/{id}` ; l'application applique les règles : offre ≥ minimum vendeur et article dormant depuis ≥ X jours → acceptation ; sinon contre-offre à mi-chemin (arrondi 0,50 €, plancher) ; sans minimum → signalée dans « À faire » ; la vente est créée quand l'offre est acceptée et payée. (#302)
+
+## [1.33.1] — 23/11/2026
+
+### Corrigé
+- Extension 1.19.1 : sur Vinted Go, l'extension ne peut plus que relever la page (toute autre demande est refusée) ;
+  message d'échec du relevé valable pour Vinted Go ; le test du relevé Vinted Go utilise une fausse page locale au lieu
+  du vrai site (#309).
 
 ## [1.33.0] — 22/11/2026
 
 ### Ajouté
 - Fiche article : conseil de prix issu des ventes finalisées comparables (même catégorie, marque et état), affiché à
   partir de 10 ventes avec un bouton « Utiliser ce prix » ; le prix reste modifiable (#270).
+- Extension 1.19.0 : « Relever cet onglet » accepte les pages publiques Vinted Go, sans rien remplir ni envoyer
+  (#262). *(Entrée rangée dans cette version le 23/11/2026, #309.)*
 
 ## [1.32.4] — 22/11/2026
 
