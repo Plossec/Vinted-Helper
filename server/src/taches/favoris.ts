@@ -114,15 +114,15 @@ export async function recevoirFavoris(
   utilisateurId: string,
   d: { favoris: FavoriLu[]; erreur: string | null },
   maintenant: Date,
-): Promise<{ lus: number; nouvelles: number; ignores: string[] }> {
-  return base.transaction(async (tx) => {
+): Promise<{ lus: number; nouvelles: number; ignores: string[]; dues: number }> {
+  const bilan = await base.transaction(async (tx) => {
     const [r] = await tx.select().from(reglages).where(eq(reglages.utilisateurId, utilisateurId));
     if (!r) throw introuvable("Réglages");
     await tx
       .update(reglages)
       .set({ favorisDernierPassage: maintenant, favorisLancementDemande: null })
       .where(eq(reglages.utilisateurId, utilisateurId));
-    if (d.erreur !== null) return { lus: 0, nouvelles: 0, ignores: [] };
+    if (d.erreur !== null) return { lus: 0, nouvelles: 0, ignores: [] as string[] };
     const articles = await articlesDuTitre(tx, utilisateurId);
     const dormants = await republicationsEnCours(tx, utilisateurId);
     const ignores: string[] = [];
@@ -170,6 +170,8 @@ export async function recevoirFavoris(
     }
     return { lus: d.favoris.length, nouvelles, ignores };
   });
+  // Offres dues maintenant (article publié depuis le délai) : dites au journal de l'extension (#314).
+  return { ...bilan, dues: await nombreOffresDues(base, utilisateurId, maintenant) };
 }
 
 /**
@@ -200,6 +202,16 @@ async function datesPublication(tx: Transaction | Base, articleIds: readonly str
   ]);
   for (const s of statuts) noter(s.articleId, s.date);
   for (const a of republications) noter(a.articleId, a.date);
+  // Sans passage « En ligne » connu (#314) : la date d'achat sert de date de publication (sinon l'offre ne serait
+  // jamais due).
+  const sansDate = articleIds.filter((id) => !dates.has(id));
+  if (sansDate.length > 0) {
+    const achats = await tx
+      .select({ id: article.id, dateAchat: article.dateAchat })
+      .from(article)
+      .where(inArray(article.id, sansDate));
+    for (const a of achats) if (a.dateAchat) noter(a.id, new Date(`${a.dateAchat}T00:00:00.000Z`));
+  }
   return dates;
 }
 
