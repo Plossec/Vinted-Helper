@@ -646,15 +646,23 @@ async function faireOffreSuivante(api, vinted, signaler) {
   /** @type {{ resultat: string; message?: string; releve?: boolean }} */
   let resultat;
   let arret = null;
+  /** Onglet utilisé, pour le relevé en cas d'erreur. */
+  let onglet = null;
   try {
-    const notifications = await ouvrirNotifications(vinted);
-    const lien = await reponseFavoris(notifications, {
-      type: "lien-favori",
-      personne: offre.personne,
-      titre: offre.titre,
-    });
-    const onglet = lien.url ? await ouvrirOnglet(lien.url) : notifications;
-    if (!lien.url) await attendreMs(3000);
+    if (offre.lien) {
+      // Lien de la conversation gardé à la lecture du favori (#326) : plus besoin de retrouver la notification.
+      onglet = await ouvrirOnglet(offre.lien);
+    } else {
+      const notifications = await ouvrirNotifications(vinted);
+      onglet = notifications;
+      const lien = await reponseFavoris(notifications, {
+        type: "lien-favori",
+        personne: offre.personne,
+        titre: offre.titre,
+      });
+      if (lien.url) onglet = await ouvrirOnglet(lien.url);
+      else await attendreMs(3000);
+    }
     await verifierPage(onglet);
     const r = await reponseFavoris(onglet, {
       type: "faire-offre",
@@ -674,8 +682,28 @@ async function faireOffreSuivante(api, vinted, signaler) {
     resultat = r.inutile ? { resultat: "inutile", message: r.inutile } : { resultat: offre.essai ? "essai" : "faite" };
   } catch (erreur) {
     const message = erreur instanceof Error ? erreur.message : String(erreur);
-    resultat = { resultat: "erreur", message };
+    // Offre prévue avant #326, sans lien, dont la notification n'est plus visible : annulée (rien n'a été envoyé) ;
+    // la prochaine lecture des favoris la refera avec son lien si la notification est encore lue.
+    if (message.startsWith("Notification du favori introuvable"))
+      resultat = {
+        resultat: "inutile",
+        message: `${message} Offre annulée, rien n'a été envoyé ; elle sera refaite à la prochaine lecture des favoris si la notification y est encore.`,
+      };
+    else resultat = { resultat: "erreur", message };
     if (erreur instanceof Arret) arret = message;
+    // Relevé de la page en cas d'erreur, s'il n'a pas déjà été pris (#326).
+    if (resultat.resultat === "erreur" && onglet !== null && (await empreinteReleve()) === avant) {
+      const r = await envoyer(onglet, { type: "releve-onglet" }).catch(() => null);
+      if (r?.releve)
+        await chrome.storage.local.set({
+          diagnostic: {
+            ...r.releve,
+            date: new Date().toISOString(),
+            etape: "tâche : offre au favori",
+            erreur: message,
+          },
+        });
+    }
   }
   if (resultat.resultat === "erreur") resultat.releve = (await empreinteReleve()) !== avant;
   await api.resultatOffre(offre.id, resultat);

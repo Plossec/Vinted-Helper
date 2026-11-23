@@ -598,6 +598,11 @@ export const offreFavori = pgTable(
     /** Empreinte SHA-256 de l'identifiant Vinted de la personne. */
     personne: text("personne").notNull(),
     favoriLe: horodatage("favori_le").notNull(),
+    /**
+     * Lien de la notification (conversation où « Faire une offre » s'ouvre), gardé dès la lecture (#326) : l'offre
+     * n'a plus à retrouver une notification devenue trop ancienne. Pas une donnée personnelle (ni nom ni pseudo).
+     */
+    lien: text("lien"),
     etat: etatActionVinted("etat").notNull(),
     /** Centimes : prix affiché au moment de la planification, et prix proposé. */
     prixAvant: integer("prix_avant").notNull(),

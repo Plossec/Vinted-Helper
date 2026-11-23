@@ -193,4 +193,67 @@ describe("tâche « Offres aux favoris »", () => {
     });
     expect(r.json()).toMatchObject({ nouvelles: 0, ignores: [expect.stringContaining("pas de prix d'offre")] });
   });
+
+  it("lien de la conversation gardé dès la lecture et donné avec l'offre ; une offre sans lien le reçoit (#326)", async () => {
+    await regler({ favorisDelaiJours: 1 });
+    const id = await enLigne("Sac à dos léopard");
+    // Avant #326 : offre prévue sans lien, puis annulée faute de notification retrouvée.
+    await extension("POST", "/api/programme/favoris", {
+      favoris: [{ personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(1) }],
+    });
+    await t.base
+      .update(offreFavori)
+      .set({ etat: "annulee", message: "Notification du favori introuvable." })
+      .where(eq(offreFavori.articleId, id));
+    const lien = "https://www.vinted.fr/inbox/123?offer_request=true";
+    // Lien invalide (pas une adresse Vinted) : ignoré, sans refuser la lecture.
+    const r = await extension("POST", "/api/programme/favoris", {
+      favoris: [
+        { personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(1), lien },
+        {
+          personne: empreinte("acheteur2"),
+          titre: "Sac à dos léopard",
+          depuis: depuis(1),
+          lien: "http://exemple.com/x",
+        },
+      ],
+    });
+    expect(r.statusCode, r.body).toBe(200);
+    const offres = await t.base.select().from(offreFavori).where(eq(offreFavori.articleId, id));
+    expect(
+      offres.map((o) => ({ etat: o.etat, lien: o.lien })).sort((a, b) => String(a.lien).localeCompare(String(b.lien))),
+    ).toEqual(
+      [
+        { etat: "en_attente", lien },
+        { etat: "en_attente", lien: null },
+      ].sort((a, b) => String(a.lien).localeCompare(String(b.lien))),
+    );
+    t.horloge.avancer(2 * JOUR_MS);
+    const { offre } = (await extension("GET", "/api/programme/offre-suivante")).json<{
+      offre: { lien: string | null };
+    }>();
+    expect([lien, null]).toContain(offre.lien);
+  });
+
+  it("offre faite : un nouveau lien ne la relance jamais (#326)", async () => {
+    await regler({ favorisDelaiJours: 1 });
+    const id = await enLigne("Sac à dos léopard");
+    await extension("POST", "/api/programme/favoris", {
+      favoris: [{ personne: empreinte("acheteur1"), titre: "Sac à dos léopard", depuis: depuis(1) }],
+    });
+    await t.base.update(offreFavori).set({ etat: "faite" }).where(eq(offreFavori.articleId, id));
+    await extension("POST", "/api/programme/favoris", {
+      favoris: [
+        {
+          personne: empreinte("acheteur1"),
+          titre: "Sac à dos léopard",
+          depuis: depuis(1),
+          lien: "https://www.vinted.fr/inbox/123?offer_request=true",
+        },
+      ],
+    });
+    expect(await t.base.select({ etat: offreFavori.etat, lien: offreFavori.lien }).from(offreFavori)).toEqual([
+      { etat: "faite", lien: null },
+    ]);
+  });
 });

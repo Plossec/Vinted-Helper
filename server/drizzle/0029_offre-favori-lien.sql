@@ -1,0 +1,1 @@
+ALTER TABLE "offre_favori" ADD COLUMN "lien" text;

@@ -405,7 +405,7 @@ Toutes les entités (sauf Utilisateur) portent un **utilisateur** propriétaire 
 | **Session** | empreinte du jeton de connexion, date d'expiration |
 | **PublicationVinted** | article, état de la publication dans la file, essai, message, dates |
 | **ActionVinted** | article, type (baisse de prix ou republication), état, prix avant / après, essai, message, lien |
-| **OffreFavori** | article, empreinte de la personne (jamais son nom), date du favori, état, prix avant / prix proposé, essai, message ; effacée après 6 mois |
+| **OffreFavori** | article, empreinte de la personne (jamais son nom), date du favori, état, prix avant / prix proposé, essai, message, lien de la conversation Vinted (ADR-0129) ; effacée après 6 mois |
 | **CommandeVinted** | identifiant de la commande Vinted, annonces, date de fin, montant, état (à valider, à rattacher, appliquée…), vente rattachée, montant avant correction |
 | **SignalementVu** | type d'alerte, article, date de départ de l'alerte, date du « Vu » |
 
