@@ -322,6 +322,16 @@ export interface ReglagesUtilisateur {
   /** Secondes. */
   favorisPause: number;
   favorisPlafond: number;
+  // Tâche « Offres reçues » (#150).
+  offresRecuesActive: boolean;
+  offresRecuesHeureDebut: number;
+  offresRecuesHeureFin: number;
+  offresRecuesEssai: boolean;
+  offresRecuesMode: "automatique" | "manuel";
+  offresRecuesDelaiJours: number;
+  offresRecuesFrequenceHeures: number;
+  offresRecuesPause: number;
+  offresRecuesPlafond: number;
 }
 
 /** Commande terminée lue sur Vinted (#148), rattachée ou non à une vente de l'application. */
@@ -359,6 +369,36 @@ export interface ActionVinted {
   url: string | null;
   creeLe: string;
   finLe: string | null;
+}
+
+/** Offre reçue lue par l'extension (contenu de GET /api/v2/inbox / GET /api/v2/conversations/{id}). */
+export interface OffreRecueLu {
+  /** Identifiant de l'offre sur Vinted (transaction / message) — unicité de lecture. */
+  offreId: string;
+  /** Numéro de l'annonce Vinted (« 123 » de /items/123-…), vide s'il n'a pas été lu. */
+  articleId: string;
+  /** Identifiant de la transaction Vinted, si lu. */
+  transactionId: string | null;
+  /** Identifiant de la demande d'offre, si lu. */
+  offerRequestId: string | null;
+  /** Centimes : prix de l'offre. */
+  prixOffre: number;
+  depuis: string;
+  message?: string | null;
+}
+
+/** Offre reçue à valider en « À faire » (écran dédié, lignes de GET /api/taches/offres-recues). */
+export interface OffreRecueLigne {
+  id: string;
+  articleId: string;
+  reference: number;
+  nom: string | null;
+  /** Centimes : prix de l'offre reçue. */
+  prixOffre: number;
+  /** Centimes : contre-offre prévue en mode manuel ; null (acceptation, signalement). */
+  prixContreOffre: number | null;
+  message: string | null;
+  depuis: string;
 }
 
 /** État de chaque tâche automatisée (#232) : dates ISO, passage automatique prévu (null : désactivée). */

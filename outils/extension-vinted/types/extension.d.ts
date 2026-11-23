@@ -99,6 +99,7 @@ type MessageContenu =
   | { type: "lien-notifications" }
   | { type: "lire-favoris" }
   | { type: "lien-favori"; personne: string; titre: string }
+  | { type: "lire-offres-recues" }
   | { type: "faire-offre"; prix: string; titre: string; essai: boolean };
 
 /** Messages des pages de l'extension (fenêtre, réglages) au service worker (service-worker.js, action). */

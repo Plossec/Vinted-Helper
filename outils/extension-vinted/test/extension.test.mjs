@@ -43,6 +43,7 @@ async function lancer({
   lectureCommandes = false,
   lectureFavoris = false,
   offres = [],
+  lectureOffresRecues = false,
   pointVintedGo = null,
   vinted = {},
   passages = 1,
@@ -55,6 +56,7 @@ async function lancer({
     lectureCommandes,
     lectureFavoris,
     offres,
+    lectureOffresRecues,
     pointVintedGo,
   });
   const extension = copieDeTest();
@@ -694,4 +696,26 @@ test("offre aux favoris : offre plus chère déjà dans la conversation → offr
   const { app, vinted } = await lancer({ offres: [OFFRE(false)], vinted: { offreExistante: "10,00 €" } });
   assert.deepEqual(app.resultatsOffres, [{ resultat: "faite" }]);
   assert.deepEqual(vinted.offres, ["9.50"]);
+});
+
+test("offres reçues (#302) : lues dans la messagerie, envoyées à l'application, rien n'est envoyé à Vinted", async () => {
+  const { app, vinted, diagnostic } = await lancer({ demande: null, lectureOffresRecues: true });
+  assert.equal(app.offresRecues.length, 1);
+  assert.deepEqual(app.offresRecues[0].offres, [
+    {
+      offreId: "5001",
+      articleId: "987654",
+      transactionId: "7011",
+      offerRequestId: "5001",
+      prixOffre: 900,
+      depuis: "2026-11-22T09:00:00.000Z",
+    },
+  ]);
+  // Lecture seule : aucune requête d'écriture vers Vinted.
+  assert.equal(vinted.ecrituresApi, 0);
+  // Relevé pour le calibrage : la forme des réponses, jamais leurs valeurs (aucune donnée personnelle).
+  assert.equal(diagnostic.etape, "offres reçues (forme des réponses)");
+  assert.deepEqual(diagnostic.inbox.conversations, [{ id: "number" }]);
+  assert.ok(!JSON.stringify(diagnostic).includes("toujours dispo"));
+  assert.ok(!JSON.stringify(diagnostic).includes("9.00"));
 });

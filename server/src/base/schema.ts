@@ -51,6 +51,8 @@ export const typeBaisse = pgEnum("type_baisse", ["pourcentage", "montant"]);
 /** Baisse de prix d'un article dormant (#147) : réglage de l'article ; « aucune » = ne pas baisser le prix. */
 export const reglageBaisse = pgEnum("reglage_baisse", ["compte", "pourcentage", "montant", "aucune"]);
 export const typeActionVinted = pgEnum("type_action_vinted", ["baisse", "republication"]);
+/** Offres reçues des acheteurs (#150, ADR-0076) : à valider, confiée à l'extension, faite ou signalée. */
+export const etatOffreRecue = pgEnum("etat_offre_recue", ["a_valider", "en_attente", "faite", "signale", "erreur"]);
 /** Commande terminée lue sur Vinted (#148) : à valider (manuel), à rattacher à un article, appliquée, refusée. */
 export const etatCommandeVinted = pgEnum("etat_commande_vinted", [
   "a_valider",
@@ -492,6 +494,24 @@ export const reglages = pgTable(
     favorisDernierPassage: horodatage("favoris_dernier_passage"),
     /** « Lancer maintenant » : lecture des favoris demandée, faite au prochain passage, à toute heure. */
     favorisLancementDemande: horodatage("favoris_lancement_demande"),
+    // Tâche « Offres reçues » (#150, ADR-0076) : l'extension lit les offres reçues (contre-offre, acceptation),
+    // l'application applique les règles (ADR-0078 pour les réglages de passage).
+    offresRecuesActive: boolean("offres_recues_active").notNull().default(false),
+    offresRecuesHeureDebut: integer("offres_recues_heure_debut").notNull().default(8),
+    offresRecuesHeureFin: integer("offres_recues_heure_fin").notNull().default(22),
+    offresRecuesEssai: boolean("offres_recues_essai").notNull().default(true),
+    offresRecuesMode: modeTache("offres_recues_mode").notNull().default("manuel"),
+    /** Jours d'ancienneté de l'article (depuis la dernière baisse de prix ou la mise en ligne) pour une acceptation (#150). */
+    offresRecuesDelaiJours: integer("offres_recues_delai_jours").notNull().default(30),
+    offresRecuesFrequenceHeures: integer("offres_recues_frequence_heures").notNull().default(6),
+    /** Secondes entre deux offres reçues. */
+    offresRecuesPause: integer("offres_recues_pause").notNull().default(120),
+    /** Offres reçues faites sans validation, par jour (au-delà : à valider). */
+    offresRecuesPlafond: integer("offres_recues_plafond").notNull().default(30),
+    /** Dernière lecture des offres reçues (résultat reçu de l'extension). */
+    offresRecuesDernierPassage: horodatage("offres_recues_dernier_passage"),
+    /** « Lancer maintenant » (#230) : lecture des offres demandée, faite au prochain passage, à toute heure. */
+    offresRecuesLancementDemande: horodatage("offres_recues_lancement_demande"),
   },
   // L'extension s'identifie par son jeton à chaque appel (#131).
   (t) => [index("reglages_jeton_publication_idx").on(t.jetonPublication)],
@@ -593,6 +613,52 @@ export const offreFavori = pgTable(
   (t) => [
     uniqueIndex("offre_favori_article_personne_unique").on(t.articleId, t.personne),
     index("offre_favori_utilisateur_idx").on(t.utilisateurId, t.etat),
+  ],
+);
+
+/**
+ * Offres reçues des acheteurs (#150, ADR-0076) : l'extension lit les offres (contre-offre, acceptation) via
+ * GET /api/v2/inbox / GET /api/v2/conversations/{id} ; l'application applique les règles (acceptation si l'article
+ * est dormant depuis au moins le délai réglable, sinon contre-offre à mi-chemin ; sans minimum, signalée, #191) et
+ * crée la vente quand l'offre est acceptée et payée.
+ */
+export const offreRecue = pgTable(
+  "offre_recue",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    utilisateurId: uuid("utilisateur_id")
+      .notNull()
+      .references(() => utilisateur.id, { onDelete: "cascade" }),
+    articleId: uuid("article_id")
+      .notNull()
+      .references(() => article.id, { onDelete: "cascade" }),
+    /** Identifiant de l'offre sur Vinted (transaction / message) — unicité de lecture. */
+    offreId: text("offre_id").notNull(),
+    /** Identifiant de la transaction Vinted (dans l'offre lue) : acceptation / contre-offre. */
+    transactionId: text("transaction_id"),
+    /** Identifiant de la demande d'offre (dans l'offre lue) : acceptation. */
+    offerRequestId: text("offer_request_id"),
+    /** Centimes : prix de l'offre reçue. */
+    prixOffre: integer("prix_offre").notNull(),
+    /** Date de l'offre lue sur Vinted. */
+    depuis: horodatage("depuis").notNull(),
+    etat: etatOffreRecue("etat").notNull(),
+    /** Centimes : contre-offre prévue en mode manuel ; null (acceptation, signalement). */
+    prixContreOffre: integer("prix_contre_offre"),
+    /** Message d'erreur (extraction incomplète de l'offre, refus, …). */
+    message: text("message"),
+    essai: boolean("essai").notNull().default(true),
+    /** Lancée avec « Lancer maintenant » : exécutée à toute heure. */
+    manuelle: boolean("manuelle").notNull().default(false),
+    /** Un relevé de la page a été enregistré dans l'extension (« Dernier relevé »). */
+    releve: boolean("releve").notNull().default(false),
+    creeLe: horodatage("cree_le").notNull(),
+    debutLe: horodatage("debut_le"),
+    finLe: horodatage("fin_le"),
+  },
+  (t) => [
+    uniqueIndex("offre_recue_article_offre_unique").on(t.articleId, t.offreId),
+    index("offre_recue_utilisateur_idx").on(t.utilisateurId, t.etat),
   ],
 );
 

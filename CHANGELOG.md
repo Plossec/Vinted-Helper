@@ -5,6 +5,15 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.0] — 23/11/2026
+
+### Ajouté
+- **Offres reçues** (première étape, extension 1.21.0) : la tâche lit les offres reçues dans votre messagerie Vinted
+  et l'écran **À faire** affiche, pour chacune, ce que la règle propose (accepter, contre-offre à mi-chemin, ou rien
+  sans prix vente minimum). **Rien n'est envoyé à Vinted** pour l'instant : vous répondez à la main ; l'envoi
+  automatique viendra après le calibrage sur un premier relevé (#302, ADR-0127). « Lancer maintenant » dans
+  **À faire** demande une lecture.
+
 ## [1.34.0] — 23/11/2026
 
 ### Ajouté

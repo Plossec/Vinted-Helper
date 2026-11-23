@@ -128,6 +128,8 @@ export type {
   LigneJournal,
   ListePointsRelais,
   MotifSortie,
+  OffreRecueLigne,
+  OffreRecueLu,
   PeriodeTableau,
   PhotoArticle,
   Plage,

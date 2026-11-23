@@ -1,5 +1,6 @@
 // Routes de la publication Vinted : interface (session) et extension (jeton « Bearer », routes /api/programme/* : ancien nom gardé, #246).
 import { lectureFavorisDue, nombreOffresDues } from "../taches/favoris.js";
+import { lectureOffresRecuesDue } from "../taches/offres.js";
 import type { FastifyInstance } from "fastify";
 import type { ContexteRoutes } from "../app.js";
 import { erreurSaisie } from "../utilitaires/erreurs.js";
@@ -59,6 +60,8 @@ export function routesPublication(app: FastifyInstance, { base, maintenant, util
       lectureCommandes: await lectureCommandesDue(base, utilisateurId, maintenant()),
       /** Lecture des favoris (notifications) à faire, et offres dues (#149). */
       lectureFavoris: await lectureFavorisDue(base, utilisateurId, maintenant()),
+      /** Lecture des offres reçues à faire (#150). */
+      lectureOffresRecues: await lectureOffresRecuesDue(base, utilisateurId, maintenant()),
       offres: await nombreOffresDues(base, utilisateurId, maintenant()),
     };
   });

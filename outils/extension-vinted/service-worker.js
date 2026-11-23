@@ -127,7 +127,8 @@ function creerApi({ adresse, jeton }) {
     async enAttente() {
       return (await (await appeler("/api/programme/attente")).json()).nombre;
     },
-    /** Annonces à publier, actions des tâches automatiques (#147) et lecture des commandes (#148) à faire. */
+    /** Annonces à publier, actions des tâches automatiques (#147), lecture des commandes (#148) et lecture des
+     * offres reçues (#150) à faire. */
     async attente() {
       const r = await (await appeler("/api/programme/attente")).json();
       return {
@@ -136,6 +137,7 @@ function creerApi({ adresse, jeton }) {
         lectureCommandes: r.lectureCommandes === true,
         lectureFavoris: r.lectureFavoris === true,
         offres: r.offres ?? 0,
+        lectureOffresRecues: r.lectureOffresRecues === true,
       };
     },
     async favoris(corps) {
@@ -146,6 +148,9 @@ function creerApi({ adresse, jeton }) {
     },
     async resultatOffre(id, corps) {
       await appeler(`/api/programme/offres/${id}/resultat`, { method: "POST", body: JSON.stringify(corps) });
+    },
+    async offresRecues(corps) {
+      return (await appeler("/api/programme/offres-recues", { method: "POST", body: JSON.stringify(corps) })).json();
     },
     async commandes(corps) {
       await appeler("/api/programme/commandes", { method: "POST", body: JSON.stringify(corps) });
@@ -582,6 +587,52 @@ async function lireFavoris(api, vinted) {
   }
 }
 
+/** Réponse du script de contenu : page bloquée ou vérification → pause ; échec → erreur. */
+async function reponseOffresRecues(onglet, message) {
+  const r = await envoyer(onglet, message);
+  if (!r) throw new Arret(RAISONS.inconnu);
+  if (r.etat) throw new Arret(RAISONS[r.etat] ?? RAISONS.inconnu);
+  if (!r.ok) throw new Error(r.message);
+  return r;
+}
+
+/**
+ * Lecture des offres reçues (#302, lecture seule) : boîte de réception et conversations lues par le script de contenu,
+ * offres envoyées à l'application ; la forme des réponses (clés, jamais les valeurs) est gardée comme relevé pour le
+ * calibrage. Rien n'est envoyé à Vinted.
+ */
+async function lireOffresRecues(api, vinted) {
+  await journal("Offres reçues : lecture de la messagerie…");
+  try {
+    const onglet = await ouvrirOnglet(`${vinted}/inbox`);
+    await verifierPage(onglet);
+    const r = await reponseOffresRecues(onglet, { type: "lire-offres-recues" });
+    if (r.releve) {
+      await chrome.storage.local.set({
+        diagnostic: {
+          ...r.releve,
+          date: new Date().toISOString(),
+          etape: "offres reçues (forme des réponses)",
+          erreur: null,
+          elements: [],
+          selecteursTrouves: {},
+        },
+      });
+    }
+    const bilan = await api.offresRecues({ offres: r.offres ?? [] });
+    await journal(
+      `Offres reçues : ${r.offres?.length ?? 0} lue(s), ${bilan.nouvelles} nouvelle(s)` +
+        (bilan.ignores?.length > 0 ? ` ; ignorées : ${bilan.ignores.join(" ; ")}` : "") +
+        ". Relevé : fenêtre de l'extension → « Dernier relevé ».",
+    );
+  } catch (erreur) {
+    const message = erreur instanceof Error ? erreur.message : String(erreur);
+    await api.offresRecues({ offres: [] });
+    await journal(`Offres reçues : erreur — ${message}`);
+    if (erreur instanceof Arret) await mettreEnPause(message);
+  }
+}
+
 /** Offre suivante : notification retrouvée, conversation ouverte, prix saisi ; envoyée seulement en mode réel. */
 async function faireOffreSuivante(api, vinted, signaler) {
   const offre = await api.offreSuivante();
@@ -710,14 +761,14 @@ async function cycleSansVerrou(manuel) {
   if (etat.pause) return signaler("En pause : cliquez « Reprendre » pour relancer.");
 
   // Signale aussi à l'application que l'extension est active (et lui fait prévoir les tâches automatiques).
-  const { nombre, actions, lectureCommandes, lectureFavoris, offres } = await api.attente();
+  const { nombre, actions, lectureCommandes, lectureFavoris, offres, lectureOffresRecues } = await api.attente();
   // Points relais Vinted Go (#262) : sans annonce à publier, un point à relever passe en premier (il ne touche pas
   // Vinted) ; un échec est noté sur le point et n'arrête jamais le reste.
   if (nombre === 0) {
     const pointVintedGo = await api.vintedGoSuivant();
     if (pointVintedGo) return releverPointVintedGo(api, pointVintedGo);
   }
-  if (nombre === 0 && actions === 0 && !lectureCommandes && !lectureFavoris && offres === 0)
+  if (nombre === 0 && actions === 0 && !lectureCommandes && !lectureFavoris && offres === 0 && !lectureOffresRecues)
     return signaler("Aucune annonce en attente : demandez « Publier sur Vinted » depuis l'application.");
   if (Date.now() < etat.prochain) {
     const heure = new Date(etat.prochain).toLocaleTimeString("fr-FR", {
@@ -736,6 +787,8 @@ async function cycleSansVerrou(manuel) {
   if (nombre === 0 && lectureCommandes) return lireCommandes(api, vinted);
   // Offres aux favoris (#149) : lecture des notifications, puis les actions des dormants (prioritaires), puis les offres.
   if (nombre === 0 && lectureFavoris) return lireFavoris(api, vinted);
+  // Offres reçues (#302) : lecture seule, après les autres lectures.
+  if (nombre === 0 && lectureOffresRecues) return lireOffresRecues(api, vinted);
   if (nombre === 0 && actions === 0) return faireOffreSuivante(api, vinted, signaler);
   if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
 

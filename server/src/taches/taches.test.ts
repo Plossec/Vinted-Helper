@@ -320,6 +320,7 @@ describe("tâche « Articles dormants »", () => {
         actions: 2,
         lectureCommandes: false,
         lectureFavoris: false,
+        lectureOffresRecues: false,
         offres: 0,
       });
       const x = await suivante();

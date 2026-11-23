@@ -159,6 +159,29 @@ function lireReglagesTaches(c: Record<string, unknown>): Partial<Reglages> {
     entierFacultatif(c.favorisPause, "Offres aux favoris : pause entre deux offres (s)", 120, 3600),
   );
   poser("favorisPlafond", entierFacultatif(c.favorisPlafond, "Offres aux favoris : offres par jour", 1, 20));
+  // Tâche « Offres reçues » (#150, ADR-0076) : mêmes limites contre le spam que les autres tâches.
+  poser("offresRecuesActive", booleenFacultatif(c.offresRecuesActive, "Offres reçues : activée"));
+  poser("offresRecuesHeureDebut", entierFacultatif(c.offresRecuesHeureDebut, "Offres reçues : heure de début", 0, 23));
+  poser("offresRecuesHeureFin", entierFacultatif(c.offresRecuesHeureFin, "Offres reçues : heure de fin", 1, 24));
+  poser("offresRecuesEssai", booleenFacultatif(c.offresRecuesEssai, "Offres reçues : mode essai"));
+  if (c.offresRecuesMode !== undefined) {
+    if (c.offresRecuesMode !== "automatique" && c.offresRecuesMode !== "manuel")
+      throw erreurSaisie("Offres reçues : mode inconnu.");
+    m.offresRecuesMode = c.offresRecuesMode === "automatique" ? "automatique" : "manuel";
+  }
+  poser(
+    "offresRecuesDelaiJours",
+    entierFacultatif(c.offresRecuesDelaiJours, "Offres reçues : délai d'ancienneté (jours)", 1, 365),
+  );
+  poser(
+    "offresRecuesFrequenceHeures",
+    entierFacultatif(c.offresRecuesFrequenceHeures, "Offres reçues : fréquence (heures)", 6, 168),
+  );
+  poser(
+    "offresRecuesPause",
+    entierFacultatif(c.offresRecuesPause, "Offres reçues : pause entre deux offres (s)", 30, 3600),
+  );
+  poser("offresRecuesPlafond", entierFacultatif(c.offresRecuesPlafond, "Offres reçues : offres par jour", 1, 50));
   return m;
 }
 
@@ -339,6 +362,8 @@ export function routesVentes(
       throw erreurSaisie("Ventes finalisées : l'heure de début doit précéder l'heure de fin.");
     if (fusion.favorisHeureDebut >= fusion.favorisHeureFin)
       throw erreurSaisie("Offres aux favoris : l'heure de début doit précéder l'heure de fin.");
+    if (fusion.offresRecuesActive === true && fusion.offresRecuesHeureDebut >= fusion.offresRecuesHeureFin)
+      throw erreurSaisie("Offres reçues : l'heure de début doit précéder l'heure de fin.");
     if (fusion.dormantsBaisseType === "pourcentage" && fusion.dormantsBaisseValeur > 90)
       throw erreurSaisie("Baisse des articles dormants : 90 % au plus.");
     await modifierReglages(base, utilisateurId, modif);

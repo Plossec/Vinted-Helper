@@ -782,6 +782,92 @@ async function lienFavori(personne, titre) {
   return { ok: false, message: `Notification du favori introuvable pour « ${titre} » (trop ancienne, ou déjà lue).` };
 }
 
+// --- Offres reçues (#302, ADR-0076, ADR-0127) : lecture seule par les adresses internes du site. ---
+// Première livraison : rien n'est envoyé à Vinted (ni acceptation, ni contre-offre) tant que la lecture n'est pas
+// calibrée sur un relevé. Les requêtes partent de la page Vinted ouverte (cookies de la session), en lecture (GET).
+
+/** Lecture d'une adresse interne du site (`/api/v2/…`), comme le fait la page elle-même. */
+async function apiVinted(chemin) {
+  const reponse = await fetch(`/api/v2/${chemin}`, { credentials: "include", headers: { accept: "application/json" } });
+  if (!reponse.ok) throw new ErreurPublication(`Lecture Vinted refusée (HTTP ${reponse.status}) : ${chemin}`);
+  return reponse.json().catch(() => ({}));
+}
+
+/** Identifiant lu (nombre ou texte) en texte ; null s'il manque. */
+const identifiant = (v) =>
+  typeof v === "number" && Number.isFinite(v) ? String(v) : typeof v === "string" && v ? v : null;
+
+/** Montant en euros lu dans un nombre, un texte (« 12.50 », « 12,50 € ») ou un objet { amount } ; null sinon. */
+function euros(v) {
+  if (v && typeof v === "object") return euros(v.amount ?? v.price ?? v.value);
+  const n =
+    typeof v === "number" ? v : typeof v === "string" ? Number(v.replace(/[^\d,.-]/g, "").replace(",", ".")) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Numéro de l'annonce dans une adresse Vinted (« /items/123-titre »), sinon null. */
+function numeroAnnonceVinted(url) {
+  return typeof url === "string" ? (/\/items\/(\d+)/.exec(url)?.[1] ?? null) : null;
+}
+
+/**
+ * Offre d'un message de conversation, si c'en est une (formats à confirmer au premier relevé) : demande d'offre de
+ * l'acheteur, avec son prix et ses identifiants. Sans identifiant stable, l'offre est ignorée (pas de doublon).
+ * @param {any} message
+ * @param {any} conversation
+ */
+function extraireOffreRecue(message, conversation) {
+  if (!message || typeof message !== "object") return null;
+  const corps = message.entity ?? message.offer_request ?? message.offer ?? message;
+  const prix = euros(corps.price ?? corps.offer_price ?? corps.amount ?? message.price);
+  const offerRequestId = identifiant(corps.offer_request_id ?? corps.id ?? message.offer_request_id);
+  if (prix === null || offerRequestId === null) return null;
+  const transaction = conversation?.transaction ?? {};
+  const article = transaction.item ?? conversation?.item ?? {};
+  return {
+    offreId: offerRequestId,
+    articleId: identifiant(article.id) ?? numeroAnnonceVinted(article.url) ?? "",
+    transactionId: identifiant(transaction.id ?? message.transaction_id),
+    offerRequestId,
+    prixOffre: Math.round(prix * 100),
+    depuis: new Date(typeof message.created_at_ts === "string" ? message.created_at_ts : Date.now()).toISOString(),
+  };
+}
+
+/** Forme d'une réponse (clés et types, jamais les valeurs) : sert au calibrage sans données personnelles. */
+function forme(v, profondeur = 0) {
+  if (Array.isArray(v)) return v.length === 0 ? [] : [forme(v[0], profondeur + 1)];
+  if (v && typeof v === "object") {
+    if (profondeur > 5) return "objet";
+    return Object.fromEntries(
+      Object.keys(v)
+        .slice(0, 40)
+        .map((k) => [k, forme(v[k], profondeur + 1)]),
+    );
+  }
+  return typeof v;
+}
+
+/** Offres reçues lues dans la boîte de réception puis les conversations (20 au plus), avec la forme des réponses. */
+async function lireOffresRecues() {
+  const inbox = await apiVinted("inbox?page=1&per_page=20");
+  const conversations = Array.isArray(inbox?.conversations) ? inbox.conversations : [];
+  const offres = [];
+  let formeConversation = null;
+  for (const resume of conversations.slice(0, 20)) {
+    const id = identifiant(resume?.id);
+    if (id === null) continue;
+    const detail = await apiVinted(`conversations/${encodeURIComponent(id)}`);
+    const conversation = detail?.conversation ?? detail;
+    formeConversation ??= forme(conversation);
+    for (const message of Array.isArray(conversation?.messages) ? conversation.messages : []) {
+      const offre = extraireOffreRecue(message, conversation);
+      if (offre) offres.push(offre);
+    }
+  }
+  return { offres, releve: { inbox: forme(inbox), conversation: formeConversation } };
+}
+
 /**
  * Offre dans la fenêtre « Faire une offre » de la conversation (ouverte par la notification, sinon par le bouton).
  * Essai : le prix est saisi et relu, puis la fenêtre est fermée sans rien envoyer.
@@ -1026,6 +1112,19 @@ async function traiter(message) {
     if (message.type === "lire-favoris") return lireFavoris();
     return lienFavori(message.personne, message.titre);
   }
+  // Offres reçues (#150, ADR-0076).
+  if (message.type === "lire-offres-recues") {
+    const etat = etatPage();
+    if (etat !== "pret") return { ok: false, etat };
+    try {
+      const { offres, releve } = await lireOffresRecues();
+      return { ok: true, offres, releve };
+    } catch (erreur) {
+      const texte = erreur instanceof Error ? erreur.message : String(erreur);
+      return { ok: false, message: `Lecture des offres reçues impossible : ${texte}` };
+    }
+  }
+
   if (message.type === "faire-offre") {
     const etat = etatPage();
     if (etat !== "pret") return { ok: false, etat };
