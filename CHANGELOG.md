@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.2] — 23/11/2026
+
+### Modifié
+- Outillage de Claude : procédure **`/frontend-design`** (skill d'Anthropic, licence Apache 2.0) pour concevoir un
+  nouvel écran ou une refonte demandée ; la charte « Techno » et les règles d'interface passent avant, et un plan
+  (couleurs, typographie, maquette) est soumis avant tout code (#322, ADR-0128). Rien ne change dans l'application.
+
 ## [1.35.1] — 23/11/2026
 
 ### Corrigé

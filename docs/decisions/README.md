@@ -43,6 +43,7 @@ règle en vigueur sur un sujet : [`../regles-en-vigueur.md`](../regles-en-vigueu
 | [0099](0099-consignes-de-claude-autonomie-et-decisions.md) | 19/10/2026 | Consignes de Claude : autonomie, questions et décisions | Accepté |
 | [0101](0101-index-des-decisions-allege.md) | 19/10/2026 | Index des décisions allégé : par thème, statut en un mot | Accepté |
 | [0116](0116-hors-perimetre-retire.md) | 18/11/2026 | « Hors périmètre » (§10) retiré du cahier des charges | Accepté |
+| [0128](0128-skill-frontend-design.md) | 23/11/2026 | Skill frontend-design d'Anthropic, encadré par la charte du projet | Accepté · à relire |
 
 ## Socle
 
