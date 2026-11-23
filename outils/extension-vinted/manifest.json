@@ -16,7 +16,7 @@
     },
     {
       "matches": ["https://vintedgo.com/*"],
-      "js": ["selecteurs.js", "contenu.js"],
+      "js": ["selecteurs.js", "vintedgo.js", "contenu.js"],
       "run_at": "document_idle"
     }
   ],

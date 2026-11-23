@@ -6,7 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { chromium } from "playwright-core";
-import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted, OFFRE } from "./faux-vinted.mjs";
+import {
+  ACTION,
+  DEMANDE,
+  demarrerFausseApplication,
+  demarrerFauxVinted,
+  demarrerFauxVintedGo,
+  OFFRE,
+} from "./faux-vinted.mjs";
 
 // Fonctions exécutées dans le service worker de l'extension.
 /* global chrome, cycle, diagnostic, releverOnglet, releverVintedGoPoint */
@@ -14,6 +21,8 @@ import { ACTION, DEMANDE, demarrerFausseApplication, demarrerFauxVinted, OFFRE }
 const CHROME = process.env.VH_CHROME_TEST ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const SOURCE = join(import.meta.dirname, "..");
 const LOCAL = "http://127.0.0.1/*";
+/** Fausse page Vinted Go (#309) : un autre nom d'hôte, pour n'y charger que le relevé. */
+const LOCAL_VINTED_GO = "http://localhost/*";
 
 function copieDeTest() {
   const dossier = mkdtempSync(join(tmpdir(), "vh-extension-"));
@@ -21,6 +30,8 @@ function copieDeTest() {
   const manifeste = JSON.parse(readFileSync(join(dossier, "manifest.json"), "utf8"));
   manifeste.host_permissions.push(LOCAL);
   manifeste.content_scripts[0].matches.push(LOCAL);
+  manifeste.host_permissions.push(LOCAL_VINTED_GO);
+  manifeste.content_scripts[1].matches.push(LOCAL_VINTED_GO);
   writeFileSync(join(dossier, "manifest.json"), JSON.stringify(manifeste));
   return dossier;
 }
@@ -39,6 +50,7 @@ async function lancer({
   action = () => cycle(),
 }) {
   const faux = await demarrerFauxVinted(vinted);
+  const fauxGo = await demarrerFauxVintedGo();
   const app = await demarrerFausseApplication(demande, actions, {
     lectureCommandes,
     lectureFavoris,
@@ -54,13 +66,14 @@ async function lancer({
   try {
     const sw = contexte.serviceWorkers()[0] ?? (await contexte.waitForEvent("serviceworker"));
     await sw.evaluate(
-      ([adresse, vintedUrl, delai]) =>
+      ([adresse, vintedUrl, vintedGoUrl, delai]) =>
         chrome.storage.local.set({
           config: { adresse, jeton: "jeton-test" },
           vinted: vintedUrl,
+          vintedGo: vintedGoUrl,
           delaiEtape: delai,
         }),
-      [app.url, faux.url, delaiEtape],
+      [app.url, faux.url, fauxGo.url, delaiEtape],
     );
     const debut = Date.now();
     let reponse;
@@ -71,6 +84,7 @@ async function lancer({
   } finally {
     await contexte.close();
     faux.fermer();
+    fauxGo.fermer();
     app.fermer();
   }
 }
@@ -271,18 +285,49 @@ test("fichier du relevé (#253) : un élément par ligne, le reste indenté, con
   assert.ok(lignes.includes('  "adresse": "https://www.vinted.fr/items/new",'));
 });
 
-test("« Relever cet onglet » accepte une page Vinted Go (#262)", async () => {
-  const { reponse } = await lancer({
+test("« Relever cet onglet » accepte une page Vinted Go (fausse page locale, #262, #309)", async () => {
+  const { reponse, diagnostic } = await lancer({
     demande: DEMANDE(false),
     action: async () => {
-      const onglet = await chrome.tabs.create({
-        url: "https://vintedgo.com/fr/carrier-locations?country=fr&region=europe",
-      });
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const { vintedGo } = await chrome.storage.local.get("vintedGo");
+      const onglet = await chrome.tabs.create({ url: `${vintedGo}/fr/carrier-locations` });
+      // Comme l'utilisateur : le relevé se demande une fois la page chargée.
+      for (let i = 0; i < 40 && (await chrome.tabs.get(onglet.id)).status !== "complete"; i++)
+        await new Promise((resolve) => setTimeout(resolve, 100));
       return releverOnglet(onglet.id);
     },
   });
   assert.equal(reponse.ok, true);
+  assert.equal(diagnostic.etape, "relevé de l'onglet");
+  assert.match(diagnostic.adresse, /\/fr\/carrier-locations$/);
+});
+
+test("Vinted Go : toute demande autre que le relevé est refusée (#309)", async () => {
+  const { reponse } = await lancer({
+    demande: DEMANDE(false),
+    action: async () => {
+      const { vintedGo } = await chrome.storage.local.get("vintedGo");
+      const onglet = await chrome.tabs.create({ url: `${vintedGo}/fr/carrier-locations` });
+      const reponses = [];
+      for (const message of [{ type: "ajouter" }, { type: "etape", nom: "titre" }, { type: "supprimer-annonce" }]) {
+        let r = null;
+        for (let essai = 0; essai < 20 && r === null; essai++) {
+          try {
+            r = await chrome.tabs.sendMessage(onglet.id, message);
+          } catch {
+            await new Promise((resolve) => setTimeout(resolve, 250));
+          }
+        }
+        reponses.push(r);
+      }
+      return reponses;
+    },
+  });
+  assert.equal(reponse.length, 3);
+  for (const r of reponse) {
+    assert.equal(r.ok, false);
+    assert.match(r.message, /Vinted Go/);
+  }
 });
 
 test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => {
@@ -290,10 +335,7 @@ test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => 
     demande: DEMANDE(false),
     action: async () => {
       const onglet = await chrome.tabs.create({
-        url: `${await (async () => {
-          const faux = await chrome.storage.local.get("vinted");
-          return faux.vinted;
-        })()}/carrier-locations?selected_point=128563`,
+        url: `${(await chrome.storage.local.get("vintedGo")).vintedGo}/fr/carrier-locations?selected_point=128563`,
       });
       await new Promise((resolve) => setTimeout(resolve, 1500));
       return releverVintedGoPoint(onglet.id, {
@@ -323,20 +365,12 @@ test("lecture Vinted Go : point, horaires et capacité lus (#262)", async () => 
   });
 });
 
-/** Passage avec la page Vinted Go servie par le faux site (jamais vintedgo.com). */
-const VINTED_GO_LOCAL = async () => {
-  const { vinted } = await chrome.storage.local.get("vinted");
-  await chrome.storage.local.set({ vintedGo: vinted });
-  return cycle();
-};
-
 const POINT_VG = (nom) => ({ id: "pr-1", nom, adresse: null, url: null, numero: "128563", vintedGoId: null });
 
 test("passage : point Vinted Go relevé et envoyé à l'application par une route /api/programme (#262)", async () => {
   const { app, etat } = await lancer({
     pointVintedGo: POINT_VG("Laverie Speed Queen - Sautron"),
     vinted: {},
-    action: VINTED_GO_LOCAL,
   });
   assert.equal(app.relevesVintedGo.length, 1);
   assert.match(app.relevesVintedGo[0].chemin, /^\/api\/programme\/points-relais\/pr-1\/releve-vinted-go$/);
@@ -345,7 +379,7 @@ test("passage : point Vinted Go relevé et envoyé à l'application par une rout
 });
 
 test("passage : point Vinted Go introuvable → erreur notée sur le point, rien n'est bloqué (#262)", async () => {
-  const { app, etat } = await lancer({ pointVintedGo: POINT_VG("Point inexistant"), action: VINTED_GO_LOCAL });
+  const { app, etat } = await lancer({ pointVintedGo: POINT_VG("Point inexistant") });
   assert.equal(app.relevesVintedGo.length, 1);
   assert.match(app.relevesVintedGo[0].corps.erreur, /Point Vinted Go introuvable/);
   assert.equal(etat.pause, false);

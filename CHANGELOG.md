@@ -10,17 +10,23 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 ### Ajouté
 - Points relais Vinted Go : lecture à la demande et quotidienne des horaires, du statut ouvert/fermé et de la
   capacité des compartiments, affichés sur la fiche du point ; un relevé en échec affiche sa raison et n'arrête pas
-  le reste de l'extension (#262, ADR-0126). L’extension passe en 1.20.0.
+  le reste de l'extension (#262, ADR-0126). L’extension passe en 1.20.0 ; sur Vinted Go, elle ne fait toujours que
+  lire (le garde-fou de #309 admet ce relevé).
+
+## [1.33.1] — 23/11/2026
 
 ### Corrigé
-- Extension Vinted : « Relever cet onglet » accepte maintenant les pages publiques Vinted Go, sans remplir ni envoyer
-  quoi que ce soit (#262).
+- Extension 1.19.1 : sur Vinted Go, l'extension ne peut plus que relever la page (toute autre demande est refusée) ;
+  message d'échec du relevé valable pour Vinted Go ; le test du relevé Vinted Go utilise une fausse page locale au lieu
+  du vrai site (#309).
 
 ## [1.33.0] — 22/11/2026
 
 ### Ajouté
 - Fiche article : conseil de prix issu des ventes finalisées comparables (même catégorie, marque et état), affiché à
   partir de 10 ventes avec un bouton « Utiliser ce prix » ; le prix reste modifiable (#270).
+- Extension 1.19.0 : « Relever cet onglet » accepte les pages publiques Vinted Go, sans rien remplir ni envoyer
+  (#262). *(Entrée rangée dans cette version le 23/11/2026, #309.)*
 
 ## [1.32.4] — 22/11/2026
 

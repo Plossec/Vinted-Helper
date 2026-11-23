@@ -351,31 +351,6 @@ export function demarrerFauxVinted(options = {}) {
     clicsAnnulerSuppression: 0,
   };
   const serveur = createServer((req, res) => {
-    if (req.url?.includes("/carrier-locations")) {
-      res.setHeader("content-type", "text/html; charset=utf-8");
-      res.end(`<!doctype html><main>
-        <button class="PointListItem_pointItemButton__Rd5K4">Laverie Speed Queen - Sautron58 rue de Bretagne, Sautron, FRPas de compartiments</button>
-        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Heures d'ouverture</button>
-        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>
-          <li class="PointDetails_workingHoursItem__ejJGJ">lundi09:00-12:00 14:00-19:00</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">mardi00:00-23:59</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">mercredi00:00-23:59</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">jeudi00:00-23:59</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">vendredi00:00-23:59</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">samedi00:00-23:59</li>
-          <li class="PointDetails_workingHoursItem__ejJGJ">dimanche00:00-23:59</li>
-        </div>
-        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
-        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 3M: 0</div>
-        <script>
-          document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
-            b.setAttribute("aria-expanded", "true");
-            b.nextElementSibling.hidden = false;
-          }));
-        </script>
-      </main>`);
-      return;
-    }
     if (req.url === "/" || req.url === "/notifications" || req.url?.startsWith("/inbox/")) {
       res.setHeader("content-type", "text/html; charset=utf-8");
       if (options.bloque) return res.end(PAGE_BLOCAGE);
@@ -650,3 +625,46 @@ export const OFFRE = (essai = true) => ({
   prix: "9,50",
   prixAvant: "11,00",
 });
+
+/**
+ * Fausse page publique Vinted Go (#262, #309) : carte des points relais, sans aucune donnée réelle. Servie sur
+ * « localhost » (et non 127.0.0.1) pour que la copie de test du manifeste n'y charge que le script de relevé.
+ */
+/** Page des points Vinted Go (#262, structure de la PR #308) : point « Pas de compartiments », horaires, capacité. */
+const PAGE_POINTS_VINTED_GO = `<!doctype html><main>
+        <button class="PointListItem_pointItemButton__Rd5K4">Laverie Speed Queen - Sautron58 rue de Bretagne, Sautron, FRPas de compartiments</button>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Heures d'ouverture</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>
+          <li class="PointDetails_workingHoursItem__ejJGJ">lundi09:00-12:00 14:00-19:00</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mardi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">mercredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">jeudi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">vendredi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">samedi00:00-23:59</li>
+          <li class="PointDetails_workingHoursItem__ejJGJ">dimanche00:00-23:59</li>
+        </div>
+        <button class="Accordion_accordionTrigger__25qD0" aria-expanded="false">Capacité du compartiment</button>
+        <div role="region" class="PointDetails_accordionContent__H3i6G" hidden>Mis à jour il y a 11 minXS: 5+S: 3M: 0</div>
+        <script>
+          document.querySelectorAll(".Accordion_accordionTrigger__25qD0").forEach((b) => b.addEventListener("click", () => {
+            b.setAttribute("aria-expanded", "true");
+            b.nextElementSibling.hidden = false;
+          }));
+        </script>
+      </main>`;
+
+export function demarrerFauxVintedGo() {
+  const serveur = createServer((req, res) => {
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    if (req.url?.includes("/carrier-locations")) return res.end(PAGE_POINTS_VINTED_GO);
+    res.end(
+      "<html><body><h1>Points relais</h1><ul><li><button>Point A — ouvert</button></li>" +
+        "<li><button>Casier B — plein</button></li></ul></body></html>",
+    );
+  });
+  return new Promise((r) =>
+    serveur.listen(0, "localhost", () =>
+      r({ url: `http://localhost:${serveur.address().port}`, fermer: () => serveur.close() }),
+    ),
+  );
+}

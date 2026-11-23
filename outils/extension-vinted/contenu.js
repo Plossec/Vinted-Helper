@@ -933,6 +933,10 @@ async function releverPointVintedGo(point) {
 
 /** @param {MessageContenu} message */
 async function traiter(message) {
+  // Vinted Go (#309) : lecture seulement (état de la page, relevé de l'onglet, relevé d'un point relais #262), jamais
+  // de remplissage ni d'envoi.
+  if (globalThis.vhReleveSeul && !["etat", "releve-onglet", "releve-vinted-go"].includes(message.type))
+    return { ok: false, message: "Sur Vinted Go, l'extension ne fait que relever la page." };
   if (message.type === "etat") return { etat: etatPage() };
 
   // « Relever cet onglet » (#224) : la page telle quelle, quel que soit son état, sans rien cliquer.
