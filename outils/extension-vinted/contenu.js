@@ -766,7 +766,13 @@ async function lireFavoris() {
   await chargerToutesNotifications();
   const favoris = [];
   for (const n of await notificationsFavoris())
-    favoris.push({ personne: await empreinte(n.pseudo), titre: n.titre, depuis: n.depuis.toISOString() });
+    // Lien de la notification gardé dès la lecture (#326) : l'offre l'ouvrira directement, des jours plus tard.
+    favoris.push({
+      personne: await empreinte(n.pseudo),
+      titre: n.titre,
+      depuis: n.depuis.toISOString(),
+      lien: n.url,
+    });
   return { ok: true, favoris, releve: relevePage("notifications") };
 }
 

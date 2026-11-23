@@ -20,6 +20,8 @@ export interface FavoriLu {
   titre: string;
   /** Date du favori, déduite de « il y a 3 jours ». */
   depuis: Date;
+  /** Lien de la notification (conversation, « Faire une offre ») : https Vinted, sinon null (#326). */
+  lien: string | null;
 }
 
 const STATUTS_OFFRE = ["en_ligne", "invendu"] as const;
@@ -151,21 +153,34 @@ export async function recevoirFavoris(
         );
         continue;
       }
-      const creees = await tx
-        .insert(offreFavori)
-        .values({
-          utilisateurId,
-          articleId: a.id,
-          personne: f.personne,
-          favoriLe: f.depuis,
-          etat: r.favorisMode === "automatique" ? "en_attente" : "a_valider",
-          prixAvant: a.prixAffiche,
-          prixOffre: prix,
-          essai: r.favorisEssai,
-          creeLe: maintenant,
-        })
-        .onConflictDoNothing()
-        .returning({ id: offreFavori.id });
+      const insertion = tx.insert(offreFavori).values({
+        utilisateurId,
+        articleId: a.id,
+        personne: f.personne,
+        favoriLe: f.depuis,
+        lien: f.lien,
+        etat: r.favorisMode === "automatique" ? "en_attente" : "a_valider",
+        prixAvant: a.prixAffiche,
+        prixOffre: prix,
+        essai: r.favorisEssai,
+        creeLe: maintenant,
+      });
+      // Offre déjà prévue sans lien (avant #326) ou annulée faute de notification retrouvée : elle reçoit le lien et
+      // repart (une seule offre par personne et par article ; jamais une offre faite, en essai, refusée ou en cours).
+      const creees = f.lien
+        ? await insertion
+            .onConflictDoUpdate({
+              target: [offreFavori.articleId, offreFavori.personne],
+              set: {
+                lien: f.lien,
+                etat: r.favorisMode === "automatique" ? "en_attente" : "a_valider",
+                message: null,
+                finLe: null,
+              },
+              setWhere: sql`${offreFavori.lien} is null and ${offreFavori.etat} in ('a_valider', 'en_attente', 'erreur', 'annulee')`,
+            })
+            .returning({ id: offreFavori.id })
+        : await insertion.onConflictDoNothing().returning({ id: offreFavori.id });
       nouvelles += creees.length;
     }
     return { lus: d.favoris.length, nouvelles, ignores };
@@ -294,6 +309,7 @@ export async function offreSuivante(base: Base, utilisateurId: string, maintenan
       .select({
         id: offreFavori.id,
         personne: offreFavori.personne,
+        lien: offreFavori.lien,
         articleId: offreFavori.articleId,
         reference: article.reference,
         titre: article.titreAnnonce,
@@ -345,6 +361,8 @@ export async function offreSuivante(base: Base, utilisateurId: string, maintenan
         titre: o.titre,
         /** Empreinte de la personne : l'extension retrouve sa notification en calculant celle de chaque pseudo. */
         personne: o.personne,
+        /** Lien de la conversation gardé à la lecture (#326), ouvert directement ; null : recherche dans les notifications. */
+        lien: o.lien,
         /** Euros, tels que saisis sur Vinted (ex. « 9,50 »). */
         prix: centimesVersSaisie(prix),
         prixAvant: centimesVersSaisie(o.prixAffiche),

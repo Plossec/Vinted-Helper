@@ -5,6 +5,13 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.4] — 23/11/2026
+
+### Corrigé
+- Offres aux favoris (extension **1.21.3**) : plus d'erreur « Notification du favori introuvable ». Le lien de la
+  conversation est gardé dès la lecture du favori et l'offre l'ouvre directement, même des jours plus tard ; les
+  offres prévues avant, sans lien, sont annulées puis refaites à la lecture suivante avec leur lien (#326, ADR-0129).
+
 ## [1.35.3] — 23/11/2026
 
 ### Corrigé

@@ -56,7 +56,8 @@ async function lancer({
   const app = await demarrerFausseApplication(demande, actions, {
     lectureCommandes,
     lectureFavoris,
-    offres,
+    // « VINTED » dans un lien d'offre (#326) : remplacé par l'adresse du faux Vinted.
+    offres: offres.map((o) => (o.lien ? { ...o, lien: o.lien.replace("VINTED", faux.url) } : o)),
     lectureOffresRecues,
     pointVintedGo,
     actionsNonPretes,
@@ -683,6 +684,8 @@ test("offres aux favoris : notifications lues par « Voir tout », empreintes en
   assert.equal(favoris.length, 3); // la notification « vendu » est ignorée ; la 3e est chargée en bas de page (#295)
   assert.equal(favoris[2].titre, "Veste noire L");
   assert.equal(favoris[0].titre, "Jean Levi's 501");
+  // Lien de la notification gardé pour l'offre (#326).
+  assert.match(favoris[0].lien, /\/inbox\/1\?offer_request=true$/);
   assert.match(favoris[0].personne, /^[0-9a-f]{64}$/);
   assert.ok(!JSON.stringify(app.favoris).includes("acheteur"));
   // « il y a 3 jours » : date du favori environ 3 jours plus tôt.
@@ -703,11 +706,19 @@ test("offre aux favoris réelle : prix saisi et offre envoyée dans la bonne con
   assert.deepEqual(vinted.offres, ["9.50"]);
 });
 
-test("offre aux favoris : notification de la personne introuvable → erreur, rien envoyé (#149)", async () => {
+test("offre sans lien, notification introuvable → annulée (« inutile »), rien envoyé (#149, #326)", async () => {
   const { app, vinted } = await lancer({ offres: [{ ...OFFRE(false), personne: "0".repeat(64) }] });
-  assert.equal(app.resultatsOffres[0].resultat, "erreur");
-  assert.match(app.resultatsOffres[0].message, /Notification du favori introuvable/);
+  assert.equal(app.resultatsOffres[0].resultat, "inutile");
+  assert.match(app.resultatsOffres[0].message, /Notification du favori introuvable.*refaite à la prochaine lecture/);
   assert.deepEqual(vinted.offres, []);
+});
+
+test("offre avec le lien gardé à la lecture : conversation ouverte directement, même si la notification a disparu (#326)", async () => {
+  const { app, vinted } = await lancer({
+    offres: [{ ...OFFRE(false), personne: "0".repeat(64), lien: "VINTED/inbox/1?offer_request=true" }],
+  });
+  assert.deepEqual(app.resultatsOffres, [{ resultat: "faite" }]);
+  assert.deepEqual(vinted.offres, ["9.50"]);
 });
 
 test("offre aux favoris : offre moins chère déjà dans la conversation → rien envoyé, « inutile » (#295)", async () => {

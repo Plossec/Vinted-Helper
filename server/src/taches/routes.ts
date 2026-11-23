@@ -266,7 +266,14 @@ function lireFavori(brut: unknown, i: number): FavoriLu {
   const titre = texteObligatoire(c.titre, `${champ} : titre`, 200);
   const depuis = typeof c.depuis === "string" ? new Date(c.depuis) : new Date(Number.NaN);
   if (Number.isNaN(depuis.getTime())) throw erreurSaisie(`${champ} : date invalide.`);
-  return { personne: c.personne, titre, depuis };
+  // Lien de la notification (#326) : adresse https de Vinted seulement ; absent ou invalide → null (recherche de secours).
+  let lien: string | null;
+  try {
+    lien = lienVintedFacultatif(c.lien, `${champ} : lien`);
+  } catch {
+    lien = null;
+  }
+  return { personne: c.personne, titre, depuis, lien };
 }
 
 /** Une offre reçue envoyée par l'extension : offreId, articleId, identifiants de transaction et de demande, prix. */
