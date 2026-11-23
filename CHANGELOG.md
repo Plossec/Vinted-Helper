@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.1] — 23/11/2026
+
+### Corrigé
+- Offres aux favoris (extension 1.21.1) : les offres prévues n'étaient jamais envoyées tant qu'une action des articles
+  dormants attendait sans être prête (pause, plafond du jour, heures) ; l'offre suivante est maintenant tentée au même
+  passage. Un article sans mise en ligne connue dans l'application prend sa date d'achat comme date de publication
+  (sinon son offre n'était jamais due). Le journal indique combien d'offres sont à envoyer dès maintenant (#314).
+
 ## [1.35.0] — 23/11/2026
 
 ### Ajouté

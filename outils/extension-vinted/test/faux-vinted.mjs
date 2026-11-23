@@ -514,6 +514,8 @@ export function demarrerFausseApplication(
     offres = [],
     lectureOffresRecues = false,
     pointVintedGo = null,
+    /** Actions des dormants en attente mais pas prêtes (pause, plafond) : comptées, jamais confiées (#314). */
+    actionsNonPretes = 0,
   } = {},
 ) {
   const etat = {
@@ -547,7 +549,7 @@ export function demarrerFausseApplication(
       return res.end(
         JSON.stringify({
           nombre: enFile.length,
-          actions: actionsEnFile.length,
+          actions: actionsEnFile.length + actionsNonPretes,
           lectureCommandes: lecture,
           lectureFavoris: lectureF,
           offres: offresEnFile.length,

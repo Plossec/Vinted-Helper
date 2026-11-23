@@ -3,7 +3,7 @@
 import { createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { article, offreFavori } from "../base/schema.js";
+import { article, historiqueStatut, offreFavori } from "../base/schema.js";
 import { creerAppDeTest, seConnecter } from "../test/outils.js";
 
 const JOUR_MS = 86_400_000;
@@ -132,6 +132,19 @@ describe("tâche « Offres aux favoris »", () => {
     expect(journal).toMatchObject([
       { tache: "favoris", etat: "faite", action: { type: "offre", prixAvant: 1100, prixApres: 1000 } },
     ]);
+  });
+
+  it("article sans passage « En ligne » connu : la date d'achat sert de date de publication (#314)", async () => {
+    await regler({ favorisDelaiJours: 2 });
+    const id = await enLigne("Veste en jean"); // achetée le 01/09/2026
+    await t.base.delete(historiqueStatut).where(eq(historiqueStatut.articleId, id));
+    const r = await extension("POST", "/api/programme/favoris", {
+      favoris: [{ personne: empreinte("acheteur9"), titre: "Veste en jean", depuis: depuis(1) }],
+    });
+    expect(r.json()).toMatchObject({ nouvelles: 1, dues: 1 });
+    expect((await extension("GET", "/api/programme/attente")).json()).toMatchObject({ offres: 1 });
+    const { offre } = (await extension("GET", "/api/programme/offre-suivante")).json<{ offre: { titre: string } }>();
+    expect(offre).toMatchObject({ titre: "Veste en jean" });
   });
 
   it("offre moins chère déjà dans la conversation : rien n'est envoyé, offre annulée avec la raison (#295)", async () => {

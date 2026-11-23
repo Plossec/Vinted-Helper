@@ -576,6 +576,7 @@ async function lireFavoris(api, vinted) {
     const bilan = await api.favoris({ favoris: r.favoris });
     await journal(
       `Offres aux favoris : ${bilan.lus} favori(s) lu(s), ${bilan.nouvelles} offre(s) prévue(s)` +
+        (typeof bilan.dues === "number" ? `, ${bilan.dues} à envoyer dès maintenant` : "") +
         (bilan.ignores.length > 0 ? ` ; ignorés : ${bilan.ignores.join(" ; ")}` : "") +
         ".",
     );
@@ -692,9 +693,15 @@ async function faireOffreSuivante(api, vinted, signaler) {
 }
 
 /** Action suivante des tâches automatiques : prise, faite (en essai), résultat renvoyé à l'application. */
-async function faireActionSuivante(api, vinted, signaler) {
+/**
+ * @returns {Promise<boolean>} false si aucune action n'était prête (le passage peut alors faire une offre, #314).
+ */
+async function faireActionSuivante(api, vinted, signaler, repli = false) {
   const action = await api.actionSuivante();
-  if (!action) return signaler("Aucune action prête (pause entre deux actions, ou hors des heures réglées).");
+  if (!action) {
+    if (!repli) await signaler("Aucune action prête (pause entre deux actions, ou hors des heures réglées).");
+    return false;
+  }
   await ecrireEtat({ actionEnCours: action.id });
   const reference = `#${String(action.reference).padStart(4, "0")}`;
   const libelle = LIBELLES_ACTION[action.type]?.(action) ?? action.type;
@@ -720,6 +727,7 @@ async function faireActionSuivante(api, vinted, signaler) {
       : `${reference} : erreur — ${resultat.message}`,
   );
   if (arret) await mettreEnPause(arret);
+  return true;
 }
 
 /**
@@ -790,7 +798,13 @@ async function cycleSansVerrou(manuel) {
   // Offres reçues (#302) : lecture seule, après les autres lectures.
   if (nombre === 0 && lectureOffresRecues) return lireOffresRecues(api, vinted);
   if (nombre === 0 && actions === 0) return faireOffreSuivante(api, vinted, signaler);
-  if (nombre === 0) return faireActionSuivante(api, vinted, signaler);
+  // Action des dormants prioritaire ; si aucune n'est prête (pause, plafond, heures), l'offre suivante est tentée au
+  // même passage (#314 : sinon les offres attendaient toute la journée).
+  if (nombre === 0) {
+    if (await faireActionSuivante(api, vinted, signaler, offres > 0)) return;
+    if (offres > 0) return faireOffreSuivante(api, vinted, signaler);
+    return;
+  }
 
   // Vérifier la page AVANT de prendre une demande (sinon elle resterait « en cours »).
   const onglet = await ouvrirOnglet(`${vinted}/items/new`);

@@ -45,6 +45,7 @@ async function lancer({
   offres = [],
   lectureOffresRecues = false,
   pointVintedGo = null,
+  actionsNonPretes = 0,
   vinted = {},
   passages = 1,
   delaiEtape = 0,
@@ -58,6 +59,7 @@ async function lancer({
     offres,
     lectureOffresRecues,
     pointVintedGo,
+    actionsNonPretes,
   });
   const extension = copieDeTest();
   const contexte = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), "vh-profil-")), {
@@ -718,4 +720,17 @@ test("offres reçues (#302) : lues dans la messagerie, envoyées à l'applicatio
   assert.deepEqual(diagnostic.inbox.conversations, [{ id: "number" }]);
   assert.ok(!JSON.stringify(diagnostic).includes("toujours dispo"));
   assert.ok(!JSON.stringify(diagnostic).includes("9.00"));
+});
+
+test("offre aux favoris envoyée même si une action des dormants attend sans être prête (#314)", async () => {
+  const { app, vinted } = await lancer({ offres: [OFFRE(false)], actionsNonPretes: 1 });
+  assert.equal(app.actionsPrises, 1);
+  assert.deepEqual(app.resultatsOffres, [{ resultat: "faite" }]);
+  assert.deepEqual(vinted.offres, ["9.50"]);
+});
+
+test("action des dormants prête : elle passe avant l'offre, une seule opération par passage (#314)", async () => {
+  const { app } = await lancer({ offres: [OFFRE(false)], actions: [ACTION("baisse", true)] });
+  assert.equal(app.resultatsActions.length, 1);
+  assert.deepEqual(app.resultatsOffres, []);
 });
