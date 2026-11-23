@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": { "lib": ["ES2023", "DOM", "DOM.Iterable"] },
-  "files": ["extension.d.ts", "../selecteurs.js", "../contenu.js"]
+  "files": ["extension.d.ts", "../selecteurs.js", "../vintedgo.js", "../contenu.js"]
 }
