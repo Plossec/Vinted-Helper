@@ -181,6 +181,14 @@ export function ListeArticles() {
       : STATUTS_VENDUS.has(a.statut)
         ? { titre: "Vendu", texte: "un article vendu ne se met pas à la corbeille en lot" }
         : null;
+  /**
+   * Cochés réellement envoyés : seulement ceux encore visibles avec la recherche et les filtres en cours (#341). Les
+   * cases cochées puis masquées restent en mémoire et reviennent si le filtre change à nouveau.
+   */
+  const cochesVisibles =
+    selectionActive && resultats
+      ? resultats.filter((a) => selection.has(a.id) && blocage(a) === null).map((a) => a.id)
+      : [];
   const commencer = (b: "vinted" | "corbeille") => {
     setRetour(null);
     setBut(b);
@@ -196,11 +204,11 @@ export function ListeArticles() {
     });
 
   const publier = async () => {
-    if (!selection || selection.size === 0) return;
+    if (cochesVisibles.length === 0) return;
     setEnvoi(true);
     setRetour(null);
     try {
-      const r = await demanderPublication([...selection]);
+      const r = await demanderPublication(cochesVisibles);
       setRetour({ ...r, suivi: true });
       if (r.ok) setSelection(null);
     } catch (e: unknown) {
@@ -211,8 +219,9 @@ export function ListeArticles() {
   };
 
   const mettreALaCorbeille = async () => {
-    if (!selection || selection.size === 0) return;
-    const n = selection.size;
+    if (cochesVisibles.length === 0) return;
+    const ids = cochesVisibles;
+    const n = ids.length;
     const ok = await confirmer(
       `Mettre ${n} article${n > 1 ? "s" : ""} à la corbeille ? ${n > 1 ? "Ils seront restaurables" : "Il sera restaurable"} pendant 30 jours.`,
       { action: "Mettre à la corbeille", danger: true },
@@ -221,10 +230,9 @@ export function ListeArticles() {
     setEnvoi(true);
     setRetour(null);
     try {
-      const ids = [...selection];
       const r = await api.post<BilanCorbeille>("/api/articles/corbeille", { ids });
       const ignores = new Set(r.ignores);
-      setArticles((liste) => liste && liste.filter((a) => !selection.has(a.id) || ignores.has(a.reference)));
+      setArticles((liste) => liste && liste.filter((a) => !ids.includes(a.id) || ignores.has(a.reference)));
       const lignes = [`${r.traites} article${r.traites > 1 ? "s" : ""} mis à la corbeille (restaurables 30 jours).`];
       if (r.ignores.length > 0)
         lignes.push(`Laissés de côté, car vendus : ${r.ignores.map((x) => formatReference(x)).join(", ")}.`);
@@ -421,19 +429,19 @@ export function ListeArticles() {
             <button
               type="button"
               className="bouton bouton--principal"
-              disabled={envoi || selection.size === 0}
+              disabled={envoi || cochesVisibles.length === 0}
               onClick={() => void publier()}
             >
-              {envoi ? "Envoi…" : `Publier sur Vinted (${selection.size})`}
+              {envoi ? "Envoi…" : `Publier sur Vinted (${cochesVisibles.length})`}
             </button>
           ) : (
             <button
               type="button"
               className="bouton bouton--danger"
-              disabled={envoi || selection.size === 0}
+              disabled={envoi || cochesVisibles.length === 0}
               onClick={() => void mettreALaCorbeille()}
             >
-              {envoi ? "Suppression…" : `Mettre à la corbeille (${selection.size})`}
+              {envoi ? "Suppression…" : `Mettre à la corbeille (${cochesVisibles.length})`}
             </button>
           )}
           <button type="button" className="bouton" onClick={() => setSelection(null)}>
