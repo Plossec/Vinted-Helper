@@ -1,7 +1,7 @@
 # ADR-0120 — Fusion de deux articles
 
 - **Date** : 20/11/2026
-- **Statut** : Accepté
+- **Statut** : Accepté · modifié par [ADR-0130](0130-fusion-ce-que-perd-le-doublon.md)
 - **Décideurs** : utilisateur, avec des points tranchés par Claude ; validé par l'utilisateur le 22/11/2026 (#250)
 - **Issue** : #284
 - **Thème** : Liste

@@ -2,7 +2,9 @@
 // - Champs : le doublon ne remplit que les champs vides de l'article gardé (rien n'est écrasé).
 // - Achat : si l'article gardé n'a ni prix d'achat ni lot, il prend la place du doublon dans son lot (ou son prix).
 // - Statut : l'article gardé prend le plus avancé des deux, avec son historique ; deux articles vendus sont refusés.
-// - Photos, prix, boosts, ventes, publications et tâches du doublon passent sur l'article gardé.
+// - Photos, prix, boosts, ventes, publications, tâches et offres du doublon passent sur l'article gardé.
+// - Le doublon, mis à la corbeille, perd ce qui a été repris (prix d'achat, lien Vinted, statut de vente) : restauré,
+//   il ne compte pas deux fois le même coût (#334, ADR-0130).
 // Aucun montant n'est calculé ici : les valeurs sont seulement déplacées (les parts restent calculées, jamais stockées).
 import { and, eq, inArray, isNull, max, notInArray } from "drizzle-orm";
 import type { Base, Transaction } from "../base/connexion.js";
@@ -14,7 +16,9 @@ import {
   historiquePrix,
   historiqueStatut,
   offreFavori,
+  offreRecue,
   publicationVinted,
+  signalementVu,
   vente,
   venteArticle,
 } from "../base/schema.js";
@@ -67,7 +71,8 @@ async function enVente(tx: Transaction, articleId: string): Promise<boolean> {
     .select({ venteId: venteArticle.venteId })
     .from(venteArticle)
     .innerJoin(vente, eq(vente.id, venteArticle.venteId))
-    .where(and(eq(venteArticle.articleId, articleId), eq(vente.annulee, false)))
+    // Un article retourné n'est plus vendu (#335), comme partout ailleurs dans l'application.
+    .where(and(eq(venteArticle.articleId, articleId), eq(vente.annulee, false), eq(venteArticle.retourne, false)))
     .limit(1);
   return r.length > 0;
 }
@@ -191,6 +196,19 @@ export async function fusionnerArticles(
           ...(personnesGarde.length > 0 ? [notInArray(offreFavori.personne, personnesGarde)] : []),
         ),
       );
+    // Offres reçues des acheteurs (#336) : une offre Vinted déjà rattachée à l'article gardé n'est pas reprise.
+    const offresRecuesGarde = (
+      await tx.select({ offreId: offreRecue.offreId }).from(offreRecue).where(eq(offreRecue.articleId, garde.id))
+    ).map((o) => o.offreId);
+    const offresRecues = await tx
+      .select({ id: offreRecue.id })
+      .from(offreRecue)
+      .where(
+        and(
+          eq(offreRecue.articleId, doublon.id),
+          ...(offresRecuesGarde.length > 0 ? [notInArray(offreRecue.offreId, offresRecuesGarde)] : []),
+        ),
+      );
     const ventesGarde = (
       await tx.select({ venteId: venteArticle.venteId }).from(venteArticle).where(eq(venteArticle.articleId, garde.id))
     ).map((v) => v.venteId);
@@ -204,7 +222,13 @@ export async function fusionnerArticles(
         ),
       );
     const historique =
-      prix.length + boosts.length + publications.length + actions.length + offres.length + ventes.length;
+      prix.length +
+      boosts.length +
+      publications.length +
+      actions.length +
+      offres.length +
+      offresRecues.length +
+      ventes.length;
 
     const bilan: BilanFusion = {
       champs,
@@ -260,6 +284,24 @@ export async function fusionnerArticles(
         .update(offreFavori)
         .set({ articleId: garde.id })
         .where(inArray(offreFavori.id, versGarde(offres)));
+    if (offresRecues.length > 0)
+      await tx
+        .update(offreRecue)
+        .set({ articleId: garde.id })
+        .where(inArray(offreRecue.id, versGarde(offresRecues)));
+    // Signalements « Vu » (#336) : ceux d'un type que l'article gardé n'a pas encore passent sur lui.
+    const typesVusGarde = (
+      await tx.select({ type: signalementVu.type }).from(signalementVu).where(eq(signalementVu.articleId, garde.id))
+    ).map((v) => v.type);
+    await tx
+      .update(signalementVu)
+      .set({ articleId: garde.id })
+      .where(
+        and(
+          eq(signalementVu.articleId, doublon.id),
+          ...(typesVusGarde.length > 0 ? [notInArray(signalementVu.type, typesVusGarde)] : []),
+        ),
+      );
     if (ventes.length > 0)
       await tx
         .update(venteArticle)
@@ -298,10 +340,33 @@ export async function fusionnerArticles(
       .update(article)
       .set({ ...maj, modifieLe: maintenant })
       .where(eq(article.id, garde.id));
-    // Le doublon quitte son lot s'il a cédé sa place, puis part à la corbeille.
+    // Le doublon perd ce qui a été repris (#334) : sa place dans le lot, son prix d'achat, son lien Vinted, son
+    // statut. Restauré depuis la corbeille, il ne compte pas une seconde fois le même coût ni la même annonce.
+    const rendu: Partial<Article> = {};
+    if (lot) rendu.lotId = null;
+    if (maj.prixAchat !== undefined) rendu.prixAchat = null;
+    if (maj.urlVinted !== undefined) rendu.urlVinted = null;
+    if (maj.urlConversation !== undefined) rendu.urlConversation = null;
+    if (statutDuDoublon) {
+      // Il a reçu l'historique de l'article gardé (échange ci-dessus) ; il en garde le statut s'il est neutre
+      // (Brouillon, En stock), sinon il revient « En stock », sans sortie du stock (ADR-0130, à relire).
+      const neutre: Statut = RANG[garde.statut] === 0 ? garde.statut : "en_stock";
+      Object.assign(rendu, {
+        statut: neutre,
+        motifSortie: null,
+        canalRevente: null,
+        prixRevente: null,
+        dateSortieStock: null,
+      });
+      if (neutre !== garde.statut)
+        await tx
+          .insert(historiqueStatut)
+          .values({ utilisateurId, articleId: doublon.id, de: garde.statut, vers: neutre, date: maintenant });
+    }
+    // Puis il part à la corbeille.
     await tx
       .update(article)
-      .set({ ...(lot ? { lotId: null } : {}), supprimeLe: maintenant, modifieLe: maintenant })
+      .set({ ...rendu, supprimeLe: maintenant, modifieLe: maintenant })
       .where(and(eq(article.id, doublon.id), isNull(article.supprimeLe)));
     return bilan;
   });

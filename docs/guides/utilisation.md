@@ -167,10 +167,12 @@ Un même objet existe deux fois ? Ouvrez la fiche du **doublon**, tout en bas : 
 Cherchez l'article à garder (nom ou référence, ex. « 0127 »), lisez ce qui sera repris, puis **Fusionner**.
 
 - L'article gardé reprend seulement ce qui lui manque (rien n'est écrasé), les photos du doublon, ses prix, boosts,
-  ventes et publications, et sa place dans un lot s'il n'a pas de prix d'achat.
+  ventes, publications et offres reçues, et sa place dans un lot s'il n'a pas de prix d'achat.
 - Il prend le statut **le plus avancé** des deux (ex. le doublon était vendu : l'article gardé devient vendu).
-- Deux articles vendus chacun de leur côté ne se fusionnent pas : ce sont deux objets différents.
-- Le doublon part à la **corbeille** (30 jours).
+- Deux articles vendus chacun de leur côté ne se fusionnent pas : ce sont deux objets différents. Un article vendu
+  puis retourné ne compte pas comme vendu.
+- Le doublon part à la **corbeille** (30 jours), sans ce que l'article gardé lui a repris (prix d'achat, lien Vinted,
+  statut de vente) : restauré, il revient « En stock » et ne compte pas deux fois le même coût.
 
 ## Nouveaux articles par photos
 
