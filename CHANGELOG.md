@@ -5,6 +5,8 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.5] — 24/11/2026
+
 ### Corrigé
 - Fusion de deux articles : le doublon mis à la corbeille perd ce que l'article gardé lui a repris (prix d'achat,
   lien Vinted, statut de vente). Restauré, il ne compte plus le même coût deux fois et ne paraît plus vendu (#334).
