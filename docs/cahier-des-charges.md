@@ -266,7 +266,8 @@ manque. La catégorie « Autre » est admise (publication à la main).
 - **En lot** : plusieurs articles cochés dans la liste vont à la corbeille d'un coup (sauf les articles vendus) ; dans
   la corbeille, plusieurs articles cochés se restaurent d'un coup (ADR-0121).
 - **Doublon** : depuis sa fiche, « Fusionner avec un autre article » : l'article gardé reprend ce qui lui manque (champs
-  vides, place dans le lot, photos, historique, statut le plus avancé), puis le doublon part à la corbeille (ADR-0120).
+  vides, place dans le lot, photos, historique et offres reçues, statut le plus avancé), puis le doublon part à la
+  corbeille, vidé de ce qui a été repris (ADR-0120, ADR-0130).
 
 ### 5.12 Frais divers
 - Écran **« Frais divers »** (accessible depuis le menu) : liste des frais saisis à la main, ajout / modification / suppression.

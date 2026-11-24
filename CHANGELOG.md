@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Fusion de deux articles : le doublon mis à la corbeille perd ce que l'article gardé lui a repris (prix d'achat,
+  lien Vinted, statut de vente). Restauré, il ne compte plus le même coût deux fois et ne paraît plus vendu (#334).
+- Fusion de deux articles : un article vendu puis retourné n'est plus considéré comme vendu (fusion refusée à tort,
+  ou article gardé rétrogradé) (#335).
+- Fusion de deux articles : les offres reçues du doublon passent sur l'article gardé ; elles n'apparaissent plus en
+  double dans « À faire » (#336, ADR-0130, à relire).
+
 ## [1.35.4] — 23/11/2026
 
 ### Corrigé
