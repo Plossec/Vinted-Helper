@@ -16,7 +16,12 @@ export function Corbeille() {
   const charger = () =>
     api
       .get<ArticleSupprime[]>("/api/corbeille")
-      .then(setArticles)
+      .then((liste) => {
+        setArticles(liste);
+        // Seules restent cochées les cases d'articles encore dans la corbeille (#341).
+        const presents = new Set(liste.map((a) => a.id));
+        setCoches((c) => new Set([...c].filter((id) => presents.has(id))));
+      })
       .catch((e: unknown) => setErreur(e instanceof Error ? e.message : "Chargement impossible."));
   useEffect(() => {
     void charger();

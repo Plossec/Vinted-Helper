@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.6] — 24/11/2026
+
+### Corrigé
+- Articles, sélection en lot : seuls les articles cochés **encore visibles** avec la recherche et les filtres en cours
+  sont comptés et envoyés (corbeille ou publication). Avant, un article coché puis masqué par une recherche partait
+  aussi à la corbeille. Dans la Corbeille, un article restauré ou supprimé seul ne reste plus compté dans « Restaurer
+  (N) » (#341).
+
 ## [1.35.5] — 24/11/2026
 
 ### Corrigé
