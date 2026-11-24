@@ -16,7 +16,7 @@ function resumeBilan(b: BilanFusion): string[] {
   if (b.lot) lignes.push("Il prend la place de ce doublon dans son lot d'achat.");
   if (b.statut) lignes.push(`Son statut devient « ${b.statut} » (avec l'historique, la vente et le lien Vinted).`);
   if (b.historique > 0)
-    lignes.push(`${b.historique} élément(s) d'historique rattaché(s) (prix, boosts, ventes, publications).`);
+    lignes.push(`${b.historique} élément(s) d'historique rattaché(s) (prix, boosts, ventes, publications, offres).`);
   if (lignes.length === 0) lignes.push("Rien à reprendre : l'article gardé est déjà complet.");
   return lignes;
 }

@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { article, boost, historiqueStatut, lotAchat } from "../base/schema.js";
+import { article, boost, historiqueStatut, lotAchat, offreRecue, signalementVu } from "../base/schema.js";
 import { completerAnnonce, creerAppDeTest, seConnecter } from "../test/outils.js";
 
 describe("fusion de deux articles", () => {
@@ -129,5 +129,89 @@ describe("fusion de deux articles", () => {
     expect((await fusionner(doublon, garde)).json()).toMatchObject({ lot: true });
     expect(await lire(garde)).toMatchObject({ lot: { prixTotal: 1000 }, couts: { prixAchat: 500 } });
     expect(await lire(autre)).toMatchObject({ couts: { prixAchat: 500 } });
+  });
+
+  it("doublon restauré : sans le prix d'achat, le lien Vinted ni le statut de vente repris (#334)", async () => {
+    const garde = await creer();
+    const doublon = await creer({ prixAchat: 500 });
+    await t.base.update(article).set({ prixAchat: null }).where(eq(article.id, garde));
+    await t.base.update(article).set({ urlVinted: "https://www.vinted.fr/items/1" }).where(eq(article.id, doublon));
+    await requete("POST", `/api/articles/${doublon}/statut`, { vers: "en_ligne", prixAffiche: 900 });
+    expect((await requete("POST", "/api/ventes", { articleIds: [doublon], montantCredite: 900 })).statusCode).toBe(201);
+
+    expect((await fusionner(doublon, garde)).statusCode).toBe(200);
+    expect(await lire(garde)).toMatchObject({ statut: "a_expedier", urlVinted: "https://www.vinted.fr/items/1" });
+    expect((await requete("POST", `/api/corbeille/${doublon}/restauration`)).statusCode).toBeLessThan(300);
+    const restaure = await lire(doublon);
+    expect(restaure).toMatchObject({ statut: "brouillon", urlVinted: null });
+    const [d] = await t.base.select().from(article).where(eq(article.id, doublon));
+    expect(d?.prixAchat).toBeNull(); // le coût n'est plus compté deux fois
+    const historique = await t.base.select().from(historiqueStatut).where(eq(historiqueStatut.articleId, doublon));
+    expect(historique.map((h) => h.vers)).toEqual(["brouillon"]); // celui de l'article gardé, échangé
+  });
+
+  it("doublon sorti d'une vente en ligne : il revient « En stock », sortie du stock effacée (#334)", async () => {
+    const garde = await creer();
+    const doublon = await creer();
+    await requete("POST", `/api/articles/${garde}/statut`, { vers: "en_ligne", prixAffiche: 900 });
+    await requete("POST", `/api/articles/${doublon}/statut`, { vers: "en_ligne", prixAffiche: 900 });
+    expect((await requete("POST", "/api/ventes", { articleIds: [doublon], montantCredite: 900 })).statusCode).toBe(201);
+
+    expect((await fusionner(doublon, garde)).statusCode).toBe(200);
+    const [d] = await t.base.select().from(article).where(eq(article.id, doublon));
+    expect(d).toMatchObject({ statut: "en_stock", dateSortieStock: null, prixAchat: 300 }); // son propre prix reste
+    const historique = await t.base.select().from(historiqueStatut).where(eq(historiqueStatut.articleId, doublon));
+    expect(historique.some((h) => h.de === "en_ligne" && h.vers === "en_stock")).toBe(true);
+  });
+
+  it("doublon vendu puis retourné : il n'est plus vendu, la fusion est admise (#335)", async () => {
+    const garde = await creer();
+    const doublon = await creer();
+    const autre = await creer();
+    for (const id of [garde, doublon, autre])
+      await requete("POST", `/api/articles/${id}/statut`, { vers: "en_ligne", prixAffiche: 900 });
+    expect((await requete("POST", "/api/ventes", { articleIds: [garde], montantCredite: 900 })).statusCode).toBe(201);
+    const v = await requete("POST", "/api/ventes", { articleIds: [doublon, autre], montantCredite: 1800 });
+    expect(v.statusCode, v.body).toBe(201);
+    await t.base.update(article).set({ statut: "envoye" }).where(eq(article.id, doublon)); // colis parti
+    const retour = await requete("POST", `/api/ventes/${v.json<{ id: string }>().id}/retour`, {
+      articleIds: [doublon],
+      montantCredite: 900,
+      date: "2026-10-05",
+    });
+    expect(retour.statusCode, retour.body).toBe(200);
+
+    const r = await fusionner(doublon, garde);
+    expect(r.statusCode, r.body).toBe(200);
+    expect(r.json()).toMatchObject({ statut: null }); // l'article gardé reste vendu, sans prendre le statut du doublon
+    expect(await lire(garde)).toMatchObject({ statut: "a_expedier" });
+  });
+
+  it("offres reçues et signalements « Vu » du doublon passent sur l'article gardé, sans double (#336)", async () => {
+    const garde = await creer();
+    const doublon = await creer();
+    const utilisateurId = (await lireUtilisateur(doublon)) ?? "";
+    const offre = (articleId: string, offreId: string) => ({
+      utilisateurId,
+      articleId,
+      offreId,
+      prixOffre: 500,
+      depuis: new Date("2026-11-20T10:00:00Z"),
+      etat: "a_valider" as const,
+      creeLe: new Date("2026-11-20T10:00:00Z"),
+    });
+    await t.base.insert(offreRecue).values([offre(garde, "o1"), offre(doublon, "o1"), offre(doublon, "o2")]);
+    await t.base.insert(signalementVu).values([
+      { utilisateurId, type: "dormants", articleId: garde, depuis: "2026-11-01" },
+      { utilisateurId, type: "dormants", articleId: doublon, depuis: "2026-11-02" },
+      { utilisateurId, type: "brouillons", articleId: doublon, depuis: "2026-11-03" },
+    ]);
+
+    expect((await fusionner(doublon, garde, true)).json()).toMatchObject({ historique: 1 });
+    expect((await fusionner(doublon, garde)).statusCode).toBe(200);
+    const offres = await t.base.select().from(offreRecue).where(eq(offreRecue.articleId, garde));
+    expect(offres.map((o) => o.offreId).sort()).toEqual(["o1", "o2"]);
+    const vus = await t.base.select().from(signalementVu).where(eq(signalementVu.articleId, garde));
+    expect(vus.map((v) => `${v.type} ${v.depuis}`).sort()).toEqual(["brouillons 2026-11-03", "dormants 2026-11-01"]);
   });
 });
