@@ -20,15 +20,15 @@
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.5",
-    "@fastify/rate-limit": "11.2.1",
-    "@fastify/static": "^10.1.6",
+    "@fastify/rate-limit": "11.3.0",
+    "@fastify/static": "^10.1.12",
     "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.5",
     "pg": "^8.23.1",
     "sharp": "^0.35.5"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite": "^0.5.17",
     "@types/pg": "^8.23.1",
     "drizzle-kit": "^0.31.11",
     "tsx": "^4.23.15",
