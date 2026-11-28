@@ -5,6 +5,14 @@ numérotation [SemVer](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+## [1.35.7] — 28/11/2026
+
+### Modifié
+- Consignes de Claude : réponses très succinctes (la réponse d'abord, sans préambule ni récapitulatif). `/lot` :
+  chaque issue porte des critères d'acceptation « Étant donné / Quand / Alors », qui deviennent les tests écrits
+  avant le code ; chaque question vient avec la réponse recommandée, et rien n'est demandé que le code ou le cahier
+  des charges disent déjà ; une grosse demande est découpée en plusieurs issues (#349).
+
 ## [1.35.6] — 24/11/2026
 
 ### Corrigé

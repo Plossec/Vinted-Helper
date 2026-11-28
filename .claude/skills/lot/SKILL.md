@@ -15,8 +15,10 @@ maintenant ? », **vaut demande** de pousser et de fusionner (dans les limites d
 
 ## 0. Pas encore d'issue ?
 Si l'entrée n'est pas un numéro d'issue, c'est une nouvelle demande : crée l'issue (titre `[Évolution] …` ou
-`[Correctif] …` ; contexte, demande de l'utilisateur citée, points à préciser), donne son lien et **demande s'il faut
-la réaliser maintenant**. Arrête-toi là tant que l'utilisateur n'a pas répondu oui. Une simple question (audit,
+`[Correctif] …` ; contexte, demande de l'utilisateur citée, **critères d'acceptation** « Étant donné … / Quand … /
+Alors … », points à préciser avec ta recommandation), donne son lien et **demande s'il faut la réaliser
+maintenant**. Demande trop grosse pour une PR (plusieurs fonctionnalités indépendantes) : **découpe-la** en
+plusieurs issues, chacune livrable seule, et propose l'ordre. Arrête-toi là tant que l'utilisateur n'a pas répondu oui. Une simple question (audit,
 conseil) n'ouvre pas d'issue : réponds directement.
 
 ## 1. Point de départ
@@ -35,7 +37,8 @@ conseil) n'ouvre pas d'issue : réponds directement.
 
 ## 3. Lever les ambiguïtés
 Point flou, contradiction avec le cahier des charges, choix qui change le comportement : pose la question, **une à la
-fois**. Note les réponses en commentaire sur l'issue. Si l'utilisateur a dit de trancher, tranche et note le choix
+fois**, **avec ta réponse recommandée**. Ne demande jamais ce que le code, le cahier des charges ou les décisions
+disent déjà : lis-les. Note les réponses en commentaire sur l'issue, avec les critères d'acceptation s'il en manque. Si l'utilisateur a dit de trancher, tranche et note le choix
 « *à relire* » dans la décision. Tout choix qui n'est écrit ni dans l'issue ni dans une réponse est une décision :
 ADR **Proposé** (« à relire »), jamais passé à **Accepté** par Claude.
 
@@ -46,8 +49,9 @@ charges, une règle de `CLAUDE.md`, une nouvelle dépendance, ou plusieurs écra
 locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîne.
 
 ## 5. Réaliser
-- **Tests d'abord** pour le calcul et les règles métier ; jamais modifier un test de l'annexe §11 pour le faire
-  passer.
+- **Tests d'abord** : chaque critère d'acceptation de l'issue devient un test (serveur, client ou parcours Chromium),
+  écrit avant le code ; un critère impossible à automatiser est vérifié à la main et noté dans la PR. Jamais modifier
+  un test de l'annexe §11 pour le faire passer.
 - Migration : `server/drizzle/` uniquement par `npx drizzle-kit generate --name <nom>` (`.claude/rules/migrations.md`).
 - Interface : `.claude/rules/interface.md` (français, mobile d'abord, montants et dates).
 - Commits petits, en français, à l'impératif, avec le numéro de l'issue.
@@ -77,5 +81,5 @@ locale déjà précisée dans l'issue), annonce le plan en une ligne et enchaîn
   (« Vérifier », image Docker, CodeQL, extension si elle a changé), **sauf fusion sensible** (liste de `CLAUDE.md`,
   Git) : demande d'abord l'accord de l'utilisateur.
 - Message court à l'utilisateur : ce qui change, la version (le tag `vX.Y.Z` est créé par GitHub après la mise en
-  production), ce qu'il doit faire (mettre à jour l'application, `git pull`, recharger l'extension…), étapes pas à
-  pas.
+  production), ce qu'il doit faire (mettre à jour l'application, `git pull`, recharger l'extension…), une ligne
+  par étape.

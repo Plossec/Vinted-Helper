@@ -87,7 +87,7 @@ suit les complète.
 
 - **Question, audit, conseil** : répondre directement, sans issue ni modification de fichier.
 - **Évolution ou correctif** : créer d'abord une **issue** (`[Évolution] …` / `[Correctif] …` : contexte, demande
-  citée, points à préciser), donner son lien et **demander s'il faut la réaliser maintenant** ; ni plan ni code avant.
+  citée, critères d'acceptation, points à préciser), donner son lien et **demander s'il faut la réaliser maintenant** ; ni plan ni code avant.
 - Une issue par PR **`#N — <Verbe> …`** avec `Closes #N`, sur une branche ; plusieurs petites issues liées peuvent
   partager une PR (`#A, #B — …`) **si l'utilisateur l'accepte**. Déroulé : `.claude/skills/lot/SKILL.md`.
 - **Décision** = tout choix qui n'est écrit ni dans l'issue ni dans une réponse de l'utilisateur : nouvel ADR
@@ -99,5 +99,5 @@ suit les complète.
 ## L'utilisateur
 
 Niveau intermédiaire (à l'aise avec un terminal, pas développeur), sous **Windows** (PowerShell, Git pour Windows) et
-**Android**. Réponses en **français**, **courtes**. Toute commande à lancer est expliquée pas à pas (où la taper, ce
-qu'elle fait, le résultat attendu).
+**Android**. Réponses en **français**, **très succinctes** : la réponse d'abord, sans préambule ni récapitulatif.
+Commande à lancer : une ligne (où la taper, résultat attendu).
